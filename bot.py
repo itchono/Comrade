@@ -12,6 +12,8 @@ print(GUILD)
 
 client = discord.Client()
 
+kzCounter = 0
+    
 @client.event
 async def on_message(message):
     if message.author != client.user:
@@ -19,9 +21,22 @@ async def on_message(message):
         print(str(message.author))
         if (str(message.author) == 'Wahaha#0365'):
             await message.channel.send('ur bad lol')
-        print(message.content.lower())
         if 'hello comrade' in message.content.lower():
             await message.channel.send('Henlo')
+        if '$comrade' in message.content.lower():
+            parse = str(message.content).strip('$comrade').split()
+            print(parse)
+            if parse[0] == 'banKZ':
+                global kzCounter
+                kzCounter += 1
+                if (kzCounter >= 2):
+                    tgt = ''
+                    for member in message.guild.members:
+                        if str(member) == 'Wahaha#0365':
+                            tgt = member
+                     
+                    await message.channel.send(str(str(tgt)+ 'has been kicked successfully'))
+            
             
 
 @client.event
@@ -29,11 +44,10 @@ async def on_ready():
     for guild in client.guilds:
         if guild.name == GUILD:
             break
-
+    kzCounter = 0
     print(
         f'{client.user} is connected to the following guild:\n'
         f'{guild.name}(id: {guild.id})')
-    
     
 
 client.run(TOKEN)
