@@ -29,13 +29,14 @@ async def on_message(message):
             if parse[0] == 'banKZ':
                 global kzCounter
                 kzCounter += 1
+                await message.channel.send(str('Vote added.' + str(2-kzCounter) + ' more needed to kick.' ))
                 if (kzCounter >= 2):
                     tgt = ''
                     for member in message.guild.members:
                         if str(member) == 'Wahaha#0365':
                             tgt = member
                      
-                    await message.channel.send(str(str(tgt)+ 'has been kicked successfully'))
+                    await message.channel.send(str('@' + str(tgt)+ ' has been kicked successfully'))
             
             
 
