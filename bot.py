@@ -17,8 +17,12 @@ async def on_message(message):
     if message.author != client.user:
         #failsafe against self response
         print(str(message.author))
-        if (str(message.author) == 'Wahaha#0365' or str(message.author) =='itchono#3597'):
+        if (str(message.author) == 'Wahaha#0365'):
+            await message.channel.send('ur bad lol')
+        print(message.content.lower())
+        if 'hello comrade' in message.content.lower():
             await message.channel.send('Henlo')
+            
 
 @client.event
 async def on_ready():
