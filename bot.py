@@ -9,6 +9,8 @@ import unidecode
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 
+# download pfps
+import requests
 
 dotenv.load_dotenv()
 
@@ -21,6 +23,8 @@ print(GUILD)
 client = discord.Client()
 
 kickList = {}
+
+HARD_MODE = True
 
 THREATS = ['Wahaha#0365', 'itchono#3597']
 
@@ -39,7 +43,7 @@ async def on_message(message):
     if message.author != client.user:
         #failsafe against self response
         
-        if (str(message.author) in THREATS):
+        if (str(message.author) in THREATS and HARD_MODE):
             custom_emojis = re.findall(r'<:\w*:\d*>', message.content)
             print(custom_emojis)
             query = re.sub('\W+','', unidecode.unidecode(message.content.lower()))
@@ -74,7 +78,7 @@ async def on_message_edit(message1, message):
     if message.author != client.user:
         #failsafe against self response
         
-        if (str(message.author) in THREATS):
+        if (str(message.author) in THREATS and HARD_MODE):
             
         
             query = re.sub('\W+','', unidecode.unidecode(message.content.lower()))
@@ -85,6 +89,8 @@ async def on_message_edit(message1, message):
 
 @client.event
 async def on_ready():
+    file = open("avatarlinks.txt", "w")
+    
     for guild in client.guilds:
         if guild.name == GUILD:
             global kickList
@@ -93,6 +99,17 @@ async def on_ready():
             for member in guild.members:
                 num_mem +=1
                 kickList[member.name] = 0
+                
+                '''
+                url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(member)
+                
+                r = requests.get(url)
+                with open('C:/Users/mdsup/Documents/GitHub/Comrade/avatars/avatar{0}.png'.format(member.id), 'wb') as outfile:
+                    outfile.write(r.content)
+                
+                file.write(url + '\n')
+                '''
+                
             print(num_mem, "members loaded.")
             break
     print(
@@ -100,6 +117,6 @@ async def on_ready():
         f'{guild.name}(id: {guild.id})')
         
     await client.change_presence(status=discord.Status.online, activity=discord.Game("Upholding Communism"))
-    
+    file.close()
 
 client.run(TOKEN)
