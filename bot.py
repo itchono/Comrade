@@ -148,7 +148,7 @@ async def on_message_edit(message1, message):
 
 @client.event
 async def on_ready():
-    file = open("avatarlinks.txt", "w")
+    # file = open("avatarlinks.txt", "w")
     
     for guild in client.guilds:
         if guild.name == GUILD:
@@ -178,6 +178,6 @@ async def on_ready():
         f'{guild.name}(id: {guild.id})')
         
     await client.change_presence(status=discord.Status.online, activity=discord.Game("Upholding Communism"))
-    file.close()
+    # file.close()
 
 client.run(TOKEN)
