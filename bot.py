@@ -118,12 +118,12 @@ async def on_message(message):
                 await message.channel.send('OP Removed.')
                 
             elif parse[0] == 'arrayStatus':
-                kickvotes = []
+                kicks = []
                 for member in message.guild.members:
                     if kickList[str(member.name)] >= 1:
-                        kickVotes.append(str(member.name) + ': ' + kickList[str(member.name)])
+                        kicks.append(str(member.name) + ': ' + kickList[str(member.name)])
             
-                await message.channel.send('Threats: ' + str(THREATS) + '\nOPS:' + str(OPS) + '\nKick Requirement: ' + str(KICK_REQ) + "\nKick List: " + str(kickVotes))
+                await message.channel.send('Threats: ' + str(THREATS) + '\nOPS:' + str(OPS) + '\nKick Requirement: ' + str(KICK_REQ) + "\nKick List: " + str(kicks))
                 
             elif parse[0] == 'kickReq' and str(message.author) in OPS:
                 KICK_REQ = parse[1]
