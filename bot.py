@@ -14,13 +14,14 @@ import requests
 
 dotenv.load_dotenv()
 
+print('COMRADE BOT INITIALIZING...')
+
 TOKEN = os.environ.get('TOKEN')
 GUILD = os.environ.get('GUILD')
 
-print(TOKEN)
-print(GUILD)
-
 client = discord.Client()
+
+print('Initializing parameters')
 
 kickList = {}
 
@@ -150,6 +151,8 @@ async def on_message_edit(message1, message):
 async def on_ready():
     # file = open("avatarlinks.txt", "w")
     
+    print('Constructing member list')
+
     for guild in client.guilds:
         if guild.name == GUILD:
             global kickList
@@ -179,5 +182,7 @@ async def on_ready():
         
     await client.change_presence(status=discord.Status.online, activity=discord.Game("Upholding Communism"))
     # file.close()
+
+    print('COMRADE is fully online.')
 
 client.run(TOKEN)
