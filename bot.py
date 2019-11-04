@@ -24,11 +24,15 @@ client = discord.Client()
 
 kickList = {}
 
-HARD_MODE = True
+kickVotes = {}
+
+LETHALITY = 0
 
 THREATS = ['Wahaha#0365', 'itchono#3597']
 
-KICK_REQ = 3
+OPS = ['itchono#3597']
+
+KICK_REQ = 6
 
 def containsletters(string, check):
     res = True
@@ -40,10 +44,17 @@ def containsletters(string, check):
     
 @client.event
 async def on_message(message):
+    global LETHALITY
+    global THREATS
+    global OPS
+    global kickVotes
+    global kicklist
+    global KICK_REQ
+    
     if message.author != client.user:
         #failsafe against self response
         
-        if (str(message.author) in THREATS and HARD_MODE):
+        if (str(message.author) in THREATS and LETHALITY >= 2):
             custom_emojis = re.findall(r'<:\w*:\d*>', message.content)
             print(custom_emojis)
             query = re.sub('\W+','', unidecode.unidecode(message.content.lower()))
@@ -56,21 +67,71 @@ async def on_message(message):
         if 'hello comrade' in message.content.lower():
             await message.channel.send('Henlo')
         if '$comrade' in message.content.lower():
-            parse = str(message.content).strip('$comrade').split()
+            parse = str(message.content).lstrip('$comrade').split()
             print(parse)
             if parse[0] == 'voteKick':
                 user = str(message.mentions[0].name)
+                
+                if not str(message.author) in kickVotes[user]:
+                    kickList[user] += 1
+                    kickVotes[user].append(str(message.author))
+                    await message.channel.send(str('Vote added. ' + str(KICK_REQ-kickList[user]) + ' more needed to kick.' ))
+                    if (kickList[user] >= KICK_REQ):
+                        tgt = ''
+                        for member in message.guild.members:
+                            if str(member) == [parse[1]]:
+                                tgt = member
+                        if LETHALITY >= 1:
+                            kickList[user] = 0
+                            await message.channel.send(str('@' + str(tgt.name)+ ' has been kicked successfully'))
+                            await kick(tgt)
+                        else:
+                            await message.channel.send('Lethal mode has been disabled. Please enable it with $comrade lethal <level>')
+                else:
+                    await message.channel.send('You have already voted!')
+                 
+            elif parse[0] == 'lethal' and str(message.author) in OPS:
+                LETHALITY = int(parse[1])
+                if LETHALITY == 0:
+                    await message.channel.send('Lethal mode has been deactivated.')
+                else:
+                    await message.channel.send('Lethality has been activated and set to {0}. This can cause destructive actions.'.format(LETHALITY))
+            elif parse[0] == 'addThreat' and str(message.author) in OPS:
+                user = str(message.mentions[0])
+                THREATS.append(user)
+                await message.channel.send('Threat Added.')
+            elif parse[0] == 'removeThreat' and str(message.author) in OPS:
+                user = str(message.mentions[0])
+                if user in THREATS:
+                    THREATS.remove(user)
+                await message.channel.send('Threat Added.')
             
-                global kickList
-                kickList[user] += 1
-                await message.channel.send(str('Vote added. ' + str(KICK_REQ-kickList[user]) + ' more needed to kick.' ))
-                if (kickList[user] >= KICK_REQ):
-                    tgt = ''
-                    for member in message.guild.members:
-                        if str(member) == [parse[1]]:
-                            tgt = member
-                     
-                    await message.channel.send(str('@' + str(tgt.name)+ ' has been kicked successfully'))
+            
+            elif parse[0] == 'op' and str(message.author) in OPS:
+                user = str(message.mentions[0])
+                OPS.append(user)
+                await message.channel.send('OP Added.')
+            elif parse[0] == 'deop' and str(message.author) in OPS:
+                user = str(message.mentions[0])
+                if user in OPS:
+                    OPS.remove(user)
+                await message.channel.send('OP Removed.')
+                
+            elif parse[0] == 'arrayStatus':
+                kickvotes = []
+                for member in message.guild.members:
+                    if kickList[str(member.name)] >= 1:
+                        kickVotes.append(str(member.name) + ': ' + kickList[str(member.name)])
+            
+                await message.channel.send('Threats: ' + str(THREATS) + '\nOPS:' + str(OPS) + '\nKick Requirement: ' + str(KICK_REQ) + "\nKick List: " + str(kickVotes))
+                
+            elif parse[0] == 'kickReq' and str(message.author) in OPS:
+                KICK_REQ = parse[1]
+                await message.channel.send('Kick requirement has been set to {0} votes.'.format(KICK_REQ))
+                
+                
+                
+                    
 
 @client.event
 async def on_message_edit(message1, message):  
@@ -78,9 +139,7 @@ async def on_message_edit(message1, message):
     if message.author != client.user:
         #failsafe against self response
         
-        if (str(message.author) in THREATS and HARD_MODE):
-            
-        
+        if (str(message.author) in THREATS and LETHALITY >= 2):
             query = re.sub('\W+','', unidecode.unidecode(message.content.lower()))
             if 'hentai' in query or fuzz.partial_ratio(query,'hentai') > 60:
                 await message.delete()
@@ -99,6 +158,8 @@ async def on_ready():
             for member in guild.members:
                 num_mem +=1
                 kickList[member.name] = 0
+                kickVotes[member.name] = []
+                
                 
                 '''
                 url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(member)
