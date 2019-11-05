@@ -1,0 +1,7 @@
+flask
+unidecode
+fuzzywuzzy
+requests
+discord
+discord.py
+python-dotenv

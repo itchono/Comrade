@@ -3,6 +3,8 @@ import os
 import dotenv
 import discord
 
+import keep_alive
+
 # text filtering
 import re
 import unidecode
@@ -135,7 +137,7 @@ async def on_message(message):
                     kickList[member.name] = 0
                     kickVotes[member.name] = []
                 await message.channel.send('Kore wa requiem: All kick votes have been reset.')
-                
+                      
                 
                 
                     
@@ -191,4 +193,5 @@ async def on_ready():
 
     print('COMRADE is fully online.')
 
+keep_alive.keep_alive()
 client.run(TOKEN)
