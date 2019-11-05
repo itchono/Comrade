@@ -122,13 +122,18 @@ async def on_message(message):
                 kicks = []
                 for member in message.guild.members:
                     if kickList[str(member.name)] >= 1:
-                        kicks.append(str(member.name) + ': ' + kickList[str(member.name)])
+                        kicks.append(str(member.name) + ': ' + str(kickList[str(member.name)]))
             
                 await message.channel.send('Threats: ' + str(THREATS) + '\nOPS:' + str(OPS) + '\nKick Requirement: ' + str(KICK_REQ) + "\nKick List: " + str(kicks))
                 
             elif parse[0] == 'kickReq' and str(message.author) in OPS:
                 KICK_REQ = parse[1]
                 await message.channel.send('Kick requirement has been set to {0} votes.'.format(KICK_REQ))
+            elif parse[0] == 'resetKick' and str(message.author) in OPS:
+                for member in message.guild.members:
+                    kickList[member.name] = 0
+                    kickVotes[member.name] = []
+                await message.channel.send('Kore wa requiem: All kick votes have been reset.')
                 
                 
                 
