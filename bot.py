@@ -31,7 +31,9 @@ LETHALITY = 0
 
 THREATS = ['Wahaha#0365', 'itchono#3597']
 
-OPS = ['itchono#3597']
+OPS = ['itchono#3597', 'Vyre#6300']
+
+KICK_SAFE = ['itchono#3597', 'Comrade#2988']
 
 KICK_REQ = 6
 
@@ -71,23 +73,22 @@ async def on_message(message):
             parse = str(message.content).lstrip('$comrade').split()
             print(parse)
             if parse[0] == 'voteKick':
-                user = str(message.mentions[0].name)
+                user = str(message.mentions[0].name) #name of user to be kicked
                 
-                if not str(message.author) in kickVotes[user]:
+                if not (str(message.author) in kickVotes[user] or user in KICK_SAFE):
                     kickList[user] += 1
                     kickVotes[user].append(str(message.author))
-                    await message.channel.send(str('Vote added. ' + str(KICK_REQ-kickList[user]) + ' more needed to kick.' ))
+                    await message.channel.send('Vote added. ' + str(int(KICK_REQ)-int(kickList[user])) + ' more needed to kick.')
                     if (kickList[user] >= KICK_REQ):
-                        tgt = ''
                         for member in message.guild.members:
-                            if str(member) == [parse[1]]:
-                                tgt = member
-                        if LETHALITY >= 1:
-                            kickList[user] = 0
-                            await message.channel.send(str('@' + str(tgt.name)+ ' has been kicked successfully'))
-                            await kick(tgt)
-                        else:
-                            await message.channel.send('Lethal mode has been disabled. Please enable it with $comrade lethal <level>')
+                            if str(member.name) == user:
+                                if LETHALITY >= 1:
+                                    kickList[user] = 0
+                                    await message.channel.send('@' + str(member.name)+ ' has been kicked successfully')
+                                    await message.guild.kick(member)
+                                else:
+                                    await message.channel.send('Lethal mode has been disabled. Please enable it with $comrade lethal <level>')
+                                             
                 else:
                     await message.channel.send('You have already voted!')
                  
@@ -127,7 +128,7 @@ async def on_message(message):
                 await message.channel.send('Threats: ' + str(THREATS) + '\nOPS:' + str(OPS) + '\nKick Requirement: ' + str(KICK_REQ) + "\nKick List: " + str(kicks))
                 
             elif parse[0] == 'kickReq' and str(message.author) in OPS:
-                KICK_REQ = parse[1]
+                KICK_REQ = int(parse[1])
                 await message.channel.send('Kick requirement has been set to {0} votes.'.format(KICK_REQ))
             elif parse[0] == 'resetKick' and str(message.author) in OPS:
                 for member in message.guild.members:
