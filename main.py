@@ -3,7 +3,7 @@ import os
 import dotenv
 import discord
 
-import keep_alive
+#import keep_alive
 
 # text filtering
 import re
@@ -73,8 +73,6 @@ def writeInfo():
         cfg.write('THREATS = ' + str(THREATS) + '\n')
         cfg.write('OPS = ' + str(OPS) + '\n')
         cfg.write('KICK_SAFE = ' + str(KICK_SAFE) + '\n')
-
-
     
 @client.event
 async def on_message(message):
@@ -100,11 +98,13 @@ async def on_message(message):
         
         if 'hello comrade' in message.content.lower():
             await message.channel.send('Henlo')
+        elif 'henlo comrade' in message.content.lower():
+            await message.channel.send('Hello')
         if '$comrade' in message.content.lower():
             parse = str(message.content).lstrip('$comrade').split()
             print(parse)
             if parse[0] == 'voteKick':
-                user = str(message.mentions[0].name) #name of user to be kicked
+                user = str(message.mentions[0].id) # id of user to be kicked
                 
                 if not (str(message.author) in kickVotes[user] or str(message.author) in KICK_SAFE):
                     kickList[user] += 1
@@ -159,8 +159,8 @@ async def on_message(message):
             elif parse[0] == 'status':
                 kicks = []
                 for member in message.guild.members:
-                    if kickList[str(member.name)] >= 1:
-                        kicks.append(str(member.name) + ': ' + str(kickList[str(member.name)]))
+                    if kickList[str(member.id)] >= 1:
+                        kicks.append(str(member) + ': ' + str(kickList[str(member.id)]))
                 await message.channel.send('Threats: ' + str(THREATS) + '\nOPS:' + str(OPS) + '\nKick Requirement: ' + str(KICK_REQ) + "\nKick List: " + str(kicks) + "\nLethality: " + str(LETHALITY))
                 
             elif parse[0] == 'kickReq' and str(message.author) in OPS:
@@ -209,8 +209,8 @@ async def on_ready():
                 for member in guild.members:
                     num_mem +=1
                     # repopulate kicklist
-                    kickList[member.name] = 0
-                    kickVotes[member.name] = []
+                    kickList[member.id] = 0
+                    kickVotes[member.id] = []
                 writeInfo()
             # defunct - for avatars
             '''
@@ -234,5 +234,5 @@ async def on_ready():
 
     print('COMRADE is fully online.')
 
-keep_alive.keep_alive()
+#keep_alive.keep_alive()
 client.run(TOKEN)
