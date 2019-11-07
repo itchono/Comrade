@@ -12,7 +12,10 @@ from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 
 # download pfps
-import requests
+# import requests
+
+# load variables
+import comrade_cfg
 
 dotenv.load_dotenv()
 
@@ -25,19 +28,14 @@ client = discord.Client()
 
 print('Initializing parameters')
 
-kickList = {}
-
-kickVotes = {}
-
-LETHALITY = 0
-
-THREATS = ['Wahaha#0365', 'itchono#3597']
-
-OPS = ['itchono#3597', 'Vyre#6300']
-
-KICK_SAFE = ['itchono#3597', 'Comrade#2988']
-
-KICK_REQ = 6
+# init vars
+kickList = comrade_cfg.kickList
+kickVotes = comrade_cfg.kickVotes
+LETHALITY = comrade_cfg.LETHALITY
+THREATS = comrade_cfg.THREATS
+OPS = comrade_cfg.OPS
+KICK_SAFE = comrade_cfg.KICK_SAFE
+KICK_REQ = comrade_cfg.KICK_REQ
 
 def containsletters(string, check):
     res = True
@@ -46,6 +44,37 @@ def containsletters(string, check):
             res = False
         
     return res
+
+def loadVars():
+    # if we ever need to reload vars
+    global LETHALITY
+    global THREATS
+    global OPS
+    global kickVotes
+    global kickList
+    global KICK_REQ
+    global KICK_SAFE
+
+    kickList = comrade_cfg.kickList
+    kickVotes = comrade_cfg.kickVotes
+    LETHALITY = comrade_cfg.LETHALITY
+    THREATS = comrade_cfg.THREATS
+    OPS = comrade_cfg.OPS
+    KICK_SAFE = comrade_cfg.KICK_SAFE
+    KICK_REQ = comrade_cfg.KICK_REQ
+
+
+def writeInfo():
+    # writes all variables to file again in order.
+    with open('comrade_cfg.py', 'w') as cfg:
+        cfg.write('kickList = ' + str(kickList) + '\n')
+        cfg.write('kickVotes = ' + str(kickVotes) + '\n')
+        cfg.write('LETHALITY = ' + str(LETHALITY) + '\n')
+        cfg.write('THREATS = ' + str(THREATS) + '\n')
+        cfg.write('OPS = ' + str(OPS) + '\n')
+        cfg.write('KICK_SAFE = ' + str(KICK_SAFE) + '\n')
+
+
     
 @client.event
 async def on_message(message):
@@ -53,7 +82,7 @@ async def on_message(message):
     global THREATS
     global OPS
     global kickVotes
-    global kicklist
+    global kickList
     global KICK_REQ
     
     if message.author != client.user:
@@ -77,7 +106,7 @@ async def on_message(message):
             if parse[0] == 'voteKick':
                 user = str(message.mentions[0].name) #name of user to be kicked
                 
-                if not (str(message.author) in kickVotes[user] or user in KICK_SAFE):
+                if not (str(message.author) in kickVotes[user] or str(message.author) in KICK_SAFE):
                     kickList[user] += 1
                     kickVotes[user].append(str(message.author))
                     await message.channel.send('Vote added. ' + str(int(KICK_REQ)-int(kickList[user])) + ' more needed to kick.')
@@ -90,57 +119,66 @@ async def on_message(message):
                                     await message.guild.kick(member)
                                 else:
                                     await message.channel.send('Lethal mode has been disabled. Please enable it with $comrade lethal <level>')
-                                             
+                    writeInfo()                       
                 else:
                     await message.channel.send('You have already voted!')
                  
             elif parse[0] == 'lethal' and str(message.author) in OPS:
                 LETHALITY = int(parse[1])
+                writeInfo()
                 if LETHALITY == 0:
                     await message.channel.send('Lethal mode has been deactivated.')
                 else:
                     await message.channel.send('Lethality has been activated and set to {0}. This can cause destructive actions.'.format(LETHALITY))
+                
             elif parse[0] == 'addThreat' and str(message.author) in OPS:
                 user = str(message.mentions[0])
                 THREATS.append(user)
+                writeInfo()
                 await message.channel.send('Threat Added.')
             elif parse[0] == 'removeThreat' and str(message.author) in OPS:
                 user = str(message.mentions[0])
                 if user in THREATS:
                     THREATS.remove(user)
+                    writeInfo()
                 await message.channel.send('Threat Added.')
             
             
             elif parse[0] == 'op' and str(message.author) in OPS:
                 user = str(message.mentions[0])
                 OPS.append(user)
+                writeInfo()
                 await message.channel.send('OP Added.')
             elif parse[0] == 'deop' and str(message.author) in OPS:
                 user = str(message.mentions[0])
                 if user in OPS:
                     OPS.remove(user)
+                    writeInfo()
                 await message.channel.send('OP Removed.')
                 
-            elif parse[0] == 'arrayStatus':
+            elif parse[0] == 'status':
                 kicks = []
                 for member in message.guild.members:
                     if kickList[str(member.name)] >= 1:
                         kicks.append(str(member.name) + ': ' + str(kickList[str(member.name)]))
-            
-                await message.channel.send('Threats: ' + str(THREATS) + '\nOPS:' + str(OPS) + '\nKick Requirement: ' + str(KICK_REQ) + "\nKick List: " + str(kicks))
+                await message.channel.send('Threats: ' + str(THREATS) + '\nOPS:' + str(OPS) + '\nKick Requirement: ' + str(KICK_REQ) + "\nKick List: " + str(kicks) + "\nLethality: " + str(LETHALITY))
                 
             elif parse[0] == 'kickReq' and str(message.author) in OPS:
                 KICK_REQ = int(parse[1])
+                writeInfo()
                 await message.channel.send('Kick requirement has been set to {0} votes.'.format(KICK_REQ))
             elif parse[0] == 'resetKick' and str(message.author) in OPS:
+                # resets Kicklist and kickvotes, sometimes also used when members join/leave etc
                 for member in message.guild.members:
                     kickList[member.name] = 0
                     kickVotes[member.name] = []
-                await message.channel.send('Kore wa requiem: All kick votes have been reset.')
-                      
-                
-                
-                    
+                    writeInfo()
+                await message.channel.send('Votes have been reset and votelist regenerated.')
+            elif parse[0] == 'reloadVars' and str(message.author) in OPS:
+                loadVars()
+                await message.channel.send('All variables reloaded from file.')
+                                      
+                            
 
 @client.event
 async def on_message_edit(message1, message):  
@@ -157,7 +195,8 @@ async def on_message_edit(message1, message):
 
 @client.event
 async def on_ready():
-    # file = open("avatarlinks.txt", "w")
+
+    print('Loading OPS and Threats')
     
     print('Constructing member list')
 
@@ -166,13 +205,17 @@ async def on_ready():
             global kickList
             # populate kicklist
             num_mem = 0
+            if (len(kickList.keys()) == 0):
+                for member in guild.members:
+                    num_mem +=1
+                    # repopulate kicklist
+                    kickList[member.name] = 0
+                    kickVotes[member.name] = []
+                writeInfo()
+            # defunct - for avatars
+            '''
             for member in guild.members:
-                num_mem +=1
-                kickList[member.name] = 0
-                kickVotes[member.name] = []
                 
-                
-                '''
                 url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(member)
                 
                 r = requests.get(url)
@@ -180,8 +223,7 @@ async def on_ready():
                     outfile.write(r.content)
                 
                 file.write(url + '\n')
-                '''
-                
+            '''
             print(num_mem, "members loaded.")
             break
     print(
@@ -189,7 +231,6 @@ async def on_ready():
         f'{guild.name}(id: {guild.id})')
         
     await client.change_presence(status=discord.Status.online, activity=discord.Game("Upholding Communism"))
-    # file.close()
 
     print('COMRADE is fully online.')
 
