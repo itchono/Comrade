@@ -171,8 +171,8 @@ async def on_message(message):
             elif parse[0] == 'resetKick' and str(message.author) in OPS:
                 # resets Kicklist and kickvotes, sometimes also used when members join/leave etc
                 for member in message.guild.members:
-                    kickList[member.name] = 0
-                    kickVotes[member.name] = []
+                    kickList[member.id] = 0
+                    kickVotes[member.id] = []
                     writeInfo()
                 await message.channel.send('Votes have been reset and votelist regenerated.')
             elif parse[0] == 'reloadVars' and str(message.author) in OPS:
