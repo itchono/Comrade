@@ -3,7 +3,7 @@ import os
 import dotenv
 import discord
 
-#import keep_alive
+import keep_alive
 
 # text filtering
 import re
@@ -236,5 +236,5 @@ async def on_ready():
 
     print('COMRADE is fully online.')
 
-#keep_alive.keep_alive()
+keep_alive.keep_alive()
 client.run(TOKEN)
