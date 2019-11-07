@@ -72,6 +72,7 @@ def writeInfo():
         cfg.write('LETHALITY = ' + str(LETHALITY) + '\n')
         cfg.write('THREATS = ' + str(THREATS) + '\n')
         cfg.write('OPS = ' + str(OPS) + '\n')
+        cfg.write('KICK_REQ = ' + str(KICK_REQ) + '\n')
         cfg.write('KICK_SAFE = ' + str(KICK_SAFE) + '\n')
     
 @client.event
@@ -104,12 +105,12 @@ async def on_message(message):
             parse = str(message.content).lstrip('$comrade').split()
             print(parse)
             if parse[0] == 'voteKick':
-                user = str(message.mentions[0].id) # id of user to be kicked
+                user = message.mentions[0].id # id of user to be kicked
                 
-                if not (str(message.author) in kickVotes[user] or str(message.author) in KICK_SAFE):
+                if not (str(message.author) in kickVotes[user] or str(message.mentions[0]) in KICK_SAFE):
                     kickList[user] += 1
                     kickVotes[user].append(str(message.author))
-                    await message.channel.send('Vote added. ' + str(int(KICK_REQ)-int(kickList[user])) + ' more needed to kick.')
+                    await message.channel.send('Vote added for {0}.\n'.format(str(message.mentions[0].name)) + str(int(KICK_REQ)-int(kickList[user])) + ' more needed to kick.')
                     if (kickList[user] >= KICK_REQ):
                         for member in message.guild.members:
                             if str(member.name) == user:
@@ -159,8 +160,8 @@ async def on_message(message):
             elif parse[0] == 'status':
                 kicks = []
                 for member in message.guild.members:
-                    if kickList[str(member.id)] >= 1:
-                        kicks.append(str(member) + ': ' + str(kickList[str(member.id)]))
+                    if kickList[member.id] >= 1:
+                        kicks.append(str(member) + ': ' + str(kickList[member.id]))
                 await message.channel.send('Threats: ' + str(THREATS) + '\nOPS:' + str(OPS) + '\nKick Requirement: ' + str(KICK_REQ) + "\nKick List: " + str(kicks) + "\nLethality: " + str(LETHALITY))
                 
             elif parse[0] == 'kickReq' and str(message.author) in OPS:
@@ -224,7 +225,8 @@ async def on_ready():
                 
                 file.write(url + '\n')
             '''
-            print(num_mem, "members loaded.")
+            print(len(guild.members), "members loaded.")
+            print(num_mem, "new members added to list.")
             break
     print(
         f'{client.user} is connected to the following guild:\n'
