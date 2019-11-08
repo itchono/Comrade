@@ -37,6 +37,7 @@ OPS = comrade_cfg.OPS
 KICK_SAFE = comrade_cfg.KICK_SAFE
 KICK_REQ = comrade_cfg.KICK_REQ
 
+''' defunct text filtering
 def containsletters(string, check):
     res = True
     for i in range(len(check)-1):
@@ -44,6 +45,7 @@ def containsletters(string, check):
             res = False
         
     return res
+'''
 
 def loadVars():
     # if we ever need to reload vars
@@ -88,13 +90,14 @@ async def on_message(message):
         #failsafe against self response
         
         if (str(message.author) in THREATS and LETHALITY >= 2):
-            custom_emojis = re.findall(r'<:\w*:\d*>', message.content)
-            print(custom_emojis)
             query = re.sub('\W+','', unidecode.unidecode(message.content.lower()))
             print(message.content)
             if 'hentai' in query or fuzz.partial_ratio('hentai', query) > 60:
                 await message.delete()
                 print('Message purged', str(message.content))
+            elif u"\U0001F1ED" in query:
+                await message.delete()
+                print('Message with emoji purged', str(message.content))
             
         
         if 'hello comrade' in message.content.lower():
