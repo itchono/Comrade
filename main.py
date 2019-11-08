@@ -39,6 +39,7 @@ OPS = comrade_cfg.OPS
 KICK_SAFE = comrade_cfg.KICK_SAFE
 KICK_REQ = comrade_cfg.KICK_REQ
 BANNED_WORDS = comrade_cfg.BANNED_WORDS
+PURGE = comrade_cfg.PURGE
 
 ''' defunct text filtering
 def containsletters(string, check):
@@ -60,6 +61,7 @@ def loadVars():
     global KICK_REQ
     global KICK_SAFE
     global BANNED_WORDS
+    global PURGE
 
     kickList = comrade_cfg.kickList
     kickVotes = comrade_cfg.kickVotes
@@ -69,6 +71,7 @@ def loadVars():
     KICK_SAFE = comrade_cfg.KICK_SAFE
     KICK_REQ = comrade_cfg.KICK_REQ
     BANNED_WORDS = comrade_cfg.BANNED_WORDS
+    PURGE = comrade_cfg.PURGE
 
 
 def writeInfo():
@@ -82,30 +85,50 @@ def writeInfo():
         cfg.write('KICK_REQ = ' + str(KICK_REQ) + '\n')
         cfg.write('KICK_SAFE = ' + str(KICK_SAFE) + '\n')
         cfg.write('BANNED_WORDS = ' + str(BANNED_WORDS) + '\n')
+        cfg.write('PURGE = ' + str(PURGE) + '\n')
 
-async def generateRequiem(message: discord.message):
-    # produces a list of members to be purged
-    # takes in server
 
-    non_roled = []
-    for member in message.guild.members:
-        if str(member.roles) == '[<Role id=419214713252216848 name=\'@everyone\'>, <Role id=419215295232868361 name=\'Communism is the only Role\'>]':
-            non_roled.append(member)
-    
-    names = []
-    for member in non_roled:
-        names.append(str(member))
-    await message.channel.send('Preliminary List of members without other roles:')
-    await message.channel.send(str(names))
+async def generateRequiem(message: discord.message, mode='NonRole'):
 
-    await message.channel.send('Trimming. This will take a while.')
-    for channel in message.guild.text_channels:
-        async for message in channel.history(limit=None,after=datetime.datetime(2019, 10, 8)):
-            for member in non_roled:
-                if message.author == member:
-                    await message.channel.send(str('Member found: {0} in message sent at {1}:\n{2}'.format(member.name, str(message.created_at), message.content)))
+    if mode == 'NonRole':
+        # produces a list of members to be purged
+        # takes in server
 
-    return non_roled
+        non_roled = []
+        for member in message.guild.members:
+            if str(member.roles) == '[<Role id=419214713252216848 name=\'@everyone\'>, <Role id=419215295232868361 name=\'Communism is the only Role\'>]':
+                non_roled.append(member)
+        
+        names = []
+        for member in non_roled:
+            names.append(str(member))
+        await message.channel.send('Preliminary List of members without other roles:')
+        await message.channel.send(str(names))
+
+        await message.channel.send('Trimming. This will take a while.')
+        for channel in message.guild.text_channels:
+            async for msg in channel.history(limit=None,after=datetime.datetime(2019, 10, 8)):
+                for member in non_roled:
+                    if msg.author == member:
+                        await message.channel.send(str('Member found: {0} in message sent at {1}:\n{2}'.format(non_roled.pop(non_roled.index(member)), str(msg.created_at), msg.content)))
+
+        return non_roled
+    elif mode == 'All':
+        # produces a list of members to be purged
+        # takes in server
+
+        members = []
+        for member in message.guild.members:
+            members.append(member)
+
+        await message.channel.send('Scanning ALL members This will take a while.')
+        for channel in message.guild.text_channels:
+            async for msg in channel.history(limit=None,after=datetime.datetime(2019, 10, 8)):
+                for member in members:
+                    if msg.author == member:
+                        members.remove(member)
+
+        return members
     
 @client.event
 async def on_message(message):
@@ -247,12 +270,15 @@ async def on_message(message):
 
             elif parse[0] == 'genRequiem':
                 await message.channel.send('Generating purge list. Please wait.')
-                purge = await generateRequiem(message)
+                purge = await generateRequiem(message, str(parse[1]))
                 names = []
                 for member in purge:
                     names.append(str(member))
                 await message.channel.send('Pruned list generated.')
                 await message.channel.send(str(names))
+                PURGE = purge
+                writeInfo()
+                await message.channel.send('{0} members loaded for purge. Execute purge with $comrade PURGE'.format(len(PURGE)))
 
 
 @client.event
