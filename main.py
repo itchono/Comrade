@@ -93,13 +93,14 @@ async def generateRequiem(message: discord.message):
             non_roled.append(member)
     
     names = []
-    for member in purge:
+    for member in non_roled:
         names.append(str(member))
     await message.channel.send('Preliminary List of members without other roles:')
     await message.channel.send(str(names))
 
+    await message.channel.send('Trimming. This will take a while.')
     for channel in message.guild.text_channels:
-        async for message in sov_union.messages(limit=None,after=datetime.datetime(2019, 10, 8)):
+        async for message in channel.history(limit=None,after=datetime.datetime(2019, 10, 8)):
             for member in non_roled:
                 if message.author == member:
                     await message.channel.send(str('Member found: {0} in message sent at {1}:\n{2}'.format(member.name, str(message.created_at), message.content)))
