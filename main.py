@@ -36,6 +36,7 @@ THREATS = comrade_cfg.THREATS
 OPS = comrade_cfg.OPS
 KICK_SAFE = comrade_cfg.KICK_SAFE
 KICK_REQ = comrade_cfg.KICK_REQ
+BANNED_WORDS = comrade_cfg.BANNED_WORDS
 
 ''' defunct text filtering
 def containsletters(string, check):
@@ -56,6 +57,7 @@ def loadVars():
     global kickList
     global KICK_REQ
     global KICK_SAFE
+    global BANNED_WORDS
 
     kickList = comrade_cfg.kickList
     kickVotes = comrade_cfg.kickVotes
@@ -64,6 +66,7 @@ def loadVars():
     OPS = comrade_cfg.OPS
     KICK_SAFE = comrade_cfg.KICK_SAFE
     KICK_REQ = comrade_cfg.KICK_REQ
+    BANNED_WORDS = comrade_cfg.BANNED_WORDS
 
 
 def writeInfo():
@@ -76,6 +79,7 @@ def writeInfo():
         cfg.write('OPS = ' + str(OPS) + '\n')
         cfg.write('KICK_REQ = ' + str(KICK_REQ) + '\n')
         cfg.write('KICK_SAFE = ' + str(KICK_SAFE) + '\n')
+        cfg.write('BANNED_WORDS = ' + str(BANNED_WORDS) + '\n')
     
 @client.event
 async def on_message(message):
@@ -85,35 +89,39 @@ async def on_message(message):
     global kickVotes
     global kickList
     global KICK_REQ
+    global BANNED_WORDS
     
     if message.author != client.user:
         #failsafe against self response
         
-        if (str(message.author) in THREATS and LETHALITY >= 2):
+        # $SENTINEL
+        if (LETHALITY >= 2 and str(message.author) in THREATS):
             query = re.sub('\W+','', unidecode.unidecode(message.content.lower()))
-            print(message.content)
-            if 'hentai' in query or fuzz.partial_ratio('hentai', query) > 60:
+            for word in BANNED_WORDS:
+                if word in query or fuzz.partial_ratio(word, query) > 75:
+                    await message.delete()
+                    print('Message purged:\n', str(message.content))
+         
+            if u"\U0001F1ED" in message.content:
                 await message.delete()
-                print('Message purged', str(message.content))
-            elif u"\U0001F1ED" in query:
-                await message.delete()
-                print('Message with emoji purged', str(message.content))
+                print('Message with emoji purged:\n', str(message.content))
             
-        
+        # $JERICHO
         if 'hello comrade' in message.content.lower():
             await message.channel.send('Henlo')
         elif 'henlo comrade' in message.content.lower():
             await message.channel.send('Hello')
+       
+       
         if '$comrade' in message.content.lower():
             parse = str(message.content).lstrip('$comrade').split()
-            print(parse)
             if parse[0] == 'voteKick':
                 user = message.mentions[0].id # id of user to be kicked
                 
                 if not (str(message.author) in kickVotes[user] or str(message.mentions[0]) in KICK_SAFE):
                     kickList[user] += 1
                     kickVotes[user].append(str(message.author))
-                    await message.channel.send('Vote added for {0}.\n'.format(str(message.mentions[0].name)) + str(int(KICK_REQ)-int(kickList[user])) + ' more needed to kick.')
+                    await message.channel.send('Vote added for {0} ({2}/{1}).'.format(str(message.mentions[0].name), int(KICK_REQ), int(kickList[user])))
                     if (kickList[user] >= KICK_REQ):
                         for member in message.guild.members:
                             if str(member.name) == user:
@@ -126,6 +134,16 @@ async def on_message(message):
                     writeInfo()                       
                 else:
                     await message.channel.send('You have already voted!')
+            
+            elif parse[0] == 'unKick':
+                user = message.mentions[0].id # id of user to be kicked
+                if (str(message.author) in kickVotes[user]):
+                    kickList[user] -= 1
+                    kickVotes[user].remove(str(message.author))
+                    await message.channel.send('Vote removed for {0} ({2}/{1}).'.format(str(message.mentions[0].name), int(KICK_REQ), int(kickList[user])))
+                    writeInfo()
+                else:
+                    await message.channel.send('You have not voted to kick ' + str(message.mentions[0].name))
                  
             elif parse[0] == 'lethal' and str(message.author) in OPS:
                 LETHALITY = int(parse[1])
@@ -140,6 +158,7 @@ async def on_message(message):
                 THREATS.append(user)
                 writeInfo()
                 await message.channel.send('Threat Added.')
+
             elif parse[0] == 'removeThreat' and str(message.author) in OPS:
                 user = str(message.mentions[0])
                 if user in THREATS:
@@ -181,8 +200,24 @@ async def on_message(message):
             elif parse[0] == 'reloadVars' and str(message.author) in OPS:
                 loadVars()
                 await message.channel.send('All variables reloaded from file.')
-                                      
-                            
+
+            elif parse[0] == 'addBanWord' and str(message.author) in OPS:
+                BANNED_WORDS.append(parse[1])
+                await message.channel.send(parse[1], ' has been added to blacklist.')
+                writeInfo()
+            elif parse[0] == 'removeBanWord' and str(message.author) in OPS:
+                BANNED_WORDS.remove(parse[1])
+                await message.channel.send(parse[1], ' has been removed from blacklist.')
+                writeInfo()
+
+            elif parse[0] == 'addBanSafe' and str(message.author) in OPS:
+                KICK_SAFE.append(parse[1])
+                await message.channel.send(parse[1], ' has been added to safelist.')
+                writeInfo()
+            elif parse[0] == 'removeBanSafe' and str(message.author) in OPS:
+                KICK_SAFE.remove(parse[1])
+                await message.channel.send(parse[1], ' has been added to safelist.')
+                writeInfo()                   
 
 @client.event
 async def on_message_edit(message1, message):  
