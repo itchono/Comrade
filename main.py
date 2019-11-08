@@ -14,7 +14,7 @@ from fuzzywuzzy import process
 import datetime
 
 # download pfps
-# import requests
+import requests
 
 # load variables
 import comrade_cfg
@@ -39,17 +39,13 @@ OPS = comrade_cfg.OPS
 KICK_SAFE = comrade_cfg.KICK_SAFE
 KICK_REQ = comrade_cfg.KICK_REQ
 BANNED_WORDS = comrade_cfg.BANNED_WORDS
-PURGE = comrade_cfg.PURGE
+PURGE = []
 
-''' defunct text filtering
-def containsletters(string, check):
-    res = True
-    for i in range(len(check)-1):
-        if string.find(check[i]) == -1 or string.find(check[i+1], string.find(check[i])) == -1:
-            res = False
-        
-    return res
-'''
+for guild in client.guilds:
+    if guild.name == GUILD:
+        for i in comrade_cfg.PURGE:
+            PURGE.append(guild.get_user(i))
+
 
 def loadVars():
     # if we ever need to reload vars
@@ -71,7 +67,12 @@ def loadVars():
     KICK_SAFE = comrade_cfg.KICK_SAFE
     KICK_REQ = comrade_cfg.KICK_REQ
     BANNED_WORDS = comrade_cfg.BANNED_WORDS
-    PURGE = comrade_cfg.PURGE
+    PURGE = []
+    
+    for guild in client.guilds:
+        if guild.name == GUILD:
+            for i in comrade_cfg.PURGE:
+                PURGE.append(guild.get_user(i))
 
 
 def writeInfo():
@@ -85,7 +86,11 @@ def writeInfo():
         cfg.write('KICK_REQ = ' + str(KICK_REQ) + '\n')
         cfg.write('KICK_SAFE = ' + str(KICK_SAFE) + '\n')
         cfg.write('BANNED_WORDS = ' + str(BANNED_WORDS) + '\n')
-        cfg.write('PURGE = ' + str(PURGE) + '\n')
+
+        p2 = []
+        for i in PURGE:
+            p2.append(i.id)
+        cfg.write('PURGE = ' + str(p2) + '\n')
 
 
 async def generateRequiem(message: discord.message, mode='NonRole'):
@@ -139,6 +144,10 @@ async def on_message(message):
     global kickList
     global KICK_REQ
     global BANNED_WORDS
+    global PURGE
+
+    isOP = str(message.author) in OPS
+    isOwner = message.author == message.guild.get_member(66137108124803072) # owner only commands
     
     if message.author != client.user:
         #failsafe against self response
@@ -160,8 +169,7 @@ async def on_message(message):
             await message.channel.send('Henlo')
         elif 'henlo comrade' in message.content.lower():
             await message.channel.send('Hello')
-       
-       
+
         if '$comrade' in message.content.lower():
             parse = str(message.content).lstrip('$comrade').split()
             if parse[0] == 'voteKick':
@@ -208,7 +216,7 @@ async def on_message(message):
                 writeInfo()
                 await message.channel.send('Threat Added.')
 
-            elif parse[0] == 'removeThreat' and str(message.author) in OPS:
+            elif parse[0] == 'removeThreat' and isOP:
                 user = str(message.mentions[0])
                 if user in THREATS:
                     THREATS.remove(user)
@@ -216,12 +224,12 @@ async def on_message(message):
                 await message.channel.send('Threat Added.')
             
             
-            elif parse[0] == 'op' and str(message.author) in OPS:
+            elif parse[0] == 'op' and isOP:
                 user = str(message.mentions[0])
                 OPS.append(user)
                 writeInfo()
                 await message.channel.send('OP Added.')
-            elif parse[0] == 'deop' and str(message.author) in OPS:
+            elif parse[0] == 'deop' and isOP:
                 user = str(message.mentions[0])
                 if user in OPS:
                     OPS.remove(user)
@@ -235,40 +243,41 @@ async def on_message(message):
                         kicks.append(str(member) + ': ' + str(kickList[member.id]))
                 await message.channel.send('Threats: ' + str(THREATS) + '\nOPS:' + str(OPS) + '\nKick Requirement: ' + str(KICK_REQ) + "\nKick List: " + str(kicks) + "\nLethality: " + str(LETHALITY))
                 
-            elif parse[0] == 'kickReq' and str(message.author) in OPS:
+            elif parse[0] == 'kickReq' and isOP:
                 KICK_REQ = int(parse[1])
                 writeInfo()
                 await message.channel.send('Kick requirement has been set to {0} votes.'.format(KICK_REQ))
-            elif parse[0] == 'resetKick' and str(message.author) in OPS:
+            elif parse[0] == 'resetKick' and isOP:
                 # resets Kicklist and kickvotes, sometimes also used when members join/leave etc
                 for member in message.guild.members:
                     kickList[member.id] = 0
                     kickVotes[member.id] = []
                     writeInfo()
                 await message.channel.send('Votes have been reset and votelist regenerated.')
-            elif parse[0] == 'reloadVars' and str(message.author) in OPS:
+
+            elif parse[0] == 'reloadVars' and isOwner:
                 loadVars()
                 await message.channel.send('All variables reloaded from file.')
 
-            elif parse[0] == 'addBanWord' and str(message.author) in OPS:
+            elif parse[0] == 'addBanWord' and isOP:
                 BANNED_WORDS.append(parse[1])
                 await message.channel.send(parse[1], ' has been added to blacklist.')
                 writeInfo()
-            elif parse[0] == 'removeBanWord' and str(message.author) in OPS:
+            elif parse[0] == 'removeBanWord' and isOP:
                 BANNED_WORDS.remove(parse[1])
                 await message.channel.send(parse[1], ' has been removed from blacklist.')
                 writeInfo()
 
-            elif parse[0] == 'addBanSafe' and str(message.author) in OPS:
-                KICK_SAFE.append(parse[1])
+            elif parse[0] == 'addBanSafe' and isOwner:
+                KICK_SAFE.append(str(message.mentions[0]))
                 await message.channel.send(parse[1], ' has been added to safelist.')
                 writeInfo()
-            elif parse[0] == 'removeBanSafe' and str(message.author) in OPS:
-                KICK_SAFE.remove(parse[1])
+            elif parse[0] == 'removeBanSafe' and isOwner:
+                KICK_SAFE.remove(str(message.mentions[0]))
                 await message.channel.send(parse[1], ' has been added to safelist.')
                 writeInfo()   
 
-            elif parse[0] == 'genRequiem':
+            elif parse[0] == 'genRequiem' and isOwner:
                 await message.channel.send('Generating purge list. Please wait.')
                 purge = await generateRequiem(message, str(parse[1]))
                 names = []
@@ -279,7 +288,15 @@ async def on_message(message):
                 PURGE = purge
                 writeInfo()
                 await message.channel.send('{0} members loaded for purge. Execute purge with $comrade PURGE'.format(len(PURGE)))
-
+            
+            elif parse[0] == 'PURGE' and isOwner:
+                if LETHALITY >= 3:
+                    await message.channel.send('Purge started. Preparing to kick {} members'.format(len(PURGE)))
+                    for member in PURGE:
+                        message.guild.kick(member)
+                    await message.channel.send('Purge complete. Please reset votelists to restore normal functionality.')
+                else:
+                    await message.channel.send('Please set lethality to level 3 or above to continue.')
 
 @client.event
 async def on_message_edit(message1, message):  
@@ -293,10 +310,19 @@ async def on_message_edit(message1, message):
                 await message.delete()
                 print('Message purged', str(message.content))
             
+async def getPics(guild):
+    # used to retrieve all pfps and links
+    with open('avatars/avatarlist.txt', 'wb') as file:
+        for member in guild.members:
+            url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(member)
+            
+            r = requests.get(url)
+            with open('avatars/avatar{0}.png'.format(member.id), 'wb') as outfile:
+                outfile.write(r.content)
+            file.write(url + '\n')
 
 @client.event
 async def on_ready():
-
     print('Loading OPS and Threats')
     
     print('Constructing member list')
@@ -313,20 +339,8 @@ async def on_ready():
                     kickList[member.id] = 0
                     kickVotes[member.id] = []
                 writeInfo()
-            # defunct - for avatars
-            '''
-            for member in guild.members:
-                
-                url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(member)
-                
-                r = requests.get(url)
-                with open('C:/Users/mdsup/Documents/GitHub/Comrade/avatars/avatar{0}.png'.format(member.id), 'wb') as outfile:
-                    outfile.write(r.content)
-                
-                file.write(url + '\n')
-            '''
             print(len(guild.members), "members loaded.")
-            print(num_mem, "new members added to list.")
+            print(num_mem, "new members appended to list.")
             break
     print(
         f'{client.user} is connected to the following guild:\n'
