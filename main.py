@@ -11,6 +11,8 @@ import unidecode
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 
+import datetime
+
 # download pfps
 # import requests
 
@@ -80,6 +82,29 @@ def writeInfo():
         cfg.write('KICK_REQ = ' + str(KICK_REQ) + '\n')
         cfg.write('KICK_SAFE = ' + str(KICK_SAFE) + '\n')
         cfg.write('BANNED_WORDS = ' + str(BANNED_WORDS) + '\n')
+
+async def generateRequiem(message: discord.message):
+    # produces a list of members to be purged
+    # takes in server
+
+    non_roled = []
+    for member in message.guild.members:
+        if str(member.roles) == '[<Role id=419214713252216848 name=\'@everyone\'>, <Role id=419215295232868361 name=\'Communism is the only Role\'>]':
+            non_roled.append(member)
+    
+    names = []
+    for member in purge:
+        names.append(str(member))
+    await message.channel.send('Preliminary List of members without other roles:')
+    await message.channel.send(str(names))
+
+    for channel in message.guild.text_channels:
+        async for message in sov_union.messages(limit=None,after=datetime.datetime(2019, 10, 8)):
+            for member in non_roled:
+                if message.author == member:
+                    await message.channel.send(str('Member found: {0} in message sent at {1}:\n{2}'.format(member.name, str(message.created_at), message.content)))
+
+    return non_roled
     
 @client.event
 async def on_message(message):
@@ -123,14 +148,14 @@ async def on_message(message):
                     kickVotes[user].append(str(message.author))
                     await message.channel.send('Vote added for {0} ({2}/{1}).'.format(str(message.mentions[0].name), int(KICK_REQ), int(kickList[user])))
                     if (kickList[user] >= KICK_REQ):
-                        for member in message.guild.members:
-                            if str(member.name) == user:
-                                if LETHALITY >= 1:
-                                    kickList[user] = 0
-                                    await message.channel.send('@' + str(member.name)+ ' has been kicked successfully')
-                                    await message.guild.kick(member)
-                                else:
-                                    await message.channel.send('Lethal mode has been disabled. Please enable it with $comrade lethal <level>')
+                        member = message.guild.get_member(user) # more efficient code
+                        print(member)
+                        if LETHALITY >= 1:
+                            kickList[user] = 0
+                            await message.channel.send('@' + str(member.name)+ ' has been kicked successfully')
+                            await message.guild.kick(member)
+                        else:
+                            await message.channel.send('Lethal mode has been disabled. Please enable it with $comrade lethal <level>')
                     writeInfo()                       
                 else:
                     await message.channel.send('You have already voted!')
@@ -217,7 +242,17 @@ async def on_message(message):
             elif parse[0] == 'removeBanSafe' and str(message.author) in OPS:
                 KICK_SAFE.remove(parse[1])
                 await message.channel.send(parse[1], ' has been added to safelist.')
-                writeInfo()                   
+                writeInfo()   
+
+            elif parse[0] == 'genRequiem':
+                await message.channel.send('Generating purge list. Please wait.')
+                purge = await generateRequiem(message)
+                names = []
+                for member in purge:
+                    names.append(str(member))
+                await message.channel.send('Pruned list generated.')
+                await message.channel.send(str(names))
+
 
 @client.event
 async def on_message_edit(message1, message):  
