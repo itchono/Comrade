@@ -5,7 +5,9 @@ app = Flask('')
 
 @app.route('/')
 def main():
-    return "Bot remote host is online."
+    return "Comrade BOT is online."
+
+
 
 def run():
     app.run(host="0.0.0.0", port=8080)
