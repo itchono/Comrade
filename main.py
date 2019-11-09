@@ -91,7 +91,6 @@ async def dailyMSG():
     dailyAnnounce = 'Good morning everyone!\nToday is {}. Have a prosperous day! <:FeelsProsperousMan:419256328465285131>'.format(datetime.datetime.now().date())
 
     while not client.is_closed():
-        print('BEEP BOOP')
         if datetime.datetime.now().date() > LAST_DAILY and datetime.datetime.now().hour > 6:
             await client.get_guild(419214713252216848).get_channel(419214713755402262).send(dailyAnnounce)
             LAST_DAILY = datetime.datetime.now().date()
