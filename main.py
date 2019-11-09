@@ -163,7 +163,7 @@ async def on_message(message):
     global BANNED_WORDS
     global PURGE
 
-    isOP = str(message.author) in OPS
+    isOP = (message.author.id) in OPS
     isOwner = message.author == message.guild.get_member(66137108124803072) # owner only commands
     
     if message.author != client.user:
@@ -314,14 +314,13 @@ async def on_message(message):
                 if LETHALITY >= 3:
                     await message.channel.send('Purge started. Preparing to kick {} members'.format(len(PURGE)))
                     for member in PURGE:
-                        message.guild.kick(member)
+                        await message.guild.kick(member)
                     await message.channel.send('Purge complete. Please reset votelists to restore normal functionality.')
                 else:
                     await message.channel.send('Please set lethality to level 3 or above to continue. {} members will be kicked.'.format(len(PURGE)))
 
 @client.event
 async def on_message_edit(messageOG, messageNEW):  
-    print('Edit detected')
     if LETHALITY >= 2 and messageNEW.author != client.user and not messageNEW.author.id in THREATS:
         sentinelFilter(messageNEW)
             
