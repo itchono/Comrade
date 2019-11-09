@@ -11,13 +11,14 @@ import unidecode
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 
+import asyncio
 import datetime
-
-# download pfps
-import requests
 
 # load variables
 import comrade_cfg
+
+# download pfps
+import requests
 
 dotenv.load_dotenv()
 
@@ -39,12 +40,9 @@ OPS = comrade_cfg.OPS
 KICK_SAFE = comrade_cfg.KICK_SAFE
 KICK_REQ = comrade_cfg.KICK_REQ
 BANNED_WORDS = comrade_cfg.BANNED_WORDS
+ON_TIME = datetime.datetime.now()
+LAST_DAILY = datetime.datetime.strptime(comrade_cfg.LAST_DAILY, '%Y-%m-%d').date()
 PURGE = []
-
-for guild in client.guilds:
-    if guild.name == GUILD:
-        for i in comrade_cfg.PURGE:
-            PURGE.append(guild.get_user(i))
 
 
 def loadVars():
@@ -58,6 +56,7 @@ def loadVars():
     global KICK_SAFE
     global BANNED_WORDS
     global PURGE
+    global LAST_DAILY
 
     kickList = comrade_cfg.kickList
     kickVotes = comrade_cfg.kickVotes
@@ -67,13 +66,8 @@ def loadVars():
     KICK_SAFE = comrade_cfg.KICK_SAFE
     KICK_REQ = comrade_cfg.KICK_REQ
     BANNED_WORDS = comrade_cfg.BANNED_WORDS
-    PURGE = []
-    
-    for guild in client.guilds:
-        if guild.name == GUILD:
-            for i in comrade_cfg.PURGE:
-                PURGE.append(guild.get_user(i))
-
+    LAST_DAILY = datetime.datetime.strptime(comrade_cfg.LAST_DAILY, '%Y-%m-%d').date()
+    PURGE = [client.get_guild(419214713252216848).get_member(i) for i in comrade_cfg.PURGE]
 
 def writeInfo():
     # writes all variables to file again in order.
@@ -86,14 +80,39 @@ def writeInfo():
         cfg.write('KICK_REQ = ' + str(KICK_REQ) + '\n')
         cfg.write('KICK_SAFE = ' + str(KICK_SAFE) + '\n')
         cfg.write('BANNED_WORDS = ' + str(BANNED_WORDS) + '\n')
+        cfg.write('PURGE = ' + str([i.id for i in PURGE]) + '\n')
+        cfg.write('LAST_DAILY = \"' + str(LAST_DAILY) + '\"\n')
 
-        p2 = []
-        for i in PURGE:
-            p2.append(i.id)
-        cfg.write('PURGE = ' + str(p2) + '\n')
+async def dailyMSG():
+    await client.wait_until_ready()
+
+    global LAST_DAILY
+
+    dailyAnnounce = 'Good morning everyone!\nToday is {}. Have a prosperous day! <:FeelsProsperousMan:419256328465285131>'.format(datetime.datetime.now().date())
+
+    while not client.is_closed():
+        print('BEEP BOOP')
+        if datetime.datetime.now().date() > LAST_DAILY and datetime.datetime.now().hour > 6:
+            await client.get_guild(419214713252216848).get_channel(419214713755402262).send(dailyAnnounce)
+            LAST_DAILY = datetime.datetime.now().date()
+            writeInfo()
+        await asyncio.sleep(60)
+
+async def sentinelFilter(message):
+    # intelligent message filtering system
+    query = re.sub('\W+','', unidecode.unidecode(message.content.lower()))
+    for word in BANNED_WORDS:
+        if word in query or fuzz.partial_ratio(word, query) > 75:
+            await message.delete()
+            print('Message purged:\n', str(message.content))
+    
+    if u"\U0001F1ED" in message.content: # H filter
+        await message.delete()
+        print('Message with emoji purged:\n', str(message.content))
 
 
 async def generateRequiem(message: discord.message, mode='NonRole'):
+    # produces a list of members to be purged
 
     if mode == 'NonRole':
         # produces a list of members to be purged
@@ -119,7 +138,6 @@ async def generateRequiem(message: discord.message, mode='NonRole'):
 
         return non_roled
     elif mode == 'All':
-        # produces a list of members to be purged
         # takes in server
 
         members = []
@@ -153,16 +171,8 @@ async def on_message(message):
         #failsafe against self response
         
         # $SENTINEL
-        if (LETHALITY >= 2 and str(message.author) in THREATS):
-            query = re.sub('\W+','', unidecode.unidecode(message.content.lower()))
-            for word in BANNED_WORDS:
-                if word in query or fuzz.partial_ratio(word, query) > 75:
-                    await message.delete()
-                    print('Message purged:\n', str(message.content))
-         
-            if u"\U0001F1ED" in message.content:
-                await message.delete()
-                print('Message with emoji purged:\n', str(message.content))
+        if (LETHALITY >= 2 and message.author.id in THREATS):
+            sentinelFilter(message)
             
         # $JERICHO
         if 'hello comrade' in message.content.lower():
@@ -170,14 +180,21 @@ async def on_message(message):
         elif 'henlo comrade' in message.content.lower():
             await message.channel.send('Hello')
 
+        if message.mention_everyone:
+            print('yo')
+            for e in message.guild.emojis:
+                if e.name == 'pong':
+                    await message.add_reaction(e)
+
+        # COMMANDS
         if '$comrade' in message.content.lower():
             parse = str(message.content).lstrip('$comrade').split()
             if parse[0] == 'voteKick':
                 user = message.mentions[0].id # id of user to be kicked
                 
-                if not (str(message.author) in kickVotes[user] or str(message.mentions[0]) in KICK_SAFE):
+                if not (message.author.id in kickVotes[user] or message.mentions[0].id in KICK_SAFE):
                     kickList[user] += 1
-                    kickVotes[user].append(str(message.author))
+                    kickVotes[user].append(message.author.id)
                     await message.channel.send('Vote added for {0} ({2}/{1}).'.format(str(message.mentions[0].name), int(KICK_REQ), int(kickList[user])))
                     if (kickList[user] >= KICK_REQ):
                         member = message.guild.get_member(user) # more efficient code
@@ -196,13 +213,13 @@ async def on_message(message):
                 user = message.mentions[0].id # id of user to be kicked
                 if (str(message.author) in kickVotes[user]):
                     kickList[user] -= 1
-                    kickVotes[user].remove(str(message.author))
+                    kickVotes[user].remove(message.author.id)
                     await message.channel.send('Vote removed for {0} ({2}/{1}).'.format(str(message.mentions[0].name), int(KICK_REQ), int(kickList[user])))
                     writeInfo()
                 else:
                     await message.channel.send('You have not voted to kick ' + str(message.mentions[0].name))
                  
-            elif parse[0] == 'lethal' and str(message.author) in OPS:
+            elif parse[0] == 'lethal' and isOP:
                 LETHALITY = int(parse[1])
                 writeInfo()
                 if LETHALITY == 0:
@@ -210,27 +227,26 @@ async def on_message(message):
                 else:
                     await message.channel.send('Lethality has been activated and set to {0}. This can cause destructive actions.'.format(LETHALITY))
                 
-            elif parse[0] == 'addThreat' and str(message.author) in OPS:
-                user = str(message.mentions[0])
+            elif parse[0] == 'addThreat' and isOP:
+                user = message.mentions[0].id
                 THREATS.append(user)
                 writeInfo()
                 await message.channel.send('Threat Added.')
 
             elif parse[0] == 'removeThreat' and isOP:
-                user = str(message.mentions[0])
+                user = message.mentions[0].id
                 if user in THREATS:
                     THREATS.remove(user)
                     writeInfo()
                 await message.channel.send('Threat Added.')
             
-            
             elif parse[0] == 'op' and isOP:
-                user = str(message.mentions[0])
+                user = message.mentions[0].id
                 OPS.append(user)
                 writeInfo()
                 await message.channel.send('OP Added.')
             elif parse[0] == 'deop' and isOP:
-                user = str(message.mentions[0])
+                user = message.mentions[0].id
                 if user in OPS:
                     OPS.remove(user)
                     writeInfo()
@@ -241,10 +257,15 @@ async def on_message(message):
                 for member in message.guild.members:
                     if kickList[member.id] >= 1:
                         kicks.append(str(member) + ': ' + str(kickList[member.id]))
-                await message.channel.send('Threats: ' + str(THREATS) + '\nOPS:' + str(OPS) + '\nKick Requirement: ' + str(KICK_REQ) + "\nKick List: " + str(kicks) + "\nLethality: " + str(LETHALITY))
+                disp_OPS = str([str(message.guild.get_member(i)) for i in OPS])
+                disp_THREATS = str([str(message.guild.get_member(i)) for i in THREATS])
+                curr_time = datetime.datetime.now()
+                dt = curr_time - ON_TIME
+
+                await message.channel.send('OPS: {0}\nThreats: {1}\nKick Votes: {2}\nKick Requirement: {3}\nLethality: {4}\nUptime: {5}\n'.format(disp_OPS, disp_THREATS, str(kicks), KICK_REQ, LETHALITY, str(dt)))
                 
             elif parse[0] == 'kickReq' and isOP:
-                KICK_REQ = int(parse[1])
+                KICK_REQ = int(parse[1]) if int(parse[1]) >= 1 else KICK_REQ
                 writeInfo()
                 await message.channel.send('Kick requirement has been set to {0} votes.'.format(KICK_REQ))
             elif parse[0] == 'resetKick' and isOP:
@@ -272,6 +293,7 @@ async def on_message(message):
                 KICK_SAFE.append(str(message.mentions[0]))
                 await message.channel.send(parse[1], ' has been added to safelist.')
                 writeInfo()
+
             elif parse[0] == 'removeBanSafe' and isOwner:
                 KICK_SAFE.remove(str(message.mentions[0]))
                 await message.channel.send(parse[1], ' has been added to safelist.')
@@ -296,19 +318,13 @@ async def on_message(message):
                         message.guild.kick(member)
                     await message.channel.send('Purge complete. Please reset votelists to restore normal functionality.')
                 else:
-                    await message.channel.send('Please set lethality to level 3 or above to continue.')
+                    await message.channel.send('Please set lethality to level 3 or above to continue. {} members will be kicked.'.format(len(PURGE)))
 
 @client.event
-async def on_message_edit(message1, message):  
+async def on_message_edit(messageOG, messageNEW):  
     print('Edit detected')
-    if message.author != client.user:
-        #failsafe against self response
-        
-        if (str(message.author) in THREATS and LETHALITY >= 2):
-            query = re.sub('\W+','', unidecode.unidecode(message.content.lower()))
-            if 'hentai' in query or fuzz.partial_ratio(query,'hentai') > 60:
-                await message.delete()
-                print('Message purged', str(message.content))
+    if LETHALITY >= 2 and messageNEW.author != client.user and not messageNEW.author.id in THREATS:
+        sentinelFilter(messageNEW)
             
 async def getPics(guild):
     # used to retrieve all pfps and links
@@ -326,6 +342,8 @@ async def on_ready():
     print('Loading OPS and Threats')
     
     print('Constructing member list')
+    global PURGE
+    PURGE = [client.get_guild(419214713252216848).get_member(i) for i in comrade_cfg.PURGE]
 
     for guild in client.guilds:
         if guild.name == GUILD:
@@ -350,5 +368,14 @@ async def on_ready():
 
     print('COMRADE is fully online.')
 
+# create server
 keep_alive.keep_alive()
+# create tasks
+client.loop.create_task(dailyMSG())
+
+# finally, start the bot
 client.run(TOKEN)
+
+
+
+
