@@ -171,7 +171,7 @@ async def on_message(message):
         
         # $SENTINEL
         if (LETHALITY >= 2 and message.author.id in THREATS):
-            sentinelFilter(message)
+            await sentinelFilter(message)
             
         # $JERICHO
         if 'hello comrade' in message.content.lower():
@@ -272,7 +272,7 @@ async def on_message(message):
                 for member in message.guild.members:
                     kickList[member.id] = 0
                     kickVotes[member.id] = []
-                    writeInfo()
+                writeInfo()
                 await message.channel.send('Votes have been reset and votelist regenerated.')
 
             elif parse[0] == 'reloadVars' and isOwner:
@@ -322,7 +322,7 @@ async def on_message(message):
 @client.event
 async def on_message_edit(messageOG, messageNEW):  
     if LETHALITY >= 2 and messageNEW.author != client.user and not messageNEW.author.id in THREATS:
-        sentinelFilter(messageNEW)
+        await sentinelFilter(messageNEW)
             
 async def getPics(guild):
     # used to retrieve all pfps and links
@@ -346,9 +346,10 @@ async def on_ready():
     for guild in client.guilds:
         if guild.name == GUILD:
             global kickList
+            global kickVotes
             # populate kicklist
             num_mem = 0
-            if (len(kickList.keys()) == 0):
+            if (len(kickList) == 0):
                 for member in guild.members:
                     num_mem +=1
                     # repopulate kicklist
