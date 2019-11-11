@@ -338,7 +338,7 @@ async def on_message(message):
                 await message.channel.send(str(mem))
 
             elif parse[0] == 'failedNNN':
-                lost_nnn.add(message.mentions[0].id)
+                lost_nnn.append(message.mentions[0].id)
                 await message.channel.send(message.mentions[0].name + ', you lost NNN!')
                 writeInfo()
 
