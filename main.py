@@ -325,12 +325,12 @@ async def on_message(message):
                     await message.channel.send('Please set lethality to level 3 or above to continue. {} members will be kicked.'.format(len(PURGE)))
 
             elif parse[0] == 'lostVirginity':
-                v_list.append(str(message.mentions[0]))
-                await message.channel.send(parse[1], ', congrats!')
+                v_list.append(message.mentions[0].id)
+                await message.channel.send(message.mentions[0].name + ', congrats!')
                 writeInfo()
 
             elif parse[0] == 'listNonVirgins':
-                mem = [message.guild.get_member(i).nick for i in v_list]
+                mem = [message.guild.get_member(i).name for i in v_list]
                 await message.channel.send(str(mem))
 
 @client.event
