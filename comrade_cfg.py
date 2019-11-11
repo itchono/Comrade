@@ -9,3 +9,4 @@ BANNED_WORDS = ['hentai']
 PURGE = []
 LAST_DAILY = "2019-11-08"
 v_list = []
+lost_nnn = {}

@@ -44,6 +44,7 @@ ON_TIME = datetime.datetime.now()
 LAST_DAILY = datetime.datetime.strptime(comrade_cfg.LAST_DAILY, '%Y-%m-%d').date()
 PURGE = []
 v_list = comrade_cfg.v_list
+lost_nnn = comrade_cfg.lost_nnn
 
 
 def loadVars():
@@ -59,6 +60,7 @@ def loadVars():
     global PURGE
     global LAST_DAILY
     global v_list
+    global lost_nnn
 
     kickList = comrade_cfg.kickList
     kickVotes = comrade_cfg.kickVotes
@@ -71,6 +73,7 @@ def loadVars():
     LAST_DAILY = datetime.datetime.strptime(comrade_cfg.LAST_DAILY, '%Y-%m-%d').date()
     PURGE = [client.get_guild(419214713252216848).get_member(i) for i in comrade_cfg.PURGE]
     v_list = comrade_cfg.v_list
+    lost_nnn = comrade_cfg.lost_nnn
 
 def writeInfo():
     # writes all variables to file again in order.
@@ -85,7 +88,8 @@ def writeInfo():
         cfg.write('BANNED_WORDS = ' + str(BANNED_WORDS) + '\n')
         cfg.write('PURGE = ' + str([i.id for i in PURGE]) + '\n')
         cfg.write('LAST_DAILY = \"' + str(LAST_DAILY) + '\"\n')
-        cfg.write('v_list = ' + str(v_list))
+        cfg.write('v_list = ' + str(v_list) + '\n')
+        cfg.write('lost_nnn = ' + str(lost_nnn) + '\n')
 
 async def dailyMSG():
     await client.wait_until_ready()
@@ -193,7 +197,7 @@ async def on_message(message):
         # COMMANDS
         if '$comrade' in message.content.lower():
             parse = str(message.content).lstrip('$comrade').split()
-            if parse[0] == 'voteKick':
+            if parse[0] == 'voteKick' or parse[0] == 'vibeCheck':
                 user = message.mentions[0].id # id of user to be kicked
                 
                 if not (message.author.id in kickVotes[user] or message.mentions[0].id in KICK_SAFE):
@@ -215,7 +219,7 @@ async def on_message(message):
             
             elif parse[0] == 'unKick':
                 user = message.mentions[0].id # id of user to be kicked
-                if (str(message.author) in kickVotes[user]):
+                if ((message.author.id) in kickVotes[user]):
                     kickList[user] -= 1
                     kickVotes[user].remove(message.author.id)
                     await message.channel.send('Vote removed for {0} ({2}/{1}).'.format(str(message.mentions[0].name), int(KICK_REQ), int(kickList[user])))
@@ -294,13 +298,13 @@ async def on_message(message):
                 writeInfo()
 
             elif parse[0] == 'addBanSafe' and isOwner:
-                KICK_SAFE.append(str(message.mentions[0]))
-                await message.channel.send(parse[1], ' has been added to safelist.')
+                KICK_SAFE.append((message.mentions[0].id))
+                await message.channel.send(message.mentions[0].name + ' has been added to safelist.')
                 writeInfo()
 
             elif parse[0] == 'removeBanSafe' and isOwner:
-                KICK_SAFE.remove(str(message.mentions[0]))
-                await message.channel.send(parse[1], ' has been added to safelist.')
+                KICK_SAFE.remove((message.mentions[0].id))
+                await message.channel.send(message.mentions[0].name +  ' has been added to safelist.')
                 writeInfo()   
 
             elif parse[0] == 'genRequiem' and isOwner:
@@ -331,6 +335,15 @@ async def on_message(message):
 
             elif parse[0] == 'listNonVirgins':
                 mem = [message.guild.get_member(i).name for i in v_list]
+                await message.channel.send(str(mem))
+
+            elif parse[0] == 'failedNNN':
+                lost_nnn.add(message.mentions[0].id)
+                await message.channel.send(message.mentions[0].name + ', you lost NNN!')
+                writeInfo()
+
+            elif parse[0] == 'listLostNNN':
+                mem = [message.guild.get_member(i).name for i in lost_nnn]
                 await message.channel.send(str(mem))
 
 @client.event
