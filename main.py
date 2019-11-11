@@ -43,6 +43,7 @@ BANNED_WORDS = comrade_cfg.BANNED_WORDS
 ON_TIME = datetime.datetime.now()
 LAST_DAILY = datetime.datetime.strptime(comrade_cfg.LAST_DAILY, '%Y-%m-%d').date()
 PURGE = []
+v_list = comrade_cfg.v_list
 
 
 def loadVars():
@@ -57,6 +58,7 @@ def loadVars():
     global BANNED_WORDS
     global PURGE
     global LAST_DAILY
+    global v_list
 
     kickList = comrade_cfg.kickList
     kickVotes = comrade_cfg.kickVotes
@@ -68,6 +70,7 @@ def loadVars():
     BANNED_WORDS = comrade_cfg.BANNED_WORDS
     LAST_DAILY = datetime.datetime.strptime(comrade_cfg.LAST_DAILY, '%Y-%m-%d').date()
     PURGE = [client.get_guild(419214713252216848).get_member(i) for i in comrade_cfg.PURGE]
+    v_list = comrade_cfg.v_list
 
 def writeInfo():
     # writes all variables to file again in order.
@@ -82,6 +85,7 @@ def writeInfo():
         cfg.write('BANNED_WORDS = ' + str(BANNED_WORDS) + '\n')
         cfg.write('PURGE = ' + str([i.id for i in PURGE]) + '\n')
         cfg.write('LAST_DAILY = \"' + str(LAST_DAILY) + '\"\n')
+        cfg.write('v_list = ' + str(v_list))
 
 async def dailyMSG():
     await client.wait_until_ready()
@@ -162,6 +166,7 @@ async def on_message(message):
     global KICK_REQ
     global BANNED_WORDS
     global PURGE
+    global v_list
 
     isOP = (message.author.id) in OPS
     isOwner = message.author == message.guild.get_member(66137108124803072) # owner only commands
@@ -318,6 +323,15 @@ async def on_message(message):
                     await message.channel.send('Purge complete. Please reset votelists to restore normal functionality.')
                 else:
                     await message.channel.send('Please set lethality to level 3 or above to continue. {} members will be kicked.'.format(len(PURGE)))
+
+            elif parse[0] == 'lostVirginity':
+                v_list.append(str(message.mentions[0]))
+                await message.channel.send(parse[1], ', congrats!')
+                writeInfo()
+
+            elif parse[0] == 'listNonVirgins':
+                mem = [message.guild.get_member(i).nick for i in v_list]
+                await message.channel.send(str(mem))
 
 @client.event
 async def on_message_edit(messageOG, messageNEW):  
