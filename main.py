@@ -96,13 +96,13 @@ async def dailyMSG():
 
     global LAST_DAILY
 
-    dailyAnnounce = 'Good morning everyone!\nToday is {}. Have a prosperous day! <:FeelsProsperousMan:419256328465285131>'.format(datetime.datetime.now().date())
-
     while not client.is_closed():
         if datetime.datetime.now().date() > LAST_DAILY and datetime.datetime.now().hour > 6:
+            dailyAnnounce = 'Good morning everyone!\nToday is {}. Have a prosperous day! <:FeelsProsperousMan:419256328465285131>'.format(datetime.datetime.now().date())
             await client.get_guild(419214713252216848).get_channel(419214713755402262).send(dailyAnnounce)
             LAST_DAILY = datetime.datetime.now().date()
             writeInfo()
+            await client.get_guild(419214713252216848).get_channel(446457522862161920).send("Daily Announcement Made. Current LAST_DAILY = {}".format(LAST_DAILY))
         await asyncio.sleep(60)
 
 async def sentinelFilter(message):
@@ -396,6 +396,7 @@ async def on_ready():
         f'{guild.name}(id: {guild.id})')
         
     await client.change_presence(status=discord.Status.online, activity=discord.Game("Upholding Communism"))
+    await client.get_guild(419214713252216848).get_channel(446457522862161920).send("Comrade is online. Current time at remote host is {}".format(datetime.datetime.now()))
 
     print('COMRADE is fully online.')
 
