@@ -347,7 +347,9 @@ async def on_message(message):
                 await message.channel.send(str(mem))
             else:
                 response = requests.get('https://raw.githubusercontent.com/wiki/itchono/Comrade/Home.md')
-                await message.channel.send(str(response.content).replace('\n','\t'))
+                s = str(response.content).replace('\n','\t')
+                s = s[s.find("Commands"):]
+                await message.channel.send(s[:s.find("***")])
 
 @client.event
 async def on_message_edit(messageOG, messageNEW):  
