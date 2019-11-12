@@ -40,7 +40,7 @@ OPS = comrade_cfg.OPS
 KICK_SAFE = comrade_cfg.KICK_SAFE
 KICK_REQ = comrade_cfg.KICK_REQ
 BANNED_WORDS = comrade_cfg.BANNED_WORDS
-ON_TIME = datetime.datetime.now()
+ON_TIME = datetime.datetime.utcnow()
 LAST_DAILY = datetime.datetime.strptime(comrade_cfg.LAST_DAILY, '%Y-%m-%d').date()
 PURGE = []
 v_list = comrade_cfg.v_list
@@ -97,10 +97,10 @@ async def dailyMSG():
     global LAST_DAILY
 
     while not client.is_closed():
-        if datetime.datetime.now().date() > LAST_DAILY and datetime.datetime.now().hour > 6:
-            dailyAnnounce = 'Good morning everyone!\nToday is {}. Have a prosperous day! <:FeelsProsperousMan:419256328465285131>'.format(datetime.datetime.now().date())
+        if datetime.datetime.utcnow().date() > LAST_DAILY and datetime.datetime.utcnow().hour > 11:
+            dailyAnnounce = 'Good morning everyone!\nToday is {}. Have a prosperous day! <:FeelsProsperousMan:419256328465285131>'.format(datetime.datetime.utcnow().date())
             await client.get_guild(419214713252216848).get_channel(419214713755402262).send(dailyAnnounce)
-            LAST_DAILY = datetime.datetime.now().date()
+            LAST_DAILY = datetime.datetime.utcnow().date()
             writeInfo()
             await client.get_guild(419214713252216848).get_channel(446457522862161920).send("Daily Announcement Made. Current LAST_DAILY = {}".format(LAST_DAILY))
         await asyncio.sleep(60)
@@ -267,7 +267,7 @@ async def on_message(message):
                         kicks.append(str(member) + ': ' + str(kickList[member.id]))
                 disp_OPS = str([str(message.guild.get_member(i)) for i in OPS])
                 disp_THREATS = str([str(message.guild.get_member(i)) for i in THREATS])
-                curr_time = datetime.datetime.now()
+                curr_time = datetime.datetime.utcnow()
                 dt = curr_time - ON_TIME
 
                 await message.channel.send('OPS: {0}\nThreats: {1}\nKick Votes: {2}\nKick Requirement: {3}\nLethality: {4}\nUptime: {5}\n'.format(disp_OPS, disp_THREATS, str(kicks), KICK_REQ, LETHALITY, str(dt)))
@@ -345,11 +345,16 @@ async def on_message(message):
             elif parse[0] == 'listLostNNN':
                 mem = [message.guild.get_member(i).name for i in lost_nnn]
                 await message.channel.send(str(mem))
-            else:
+            elif parse[0] == 'help':
                 response = requests.get('https://raw.githubusercontent.com/wiki/itchono/Comrade/Home.md')
-                s = str(response.content).replace('\n','\t')
+
+                s = str(response.content).replace('\\n','\n')
                 s = s[s.find("Commands"):]
-                await message.channel.send(s[:s.find("***")])
+                s = s[:s.find('***')]
+                
+                embed = discord.Embed(title="Comrade Commands", url = 'https://github.com/itchono/Comrade/wiki', color=0xd7342a)
+
+                await message.channel.send(embed = embed, content=s)
 
 @client.event
 async def on_message_edit(messageOG, messageNEW):  
@@ -396,7 +401,7 @@ async def on_ready():
         f'{guild.name}(id: {guild.id})')
         
     await client.change_presence(status=discord.Status.online, activity=discord.Game("Upholding Communism"))
-    await client.get_guild(419214713252216848).get_channel(446457522862161920).send("Comrade is online. Current time at remote host is {}".format(datetime.datetime.now()))
+    await client.get_guild(419214713252216848).get_channel(446457522862161920).send("Comrade is online. Current UTC time is {}".format(datetime.datetime.utcnow()))
 
     print('COMRADE is fully online.')
 
@@ -407,7 +412,3 @@ client.loop.create_task(dailyMSG())
 
 # finally, start the bot
 client.run(TOKEN)
-
-
-
-
