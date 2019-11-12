@@ -345,6 +345,9 @@ async def on_message(message):
             elif parse[0] == 'listLostNNN':
                 mem = [message.guild.get_member(i).name for i in lost_nnn]
                 await message.channel.send(str(mem))
+            else:
+                response = requests.get('https://raw.githubusercontent.com/wiki/itchono/Comrade/Home.md')
+                await message.channel.send(str(response.content).replace('\n','\t'))
 
 @client.event
 async def on_message_edit(messageOG, messageNEW):  
