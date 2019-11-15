@@ -381,14 +381,14 @@ async def on_message_edit(messageOG, messageNEW):
             
 async def getPics(guild):
     # used to retrieve all pfps and links
-    with open('avatars/avatarlist.txt', 'wb') as file:
+    with open('Extracted Avatars/avatarlist.txt', 'w') as f:
         for member in guild.members:
             url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(member)
             
             r = requests.get(url)
-            with open('avatars/avatar{0}.png'.format(member.id), 'wb') as outfile:
+            with open('Extracted Avatars/avatar{0}.png'.format(member.id), 'wb') as outfile:
                 outfile.write(r.content)
-            file.write(url + '\n')
+            f.write(str(url + '\n'))
 
 @client.event
 async def on_ready():
@@ -411,6 +411,7 @@ async def on_ready():
                     kickList[member.id] = 0
                     kickVotes[member.id] = []
                 writeInfo()
+            #await getPics(guild)
             print(len(guild.members), "members loaded.")
             print(num_mem, "new members appended to list.")
             break
