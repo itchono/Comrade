@@ -51,7 +51,7 @@ lost_nnn = comrade_cfg.lost_nnn
 vaultCandidates = {}
 
 
-def loadVars():
+async def loadVars():
     # if we ever need to reload vars
     global LETHALITY
     global THREATS
@@ -79,7 +79,7 @@ def loadVars():
     v_list = comrade_cfg.v_list
     lost_nnn = comrade_cfg.lost_nnn
 
-def writeInfo():
+async def writeInfo():
     # writes all variables to file again in order.
     with open('comrade_cfg.py', 'w') as cfg:
         cfg.write('kickList = ' + str(kickList) + '\n')
@@ -101,11 +101,11 @@ async def dailyMSG():
     global LAST_DAILY
 
     while not client.is_closed():
-        if datetime.datetime.utcnow().date() > LAST_DAILY and datetime.datetime.utcnow().hour > 11:
+        if datetime.datetime.utcnow().date() > LAST_DAILY and datetime.datetime.utcnow().hour > 11 and datetime.datetime.utcnow().hour < 13:
             dailyAnnounce = 'Good morning everyone!\nToday is {}. Have a prosperous day! <:FeelsProsperousMan:419256328465285131>'.format(datetime.datetime.utcnow().date())
             await client.get_guild(419214713252216848).get_channel(419214713755402262).send(dailyAnnounce)
             LAST_DAILY = datetime.datetime.utcnow().date()
-            writeInfo()
+            await writeInfo()
             await client.get_guild(419214713252216848).get_channel(446457522862161920).send("Daily Announcement Made. Current LAST_DAILY = {}".format(LAST_DAILY))
         await asyncio.sleep(60)
 
@@ -120,6 +120,9 @@ async def sentinelFilter(message):
     if u"\U0001F1ED" in message.content: # H filter
         await message.delete()
         print('Message with emoji purged:\n', str(message.content))
+
+    if len(message.attachments) > 0 or len(message.embeds) > 0:
+        await message.delete()
 
 
 async def generateRequiem(message: discord.message, mode='NonRole'):
@@ -219,7 +222,7 @@ async def on_message(message):
                             await message.guild.kick(member)
                         else:
                             await message.channel.send('Lethal mode has been disabled. Please enable it with $comrade lethal <level>')
-                    writeInfo()                       
+                    await writeInfo()                       
                 else:
                     await message.channel.send('You have already voted!')
             
@@ -229,13 +232,13 @@ async def on_message(message):
                     kickList[user] -= 1
                     kickVotes[user].remove(message.author.id)
                     await message.channel.send('Vote removed for {0} ({2}/{1}).'.format(str(message.mentions[0].name), int(KICK_REQ), int(kickList[user])))
-                    writeInfo()
+                    await writeInfo()
                 else:
                     await message.channel.send('You have not voted to kick ' + str(message.mentions[0].name))
                  
             elif parse[0] == 'lethal' and isOP:
                 LETHALITY = int(parse[1])
-                writeInfo()
+                await writeInfo()
                 if LETHALITY == 0:
                     await message.channel.send('Lethal mode has been deactivated.')
                 else:
@@ -244,26 +247,26 @@ async def on_message(message):
             elif parse[0] == 'addThreat' and isOP:
                 user = message.mentions[0].id
                 THREATS.append(user)
-                writeInfo()
+                await writeInfo()
                 await message.channel.send('Threat Added.')
 
             elif parse[0] == 'removeThreat' and isOP:
                 user = message.mentions[0].id
                 if user in THREATS:
                     THREATS.remove(user)
-                    writeInfo()
-                await message.channel.send('Threat Added.')
+                    await writeInfo()
+                await message.channel.send('Threat Removed.')
             
             elif parse[0] == 'op' and isOP:
                 user = message.mentions[0].id
                 OPS.append(user)
-                writeInfo()
+                await writeInfo()
                 await message.channel.send('OP Added.')
             elif parse[0] == 'deop' and isOP:
                 user = message.mentions[0].id
                 if user in OPS:
                     OPS.remove(user)
-                    writeInfo()
+                    await writeInfo()
                 await message.channel.send('OP Removed.')
                 
             elif parse[0] == 'status':
@@ -280,38 +283,38 @@ async def on_message(message):
                 
             elif parse[0] == 'kickReq' and isOP:
                 KICK_REQ = int(parse[1]) if int(parse[1]) >= 1 else KICK_REQ
-                writeInfo()
+                await writeInfo()
                 await message.channel.send('Kick requirement has been set to {0} votes.'.format(KICK_REQ))
             elif parse[0] == 'resetKick' and isOP:
                 # resets Kicklist and kickvotes, sometimes also used when members join/leave etc
                 for member in message.guild.members:
                     kickList[member.id] = 0
                     kickVotes[member.id] = []
-                writeInfo()
+                await writeInfo()
                 await message.channel.send('Votes have been reset and votelist regenerated.')
 
             elif parse[0] == 'reloadVars' and isOwner:
-                loadVars()
+                await loadVars()
                 await message.channel.send('All variables reloaded from file.')
 
             elif parse[0] == 'addBanWord' and isOP:
                 BANNED_WORDS.append(parse[1])
-                await message.channel.send(parse[1], ' has been added to blacklist.')
-                writeInfo()
+                await message.channel.send(str(parse[1] + ' has been added to blacklist.'))
+                await writeInfo()
             elif parse[0] == 'removeBanWord' and isOP:
                 BANNED_WORDS.remove(parse[1])
-                await message.channel.send(parse[1], ' has been removed from blacklist.')
-                writeInfo()
+                await message.channel.send(str(parse[1]+ ' has been removed from blacklist.'))
+                await writeInfo()
 
             elif parse[0] == 'addBanSafe' and isOwner:
                 KICK_SAFE.append((message.mentions[0].id))
                 await message.channel.send(message.mentions[0].name + ' has been added to safelist.')
-                writeInfo()
+                await writeInfo()
 
             elif parse[0] == 'removeBanSafe' and isOwner:
                 KICK_SAFE.remove((message.mentions[0].id))
                 await message.channel.send(message.mentions[0].name +  ' has been added to safelist.')
-                writeInfo()   
+                await writeInfo()   
 
             elif parse[0] == 'genRequiem' and isOwner:
                 await message.channel.send('Generating purge list. Please wait.')
@@ -322,7 +325,7 @@ async def on_message(message):
                 await message.channel.send('Pruned list generated.')
                 await message.channel.send(str(names))
                 PURGE = purge
-                writeInfo()
+                await writeInfo()
                 await message.channel.send('{0} members loaded for purge. Execute purge with $comrade PURGE'.format(len(PURGE)))
             
             elif parse[0] == 'PURGE' and isOwner:
@@ -337,7 +340,7 @@ async def on_message(message):
             elif parse[0] == 'lostVirginity':
                 v_list.append(message.mentions[0].id)
                 await message.channel.send(message.mentions[0].name + ', congrats!')
-                writeInfo()
+                await writeInfo()
 
             elif parse[0] == 'listNonVirgins':
                 mem = [message.guild.get_member(i).name for i in v_list]
@@ -346,7 +349,7 @@ async def on_message(message):
             elif parse[0] == 'failedNNN':
                 lost_nnn.append(message.mentions[0].id)
                 await message.channel.send(message.mentions[0].name + ', you lost NNN!')
-                writeInfo()
+                await writeInfo()
 
             elif parse[0] == 'listLostNNN':
                 mem = [message.guild.get_member(i).name for i in lost_nnn]
@@ -361,6 +364,10 @@ async def on_message(message):
                 embed = discord.Embed(title="Comrade Commands", url = 'https://github.com/itchono/Comrade/wiki', color=0xd7342a)
 
                 await message.channel.send(embed = embed, content=s)
+
+            elif parse[0] == 'shutdown':
+                await client.logout()
+                await client.close()
 
             elif u"\U0001F345" in message.content:
                 if len(parse) == 1:
@@ -410,7 +417,7 @@ async def on_ready():
                     # repopulate kicklist
                     kickList[member.id] = 0
                     kickVotes[member.id] = []
-                writeInfo()
+                await writeInfo()
             #await getPics(guild)
             print(len(guild.members), "members loaded.")
             print(num_mem, "new members appended to list.")
