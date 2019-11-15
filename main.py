@@ -47,6 +47,10 @@ v_list = comrade_cfg.v_list
 lost_nnn = comrade_cfg.lost_nnn
 
 
+# tomato module
+vaultCandidates = {}
+
+
 def loadVars():
     # if we ever need to reload vars
     global LETHALITY
@@ -197,6 +201,8 @@ async def on_message(message):
         # COMMANDS
         if '$comrade' in message.content.lower():
             parse = str(message.content).lstrip('$comrade').split()
+            print(parse)
+
             if parse[0] == 'voteKick' or parse[0] == 'vibeCheck':
                 user = message.mentions[0].id # id of user to be kicked
                 
@@ -355,6 +361,18 @@ async def on_message(message):
                 embed = discord.Embed(title="Comrade Commands", url = 'https://github.com/itchono/Comrade/wiki', color=0xd7342a)
 
                 await message.channel.send(embed = embed, content=s)
+
+            elif u"\U0001F345" in message.content:
+                if len(parse) == 1:
+                    vaultCandidates[message.id] = message
+                    await message.channel.send('Candidate Created. One more person must confirm, using $comrade <:tomato:644700384291586059> {}'.format(message.id))
+                    # store message to be outputted
+                elif int(parse[1]) in vaultCandidates.keys() and message.author.id != vaultCandidates[int(parse[1])].author.id:
+                    # checks if another unique user confirms
+                    msg = 'Sent by {0}:\n{1}'.format(vaultCandidates[int(parse[1])].author.name, vaultCandidates[int(parse[1])].attachments[0].url)
+                    await message.channel.send('Successfully Vaulted.')
+                    await client.get_guild(419214713252216848).get_channel(587743411499565067).send(msg)
+
 
 @client.event
 async def on_message_edit(messageOG, messageNEW):  
