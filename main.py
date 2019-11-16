@@ -383,7 +383,7 @@ async def on_message(message):
 
 @client.event
 async def on_message_edit(messageOG, messageNEW):  
-    if LETHALITY >= 2 and messageNEW.author != client.user and not messageNEW.author.id in THREATS:
+    if LETHALITY >= 2 and messageNEW.author != client.user and messageNEW.author.id in THREATS:
         await sentinelFilter(messageNEW)
             
 async def getPics(guild):
