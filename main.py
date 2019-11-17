@@ -237,7 +237,7 @@ async def on_message(message):
                     await message.channel.send('You have not voted to kick ' + str(message.mentions[0].name))
                  
             elif parse[0] == 'lethal' and isOP:
-                LETHALITY = int(parse[1])
+                LETHALITY = float(parse[1])
                 await writeInfo()
                 if LETHALITY == 0:
                     await message.channel.send('Lethal mode has been deactivated.')
@@ -369,7 +369,7 @@ async def on_message(message):
                 await client.logout()
                 await client.close()
 
-            elif u"\U0001F345" in message.content:
+            elif u"\U0001F345" in message.content and (not message.author.id in THREATS or LETHALITY < 1.1):
                 if len(parse) == 1:
                     vaultCandidates[message.id] = message
                     await message.channel.send('Candidate Created. One more person must confirm, using $comrade <:tomato:644700384291586059> {}'.format(message.id))
