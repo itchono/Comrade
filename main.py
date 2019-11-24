@@ -106,7 +106,8 @@ async def dailyMSG():
             await client.get_guild(419214713252216848).get_channel(419214713755402262).send(dailyAnnounce)
             LAST_DAILY = datetime.datetime.utcnow().date()
             await writeInfo()
-            await client.get_guild(419214713252216848).get_channel(446457522862161920).send("Daily Announcement Made. Current LAST_DAILY = {}".format(LAST_DAILY))
+            asyncio.sleep(5)
+            await client.get_guild(419214713252216848).get_channel(446457522862161920).send("Daily Announcement Made. Current LAST_DAILY = {}".format(datetime.datetime.strptime(comrade_cfg.LAST_DAILY, '%Y-%m-%d').date()))
         await asyncio.sleep(60)
 
 async def sentinelFilter(message):
@@ -365,9 +366,18 @@ async def on_message(message):
 
                 await message.channel.send(embed = embed, content=s)
 
-            elif parse[0] == 'shutdown':
+            elif parse[0] == 'shutdown' and isOwner:
                 await client.logout()
                 await client.close()
+
+            elif parse[0] == 'updateDaily':
+                global LAST_DAILY
+
+                if datetime.datetime.utcnow().date() > LAST_DAILY and datetime.datetime.utcnow().hour > 11:
+                    LAST_DAILY = datetime.datetime.utcnow().date()
+                    await writeInfo()
+                    await asyncio.sleep(5)
+                    await client.get_guild(419214713252216848).get_channel(446457522862161920).send("Daily Announcement Made. Current LAST_DAILY = {}".format(datetime.datetime.strptime(comrade_cfg.LAST_DAILY, '%Y-%m-%d').date()))
 
             elif u"\U0001F345" in message.content and (not message.author.id in THREATS or LETHALITY < 1.1):
                 if len(parse) == 1:
