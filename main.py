@@ -45,6 +45,7 @@ LAST_DAILY = datetime.datetime.strptime(comrade_cfg.LAST_DAILY, '%Y-%m-%d').date
 PURGE = []
 v_list = comrade_cfg.v_list
 lost_nnn = comrade_cfg.lost_nnn
+USER_BANNED_WORDS = comrade_cfg.USER_BANNED_WORDS
 
 
 # tomato module
@@ -65,6 +66,7 @@ async def loadVars():
     global LAST_DAILY
     global v_list
     global lost_nnn
+    global USER_BANNED_WORDS
 
     kickList = comrade_cfg.kickList
     kickVotes = comrade_cfg.kickVotes
@@ -78,6 +80,7 @@ async def loadVars():
     PURGE = [client.get_guild(419214713252216848).get_member(i) for i in comrade_cfg.PURGE]
     v_list = comrade_cfg.v_list
     lost_nnn = comrade_cfg.lost_nnn
+    USER_BANNED_WORDS = comrade_cfg.USER_BANNED_WORDS
 
 async def writeInfo():
     # writes all variables to file again in order.
@@ -94,6 +97,7 @@ async def writeInfo():
         cfg.write('LAST_DAILY = \"' + str(LAST_DAILY) + '\"\n')
         cfg.write('v_list = ' + str(v_list) + '\n')
         cfg.write('lost_nnn = ' + str(lost_nnn) + '\n')
+        cfg.write('USER_BANNED_WORDS = ' + str(USER_BANNED_WORDS) + '\n')
 
 async def dailyMSG():
     await client.wait_until_ready()
@@ -113,16 +117,16 @@ async def dailyMSG():
 async def sentinelFilter(message):
     # intelligent message filtering system
     query = re.sub('\W+','', unidecode.unidecode(message.content.lower()))
-    for word in BANNED_WORDS:
-        if word in query or fuzz.partial_ratio(word, query) > 75:
+    for word in set(BANNED_WORDS).union(set(USER_BANNED_WORDS[message.author.id])):
+        if word in query or (fuzz.partial_ratio(word, query) > 75 and LETHALITY >= 2.1):
             await message.delete()
             print('Message purged:\n', str(message.content))
     
-    if u"\U0001F1ED" in message.content: # H filter
+    if u"\U0001F1ED" in message.content and THREATS[message.author.id] >= 2: # H filter
         await message.delete()
         print('Message with emoji purged:\n', str(message.content))
 
-    if len(message.attachments) > 0 or len(message.embeds) > 0:
+    if (len(message.attachments) > 0 or len(message.embeds) > 0) and THREATS[message.author.id] >= 2 and LETHALITY >=2.1:
         await message.delete()
 
 
@@ -179,6 +183,7 @@ async def on_message(message):
     global BANNED_WORDS
     global PURGE
     global v_list
+    global USER_BANNED_WORDS
 
     isOP = (message.author.id) in OPS
     isOwner = message.author == message.guild.get_member(66137108124803072) # owner only commands
@@ -187,7 +192,7 @@ async def on_message(message):
         #failsafe against self response
         
         # $SENTINEL
-        if (LETHALITY >= 2 and message.author.id in THREATS):
+        if (LETHALITY >= 2 and message.author.id in THREATS) or LETHALITY >= 3:
             await sentinelFilter(message)
             
         # $JERICHO
@@ -243,18 +248,33 @@ async def on_message(message):
                 if LETHALITY == 0:
                     await message.channel.send('Lethal mode has been deactivated.')
                 else:
-                    await message.channel.send('Lethality has been activated and set to {0}. This can cause destructive actions.'.format(LETHALITY))
+                    await message.channel.send('Lethality has been set to {0}. This can cause destructive actions.'.format(LETHALITY))
+                msg = 'Current Powers:\nNone'
+                if LETHALITY >= 1:
+                    msg = 'Ability to Votekick\n'
+                if LETHALITY >=1.1:
+                    msg += 'Threats are unable to vote for tomato\n'
+                if LETHALITY >=2:
+                    msg += 'Messages sent by threats are filtered (less strict)'
+                if LETHALITY >= 2.1:
+                    msg += 'Messages sent by threats are strictly filtered'
+                if LETHALITY >= 3:
+                    msg += 'Purge available, all messages filtered'
+                await message.channel.send(msg)
                 
             elif parse[0] == 'addThreat' and isOP:
                 user = message.mentions[0].id
-                THREATS.append(user)
+                THREATS[user] = int(parse[1])
+
+                USER_BANNED_WORDS[user] = set()
                 await writeInfo()
-                await message.channel.send('Threat Added.')
+                await message.channel.send('Threat Added - Tier {}.'.format(parse[1]))
 
             elif parse[0] == 'removeThreat' and isOP:
                 user = message.mentions[0].id
                 if user in THREATS:
-                    THREATS.remove(user)
+                    del THREATS[user]
+                    del USER_BANNED_WORDS[user]
                     await writeInfo()
                 await message.channel.send('Threat Removed.')
             
@@ -276,7 +296,7 @@ async def on_message(message):
                     if kickList[member.id] >= 1:
                         kicks.append(str(member) + ': ' + str(kickList[member.id]))
                 disp_OPS = str([str(message.guild.get_member(i)) for i in OPS])
-                disp_THREATS = str([str(message.guild.get_member(i)) for i in THREATS])
+                disp_THREATS = str([str(message.guild.get_member(i)) + '- level '+str(THREATS[i]) for i in THREATS])
                 curr_time = datetime.datetime.utcnow()
                 dt = curr_time - ON_TIME
 
@@ -299,13 +319,28 @@ async def on_message(message):
                 await message.channel.send('All variables reloaded from file.')
 
             elif parse[0] == 'addBanWord' and isOP:
-                BANNED_WORDS.append(parse[1])
-                await message.channel.send(str(parse[1] + ' has been added to blacklist.'))
-                await writeInfo()
+                if len(message.mentions) > 0:
+                    # particular
+                    USER_BANNED_WORDS[message.mentions[0].id].add(str(parse[1]))
+                    await message.channel.send(str(parse[1] + ' has been added to blacklist.'))
+                    await writeInfo()
+                else:
+                    # global
+                    BANNED_WORDS.add(parse[1])
+                    await message.channel.send(str(parse[1] + ' has been added to blacklist.'))
+                    await writeInfo()
             elif parse[0] == 'removeBanWord' and isOP:
-                BANNED_WORDS.remove(parse[1])
-                await message.channel.send(str(parse[1]+ ' has been removed from blacklist.'))
-                await writeInfo()
+
+                if len(message.mentions) > 0:
+                    # particular
+                    USER_BANNED_WORDS[message.mentions[0].id].add(str(parse[1]))
+                    await message.channel.send(str(parse[1] + ' has been removed from blacklist.'))
+                    await writeInfo()
+                else:
+                    # global
+                    BANNED_WORDS.remove(parse[1])
+                    await message.channel.send(str(parse[1]+ ' has been removed from blacklist.'))
+                    await writeInfo()
 
             elif parse[0] == 'addBanSafe' and isOwner:
                 KICK_SAFE.append((message.mentions[0].id))
@@ -409,6 +444,7 @@ async def getPics(guild):
 
 @client.event
 async def on_ready():
+    global USER_BANNED_WORDS
     print('Loading OPS and Threats')
     
     print('Constructing member list')
@@ -429,6 +465,12 @@ async def on_ready():
                     kickVotes[member.id] = []
                 await writeInfo()
             #await getPics(guild)
+
+            for m in THREATS:
+                if not m in USER_BANNED_WORDS:
+                    USER_BANNED_WORDS[m] = set()
+            writeInfo()
+
             print(len(guild.members), "members loaded.")
             print(num_mem, "new members appended to list.")
             break
