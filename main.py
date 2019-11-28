@@ -121,13 +121,31 @@ async def sentinelFilter(message):
         if word in query or (fuzz.partial_ratio(word, query) > 75 and LETHALITY >= 2.1):
             await message.delete()
             print('Message purged:\n', str(message.content))
+            await infraction(message, message.author.id, 0.5)
+
     
     if u"\U0001F1ED" in message.content and THREATS[message.author.id] >= 2: # H filter
         await message.delete()
         print('Message with emoji purged:\n', str(message.content))
+        await infraction(message, message.author.id, 0.5)
 
     if (len(message.attachments) > 0 or len(message.embeds) > 0) and THREATS[message.author.id] >= 2 and LETHALITY >=2.1:
         await message.delete()
+        await infraction(message, message.author.id, 0.5)
+
+async def infraction(message, user, weight):
+    kickList[user] += weight
+    await message.channel.send('Infraction committed by {0} ({2}/{1}).'.format(str(message.author.name), int(KICK_REQ), int(kickList[user])))
+    if (kickList[user] >= KICK_REQ):
+        member = message.guild.get_member(user) # more efficient code
+        print(member)
+        if LETHALITY >= 1:
+            kickList[user] = 0
+            await message.channel.send('@' + str(member.name)+ ' has been kicked successfully')
+            await message.guild.kick(member)
+        else:
+            await message.channel.send('Lethal mode has been disabled. Please enable it with $comrade lethal <level>')
+    await writeInfo()                       
 
 
 async def generateRequiem(message: discord.message, mode='NonRole'):
