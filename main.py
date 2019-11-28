@@ -215,7 +215,7 @@ async def on_message(message):
             if parse[0] == 'voteKick' or parse[0] == 'vibeCheck':
                 user = message.mentions[0].id # id of user to be kicked
                 
-                if not (message.author.id in kickVotes[user] or message.mentions[0].id in KICK_SAFE):
+                if not (message.author.id in kickVotes[user] or message.mentions[0].id in KICK_SAFE or (message.author.id in THREATS and LETHALITY >=2)):
                     kickList[user] += 1
                     kickVotes[user].append(message.author.id)
                     await message.channel.send('Vote added for {0} ({2}/{1}).'.format(str(message.mentions[0].name), int(KICK_REQ), int(kickList[user])))
@@ -253,11 +253,11 @@ async def on_message(message):
                 if LETHALITY >= 1:
                     msg = 'Ability to Votekick\n'
                 if LETHALITY >=1.1:
-                    msg += 'Threats are unable to vote for tomato\n'
+                    msg += 'Threats are unable to vote for Tomato\n'
                 if LETHALITY >=2:
-                    msg += 'Messages sent by threats are filtered (less strict)'
+                    msg += 'Messages sent by threats are filtered (less strict), Threats cannot voteKick\n'
                 if LETHALITY >= 2.1:
-                    msg += 'Messages sent by threats are strictly filtered'
+                    msg += 'Messages sent by threats are strictly filtered\n'
                 if LETHALITY >= 3:
                     msg += 'Purge available, all messages filtered'
                 await message.channel.send(msg)
@@ -415,7 +415,7 @@ async def on_message(message):
                     await client.get_guild(419214713252216848).get_channel(446457522862161920).send("Daily Announcement Made. Current LAST_DAILY = {}".format(datetime.datetime.strptime(comrade_cfg.LAST_DAILY, '%Y-%m-%d').date()))
 
             elif u"\U0001F345" in message.content and (not message.author.id in THREATS or LETHALITY < 1.1):
-                if len(parse) == 1:
+                if len(parse) == 1 and not message.id in vaultCandidates:
                     vaultCandidates[message.id] = message
                     await message.channel.send('Candidate Created. One more person must confirm, using $comrade <:tomato:644700384291586059> {}'.format(message.id))
                     # store message to be outputted
