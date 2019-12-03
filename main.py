@@ -120,7 +120,7 @@ async def sentinelFilter(message):
     for word in set(BANNED_WORDS).union(set(USER_BANNED_WORDS[message.author.id])):
         if word in query or (fuzz.partial_ratio(word, query) > 75 and LETHALITY >= 2.1):
             await message.delete()
-            print('Message purged:\n', str(message.content))
+            print('Message purged for bad word:\n', str(message.content))
             await infraction(message, message.author.id, 0.5)
 
     
@@ -129,13 +129,14 @@ async def sentinelFilter(message):
         print('Message with emoji purged:\n', str(message.content))
         await infraction(message, message.author.id, 0.5)
 
-    if (len(message.attachments) > 0 or len(message.embeds) > 0) and THREATS[message.author.id] >= 2 and LETHALITY >=2.1:
+    if (len(message.attachments) > 0 or len(message.embeds) > 0) and THREATS[message.author.id] >= 2:
+        print('Attachment Purged')
         await message.delete()
         await infraction(message, message.author.id, 0.5)
 
 async def infraction(message, user, weight):
     kickList[user] += weight
-    await message.channel.send('Infraction committed by {0} ({2}/{1}).'.format(str(message.author.name), int(KICK_REQ), int(kickList[user])))
+    await message.channel.send('Infraction committed by {0} ({2}/{1}).'.format(str(message.author.name), float(KICK_REQ), float(kickList[user])))
     if (kickList[user] >= KICK_REQ):
         member = message.guild.get_member(user) # more efficient code
         print(member)
@@ -210,7 +211,7 @@ async def on_message(message):
         #failsafe against self response
         
         # $SENTINEL
-        if (LETHALITY >= 2 and message.author.id in THREATS) or LETHALITY >= 3:
+        if (LETHALITY >= 2 and message.author.id in THREATS) or (LETHALITY >= 1.9 and message.author.id in THREATS and THREATS[message.author.id] >= 2) or LETHALITY >= 3:
             await sentinelFilter(message)
             
         # $JERICHO
@@ -236,7 +237,7 @@ async def on_message(message):
                 if not (message.author.id in kickVotes[user] or message.mentions[0].id in KICK_SAFE or (message.author.id in THREATS and LETHALITY >=2)):
                     kickList[user] += 1
                     kickVotes[user].append(message.author.id)
-                    await message.channel.send('Vote added for {0} ({2}/{1}).'.format(str(message.mentions[0].name), int(KICK_REQ), int(kickList[user])))
+                    await message.channel.send('Vote added for {0} ({2}/{1}).'.format(str(message.mentions[0].name), float(KICK_REQ), float(kickList[user])))
                     if (kickList[user] >= KICK_REQ):
                         member = message.guild.get_member(user) # more efficient code
                         print(member)
@@ -272,8 +273,10 @@ async def on_message(message):
                     msg = 'Ability to Votekick\n'
                 if LETHALITY >=1.1:
                     msg += 'Threats are unable to vote for Tomato\n'
-                if LETHALITY >=2:
-                    msg += 'Messages sent by threats are filtered (less strict), Threats cannot voteKick\n'
+                if LETHALITY >= 1.9:
+                    msg += 'All members above threat level 2 have messages diltered'
+                if 2 <= LETHALITY <2.1:
+                    msg += 'Messages sent by all threats are filtered (less strict), Threats cannot voteKick\n'
                 if LETHALITY >= 2.1:
                     msg += 'Messages sent by threats are strictly filtered\n'
                 if LETHALITY >= 3:
@@ -311,7 +314,7 @@ async def on_message(message):
             elif parse[0] == 'status':
                 kicks = []
                 for member in message.guild.members:
-                    if kickList[member.id] >= 1:
+                    if kickList[member.id] > 0:
                         kicks.append(str(member) + ': ' + str(kickList[member.id]))
                 disp_OPS = str([str(message.guild.get_member(i)) for i in OPS])
                 disp_THREATS = str([str(message.guild.get_member(i)) + '- level '+str(THREATS[i]) for i in THREATS])
@@ -487,7 +490,7 @@ async def on_ready():
             for m in THREATS:
                 if not m in USER_BANNED_WORDS:
                     USER_BANNED_WORDS[m] = set()
-            writeInfo()
+            await writeInfo()
 
             print(len(guild.members), "members loaded.")
             print(num_mem, "new members appended to list.")
