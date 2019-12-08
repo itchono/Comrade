@@ -110,7 +110,7 @@ async def dailyMSG():
             await client.get_guild(419214713252216848).get_channel(419214713755402262).send(dailyAnnounce)
             LAST_DAILY = datetime.datetime.utcnow().date()
             await writeInfo()
-            asyncio.sleep(5)
+            await asyncio.sleep(5)
             await client.get_guild(419214713252216848).get_channel(446457522862161920).send("Daily Announcement Made. Current LAST_DAILY = {}".format(datetime.datetime.strptime(comrade_cfg.LAST_DAILY, '%Y-%m-%d').date()))
         await asyncio.sleep(60)
 
@@ -219,6 +219,13 @@ async def on_message(message):
             await message.channel.send('Henlo')
         elif 'henlo comrade' in message.content.lower():
             await message.channel.send('Hello')
+        elif 'comrade' in message.content.lower() and fuzz.partial_ratio('hello', message.content.lower()) > 75:
+            await message.channel.send('GREETINGS')
+
+        if 'star platinum' in message.content.lower():
+            await message.channel.send('ZA WARUDO')
+            await asyncio.sleep(10)
+            await message.channel.send('Time has begun to move again.')
 
         if message.mention_everyone:
             print('yo')
@@ -227,7 +234,7 @@ async def on_message(message):
                     await message.add_reaction(e)
 
         # COMMANDS
-        if '$comrade' in message.content.lower():
+        if '$comrade' in message.content.lower() or '$ora' in message.content.lower():
             parse = str(message.content).lstrip('$comrade').split()
             print(parse)
 
