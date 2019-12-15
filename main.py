@@ -20,6 +20,11 @@ import comrade_cfg
 # download pfps
 import requests
 
+# Random
+import random
+
+
+# CODE START
 dotenv.load_dotenv()
 
 print('COMRADE BOT INITIALIZING...')
@@ -46,7 +51,6 @@ PURGE = []
 v_list = comrade_cfg.v_list
 lost_nnn = comrade_cfg.lost_nnn
 USER_BANNED_WORDS = comrade_cfg.USER_BANNED_WORDS
-
 
 # tomato module
 vaultCandidates = {}
@@ -106,14 +110,75 @@ async def dailyMSG():
 
     while not client.is_closed():
         if datetime.datetime.utcnow().date() > LAST_DAILY and datetime.datetime.utcnow().hour > 11 and datetime.datetime.utcnow().hour < 13:
+
+            # MESSAGE CLEANSE
+            await cleanMSG()
+
+            # Announcement
             dailyAnnounce = 'Good morning everyone!\nToday is {}. Have a prosperous day! <:FeelsProsperousMan:419256328465285131>'.format(datetime.datetime.utcnow().date())
             await client.get_guild(419214713252216848).get_channel(419214713755402262).send(dailyAnnounce)
             LAST_DAILY = datetime.datetime.utcnow().date()
+            await asyncio.sleep(5)
             await writeInfo()
             await asyncio.sleep(5)
             await client.get_guild(419214713252216848).get_channel(446457522862161920).send("Daily Announcement Made. Current LAST_DAILY = {}".format(datetime.datetime.strptime(comrade_cfg.LAST_DAILY, '%Y-%m-%d').date()))
+        
+            # Daily 
+            await dailyRole()
+
+            # VOTE RESET
+            global kickList
+            global kickVotes
+            for member in client.get_guild(419214713252216848).members:
+                kickList[member.id] = 0
+                kickVotes[member.id] = []
+            await writeInfo()
+        
         await asyncio.sleep(60)
 
+async def cleanMSG():
+    for channel in client.get_guild(419214713252216848).text_channels:
+        yesterday = datetime.datetime.now()-datetime.timedelta(days=1)
+        async for msg in channel.history(limit=None,after=yesterday):
+            if msg.author == client.user:
+                await msg.delete()
+
+async def quarantine(user, message):
+    currRoles = user.roles
+    isQ = False
+    for r in currRoles:
+        if r.id == 613106246874038274: # quarantine role
+            isQ = True
+            currRoles.remove(r)
+            # remove the role if quarantined
+        elif r.id == 419215295232868361: # regular role
+            currRoles.remove(r)
+    if isQ:
+        currRoles.append(message.guild.get_role(419215295232868361))
+        await message.channel.send('{} has been returned to society.'.format(user.name))
+    else:
+        currRoles.append(message.guild.get_role(613106246874038274))
+        await message.channel.send('{} has been quarantined.'.format(user.name))
+    await user.edit(roles=currRoles)
+
+async def dailyRole():
+    members = client.get_guild(419214713252216848).members
+    chosenone = random.randint(0, len(members)-1)
+
+    s = members[chosenone].mention
+
+    for member in client.get_guild(419214713252216848).members:
+        currRoles = member.roles
+        for r in currRoles:
+            if r.id == 655670092679479296: # Daily
+                currRoles.remove(r)
+                await member.edit(roles=currRoles)
+                # remove the role if Daily'd
+        if member == members[chosenone]:
+            currRoles.append(client.get_guild(419214713252216848).get_role(655670092679479296))
+            await member.edit(roles=currRoles)
+            await client.get_guild(419214713252216848).get_channel(419214713755402262).send('Today\'s daily member is {}'.format(s))
+        
 async def sentinelFilter(message):
     # intelligent message filtering system
     query = re.sub('\W+','', unidecode.unidecode(message.content.lower()))
@@ -136,7 +201,7 @@ async def sentinelFilter(message):
 
 async def infraction(message, user, weight):
     kickList[user] += weight
-    await message.channel.send('Infraction committed by {0} ({2}/{1}).'.format(str(message.author.name), float(KICK_REQ), float(kickList[user])))
+    await message.channel.send('Yare yare daze\nInfraction committed by {0} ({2}/{1}).'.format(str(message.author.name), float(KICK_REQ), float(kickList[user])))
     if (kickList[user] >= KICK_REQ):
         member = message.guild.get_member(user) # more efficient code
         print(member)
@@ -222,9 +287,15 @@ async def on_message(message):
         elif 'comrade' in message.content.lower() and fuzz.partial_ratio('hello', message.content.lower()) > 75:
             await message.channel.send('GREETINGS')
 
-        if 'star platinum' in message.content.lower():
+        if message.content == 'STAR PLATINUM':
             await message.channel.send('ZA WARUDO')
-            await asyncio.sleep(10)
+
+            await message.channel.set_permissions(message.guild.get_role(419215295232868361), send_messages=False)
+
+            await asyncio.sleep(5)
+
+            await message.channel.set_permissions(message.guild.get_role(419215295232868361), send_messages=True)
+
             await message.channel.send('Time has begun to move again.')
 
         if message.mention_everyone:
@@ -280,12 +351,12 @@ async def on_message(message):
                     msg = 'Ability to Votekick\n'
                 if LETHALITY >=1.1:
                     msg += 'Threats are unable to vote for Tomato\n'
-                if LETHALITY >= 1.9:
-                    msg += 'All members above threat level 2 have messages diltered'
+                if 1.9 <= LETHALITY < 2:
+                    msg += 'Level 2 Threats have messages strictly filtered.\n'
                 if 2 <= LETHALITY <2.1:
-                    msg += 'Messages sent by all threats are filtered (less strict), Threats cannot voteKick\n'
+                    msg += 'Messages sent by level 1 threats are mildly filtered, Threats cannot voteKick\n'
                 if LETHALITY >= 2.1:
-                    msg += 'Messages sent by threats are strictly filtered\n'
+                    msg += 'Messages sent by all threats are strictly filtered\n'
                 if LETHALITY >= 3:
                     msg += 'Purge available, all messages filtered'
                 await message.channel.send(msg)
@@ -317,7 +388,13 @@ async def on_message(message):
                     OPS.remove(user)
                     await writeInfo()
                 await message.channel.send('OP Removed.')
-                
+
+            elif parse[0] == 'quarantine' and isOP:
+                user = message.mentions[0]
+                # if not quarantined
+
+                await quarantine(user, message)
+
             elif parse[0] == 'status':
                 kicks = []
                 for member in message.guild.members:
@@ -429,6 +506,9 @@ async def on_message(message):
 
                 await message.channel.send(embed = embed, content=s)
 
+            elif parse[0] == 'clear':
+                await cleanMSG()
+
             elif parse[0] == 'shutdown' and isOwner:
                 await client.logout()
                 await client.close()
@@ -436,11 +516,15 @@ async def on_message(message):
             elif parse[0] == 'updateDaily':
                 global LAST_DAILY
 
-                if datetime.datetime.utcnow().date() > LAST_DAILY and datetime.datetime.utcnow().hour > 11:
+                print(LAST_DAILY)
+                print(datetime.datetime.utcnow().date())
+
+                if datetime.datetime.utcnow().date() > LAST_DAILY and (datetime.datetime.utcnow().hour > 12 or datetime.datetime.utcnow().date() != LAST_DAILY):
                     LAST_DAILY = datetime.datetime.utcnow().date()
+                    await asyncio.sleep(5)
                     await writeInfo()
                     await asyncio.sleep(5)
-                    await client.get_guild(419214713252216848).get_channel(446457522862161920).send("Daily Announcement Made. Current LAST_DAILY = {}".format(datetime.datetime.strptime(comrade_cfg.LAST_DAILY, '%Y-%m-%d').date()))
+                    await client.get_guild(419214713252216848).get_channel(446457522862161920).send("Date updated. Current LAST_DAILY = {}".format(datetime.datetime.strptime(comrade_cfg.LAST_DAILY, '%Y-%m-%d').date()))
 
             elif u"\U0001F345" in message.content and (not message.author.id in THREATS or LETHALITY < 1.1):
                 if len(parse) == 1 and not message.id in vaultCandidates:
@@ -456,7 +540,7 @@ async def on_message(message):
 
 @client.event
 async def on_message_edit(messageOG, messageNEW):  
-    if LETHALITY >= 2 and messageNEW.author != client.user and messageNEW.author.id in THREATS:
+    if (LETHALITY >= 2 and messageNEW.author.id in THREATS) or (LETHALITY >= 1.9 and messageNEW.author.id in THREATS and THREATS[messageNEW.author.id] >= 2) or LETHALITY >= 3:
         await sentinelFilter(messageNEW)
             
 async def getPics(guild):
