@@ -55,7 +55,6 @@ USER_BANNED_WORDS = comrade_cfg.USER_BANNED_WORDS
 # tomato module
 vaultCandidates = {}
 
-
 async def loadVars():
     # if we ever need to reload vars
     global LETHALITY
@@ -88,20 +87,28 @@ async def loadVars():
 
 async def writeInfo():
     # writes all variables to file again in order.
-    with open('comrade_cfg.py', 'w') as cfg:
-        cfg.write('kickList = ' + str(kickList) + '\n')
-        cfg.write('kickVotes = ' + str(kickVotes) + '\n')
-        cfg.write('LETHALITY = ' + str(LETHALITY) + '\n')
-        cfg.write('THREATS = ' + str(THREATS) + '\n')
-        cfg.write('OPS = ' + str(OPS) + '\n')
-        cfg.write('KICK_REQ = ' + str(KICK_REQ) + '\n')
-        cfg.write('KICK_SAFE = ' + str(KICK_SAFE) + '\n')
-        cfg.write('BANNED_WORDS = ' + str(BANNED_WORDS) + '\n')
-        cfg.write('PURGE = ' + str([i.id for i in PURGE]) + '\n')
-        cfg.write('LAST_DAILY = \"' + str(LAST_DAILY) + '\"\n')
-        cfg.write('v_list = ' + str(v_list) + '\n')
-        cfg.write('lost_nnn = ' + str(lost_nnn) + '\n')
-        cfg.write('USER_BANNED_WORDS = ' + str(USER_BANNED_WORDS) + '\n')
+
+    if os.path.exists("comrade_cfg.py"):
+        os.remove("comrade_cfg.py")
+
+        with open('comrade_cfg.py', 'w') as cfg:
+            cfg.write('kickList = ' + str(kickList) + '\n')
+            cfg.write('kickVotes = ' + str(kickVotes) + '\n')
+            cfg.write('LETHALITY = ' + str(LETHALITY) + '\n')
+            cfg.write('THREATS = ' + str(THREATS) + '\n')
+            cfg.write('OPS = ' + str(OPS) + '\n')
+            cfg.write('KICK_REQ = ' + str(KICK_REQ) + '\n')
+            cfg.write('KICK_SAFE = ' + str(KICK_SAFE) + '\n')
+            cfg.write('BANNED_WORDS = ' + str(BANNED_WORDS) + '\n')
+            cfg.write('PURGE = ' + str([i.id for i in PURGE]) + '\n')
+            cfg.write('LAST_DAILY = \"' + str(LAST_DAILY) + '\"\n')
+            cfg.write('v_list = ' + str(v_list) + '\n')
+            cfg.write('lost_nnn = ' + str(lost_nnn) + '\n')
+            cfg.write('USER_BANNED_WORDS = ' + str(USER_BANNED_WORDS) + '\n')
+        await client.get_guild(419214713252216848).get_channel(446457522862161920).send("Data Written Successfully.")
+    else:
+        print("The file does not exist")
+        await client.get_guild(419214713252216848).get_channel(446457522862161920).send("Data could not be written.")
 
 async def dailyMSG():
     await client.wait_until_ready()
@@ -289,14 +296,14 @@ async def on_message(message):
 
         if message.content == 'STAR PLATINUM':
             await message.channel.send('ZA WARUDO')
-
             await message.channel.set_permissions(message.guild.get_role(419215295232868361), send_messages=False)
-
             await asyncio.sleep(5)
-
             await message.channel.set_permissions(message.guild.get_role(419215295232868361), send_messages=True)
-
             await message.channel.send('Time has begun to move again.')
+
+        if message.content == 'ZA HANDO':
+            if (message.author.id) in OPS:
+                await message.channel.purge(limit=10)
 
         if message.mention_everyone:
             print('yo')
@@ -508,6 +515,10 @@ async def on_message(message):
 
             elif parse[0] == 'clear':
                 await cleanMSG()
+                await message.delete()
+
+            elif parse[0] == 'zahando' and isOP:
+                await message.channel.purge(limit=int(parse[1]))
 
             elif parse[0] == 'shutdown' and isOwner:
                 await client.logout()
