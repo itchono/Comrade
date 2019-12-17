@@ -110,16 +110,16 @@ async def writeInfo():
         print("The file does not exist")
         await client.get_guild(419214713252216848).get_channel(446457522862161920).send("Data could not be written.")
 
-async def dailyMSG():
+async def dailyMSG(force = False):
     await client.wait_until_ready()
 
     global LAST_DAILY
 
     while not client.is_closed():
-        if datetime.datetime.utcnow().date() > LAST_DAILY and datetime.datetime.utcnow().hour > 11 and datetime.datetime.utcnow().hour < 13:
+        if datetime.datetime.utcnow().date() > LAST_DAILY and ((datetime.datetime.utcnow().hour > 11 and datetime.datetime.utcnow().hour < 13) or force):
 
             # MESSAGE CLEANSE
-            await cleanMSG()
+            #await cleanMSG()
 
             # Announcement
             dailyAnnounce = 'Good morning everyone!\nToday is {}. Have a prosperous day! <:FeelsProsperousMan:419256328465285131>'.format(datetime.datetime.utcnow().date())
@@ -523,6 +523,8 @@ async def on_message(message):
             elif parse[0] == 'shutdown' and isOwner:
                 await client.logout()
                 await client.close()
+            elif parse[0] == 'dailyAnnounce':
+                await dailyMSG(force=True)
 
             elif parse[0] == 'updateDaily':
                 global LAST_DAILY
