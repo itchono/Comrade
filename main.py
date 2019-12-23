@@ -33,10 +33,9 @@ import random
 
 
 # II: Internal Imports
-import comrade_cfg
-from comrade_modules import *
 import keep_alive
 
+# III: Core modules
 
 '''
 Initialization Phase
@@ -50,9 +49,32 @@ print('Comrade is currently starting up...')
 t_start = datetime.datetime.utcnow() # start time
 
 # I: Variable Loading
-# TODO
-cfg = comrade_cfg.cfg
+dotenv.load_dotenv()
+TOKEN = os.environ.get('TOKEN')
+GUILD_ID = os.environ.get('GUILD')
+MONGO_DRIVER = os.environ.get('DB')
+print('Environment variables loaded.')
 
+mongoClient = pymongo.MongoClient(MONGO_DRIVER) # requires dnspython
+cfg = mongoClient["Comrade"]["cfg"]
+
+def writeCFG(key, data, doc = "generalCFG"):
+    '''
+    Updates value in cfg database given a document id, key to modify, and new data value.
+    Defaults to writing in general CFG document
+
+    >>> writeCFG("LETHALITY", 1)
+    changes LETHALITY field under generalCFG to value of 1
+
+    >>> writeCFG(")
+    '''
+    cfg.update_one({"_id":doc}, {"$set":{key:data}})
+for x in (cfg.find({"_id":"kickVotes"})):
+    print(x)
+#writeCFG(308287917556498452, list(list(cfg["kickVotes"][308287917556498452]) + [123456]), doc = "kickVotes")
+
+# Complex Variables
+kickVotes = 
 
 # Temporary Variables
 vaultCandidates = {}
@@ -60,10 +82,6 @@ hando_list = {}
 
 
 # II: Client startup
-
-TOKEN = os.environ.get('TOKEN')
-GUILD_ID = os.environ.get('GUILD')
-
 client = discord.Client()
 bot = commands.Bot(command_prefix="$comrade")
 
@@ -72,10 +90,11 @@ async def status(ctx):
     await ctx.send("OK")
 
 
+
 # create server
 keep_alive.keep_alive()
 # create tasks
-client.loop.create_task(dailyMSG())
+#client.loop.create_task(dailyMSG())
 
 # finally, start the bot
-client.run(TOKEN)
+# client.run(TOKEN)
