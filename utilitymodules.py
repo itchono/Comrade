@@ -73,12 +73,16 @@ def makeLookUpTable():
     makes the lookup table for emojis
     '''
 
-    s = "{}"
+    s = "{"
 
     for i in range(127462, 127488):
-        s += "u\\U"
+        s += "u\\\"U"
         s += "000"
         s += str(hex(i))[2:].upper()
+        s += "\","
+
+    s += "}"
+    print(s)
 
 
 def emojiToText(s):
@@ -86,3 +90,6 @@ def emojiToText(s):
     Converts emoji to closest real text representation
     '''
     lookupTable = {u"\U0001F1E6"}
+
+if __name__ == "__main__":
+    makeLookUpTable()
