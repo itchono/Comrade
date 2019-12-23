@@ -55,6 +55,8 @@ USER_BANNED_WORDS = comrade_cfg.USER_BANNED_WORDS
 # tomato module
 vaultCandidates = {}
 
+handoList = {}
+
 async def loadVars():
     # if we ever need to reload vars
     global LETHALITY
@@ -190,21 +192,25 @@ async def sentinelFilter(message):
     # intelligent message filtering system
     query = re.sub('\W+','', unidecode.unidecode(message.content.lower()))
     for word in set(BANNED_WORDS).union(set(USER_BANNED_WORDS[message.author.id])):
-        if word in query or (fuzz.partial_ratio(word, query) > 75 and LETHALITY >= 2.1):
+        if word in query or (fuzz.partial_ratio(word, query) > 75 and message.author.id in THREATS and THREATS[message.author.id] >= 2):
             await message.delete()
             print('Message purged for bad word:\n', str(message.content))
             await infraction(message, message.author.id, 0.5)
 
     
-    if u"\U0001F1ED" in message.content and THREATS[message.author.id] >= 2: # H filter
+    if u"\U0001F1ED" in message.content and message.author.id in THREATS and THREATS[message.author.id] >= 2: # H filter
         await message.delete()
         print('Message with emoji purged:\n', str(message.content))
         await infraction(message, message.author.id, 0.5)
 
-    if (len(message.attachments) > 0 or len(message.embeds) > 0) and THREATS[message.author.id] >= 2:
+    if (len(message.attachments) > 0 or len(message.embeds) > 0) and message.author.id in THREATS and THREATS[message.author.id] >= 2:
         print('Attachment Purged')
         await message.delete()
         await infraction(message, message.author.id, 0.5)
+
+    if len(message.mentions) > 0 and message.author.id in THREATS and THREATS[message.author.id] >= 3:
+        await message.delete()
+        await message.channel.send("USELESS PING DETECTED - INITIATE SHAME PROTOCOL")
 
 async def infraction(message, user, weight):
     kickList[user] += weight
@@ -283,7 +289,7 @@ async def on_message(message):
         #failsafe against self response
         
         # $SENTINEL
-        if (LETHALITY >= 2 and message.author.id in THREATS) or (LETHALITY >= 1.9 and message.author.id in THREATS and THREATS[message.author.id] >= 2) or LETHALITY >= 3:
+        if (LETHALITY >= 2 and message.author.id in THREATS and THREATS[message.author.id] >= 1) or LETHALITY >= 3:
             await sentinelFilter(message)
             
         # $JERICHO
@@ -304,6 +310,17 @@ async def on_message(message):
         if message.content == 'ZA HANDO':
             if (message.author.id) in OPS:
                 await message.channel.purge(limit=10)
+            else:
+                if not message.channel.id in handoList:
+                    handoList[message.channel.id] = [message.author.id]
+                    await message.channel.send("Message purge initiated. 3 Votes are needed.")
+                elif not message.author.id in handoList[message.channel.id]:    
+                    handoList[message.channel.id].append(message.author.id)
+                    await message.channel.send("Message purge vote registered. {}/3".format(len(handoList[message.channel.id])))
+                    if len(handoList[message.channel.id]) >= 3:
+                        await message.channel.purge(limit=10)
+                    del handoList[message.channel.id]
+
 
         if message.mention_everyone:
             print('yo')
@@ -347,26 +364,15 @@ async def on_message(message):
                     await message.channel.send('You have not voted to kick ' + str(message.mentions[0].name))
                  
             elif parse[0] == 'lethal' and isOP:
-                LETHALITY = float(parse[1])
-                await writeInfo()
-                if LETHALITY == 0:
-                    await message.channel.send('Lethal mode has been deactivated.')
+                if len(message.mentions) == 0:
+                    LETHALITY = float(parse[1])
+                    await writeInfo()
+                    await message.channel.send('Global lethality has been set to {0}.'.format(LETHALITY))
                 else:
-                    await message.channel.send('Lethality has been set to {0}. This can cause destructive actions.'.format(LETHALITY))
-                msg = 'Current Powers:\nNone'
-                if LETHALITY >= 1:
-                    msg = 'Ability to Votekick\n'
-                if LETHALITY >=1.1:
-                    msg += 'Threats are unable to vote for Tomato\n'
-                if 1.9 <= LETHALITY < 2:
-                    msg += 'Level 2 Threats have messages strictly filtered.\n'
-                if 2 <= LETHALITY <2.1:
-                    msg += 'Messages sent by level 1 threats are mildly filtered, Threats cannot voteKick\n'
-                if LETHALITY >= 2.1:
-                    msg += 'Messages sent by all threats are strictly filtered\n'
-                if LETHALITY >= 3:
-                    msg += 'Purge available, all messages filtered'
-                await message.channel.send(msg)
+                    user = message.mentions[0].id
+                    THREATS[user] = float(parse[1])
+                    await writeInfo()
+                    await message.channel.send('User lethality has been set to {0} for {1}.'.format(float(parse[1]), message.mentions[0].name))
                 
             elif parse[0] == 'addThreat' and isOP:
                 user = message.mentions[0].id
@@ -553,7 +559,7 @@ async def on_message(message):
 
 @client.event
 async def on_message_edit(messageOG, messageNEW):  
-    if (LETHALITY >= 2 and messageNEW.author.id in THREATS) or (LETHALITY >= 1.9 and messageNEW.author.id in THREATS and THREATS[messageNEW.author.id] >= 2) or LETHALITY >= 3:
+    if (LETHALITY >= 2 and messageNEW.author.id in THREATS and THREATS[messageNEW.author.id] >= 1) or LETHALITY >= 3:
         await sentinelFilter(messageNEW)
             
 async def getPics(guild):
