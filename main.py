@@ -69,12 +69,22 @@ def writeCFG(key, data, doc = "generalCFG"):
     >>> writeCFG(")
     '''
     cfg.update_one({"_id":doc}, {"$set":{key:data}})
-for x in (cfg.find({"_id":"kickVotes"})):
-    print(x)
+
 #writeCFG(308287917556498452, list(list(cfg["kickVotes"][308287917556498452]) + [123456]), doc = "kickVotes")
 
 # Complex Variables
-kickVotes = 
+kickVotes = {}
+for x in (cfg.find({"_id":"kickVotes"})):
+    kickVotes = x
+
+THREATS = {}
+for x in (cfg.find({"_id":"THREATS"})):
+    THREATS = x
+
+print(cfg.kickVotes)
+
+print(kickVotes)
+print(THREATS)
 
 # Temporary Variables
 vaultCandidates = {}
