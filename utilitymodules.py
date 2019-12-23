@@ -67,3 +67,22 @@ async def generateRequiem(message: discord.message, mode='NonRole'):
                         members.remove(member)
 
         return members
+
+def makeLookUpTable():
+    '''
+    makes the lookup table for emojis
+    '''
+
+    s = "{}"
+
+    for i in range(127462, 127488):
+        s += "u\\U"
+        s += "000"
+        s += str(hex(i))[2:].upper()
+
+
+def emojiToText(s):
+    '''
+    Converts emoji to closest real text representation
+    '''
+    lookupTable = {u"\U0001F1E6"}
