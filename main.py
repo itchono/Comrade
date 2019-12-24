@@ -118,10 +118,11 @@ async def dailyMSG(force = False):
     global LAST_DAILY
 
     while not client.is_closed():
-        if (datetime.datetime.utcnow().date() > LAST_DAILY and (datetime.datetime.utcnow().hour > 11 and datetime.datetime.utcnow().hour < 13) or force):
+        if (datetime.datetime.utcnow().date() > LAST_DAILY and (datetime.datetime.utcnow().hour > 11 and datetime.datetime.utcnow().hour < 13)) or force:
 
             # MESSAGE CLEANSE
-            #await cleanMSG()
+            await cleanMSG()
+            await asyncio.sleep(30)
 
             # Announcement
             dailyAnnounce = 'Good morning everyone!\nToday is {}. Have a prosperous day! <:FeelsProsperousMan:419256328465285131>'.format(datetime.datetime.utcnow().date())
@@ -174,7 +175,7 @@ async def dailyRole():
     members = client.get_guild(419214713252216848).members
     chosenone = random.randint(0, len(members)-1)
 
-    s = members[chosenone].mention
+    s = members[chosenone].name
 
     for member in client.get_guild(419214713252216848).members:
         currRoles = member.roles
