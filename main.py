@@ -186,10 +186,12 @@ async def quarantine(user:discord.user):
             currRoles.remove(r)
     if isQ:
         currRoles.append(client.get_guild(419214713252216848).get_role(419215295232868361))
-        await log('{} has been returned to society.'.format(user.name))
+        await log("User Released: {}".format(user.name))
+        return '{} has been returned to society.'.format(user.name)
     else:
         currRoles.append(client.get_guild(419214713252216848).get_role(613106246874038274))
-        await log('{} has been quarantined.'.format(user.name))
+        await log("User Quarantined: {}".format(user.name))
+        return '{} has been quarantined.'.format(user.name)
     await user.edit(roles=currRoles)
 
 async def sentinelFilter(message:discord.message):
@@ -312,7 +314,7 @@ Per user: Subjects users in THREATS list to stricter conditions; subject to limi
 3: Messages filtered strictly
 4: Loss of ability to ping
 '''
-
+# General Moderation Methods
 @bot.command(name = "lethal")
 @commands.check(isOP)
 async def setLethality(ctx, Lnew):
@@ -346,6 +348,17 @@ async def setKickReq(ctx, Knew):
         await ctx.send("Kick Requirement Set to {} votes.".format(cfg["KICK_REQ"]))
     else:
         await ctx.send("Invalid input.")
+
+@bot.command(name = "quarantine")
+@commands.check(isOP)
+async def callQuarantine(ctx):
+    '''
+    Quarantines mentioned user
+    '''
+    user = ctx.message.mentions[0]
+    await ctx.send(quarantine(user))
+
+#@bot SCRAM
 
 # Threat dictionary methods
 @bot.command()
@@ -441,7 +454,6 @@ async def shutdown(ctx):
     await client.close()
     keep_alive.shutdown()
     
-
 '''
 Generalized list functions
 Allows creation of **USER** collections on the fly with custom names
@@ -535,12 +547,18 @@ async def removeKickSafe(ctx):
 @bot.command()
 @commands.check(notThreat)
 async def addCustomList(ctx, ListName):
+    '''
+    Adds a user to a custom list.
+    '''
     addToList(ListName, ctx.message.mentions[0])
     await ctx.send("List \"{}\" consists of the following:{}".format(ListName, getListUserNames(ListName)))
 
 @bot.command()
 @commands.check(notThreat)
 async def removeCustomList(ctx, ListName):
+    '''
+    Removes a user from a custom list.
+    '''
     removeFromList(ListName, ctx.message.mentions[0])
     await ctx.send("List \"{}\" consists of the following:{}".format(ListName, getListUserNames(ListName)))
 
