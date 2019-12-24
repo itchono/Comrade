@@ -240,6 +240,13 @@ def isOwner(ctx):
     OWNER_ID = 66137108124803072
     return ctx.author.id == OWNER_ID
 
+def notThreat(ctx):
+    '''
+    Determines whether message author is in good standing
+    (Either not a threat or at threat level zero)
+    '''
+    return (not ctx.author.id in cfg["THREATS"] or cfg["THREATS"][ctx.author.id]["LETHALITY"] == 0)
+
 async def addKick(ctx, user):
     '''
     Generalized manner of adding a voteKick to a user. Helper function for voteKick command.
@@ -258,6 +265,7 @@ async def addKick(ctx, user):
         else:
             await ctx.send("Kicking has been disabled. Lethality must be at least 1 to continue (current = {}).".format(cfg["LETHALITY"]))
 
+# Kick System
 @bot.command()
 async def voteKick(ctx):
     '''
@@ -313,7 +321,6 @@ async def setLethality(ctx, Lnew):
     '''
     if float(Lnew) >= 0:
         # safety check for level
-        user = ctx.message.mentions[0]
 
         # Global Modificaiton
         if len(ctx.message.mentions) == 0:
@@ -321,13 +328,26 @@ async def setLethality(ctx, Lnew):
             writeInfo()
             await ctx.send("Global Lethality has been set to {}.".format(cfg["LETHALITY"]))
         # Modificaiton for a single user (in THREATS)
-        elif user.id in cfg["THREATS"]:
-            cfg["THREATS"][user.id]["LETHALITY"] = float(Lnew)
-            writeInfo()
-            await ctx.send("User Lethality has been set to {}.\nPlease ensure global lethality is set accordingly to enable lethal features.".format(cfg["LETHALITY"]))
+        else:
+            user = ctx.message.mentions[0]
+            if user.id in cfg["THREATS"]:
+                cfg["THREATS"][user.id]["LETHALITY"] = float(Lnew)
+                writeInfo()
+                await ctx.send("User Lethality has been set to {}.\nPlease ensure global lethality is set accordingly to enable lethal features.".format(cfg["LETHALITY"]))
     else:
         await ctx.send("Invalid Input.")
 
+@bot.command(name = "kickReq")
+@commands.check(isOP)
+async def setKickReq(ctx, Knew):
+    if int(Knew) >= 1:
+        cfg["KICK_REQ"] = int(Knew)
+        writeInfo()
+        await ctx.send("Kick Requirement Set to {} votes.".format(cfg["KICK_REQ"]))
+    else:
+        await ctx.send("Invalid input.")
+
+# Threat dictionary methods
 @bot.command()
 @commands.check(isOP)
 async def addThreat(ctx, *args):
@@ -353,9 +373,79 @@ async def removeThreat(ctx):
         writeInfo()
         await ctx.send("Threat removed.")
 
+@bot.command()
+@commands.check(isOP)
+async def addBanWord(ctx, word):
+    '''
+    Adds a banned word, either to the global set or to a particular user.
+    Use "" Quotes to enclose larger phrases
+    '''
+    if len(ctx.message.mentions) == 0 and not word.lower() in cfg["GLOBAL_BANNED_WORDS"]:
+        # global
+        cfg["GLOBAL_BANNED_WORDS"].add(word.lower())
+        writeInfo()
+        await ctx.send("{} Has been added to the global blacklist.".format(word.lower()))
+    else:
+        user = ctx.message.mentions[0]
+        if user.id in cfg["THREATS"] and not word.lower() in cfg["THREATS"][user.id]["BANNED_WORDS"]:
+            # per user
+            cfg["THREATS"][user.id]["BANNED_WORDS"].add(word.lower())
+            writeInfo()
+            await ctx.send("{} Has been added to the blacklist for {}.".format(word.lower(), user.name))
+
+@bot.command()
+@commands.check(isOP)
+async def removeBanWord(ctx, word):
+    '''
+    Remove a word from eithe the global or a particular blacklist.
+    '''
+    if len(ctx.message.mentions) == 0 and word.lower() in cfg["GLOBAL_BANNED_WORDS"]:
+        # global
+        cfg["GLOBAL_BANNED_WORDS"].remove(word.lower())
+        writeInfo()
+        await ctx.send("{} Has been removed from the global blacklist.".format(word.lower()))
+    else:
+        user = ctx.message.mentions[0]
+        if user.id in cfg["THREATS"] and word.lower() in cfg["THREATS"][user.id]["BANNED_WORDS"]:
+            # per user
+            cfg["THREATS"][user.id]["BANNED_WORDS"].remove(word.lower())
+            writeInfo()
+            await ctx.send("{} Has been removed from the blacklist for {}.".format(word.lower(), user.name))
+
+# maintainence methods
+@bot.command()
+@commands.check(isOP)
+async def resetKick(ctx):
+    '''
+    Allows user to call genKick from bot.
+    '''
+    await genKick()
+    await ctx.send("Kick Votes list has been successfully generated.")
+
+@bot.command(name = "reloadVars")
+@commands.check(isOP)
+async def callreloadVars(ctx):
+    '''
+    Allows user to call reloadVars from bot.
+    '''
+    reloadVars()
+    await ctx.send("Variables reloaded from file.")
+
+@bot.command(name = "reloadVars")
+@commands.check(isOwner)
+async def shutdown(ctx):
+    '''
+    Shuts down the bot.
+    '''
+    await client.logout()
+    await client.close()
+    keep_alive.shutdown()
+    
+
 '''
 Generalized list functions
-Allows creation of user collections on the fly with custom names
+Allows creation of **USER** collections on the fly with custom names
+Will not work with other datatypes for now.
 '''
 def addToList(ListName, user, SUDO = False):
     '''
@@ -364,7 +454,7 @@ def addToList(ListName, user, SUDO = False):
     '''
     if not ListName in cfg and (not ListName in PROTECTED_NAMES or SUDO):
         cfg[ListName] = [user.id]
-    elif not ListName in PROTECTED_NAMES or SUDO:
+    elif (not ListName in PROTECTED_NAMES or SUDO) and not user.id in cfg[ListName]:
         cfg[ListName].append(user.id)
     writeInfo()
 
@@ -374,6 +464,11 @@ def removeFromList(ListName, user, SUDO = False):
     '''
     if ListName in cfg and (not ListName in PROTECTED_NAMES or SUDO) and user in cfg[ListName]:
         cfg[ListName].remove(user.id)
+
+        if len(cfg[ListName] == 0):
+            # culling of empty lists.
+            removeList(ListName)
+
         writeInfo()
 
 def removeList(ListName, SUDO = False):
@@ -382,13 +477,23 @@ def removeList(ListName, SUDO = False):
     '''
     if ListName in cfg and (not ListName in PROTECTED_NAMES or SUDO):
         del cfg[ListName]
+        writeInfo()
 
 def getListUsers(ListName):
     '''
     Returns a list of users who are in the list of choice.
     '''
-    if not ListName in PROTECTED_NAMES:
-        return [client.get_guild(419214713252216848).get_member(i).name for i in cfg[ListName]]
+    try:
+        if not ListName in PROTECTED_NAMES:
+            return [client.get_guild(419214713252216848).get_member(i).name for i in cfg[ListName]]
+    finally:
+        return None
+
+def getListUserNames(ListName):
+    '''
+    Creates a list of users' names in a given custom list.
+    '''
+    return [m.name for m in getListUsers(ListName)]
 
 @bot.command()
 @commands.check(isOP)
@@ -397,19 +502,68 @@ async def op(ctx):
     Opps a user
     '''
     user = ctx.message.mentions[0]
+    addToList("OPS", user, SUDO=True)
 
-    addToList("OPS", user)
-    
+@bot.command()
+@commands.check(isOP)
+async def deop(ctx):
+    '''
+    deops a user
+    '''
+    user = ctx.message.mentions[0]
+    removeFromList("OPS", user, SUDO=True)
+
+@bot.command()
+@commands.check(isOP)
+async def addKickSafe(ctx):
+    '''
+    Adds user to Kick Safe list.
+    '''
+    user = ctx.message.mentions[0]
+    addToList("KICK_SAFE", user, SUDO=True)
+
+@bot.command()
+@commands.check(isOP)
+async def removeKickSafe(ctx):
+    '''
+    Removes user from Kick Safe list.
+    '''
+    user = ctx.message.mentions[0]
+    removeFromList("KICK_SAFE", user, SUDO=True)
+
+# Custom list additions
+@bot.command()
+@commands.check(notThreat)
+async def addCustomList(ctx, ListName):
+    addToList(ListName, ctx.message.mentions[0])
+    await ctx.send("List \"{}\" consists of the following:{}".format(ListName, getListUserNames(ListName)))
+
+@bot.command()
+@commands.check(notThreat)
+async def removeCustomList(ctx, ListName):
+    removeFromList(ListName, ctx.message.mentions[0])
+    await ctx.send("List \"{}\" consists of the following:{}".format(ListName, getListUserNames(ListName)))
+
+# *STATUS OF BOT TODO
+@bot.command()
+async def status(ctx):
+    pass
+
+
+# TODO Tomato function
+@bot.command(name = u"\U0001F345")
+async def tomato(ctx):
+    pass
 
 
 
-# create server
-'''keep_alive.keep_alive()'''
-# create tasks
-'''client.loop.create_task(dailyMSG())'''
 
-# finally, start the bot
-'''client.run(TOKEN)'''
+# Create webserver to keep bot running on Repl.it
+keep_alive.keep_alive()
+# Create loop task to perform timed actions
+client.loop.create_task(dailyMSG())
+# Finally, start the bot
+client.run(TOKEN)
 
 if __name__ == "__main__":
     cfg["LETHALITY"] = 1
