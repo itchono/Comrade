@@ -341,6 +341,9 @@ async def addThreat(ctx, *args):
 @bot.command()
 @commands.check(isOP)
 async def removeThreat(ctx):
+    '''
+    Removes target user from threats list.
+    '''
     user = ctx.message.mentions[0]
     if user.id in cfg["THREATS"]:
         del cfg["THREATS"][user.id]
@@ -349,12 +352,50 @@ async def removeThreat(ctx):
 
 '''
 Generalized list functions
-Allow
+Allows creation of user collections on the fly with custom names
 '''
+async def addToList(ListName, user, SUDO = False):
+    '''
+    Adds a user to a list of name ListName in the cfg file.
+    Creates new list if it does not exist.
+    '''
+    if not ListName in cfg:
+        cfg[ListName] = [user.id]
+    else:
+        cfg[ListName].append(user.id)
+    writeInfo()
+
+async def removeFromList(ListName, user, SUDO = False):
+    '''
+    Removes a user from a list of ListName in cfg if they are in it.
+    '''
+    if ListName in cfg and user in cfg[ListName]:
+        cfg[ListName].remove(user.id)
+        writeInfo()
+
+async def removeList(ListName, SUDO = False):
+    '''
+    Removes entire list.
+    '''
+    # prevents default lists from getting overwritten unless forced.
+    PROTECTED_NAMES = ["LETHALITY", "THREATS", "kickVotes", "OPS"]
+
+    if ListName in cfg:
+        del cfg[ListName]
+
+async def getListUsers(ListName):
+    '''
+    Returns a list of users who are in the list of choice.
+    '''
+    return [client.get_guild(419214713252216848).get_member(i).name for i in cfg[ListName]]
 
 @bot.command()
 @commands.check(isOP)
 async def op(ctx):
+    '''
+    Opps a user
+    '''
+
 
 
 # create server
