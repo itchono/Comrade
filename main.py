@@ -118,7 +118,7 @@ async def dailyMSG(force = False):
     global LAST_DAILY
 
     while not client.is_closed():
-        if datetime.datetime.utcnow().date() > LAST_DAILY and ((datetime.datetime.utcnow().hour > 11 and datetime.datetime.utcnow().hour < 13) or force):
+        if (datetime.datetime.utcnow().date() > LAST_DAILY and (datetime.datetime.utcnow().hour > 11 and datetime.datetime.utcnow().hour < 13) or force):
 
             # MESSAGE CLEANSE
             #await cleanMSG()
