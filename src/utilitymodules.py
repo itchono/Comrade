@@ -4,28 +4,13 @@ Comrade Bot - Additional Utility Modules
 '''
 
 # I: External Library Imports
-import discord # core to bot
-from discord.ext import commands
-import pymongo # CFG storage
-
-# Text Filtering
-import re
-import unidecode
-from fuzzywuzzy import fuzz # ALSO: need python-levenshtein ==> needs C++ build tools installed
-
-# File reading for env vars
-import os
-import dotenv # NOTE - install as "pip install python-dotenv"
-
-# Misc stuff
+import discord
 from datetime import datetime # Time func
-
-import asyncio # Dependancy for Discord py
-
 import requests # PFP module
 
-import random
-
+'''
+FUNCTIONS
+'''
 async def generateRequiem(message: discord.message, mode='NonRole'):
     PURGE_DATE = datetime.datetime(2099, 1, 1)
     # SET this first
@@ -68,6 +53,19 @@ async def generateRequiem(message: discord.message, mode='NonRole'):
                         members.remove(member)
         return members
 
+async def getPics(guild:discord.guild):
+    '''
+    Retrieves all avatars on server, and stores a text file of URLs
+    '''
+    with open('Extracted Avatars/avatarlist.txt', 'w') as f:
+        for member in guild.members:
+            url = "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(member)
+            
+            r = requests.get(url)
+            with open('Extracted Avatars/avatar{0}.png'.format(member.id), 'wb') as outfile:
+                outfile.write(r.content)
+            f.write(str(url + '\n'))
+
 def makeLookUpTable(textToEmoji=False):
     '''
     Makes the lookup table for emojis
@@ -91,8 +89,11 @@ def makeLookUpTable(textToEmoji=False):
 def emojiToText(s):
     '''
     Converts emoji to closest real text representation (lowercase output)
+    Note: Will strip spaces.
     '''
     lookupTable = {u"\U0001F1E6":"a",u"\U0001F1E7":"b",u"\U0001F1E8":"c",u"\U0001F1E9":"d",u"\U0001F1EA":"e",u"\U0001F1EB":"f",u"\U0001F1EC":"g",u"\U0001F1ED":"h",u"\U0001F1EE":"i",u"\U0001F1EF":"j",u"\U0001F1F0":"k",u"\U0001F1F1":"l",u"\U0001F1F2":"m",u"\U0001F1F3":"n",u"\U0001F1F4":"o",u"\U0001F1F5":"p",u"\U0001F1F6":"q",u"\U0001F1F7":"r",u"\U0001F1F8":"s",u"\U0001F1F9":"t",u"\U0001F1FA":"u",u"\U0001F1FB":"v",u"\U0001F1FC":"w",u"\U0001F1FD":"x",u"\U0001F1FE":"y",u"\U0001F1FF":"z"}
+
+    s = s.replace(" ", "") # strip spaces
 
     newS = ''
     for c in s:
@@ -113,8 +114,18 @@ def textToEmoji(s):
     newS = ''
     for c in s:
         if c in lookupTable:
-            newS += lookupTable[c]
+            newS += lookupTable[c] + " " # add space to resolve bugs in emoji interpretation (seen as flags sometimes)
         else:
             newS += c
     return newS
 
+if __name__ == "__main__":
+    '''
+    Quick demo of emoji converter in a pinch
+    '''
+
+    s = input("Input string:\n")
+    print(textToEmoji(s))
+
+    t = input("Emoji input:\n")
+    print(emojiToText(t))

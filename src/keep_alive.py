@@ -8,12 +8,7 @@ app = Flask('')
 
 @app.route('/')
 def main():
-    # debug info
-
-    # config status
-    s = 'Comrade BOT is online\n'
-    s += "Uptime: {}\n".format(datetime.utcnow() - t_start)
-    return s
+    return 'Comrade BOT is online - Uptime: {}'.format(datetime.utcnow() - t_start)
 
 def run():
     global t_start
@@ -26,4 +21,4 @@ def keep_alive():
 
 def shutdown():
     server = Thread(target=run)
-    server.stop()
+    server._stop()
