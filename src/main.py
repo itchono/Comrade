@@ -57,7 +57,7 @@ TOKEN = os.environ.get('TOKEN') # bot token; kept private
 
 cfg = comrade_cfg.data # load config variables
 
-PROTECTED_NAMES = ["LETHALITY", "THREATS", "kickVotes", "OPS", "GLOBAL_BANNED_WORDS", "PURGE", "LAST_DAILY"]
+PROTECTED_NAMES = ["LETHALITY", "THREATS", "kickVotes", "OPS", "GLOBAL_BANNED_WORDS", "PURGE", "LAST_DAILY", "KICK_REQ", "KICK_SAFE"]
 # Protected dictionary elements in cfg file
 VERSION = "Comrade 2.0.0 Osprey"
 
@@ -68,8 +68,7 @@ handoList = {}
 print('All variables loaded.')
 
 # II: Client startup PT 1
-client = discord.Client()
-bot = commands.Bot(command_prefix="$comrade") # declare bot with prefix $comrade
+client = commands.Bot(command_prefix="$comrade ") # declare bot with prefix $comrade
 
 '''
 FUNCTIONS
@@ -93,13 +92,13 @@ async def writeInfo():
     else:
         await log("Data could not be written.")
 
-def reloadVars():
+async def reloadVars():
     '''
     Reloads variables from configuration file dynamically if needed
     '''
     global cfg
     cfg = comrade_cfg.data
-    log("Variables Successfully Reloaded From File.")
+    await log("Variables Successfully Reloaded From File.")
 
 def lastDaily():
     '''
@@ -276,7 +275,7 @@ async def addKick(ctx, user):
             await ctx.send("Kicking has been disabled. Lethality must be at least 1 to continue (current = {}).".format(cfg["LETHALITY"]))
 
 # Kick System
-@bot.command()
+@client.command()
 @commands.check(notThreat)
 async def voteKick(ctx):
     '''
@@ -292,7 +291,7 @@ async def voteKick(ctx):
     else:
         await addKick(ctx, user)
 
-@bot.command()
+@client.command()
 @commands.check(notThreat)
 async def unKick(ctx):
     '''
@@ -325,7 +324,7 @@ Per user: Subjects users in THREATS list to stricter conditions; subject to limi
 4: Loss of ability to ping
 '''
 # General Moderation Methods
-@bot.command(name = "lethal")
+@client.command(name = "lethal")
 @commands.check(isOP)
 async def setLethality(ctx, Lnew):
     '''
@@ -349,7 +348,7 @@ async def setLethality(ctx, Lnew):
     else:
         await ctx.send("Invalid Input.")
 
-@bot.command(name = "kickReq")
+@client.command(name = "kickReq")
 @commands.check(isOP)
 async def setKickReq(ctx, Knew):
     if int(Knew) >= 1:
@@ -359,7 +358,7 @@ async def setKickReq(ctx, Knew):
     else:
         await ctx.send("Invalid input.")
 
-@bot.command(name = "quarantine")
+@client.command(name = "quarantine")
 @commands.check(isOP)
 async def callQuarantine(ctx):
     '''
@@ -368,7 +367,7 @@ async def callQuarantine(ctx):
     user = ctx.message.mentions[0]
     await ctx.send(quarantine(user))
 
-@bot.command(name = "ZAHANDO")
+@client.command(name = "ZAHANDO")
 @commands.check(isOP)
 async def ZAHANDO(ctx, num):
     '''
@@ -377,7 +376,7 @@ async def ZAHANDO(ctx, num):
     await ZA_HANDO(ctx.message, num)
 
 # Dire moderation methods
-@bot.command
+@client.command
 @commands.check(isOP)
 async def SCRAM(ctx):
     '''
@@ -388,7 +387,7 @@ async def SCRAM(ctx):
         quarantine(client.get_guild(419214713252216848).get_member(i))
     await ctx.send("LOCKDOWN SUCCESSFUL. PROCEED WITH CONTINGENCY OPERATIONS.")
 
-@bot.command
+@client.command
 @commands.check(isOwner)
 async def requiem(ctx, mode):
     '''
@@ -397,7 +396,7 @@ async def requiem(ctx, mode):
     cfg["PURGE"] = [m.id for m in await utilitymodules.generateRequiem(ctx.message, mode)]
     await writeInfo()
 
-@bot.command
+@client.command
 @commands.check(isOwner)
 async def executePurge(ctx):
     '''
@@ -415,7 +414,7 @@ async def executePurge(ctx):
     else:
         await ctx.send("Please set global lethality to level 4 or higher. {} members will be kicked.".format(len(cfg["PURGE"])))
 
-@bot.command
+@client.command
 @commands.check(isOP)
 async def timeStop(ctx, time):
     '''
@@ -424,7 +423,7 @@ async def timeStop(ctx, time):
     await STAR_PLATINUM(ctx.message, time)
 
 # Threat dictionary methods
-@bot.command()
+@client.command()
 @commands.check(isOP)
 async def addThreat(ctx, *args):
     '''
@@ -437,7 +436,7 @@ async def addThreat(ctx, *args):
         await writeInfo()
         await ctx.send("Threat Added with Lethality = {}".format(cfg["THREATS"][user.id]["LETHALITY"]))
 
-@bot.command()
+@client.command()
 @commands.check(isOP)
 async def removeThreat(ctx):
     '''
@@ -449,7 +448,7 @@ async def removeThreat(ctx):
         await writeInfo()
         await ctx.send("Threat removed.")
 
-@bot.command()
+@client.command()
 @commands.check(isOP)
 async def addBanWord(ctx, word):
     '''
@@ -469,7 +468,7 @@ async def addBanWord(ctx, word):
             await writeInfo()
             await ctx.send("{} Has been added to the blacklist for {}.".format(word.lower(), user.name))
 
-@bot.command()
+@client.command()
 @commands.check(isOP)
 async def removeBanWord(ctx, word):
     '''
@@ -489,7 +488,7 @@ async def removeBanWord(ctx, word):
             await ctx.send("{} Has been removed from the blacklist for {}.".format(word.lower(), user.name))
 
 # Maintainence methods
-@bot.command()
+@client.command()
 @commands.check(isOP)
 async def resetKick(ctx):
     '''
@@ -498,16 +497,16 @@ async def resetKick(ctx):
     await genKick()
     await ctx.send("Kick Votes list has been successfully generated.")
 
-@bot.command(name = "reloadVars")
+@client.command(name = "reloadVars")
 @commands.check(isOP)
 async def callreloadVars(ctx):
     '''
     Allows user to call reloadVars from bot.
     '''
-    reloadVars()
+    await reloadVars()
     await ctx.send("Variables reloaded from file.")
 
-@bot.command
+@client.command
 @commands.check(isOwner)
 async def shutdown(ctx):
     '''
@@ -517,7 +516,7 @@ async def shutdown(ctx):
     await client.close()
     keep_alive.shutdown()
 
-@bot.command()
+@client.command()
 @commands.check(isOwner)
 async def dailyAnnounce(ctx):
     '''
@@ -525,7 +524,7 @@ async def dailyAnnounce(ctx):
     '''
     await dailyMSG(force=True)
 
-@bot.command()
+@client.command()
 @commands.check(isOwner)
 async def updateDaily(ctx):
     '''
@@ -556,10 +555,10 @@ async def removeFromList(ListName, user, SUDO = False):
     '''
     Removes a user from a list of ListName in cfg if they are in it.
     '''
-    if ListName in cfg and (not ListName in PROTECTED_NAMES or SUDO) and user in cfg[ListName]:
+    if ListName in cfg and (not ListName in PROTECTED_NAMES or SUDO) and user.id in cfg[ListName]:
         cfg[ListName].remove(user.id)
 
-        if len(cfg[ListName] == 0):
+        if len(cfg[ListName]) == 0:
             # culling of empty lists.
             removeList(ListName)
 
@@ -579,8 +578,8 @@ def getListUsers(ListName):
     '''
     try:
         if not ListName in PROTECTED_NAMES:
-            return [client.get_guild(419214713252216848).get_member(i).name for i in cfg[ListName]]
-    finally:
+            return [client.get_guild(419214713252216848).get_member(i) for i in cfg[ListName]]
+    except:
         return None
 
 def getListUserNames(ListName):
@@ -589,7 +588,7 @@ def getListUserNames(ListName):
     '''
     return [m.name for m in getListUsers(ListName)]
 
-@bot.command()
+@client.command()
 @commands.check(isOP)
 async def op(ctx):
     '''
@@ -598,7 +597,7 @@ async def op(ctx):
     user = ctx.message.mentions[0]
     await addToList("OPS", user, SUDO=True)
 
-@bot.command()
+@client.command()
 @commands.check(isOP)
 async def deop(ctx):
     '''
@@ -607,7 +606,7 @@ async def deop(ctx):
     user = ctx.message.mentions[0]
     await removeFromList("OPS", user, SUDO=True)
 
-@bot.command()
+@client.command()
 @commands.check(isOP)
 async def addKickSafe(ctx):
     '''
@@ -616,7 +615,7 @@ async def addKickSafe(ctx):
     user = ctx.message.mentions[0]
     await addToList("KICK_SAFE", user, SUDO=True)
 
-@bot.command()
+@client.command()
 @commands.check(isOP)
 async def removeKickSafe(ctx):
     '''
@@ -626,26 +625,57 @@ async def removeKickSafe(ctx):
     await removeFromList("KICK_SAFE", user, SUDO=True)
 
 # Custom list additions
-@bot.command()
+@client.command()
+async def helpList(ctx):
+    '''
+    Shows help for lists
+    '''
+    await ctx.send("```CUSTOM LISTS:\n- Show lists using $comrade showLists\n- Add a member to a new OR existing list using $comrade addList <List Name> <@mention>\n- Remove a member from a list using $comrade removeList <List Name> <@mention>\n- Check list members using $comrade checkList <List Name>\n- See this info again using $comrade helpList```")
+
+@client.command()
 @commands.check(notThreat)
-async def addCustomList(ctx, ListName):
+async def showLists(ctx):
+    '''
+    Lists the custom lists.
+    '''
+    names = ''
+    for s in cfg:
+        if not s in PROTECTED_NAMES:
+            names += s + '\n'
+    if names == '':
+        names = 'None'
+    await ctx.send("```Custom Lists:\n" + names + "```")
+
+@client.command()
+@commands.check(notThreat)
+async def addList(ctx, ListName):
     '''
     Adds a user to a custom list.
     '''
     await addToList(ListName, ctx.message.mentions[0])
     await ctx.send("List \"{}\" consists of the following:{}".format(ListName, getListUserNames(ListName)))
 
-@bot.command()
+@client.command(name = "removeList")
 @commands.check(notThreat)
-async def removeCustomList(ctx, ListName):
+async def removeFList(ctx, ListName):
     '''
     Removes a user from a custom list.
     '''
     await removeFromList(ListName, ctx.message.mentions[0])
-    await ctx.send("List \"{}\" consists of the following:{}".format(ListName, getListUserNames(ListName)))
+    await ctx.send("Removal Successful.")
+
+@client.command()
+async def checkList(ctx, ListName):
+    '''
+    Shows members of list
+    '''
+    if ListName in cfg and not ListName in PROTECTED_NAMES:
+        await ctx.send("List \"{}\" consists of the following:{}".format(ListName, getListUserNames(ListName)))
+    else:
+        await ctx.send("That list does not exist!")
 
 # Bot cleaning
-@bot.command()
+@client.command()
 async def clear(ctx):
     '''
     Clears all messages, callable from bot.
@@ -654,13 +684,13 @@ async def clear(ctx):
     await ctx.message.delete()
 
 # *STATUS OF BOT TODO
-@bot.command()
-async def status(ctx, arg):
+@client.command()
+async def status(ctx, *args):
     '''
     Reports the bot's status.
     Comes in two flavours; full and basic (default)
     '''
-    kickList = [(str(ctx.guild.get_member(i)) + ": " + str(len(cfg["kickVotes"][i]))) for i in cfg["kickVotes"] if cfg["kickVotes"][i] > 0]
+    kickList = [(str(ctx.guild.get_member(i)) + ": " + str(len(cfg["kickVotes"][i]))) for i in cfg["kickVotes"] if len(cfg["kickVotes"][i]) > 0]
     OPS = [str(ctx.guild.get_member(i)) for i in cfg["OPS"]]
     THREATS = [(str(ctx.guild.get_member(i)) + " - Lethality = " + str(cfg["THREATS"][i]["LETHALITY"]) + " - Banned Words:" + str(cfg["THREATS"][i]["BANNED_WORDS"])) for i in cfg["THREATS"]]
     LETHALITY = cfg["LETHALITY"]
@@ -669,12 +699,12 @@ async def status(ctx, arg):
     GLOBAL_WDS = str(cfg["GLOBAL_BANNED_WORDS"])
 
     uptime = datetime.utcnow() - t_start
-    if arg == "full":
+    if len(args) > 0 and args[0] == "full":
         await ctx.send("Uptime: {0}\nGlobal Lethality: {1}\nKick Votes: {2}\nKick Requirement: {3}\nOPS: {4}\nThreats: {5}\nKick Safe: {6}\n Global Banned Words: {7}".format(uptime, LETHALITY, kickList, KICK_REQ, OPS, THREATS, KICK_SAFE, GLOBAL_WDS))
     else:
         await ctx.send("Uptime: {0}\nGlobal Lethality: {1}\nKick Votes: {2}\nKick Requirement: {3}".format(uptime, LETHALITY, kickList, KICK_REQ))
         
-@bot.command()
+@client.command()
 async def lethalityhelp(ctx):
     '''
     Gives a quick guide on lethality.
@@ -682,49 +712,49 @@ async def lethalityhelp(ctx):
     await ctx.send("LETHALITY SYSTEM\nWorks under 2 regimes - Global and Per User.\nGlobal: Enables and disables features at various levels\n0: None\n1: Kicking enabled\n2: Message Filtering for threats enabled\n3: Message filtering for all users enabled\n4: Purge enabled\n\nPer user: Subjects users in THREATS list to stricter conditions; subject to limitation by global lethality\n0: No restrictions\n1: No voting of any form\n2: Messages filtered (relaxed)\n3: Messages filtered strictly\n4: Loss of ability to ping")
 
 # TODO Tomato function refinements
-@bot.command(name = u"\U0001F345")
+@client.command(name = u"\U0001F345")
 @commands.check(notThreat)
-async def tomato(ctx, arg):
+async def tomato(ctx, *args):
     '''
     System for putting a post into a designated Hall of Fame channel.
     '''
     # Mode 1: candidate
-    if (not str(arg).isnumeric() or arg is None):
+    if (len(args) == 0 or not str(args[0]).isnumeric()):
         # Determine URL of object
         u = ''
         if len(ctx.message.attachments) > 0:
             u = ctx.message.attachments[0].url
         else:
-            u = arg
+            u = args[0]
         vaultCandidates[ctx.message.id] = {"Author":ctx.author, "URL":u}
         await ctx.send("Candidate created. One more person must confirm, using $comrade <:tomato:644700384291586059> {}".format(ctx.message.id))
 
     # Mode 2: vote
-    elif str(arg).isnumeric() and int(arg) in vaultCandidates and vaultCandidates[int(arg)]["Author"] != ctx.author:
+    elif str(args[0]).isnumeric() and int(args[0]) in vaultCandidates and vaultCandidates[int(args[0])]["Author"] != ctx.author:
         # check if another unique author confirms
         await client.get_guild(419214713252216848).get_channel(587743411499565067).send(
-            "Sent by {0}:\n{1}".format(vaultCandidates[int(arg)]["Author"].mention, vaultCandidates[int(arg)]["URL"]))
+            "Sent by {0}:\n{1}".format(vaultCandidates[int(args[0])]["Author"].mention, vaultCandidates[int(args[0])]["URL"]))
 # Fun stuff
-@bot.command()
+@client.command()
 async def textToEmoji(ctx, s):
     '''
     Uses the emoji converter in utilities to convert a string of text to emoji.
     '''
     await ctx.send(utilitymodules.textToEmoji(s))
 
-@bot.command()
+@client.command()
 async def emojiToText(ctx, s):
     '''
     Uses the emoji converter in utilities to convert some emojis to plaintext.
     '''
     await ctx.send(utilitymodules.emojiToText(s))
 
-@bot.command()
+@client.command()
 async def version(ctx):
     '''
     Indicates version
     '''
-    await ctx.send("Comrade is currently running on version: {}")
+    await ctx.send("Comrade is currently running on version: {}".format(VERSION))
 
 '''
 MESSAGE EVENTS
@@ -778,7 +808,7 @@ async def on_message(message:discord.message):
             await message.channel.send('Henlo')
         elif 'henlo comrade' in message.content.lower():
             await message.channel.send('Hello')
-        elif 'comrade' in message.content.lower() and fuzz.partial_ratio('hello', message.content.lower()) > 50:
+        elif 'comrade' in message.content.lower() and fuzz.partial_ratio('hello', message.content.lower()) > 50 and not '$' in message.content.lower():
             await message.channel.send('Good day!')
 
         # fun stuff
@@ -791,8 +821,7 @@ async def on_message(message:discord.message):
             # react to @everyone
             await message.add_reaction(client.get_emoji(659263935979192341))
 
-        print(message.author.id)
-        await bot.process_commands(message) # interpret commands
+        await client.process_commands(message) # interpret commands
 
 @client.event
 async def on_message_edit(OG:discord.message, message:discord.message):
