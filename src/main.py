@@ -11,7 +11,6 @@ December 2019 - 2020
 # I: External Library Imports
 import discord # core to bot
 from discord.ext import commands
-import pymongo # CFG storage
 
 # Text Filtering
 import re
@@ -27,16 +26,19 @@ from datetime import datetime # Time func
 
 import asyncio # Dependancy for Discord py
 
-import requests # PFP module
-
 import random
-
 
 # II: Internal Imports
 import keep_alive
 import comrade_cfg
 import utilitymodules
 
+'''
+Handy Stuff
+
+client.get_guild(419214713252216848) is my server.
+
+'''
 
 '''
 Initialization Phase
@@ -51,9 +53,7 @@ t_start = datetime.utcnow() # start time
 
 # I: Variable Loading
 dotenv.load_dotenv()
-TOKEN = os.environ.get('TOKEN')
-GUILD_ID = os.environ.get('GUILD')
-MONGO_DRIVER = os.environ.get('DB')
+TOKEN = os.environ.get('TOKEN') # bot token; kept private
 
 cfg = comrade_cfg.data # load config variables
 
@@ -62,11 +62,21 @@ PROTECTED_NAMES = ["LETHALITY", "THREATS", "kickVotes", "OPS", "GLOBAL_BANNED_WO
 
 # Temporary Variables
 vaultCandidates = {}
-hando_list = {}
+handoList = {}
+
+print('All variables loaded.')
 
 # II: Client startup
 client = discord.Client()
 bot = commands.Bot(command_prefix="$comrade") # declare bot with prefix $comrade
+
+print('Starting Internal Server...')
+# Create webserver to keep bot running on Repl.it
+keep_alive.keep_alive()
+# Create loop task to perform timed actions
+client.loop.create_task(dailyMSG())
+# Finally, start the bot
+client.run(TOKEN)
 
 '''
 FUNCTIONS
@@ -118,9 +128,8 @@ async def dailyRole():
     '''
     Sets new daily member, removing all previous daily member roles
     '''
-
     members = client.get_guild(419214713252216848).members
-    random.seed()
+    random.seed() # important to seed random user
     chosenone = random.randint(0, len(members)-1)
 
     s = members[chosenone].name
@@ -199,7 +208,7 @@ async def sentinelFilter(message:discord.message):
     Sentinel message filtering system, allows for multivalent toggles
     '''
     # Stage 1: text detection
-    query = re.sub('\W+','', unidecode.unidecode(utilitymodules.emojiToText(message.content.lower()))) # clean message content down to text
+    query = re.sub("\W+",'', unidecode.unidecode(utilitymodules.emojiToText(message.content.lower()))) # clean message content down to text
     # 3 Stages of filtering: 1) Emoji pass through 2) Eliminating nonstandard unicode chars 3) Regex Substitutions to eliminate non word characters
     
     strict = (message.author.id in cfg["THREATS"] and cfg["THREATS"][message.author.id] >= 3) or cfg["LETHALITY"] >= 3 # determines whether message filtering should be relaxed (needs exact content) or strict (75% match)
@@ -223,11 +232,12 @@ async def sentinelFilter(message:discord.message):
         await message.channel.send("USELESS PING DETECTED SENT BY {}".format(message.author.mention))
 
 # TODO new infraction System?
+async def infraction():
+    pass
 
 '''
 COMMANDS
 '''
-
 # Checks
 def isOP(ctx):
     '''
@@ -358,7 +368,60 @@ async def callQuarantine(ctx):
     user = ctx.message.mentions[0]
     await ctx.send(quarantine(user))
 
-#@bot SCRAM
+@bot.command(name = "ZAHANDO")
+@commands.check(isOP)
+async def ZAHANDO(ctx, num):
+    '''
+    Calls on the ZA_HANDO method in command form.
+    '''
+    await ZA_HANDO(ctx.message, num)
+
+# Dire moderation methods
+@bot.command
+@commands.check(isOP)
+async def SCRAM(ctx):
+    '''
+    Puts server into lockdown mode. Quite Dangerous.
+    '''
+    await setLethality(ctx, 4)
+    for i in cfg["THREATS"]:
+        quarantine(client.get_guild(419214713252216848).get_member(i))
+    await ctx.send("LOCKDOWN SUCCESSFUL. PROCEED WITH CONTINGENCY OPERATIONS.")
+
+@bot.command
+@commands.check(isOwner)
+async def requiem(ctx, mode):
+    '''
+    Generates list of people for a server-wide purge.
+    '''
+    cfg["PURGE"] = [m.id for m in await utilitymodules.generateRequiem(ctx.message, mode)]
+    writeInfo()
+
+@bot.command
+@commands.check(isOwner)
+async def executePurge(ctx):
+    '''
+    Removes all people from PURGE list.
+    '''
+    if cfg["LETHALITY"] >= 4:
+        await ctx.send("Purge started. {} members will be kicked.".format(len(cfg["PURGE"])))
+
+        for i in cfg["PURGE"]:
+            await ctx.guild.kick(ctx.guild.get_member(i))
+
+        await genKick()
+
+        await ctx.send("Purge complete.")
+    else:
+        await ctx.send("Please set global lethality to level 4 or higher. {} members will be kicked.".format(len(cfg["PURGE"])))
+
+@bot.command
+@commands.check(isOP)
+async def timeStop(ctx, time):
+    '''
+    More potent version of time stop with variable lockdown timer
+    '''
+    await STAR_PLATINUM(ctx.message, time)
 
 # Threat dictionary methods
 @bot.command()
@@ -425,7 +488,7 @@ async def removeBanWord(ctx, word):
             writeInfo()
             await ctx.send("{} Has been removed from the blacklist for {}.".format(word.lower(), user.name))
 
-# maintainence methods
+# Maintainence methods
 @bot.command()
 @commands.check(isOP)
 async def resetKick(ctx):
@@ -444,7 +507,7 @@ async def callreloadVars(ctx):
     reloadVars()
     await ctx.send("Variables reloaded from file.")
 
-@bot.command(name = "reloadVars")
+@bot.command
 @commands.check(isOwner)
 async def shutdown(ctx):
     '''
@@ -453,7 +516,26 @@ async def shutdown(ctx):
     await client.logout()
     await client.close()
     keep_alive.shutdown()
-    
+
+@bot.command()
+@commands.check(isOwner)
+async def dailyAnnounce(ctx):
+    '''
+    Forces the daily announcement to occur.
+    '''
+    await dailyMSG(force=True)
+
+@bot.command()
+@commands.check(isOwner)
+async def updateDaily(ctx):
+    '''
+    Force refresh of last_daily variable
+    '''
+    if datetime.utcnow().date > lastDaily() and datetime.utcnow().hour >= 12:
+        cfg["LAST_DAILY"] = str(datetime.utcnow().date())
+        writeInfo()
+        await log("Force Refreshed Daily. Current LAST_DAILY = {}".format(cfg["LAST_DAILY"]))
+
 '''
 Generalized list functions
 Allows creation of **USER** collections on the fly with custom names
@@ -562,27 +644,178 @@ async def removeCustomList(ctx, ListName):
     removeFromList(ListName, ctx.message.mentions[0])
     await ctx.send("List \"{}\" consists of the following:{}".format(ListName, getListUserNames(ListName)))
 
+# Bot cleaning
+@bot.command()
+async def clear(ctx):
+    '''
+    Clears all messages, callable from bot.
+    '''
+    await cleanMSG()
+    await ctx.message.delete()
+
 # *STATUS OF BOT TODO
 @bot.command()
-async def status(ctx):
-    pass
+async def status(ctx, arg):
+    '''
+    Reports the bot's status.
+    Comes in two flavours; full and basic (default)
+    '''
+    kickList = [(str(ctx.guild.get_member(i)) + ": " + str(len(cfg["kickVotes"][i]))) for i in cfg["kickVotes"] if cfg["kickVotes"][i] > 0]
+    OPS = [str(ctx.guild.get_member(i)) for i in cfg["OPS"]]
+    THREATS = [(str(ctx.guild.get_member(i)) + " - Lethality = " + str(cfg["THREATS"][i]["LETHALITY"]) + " - Banned Words:" + str(cfg["THREATS"][i]["BANNED_WORDS"])) for i in cfg["THREATS"]]
+    LETHALITY = cfg["LETHALITY"]
+    KICK_REQ = cfg["KICK_REQ"]
+    KICK_SAFE = [str(ctx.guild.get_member(i)) for i in cfg["KICK_SAFE"]]
+    GLOBAL_WDS = str(cfg["GLOBAL_BANNED_WORDS"])
 
+    uptime = datetime.utcnow() - t_start
+    if arg == "full":
+        await ctx.send("Uptime: {0}\nGlobal Lethality: {1}\nKick Votes: {2}\nKick Requirement: {3}\nOPS: {4}\nThreats: {5}\nKick Safe: {6}\n Global Banned Words: {7}".format(uptime, LETHALITY, kickList, KICK_REQ, OPS, THREATS, KICK_SAFE, GLOBAL_WDS))
+    else:
+        await ctx.send("Uptime: {0}\nGlobal Lethality: {1}\nKick Votes: {2}\nKick Requirement: {3}".format(uptime, LETHALITY, kickList, KICK_REQ))
+        
+@bot.command()
+async def lethalityhelp(ctx):
+    '''
+    Gives a quick guide on lethality.
+    '''
+    await ctx.send("LETHALITY SYSTEM\nWorks under 2 regimes - Global and Per User.\nGlobal: Enables and disables features at various levels\n0: None\n1: Kicking enabled\n2: Message Filtering for threats enabled\n3: Message filtering for all users enabled\n4: Purge enabled\n\nPer user: Subjects users in THREATS list to stricter conditions; subject to limitation by global lethality\n0: No restrictions\n1: No voting of any form\n2: Messages filtered (relaxed)\n3: Messages filtered strictly\n4: Loss of ability to ping")
 
-# TODO Tomato function
+# TODO Tomato function refinements
 @bot.command(name = u"\U0001F345")
-async def tomato(ctx):
-    pass
+@commands.check(notThreat)
+async def tomato(ctx, arg):
+    '''
+    System for putting a post into a designated Hall of Fame channel.
+    '''
+    # Mode 1: candidate
+    if (not str(arg).isnumeric() or arg is None):
+        # Determine URL of object
+        u = ''
+        if len(ctx.message.attachments) > 0:
+            u = ctx.message.attachments[0].url
+        else:
+            u = arg
+        vaultCandidates[ctx.message.id] = {"Author":ctx.author, "URL":u}
+        await ctx.send("Candidate created. One more person must confirm, using $comrade <:tomato:644700384291586059> {}".format(ctx.message.id))
 
+    # Mode 2: vote
+    elif str(arg).isnumeric() and int(arg) in vaultCandidates and vaultCandidates[int(arg)]["Author"] != ctx.author:
+        # check if another unique author confirms
+        await client.get_guild(419214713252216848).get_channel(587743411499565067).send(
+            "Sent by {0}:\n{1}".format(vaultCandidates[int(arg)]["Author"].mention, vaultCandidates[int(arg)]["URL"]))
+# Fun stuff
+@bot.command()
+async def textToEmoji(ctx, s):
+    '''
+    Uses the emoji converter in utilities to convert a string of text to emoji.
+    '''
+    await ctx.send(utilitymodules.textToEmoji(s))
 
+@bot.command()
+async def emojiToText(ctx, s):
+    '''
+    Uses the emoji converter in utilities to convert some emojis to plaintext.
+    '''
+    await ctx.send(utilitymodules.emojiToText(s))
 
+'''
+MESSAGE EVENTS
+'''
 
-# Create webserver to keep bot running on Repl.it
-keep_alive.keep_alive()
-# Create loop task to perform timed actions
-client.loop.create_task(dailyMSG())
-# Finally, start the bot
-client.run(TOKEN)
+# TODO these need some work (user is able to speak)
+async def STAR_PLATINUM(message, time):
+    '''
+    Stops time.
+    '''
+    await message.channel.send('ZA WARUDO')
+    # Remove ability for people to talk and TODO: allow daily member to talk
+    await message.channel.set_permissions(message.guild.get_role(419215295232868361), send_messages=False)
+    await asyncio.sleep(time)
+    await message.channel.set_permissions(message.guild.get_role(419215295232868361), send_messages=True)
+    await message.channel.send('Time has begun to move again.')
+
+async def ZA_HANDO(message, num=10):
+    '''
+    Purges messages en masse.
+    '''
+    PURGE_REQ = 3 # Tunable
+
+    if message.author.id in cfg["OPS"]:
+        await message.channel.purge(limit=num)
+    else:
+        if not message.channel.id in handoList:
+            handoList[message.channel.id] = [message.author.id]
+            await message.channel.send("Message purge initiated. {0} Votes are needed. ({1}/{2})".format(PURGE_REQ, len(handoList[message.channel.id]), PURGE_REQ))
+        elif not message.author.id in handoList[message.channel.id]:    
+            handoList[message.channel.id].append(message.author.id)
+            await message.channel.send("Message purge vote registered. {0}/{1}".format(len(handoList[message.channel.id]), PURGE_REQ))
+            if len(handoList[message.channel.id]) >= PURGE_REQ:
+                await message.channel.purge(limit=num)
+            del handoList[message.channel.id]
+
+@client.event
+async def on_message(message:discord.message):
+    '''
+    Triggers whenever a message is sent anywhere visible to the bot.
+    '''
+    if message.author != client.user:
+        # Check to prevent feedback loop
+
+        # Filter messages
+        if cfg["LETHALITY"] >= 4 or (cfg["LETHALITY"] >= 2 and message.author.id in cfg["THREATS"] and cfg["THREATS"][message.author.id] >= 2):
+            await sentinelFilter(message)
+        
+        # Greeting function (one of the earliest functions that Comrade had)
+        if 'hello comrade' in message.content.lower():
+            await message.channel.send('Henlo')
+        elif 'henlo comrade' in message.content.lower():
+            await message.channel.send('Hello')
+        elif 'comrade' in message.content.lower() and fuzz.partial_ratio('hello', message.content.lower()) > 50:
+            await message.channel.send('Good day!')
+
+        # fun stuff
+        if message.content == "STAR PLATINUM":
+            await STAR_PLATINUM(message, 5)
+        elif message.content == "ZA HANDO":
+            await ZA_HANDO(message)
+
+        if message.mention_everyone or len(message.mentions) > 2:
+            # react to @everyone
+            await message.add_reaction(client.get_emoji(659263935979192341))
+
+@client.event
+async def on_message_edit(OG:discord.message, message:discord.message):
+    '''
+    Triggers when message is edited.
+    '''
+    # Filter message
+    if cfg["LETHALITY"] >= 4 or (cfg["LETHALITY"] >= 2 and message.author.id in cfg["THREATS"] and cfg["THREATS"][message.author.id] >= 2):
+            await sentinelFilter(message)
+
+'''
+CLIENT INIT Cont'
+'''
+@client.event
+async def on_ready():
+    for guild in client.guilds:
+        # detect home guild
+        if guild.id == 419214713252216848:
+            print("Connected successfully to {} (id = {})".format(guild.name, guild.id))
+            if len(cfg["kickVotes"]) != len(guild.members):
+                # regenerate kickList if number of members has changed
+                await genKick()
+                print("kickVotes was updated due to a change in the number of members")
+            print("{} members detected.".format(len(guild.members)))
+
+    print("{} is online and ready to go.".format(client.user))
+    
+    # Change presence accordingly
+    await client.change_presence(status=discord.Status.online, activity=discord.Game("Upholding Communism"))
+    await client.get_guild(419214713252216848).get_channel(446457522862161920).send("Comrade is online. Current UTC time is {}".format(datetime.datetime.utcnow()))
+    
+    # DONE
+    print("Done! Time taken: {}".format(datetime.utcnow - t_start))
 
 if __name__ == "__main__":
-    cfg["LETHALITY"] = 1
-    writeInfo()
+    print("Nothing to see here...")
