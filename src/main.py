@@ -22,7 +22,7 @@ import os
 import dotenv # NOTE - install as "pip install python-dotenv"
 
 # Misc stuff
-from datetime import datetime # Time func
+from datetime import datetime, timedelta # Time func
 
 import asyncio # Dependancy for Discord py
 
@@ -111,10 +111,13 @@ async def cleanMSG():
     Removes all bot messages in the last 24 hours.
     '''
     for channel in client.get_guild(419214713252216848).text_channels:
-        yesterday = datetime.datetime.now()-datetime.timedelta(days=1)
+        yesterday = datetime.now()-timedelta(hours=1)
         async for msg in channel.history(limit=None,after=yesterday):
             if msg.author == client.user:
-                await msg.delete()
+                try:
+                    await msg.delete()
+                except:
+                    await log("Some messages could not be deleted.")
 
 async def dailyRole():
     '''
@@ -736,6 +739,7 @@ async def tomato(ctx, *args):
             "Sent by {0}:\n{1}".format(vaultCandidates[int(args[0])]["Author"].mention, vaultCandidates[int(args[0])]["URL"]))
 # Fun stuff
 @client.command()
+@commands.check(notThreat)
 async def textToEmoji(ctx, s):
     '''
     Uses the emoji converter in utilities to convert a string of text to emoji.
@@ -743,6 +747,7 @@ async def textToEmoji(ctx, s):
     await ctx.send(utilitymodules.textToEmoji(s))
 
 @client.command()
+@commands.check(notThreat)
 async def emojiToText(ctx, s):
     '''
     Uses the emoji converter in utilities to convert some emojis to plaintext.
