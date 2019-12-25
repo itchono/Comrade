@@ -155,15 +155,18 @@ async def dailyMSG(force = False):
     
     while not client.is_closed():
         if (datetime.utcnow().date > lastDaily() and datetime.utcnow().hour == 12) or force:
+            '''
             await cleanMSG()
             asyncio.sleep(30)
             # allow 30 seconds for script to run to clean messages
+            '''
 
             await client.get_guild(419214713252216848).get_channel(419214713755402262).send('Good morning everyone!\nToday is {}. Have a prosperous day! <:FeelsProsperousMan:419256328465285131>'.format(datetime.utcnow().date()))
             cfg["LAST_DAILY"] = str(datetime.utcnow().date())
             writeInfo()
             await log("Daily Announcement Made. Current LAST_DAILY = {}".format(cfg["LAST_DAILY"]))
             # make announcement
+            force = False
 
             dailyRole() # do daily role
         await asyncio.sleep(60)
