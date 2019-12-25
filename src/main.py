@@ -59,6 +59,7 @@ cfg = comrade_cfg.data # load config variables
 
 PROTECTED_NAMES = ["LETHALITY", "THREATS", "kickVotes", "OPS", "GLOBAL_BANNED_WORDS", "PURGE", "LAST_DAILY"]
 # Protected dictionary elements in cfg file
+VERSION = "Comrade 2.0.0 Osprey"
 
 # Temporary Variables
 vaultCandidates = {}
@@ -66,17 +67,9 @@ handoList = {}
 
 print('All variables loaded.')
 
-# II: Client startup
+# II: Client startup PT 1
 client = discord.Client()
 bot = commands.Bot(command_prefix="$comrade") # declare bot with prefix $comrade
-
-print('Starting Internal Server...')
-# Create webserver to keep bot running on Repl.it
-keep_alive.keep_alive()
-# Create loop task to perform timed actions
-client.loop.create_task(dailyMSG())
-# Finally, start the bot
-client.run(TOKEN)
 
 '''
 FUNCTIONS
@@ -87,7 +80,7 @@ async def log(msg):
     '''
     await client.get_guild(419214713252216848).get_channel(446457522862161920).send(msg)
 
-def writeInfo():
+async def writeInfo():
     '''
     Writes changes made to cfg dictionary to configuration file.
     '''
@@ -154,7 +147,7 @@ async def dailyMSG(force = False):
     await client.wait_until_ready()
     
     while not client.is_closed():
-        if (datetime.utcnow().date > lastDaily() and datetime.utcnow().hour == 12) or force:
+        if (datetime.utcnow().date() > lastDaily().date() and datetime.utcnow().hour == 12) or force:
             '''
             await cleanMSG()
             asyncio.sleep(30)
@@ -163,7 +156,7 @@ async def dailyMSG(force = False):
 
             await client.get_guild(419214713252216848).get_channel(419214713755402262).send('Good morning everyone!\nToday is {}. Have a prosperous day! <:FeelsProsperousMan:419256328465285131>'.format(datetime.utcnow().date()))
             cfg["LAST_DAILY"] = str(datetime.utcnow().date())
-            writeInfo()
+            await writeInfo()
             await log("Daily Announcement Made. Current LAST_DAILY = {}".format(cfg["LAST_DAILY"]))
             # make announcement
             force = False
@@ -175,11 +168,13 @@ async def genKick():
     '''
     Generates/Regenerates kicklist for all members on server
     '''
+    cfg["kickVotes"] = {} # refresh
+
     for member in client.get_guild(419214713252216848).members:
         cfg["kickVotes"][member.id] = []
     
-    writeInfo()
-    await log("Kicklist regenerated.")
+    await writeInfo()
+    await log("Kicklist regenerated - {} members loaded.".format(len(cfg["kickVotes"])))
 
 async def quarantine(user:discord.user):
     '''
@@ -268,7 +263,7 @@ async def addKick(ctx, user):
     '''
     cfg["kickVotes"][user].append(ctx.author.id) # Add vote
     num_votes = len(cfg["kickVotes"][user])
-    writeInfo()
+    await writeInfo()
     await ctx.send("Vote added for {0} ({1}/{2}).".format(user.name, num_votes, cfg["KICK_REQ"]))
 
     # Check if threshold is met
@@ -282,6 +277,7 @@ async def addKick(ctx, user):
 
 # Kick System
 @bot.command()
+@commands.check(notThreat)
 async def voteKick(ctx):
     '''
     Checks to see whether to add vote to kick a user.
@@ -297,6 +293,7 @@ async def voteKick(ctx):
         await addKick(ctx, user)
 
 @bot.command()
+@commands.check(notThreat)
 async def unKick(ctx):
     '''
     Removes vote from user.
@@ -305,7 +302,7 @@ async def unKick(ctx):
     if ctx.author.id in cfg["kickVotes"][user.id]:
         cfg["kickVotes"][user.id].remove(ctx.author.id)
         num_votes = len(cfg["kickVotes"][user])
-        writeInfo()
+        await writeInfo()
         await ctx.send("Vote removed for {0} ({1}/{2}).".format(user.name, num_votes, cfg["KICK_REQ"]))
     else:
         await ctx.send("You have not voted to kick {}.".format(user.name))
@@ -340,14 +337,14 @@ async def setLethality(ctx, Lnew):
         # Global Modificaiton
         if len(ctx.message.mentions) == 0:
             cfg["LETHALITY"] = float(Lnew)
-            writeInfo()
+            await writeInfo()
             await ctx.send("Global Lethality has been set to {}.".format(cfg["LETHALITY"]))
         # Modificaiton for a single user (in THREATS)
         else:
             user = ctx.message.mentions[0]
             if user.id in cfg["THREATS"]:
                 cfg["THREATS"][user.id]["LETHALITY"] = float(Lnew)
-                writeInfo()
+                await writeInfo()
                 await ctx.send("User Lethality has been set to {}.\nPlease ensure global lethality is set accordingly to enable lethal features.".format(cfg["LETHALITY"]))
     else:
         await ctx.send("Invalid Input.")
@@ -357,7 +354,7 @@ async def setLethality(ctx, Lnew):
 async def setKickReq(ctx, Knew):
     if int(Knew) >= 1:
         cfg["KICK_REQ"] = int(Knew)
-        writeInfo()
+        await writeInfo()
         await ctx.send("Kick Requirement Set to {} votes.".format(cfg["KICK_REQ"]))
     else:
         await ctx.send("Invalid input.")
@@ -398,7 +395,7 @@ async def requiem(ctx, mode):
     Generates list of people for a server-wide purge.
     '''
     cfg["PURGE"] = [m.id for m in await utilitymodules.generateRequiem(ctx.message, mode)]
-    writeInfo()
+    await writeInfo()
 
 @bot.command
 @commands.check(isOwner)
@@ -437,7 +434,7 @@ async def addThreat(ctx, *args):
     user = ctx.message.mentions[0]
     if not user.id in cfg["THREATS"]:
         cfg["THREATS"][user.id] = {"LETHALITY":level, "BANNED_WORDS":set()}
-        writeInfo()
+        await writeInfo()
         await ctx.send("Threat Added with Lethality = {}".format(cfg["THREATS"][user.id]["LETHALITY"]))
 
 @bot.command()
@@ -449,7 +446,7 @@ async def removeThreat(ctx):
     user = ctx.message.mentions[0]
     if user.id in cfg["THREATS"]:
         del cfg["THREATS"][user.id]
-        writeInfo()
+        await writeInfo()
         await ctx.send("Threat removed.")
 
 @bot.command()
@@ -462,14 +459,14 @@ async def addBanWord(ctx, word):
     if len(ctx.message.mentions) == 0 and not word.lower() in cfg["GLOBAL_BANNED_WORDS"]:
         # global
         cfg["GLOBAL_BANNED_WORDS"].add(word.lower())
-        writeInfo()
+        await writeInfo()
         await ctx.send("{} Has been added to the global blacklist.".format(word.lower()))
     else:
         user = ctx.message.mentions[0]
         if user.id in cfg["THREATS"] and not word.lower() in cfg["THREATS"][user.id]["BANNED_WORDS"]:
             # per user
             cfg["THREATS"][user.id]["BANNED_WORDS"].add(word.lower())
-            writeInfo()
+            await writeInfo()
             await ctx.send("{} Has been added to the blacklist for {}.".format(word.lower(), user.name))
 
 @bot.command()
@@ -481,14 +478,14 @@ async def removeBanWord(ctx, word):
     if len(ctx.message.mentions) == 0 and word.lower() in cfg["GLOBAL_BANNED_WORDS"]:
         # global
         cfg["GLOBAL_BANNED_WORDS"].remove(word.lower())
-        writeInfo()
+        await writeInfo()
         await ctx.send("{} Has been removed from the global blacklist.".format(word.lower()))
     else:
         user = ctx.message.mentions[0]
         if user.id in cfg["THREATS"] and word.lower() in cfg["THREATS"][user.id]["BANNED_WORDS"]:
             # per user
             cfg["THREATS"][user.id]["BANNED_WORDS"].remove(word.lower())
-            writeInfo()
+            await writeInfo()
             await ctx.send("{} Has been removed from the blacklist for {}.".format(word.lower(), user.name))
 
 # Maintainence methods
@@ -534,9 +531,9 @@ async def updateDaily(ctx):
     '''
     Force refresh of last_daily variable
     '''
-    if datetime.utcnow().date > lastDaily() and datetime.utcnow().hour >= 12:
+    if datetime.utcnow().date() > lastDaily().date() and datetime.utcnow().hour >= 12:
         cfg["LAST_DAILY"] = str(datetime.utcnow().date())
-        writeInfo()
+        await writeInfo()
         await log("Force Refreshed Daily. Current LAST_DAILY = {}".format(cfg["LAST_DAILY"]))
 
 '''
@@ -544,7 +541,7 @@ Generalized list functions
 Allows creation of **USER** collections on the fly with custom names
 Will not work with other datatypes for now.
 '''
-def addToList(ListName, user, SUDO = False):
+async def addToList(ListName, user, SUDO = False):
     '''
     Adds a user to a list of name ListName in the cfg file.
     Creates new list if it does not exist.
@@ -553,9 +550,9 @@ def addToList(ListName, user, SUDO = False):
         cfg[ListName] = [user.id]
     elif (not ListName in PROTECTED_NAMES or SUDO) and not user.id in cfg[ListName]:
         cfg[ListName].append(user.id)
-    writeInfo()
+    await writeInfo()
 
-def removeFromList(ListName, user, SUDO = False):
+async def removeFromList(ListName, user, SUDO = False):
     '''
     Removes a user from a list of ListName in cfg if they are in it.
     '''
@@ -566,15 +563,15 @@ def removeFromList(ListName, user, SUDO = False):
             # culling of empty lists.
             removeList(ListName)
 
-        writeInfo()
+        await writeInfo()
 
-def removeList(ListName, SUDO = False):
+async def removeList(ListName, SUDO = False):
     '''
     Removes entire list.
     '''
     if ListName in cfg and (not ListName in PROTECTED_NAMES or SUDO):
         del cfg[ListName]
-        writeInfo()
+        await writeInfo()
 
 def getListUsers(ListName):
     '''
@@ -599,7 +596,7 @@ async def op(ctx):
     Opps a user
     '''
     user = ctx.message.mentions[0]
-    addToList("OPS", user, SUDO=True)
+    await addToList("OPS", user, SUDO=True)
 
 @bot.command()
 @commands.check(isOP)
@@ -608,7 +605,7 @@ async def deop(ctx):
     deops a user
     '''
     user = ctx.message.mentions[0]
-    removeFromList("OPS", user, SUDO=True)
+    await removeFromList("OPS", user, SUDO=True)
 
 @bot.command()
 @commands.check(isOP)
@@ -617,7 +614,7 @@ async def addKickSafe(ctx):
     Adds user to Kick Safe list.
     '''
     user = ctx.message.mentions[0]
-    addToList("KICK_SAFE", user, SUDO=True)
+    await addToList("KICK_SAFE", user, SUDO=True)
 
 @bot.command()
 @commands.check(isOP)
@@ -626,7 +623,7 @@ async def removeKickSafe(ctx):
     Removes user from Kick Safe list.
     '''
     user = ctx.message.mentions[0]
-    removeFromList("KICK_SAFE", user, SUDO=True)
+    await removeFromList("KICK_SAFE", user, SUDO=True)
 
 # Custom list additions
 @bot.command()
@@ -635,7 +632,7 @@ async def addCustomList(ctx, ListName):
     '''
     Adds a user to a custom list.
     '''
-    addToList(ListName, ctx.message.mentions[0])
+    await addToList(ListName, ctx.message.mentions[0])
     await ctx.send("List \"{}\" consists of the following:{}".format(ListName, getListUserNames(ListName)))
 
 @bot.command()
@@ -644,7 +641,7 @@ async def removeCustomList(ctx, ListName):
     '''
     Removes a user from a custom list.
     '''
-    removeFromList(ListName, ctx.message.mentions[0])
+    await removeFromList(ListName, ctx.message.mentions[0])
     await ctx.send("List \"{}\" consists of the following:{}".format(ListName, getListUserNames(ListName)))
 
 # Bot cleaning
@@ -722,6 +719,13 @@ async def emojiToText(ctx, s):
     '''
     await ctx.send(utilitymodules.emojiToText(s))
 
+@bot.command()
+async def version(ctx):
+    '''
+    Indicates version
+    '''
+    await ctx.send("Comrade is currently running on version: {}")
+
 '''
 MESSAGE EVENTS
 '''
@@ -787,6 +791,9 @@ async def on_message(message:discord.message):
             # react to @everyone
             await message.add_reaction(client.get_emoji(659263935979192341))
 
+        print(message.author.id)
+        await bot.process_commands(message) # interpret commands
+
 @client.event
 async def on_message_edit(OG:discord.message, message:discord.message):
     '''
@@ -805,20 +812,29 @@ async def on_ready():
         # detect home guild
         if guild.id == 419214713252216848:
             print("Connected successfully to {} (id = {})".format(guild.name, guild.id))
+
             if len(cfg["kickVotes"]) != len(guild.members):
                 # regenerate kickList if number of members has changed
                 await genKick()
-                print("kickVotes was updated due to a change in the number of members")
+                print("ATTN: kickVotes was updated due to a change in the number of members")
             print("{} members detected.".format(len(guild.members)))
 
     print("{} is online and ready to go.".format(client.user))
     
     # Change presence accordingly
     await client.change_presence(status=discord.Status.online, activity=discord.Game("Upholding Communism"))
-    await client.get_guild(419214713252216848).get_channel(446457522862161920).send("Comrade is online. Current UTC time is {}".format(datetime.datetime.utcnow()))
+    await client.get_guild(419214713252216848).get_channel(446457522862161920).send("Comrade is online. Current UTC time is {}".format(datetime.utcnow()))
     
     # DONE
-    print("Done! Time taken: {}".format(datetime.utcnow - t_start))
+    print("Done! Time taken: {}".format(datetime.utcnow() - t_start))
 
-if __name__ == "__main__":
-    print("Nothing to see here...")
+# Client startup PT 2
+print('Starting Internal Server...')
+# Create webserver to keep bot running on Repl.it
+keep_alive.keep_alive()
+# Create loop task to perform timed actions
+client.loop.create_task(dailyMSG())
+# Finally, start the bot
+client.run(TOKEN)
+
+# END OF FILE
