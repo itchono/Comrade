@@ -347,7 +347,7 @@ async def setLethality(ctx, Lnew):
             if user.id in cfg["THREATS"]:
                 cfg["THREATS"][user.id]["LETHALITY"] = float(Lnew)
                 await writeInfo()
-                await ctx.send("User Lethality has been set to {}.\nPlease ensure global lethality is set accordingly to enable lethal features.".format(cfg["LETHALITY"]))
+                await ctx.send("User Lethality has been set to {}.\nPlease ensure global lethality is set accordingly to enable lethal features.".format(cfg["THREATS"][user.id]["LETHALITY"]))
     else:
         await ctx.send("Invalid Input.")
 
