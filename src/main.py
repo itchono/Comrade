@@ -163,7 +163,7 @@ async def dailyMSG(force = False):
             # make announcement
             force = False
 
-            dailyRole() # do daily role
+            await dailyRole() # do daily role
         await asyncio.sleep(60)
 
 async def genKick():
