@@ -845,7 +845,7 @@ async def on_message_edit(OG:discord.message, message:discord.message):
     Triggers when message is edited.
     '''
     # Filter message
-    if cfg["LETHALITY"] >= 4 or (cfg["LETHALITY"] >= 2 and message.author.id in cfg["THREATS"] and cfg["THREATS"][message.author.id] >= 2):
+    if cfg["LETHALITY"] >= 4 or (cfg["LETHALITY"] >= 2 and message.author.id in cfg["THREATS"] and cfg["THREATS"][message.author.id]["LETHALITY"] >= 2):
             await sentinelFilter(message)
 
 '''
