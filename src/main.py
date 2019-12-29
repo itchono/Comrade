@@ -159,7 +159,7 @@ async def dailyMSG(force = False):
             asyncio.sleep(30)
             # allow 30 seconds for script to run to clean messages
             '''
-
+            global infractions
             del infractions # reset infractions
 
             await client.get_guild(419214713252216848).get_channel(419214713755402262).send('Good morning everyone!\nToday is {}. Have a prosperous day! <:FeelsProsperousMan:419256328465285131>'.format(datetime.utcnow().date()))
@@ -214,6 +214,7 @@ async def sentinelFilter(message:discord.message):
     '''
     Sentinel message filtering system, allows for multivalent toggles
     '''
+    THRESHOLD = 70
 
     if not message.channel.id in WHITELISTED_CHANNELS:
         # Stage 1: text detection
@@ -226,7 +227,7 @@ async def sentinelFilter(message:discord.message):
 
         for word in set(cfg["GLOBAL_BANNED_WORDS"]).union(set(cfg["THREATS"][message.author.id]["BANNED_WORDS"] if message.author.id in cfg["THREATS"] else set())):
             # checks every banned word for that user
-            if (word in query or (len(query) > 2 and strict and fuzz.partial_ratio(word, query) > 70)) or (word in utilitymodules.emojiToText(message.content.lower()) or (strict and fuzz.partial_ratio(word, utilitymodules.emojiToText(message.content.lower())) > 66)):
+            if (word in query or (len(query) > 2 and strict and fuzz.partial_ratio(word, query) > THRESHOLD)) or (word in utilitymodules.emojiToText(message.content.lower()) or (strict and fuzz.partial_ratio(word, utilitymodules.emojiToText(message.content.lower())) > THRESHOLD)):
                 # passes query through fuzzy filtering system IF length of word is long enough and author is subhect to strict filtering
                 await message.delete()
                 await log('Message purged for bad word:\n'+ str(message.content) + "\nSent By " + str(message.author.name) + "\nTrigger:" + str(word) + "\nMatch %:" + str(max([fuzz.partial_ratio(word, query), fuzz.partial_ratio(word, utilitymodules.emojiToText(message.content.lower()))])))
@@ -254,7 +255,7 @@ async def infraction(msg, user, weight):
         infractions[user.id] = weight
     else:
         infractions[user.id] += weight
-        await msg.channel.send("{3} demerit points added to {0}. ({1}/{2})".format(user.mention, infractions[user.id], LIMIT, weight))
+    await msg.channel.send("{3} demerit points added to {0}. ({1}/{2})".format(user.mention, infractions[user.id], LIMIT, weight))
     
     if infractions[user.id] >= LIMIT:
         await msg.channel.send("Kicking {}...".format(user.name))
