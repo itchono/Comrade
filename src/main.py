@@ -211,10 +211,10 @@ async def sentinelFilter(message:discord.message):
     query = re.sub("\W+",'', unidecode.unidecode(utilitymodules.emojiToText(message.content.lower()))) # clean message content down to text
     # 3 Stages of filtering: 1) Emoji pass through 2) Eliminating nonstandard unicode chars 3) Regex Substitutions to eliminate non word characters
     
-    strict = (message.author.id in cfg["THREATS"] and cfg["THREATS"][message.author.id] >= 3) or cfg["LETHALITY"] >= 3 # determines whether message filtering should be relaxed (needs exact content) or strict (75% match)
-    superStrict = (message.author.id in cfg["THREATS"] and cfg["THREATS"][message.author.id] >= 4) or cfg["LETHALITY"] >=3 # even more strict filtering when needed
+    strict = (message.author.id in cfg["THREATS"] and cfg["THREATS"][message.author.id]["LETHALITY"] >= 3) or cfg["LETHALITY"] >= 3 # determines whether message filtering should be relaxed (needs exact content) or strict (75% match)
+    superStrict = (message.author.id in cfg["THREATS"] and cfg["THREATS"][message.author.id]["LETHALITY"] >= 4) or cfg["LETHALITY"] >=3 # even more strict filtering when needed
 
-    for word in set(cfg["GLOBAL_BANNED_WORDS"]).union(set(cfg["THREATS"][message.author.id] if message.author.id in cfg["THREATS"] else set())):
+    for word in set(cfg["GLOBAL_BANNED_WORDS"]).union(set(cfg["THREATS"][message.author.id]["LETHALITY"] if message.author.id in cfg["THREATS"] else set())):
         # checks every banned word for that user
         if word in query or (len(query) > 2 and strict and fuzz.partial_ratio(word, query) > 65):
             # passes query through fuzzy filtering system IF length of word is long enough and author is subhect to strict filtering
