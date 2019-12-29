@@ -223,12 +223,8 @@ async def sentinelFilter(message:discord.message):
 
         for word in set(cfg["GLOBAL_BANNED_WORDS"]).union(set(cfg["THREATS"][message.author.id]["BANNED_WORDS"] if message.author.id in cfg["THREATS"] else set())):
             # checks every banned word for that user
-            if word in query or (len(query) > 2 and strict and fuzz.partial_ratio(word, query) > 75):
+            if (word in query or (len(query) > 2 and strict and fuzz.partial_ratio(word, query) > 75)) or (word in utilitymodules.emojiToText(message.content.lower()) or (strict and fuzz.partial_ratio(word, utilitymodules.emojiToText(message.content.lower())) > 75)):
                 # passes query through fuzzy filtering system IF length of word is long enough and author is subhect to strict filtering
-                await message.delete()
-                await log('Message purged for bad word:\n'+ str(message.content) + "\nsent by " + str(message.author.name))
-            
-            elif word in utilitymodules.emojiToText(message.content.lower()):
                 await message.delete()
                 await log('Message purged for bad word:\n'+ str(message.content) + "\nsent by " + str(message.author.name))
         
