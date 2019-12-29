@@ -59,6 +59,9 @@ cfg = comrade_cfg.data # load config variables
 
 PROTECTED_NAMES = ["LETHALITY", "THREATS", "kickVotes", "OPS", "GLOBAL_BANNED_WORDS", "PURGE", "LAST_DAILY", "KICK_REQ", "KICK_SAFE"]
 # Protected dictionary elements in cfg file
+WHITELISTED_CHANNELS = [558408620476203021, 522428899184082945] # TODO Command-ify
+# exempt from filter
+
 VERSION = "Comrade 2.0.0 Osprey"
 
 # Temporary Variables
@@ -196,40 +199,48 @@ async def quarantine(user:discord.user):
     if isQ:
         currRoles.append(client.get_guild(419214713252216848).get_role(419215295232868361))
         await log("User Released: {}".format(user.name))
+        await user.edit(roles=currRoles)
         return '{} has been returned to society.'.format(user.name)
     else:
         currRoles.append(client.get_guild(419214713252216848).get_role(613106246874038274))
         await log("User Quarantined: {}".format(user.name))
+        await user.edit(roles=currRoles)
         return '{} has been quarantined.'.format(user.name)
-    await user.edit(roles=currRoles)
 
 async def sentinelFilter(message:discord.message):
     '''
     Sentinel message filtering system, allows for multivalent toggles
     '''
-    # Stage 1: text detection
-    query = re.sub("\W+",'', unidecode.unidecode(utilitymodules.emojiToText(message.content.lower()))) # clean message content down to text
-    # 3 Stages of filtering: 1) Emoji pass through 2) Eliminating nonstandard unicode chars 3) Regex Substitutions to eliminate non word characters
-    
-    strict = (message.author.id in cfg["THREATS"] and cfg["THREATS"][message.author.id]["LETHALITY"] >= 3) or cfg["LETHALITY"] >= 3 # determines whether message filtering should be relaxed (needs exact content) or strict (75% match)
-    superStrict = (message.author.id in cfg["THREATS"] and cfg["THREATS"][message.author.id]["LETHALITY"] >= 4) or cfg["LETHALITY"] >=3 # even more strict filtering when needed
 
-    for word in set(cfg["GLOBAL_BANNED_WORDS"]).union(set(cfg["THREATS"][message.author.id]["LETHALITY"] if message.author.id in cfg["THREATS"] else set())):
-        # checks every banned word for that user
-        if word in query or (len(query) > 2 and strict and fuzz.partial_ratio(word, query) > 65):
-            # passes query through fuzzy filtering system IF length of word is long enough and author is subhect to strict filtering
+    if not message.channel.id in WHITELISTED_CHANNELS:
+        # Stage 1: text detection
+        query = re.sub("\W+",'', unidecode.unidecode(message.content.lower())) # clean message content down to text
+
+        # 3 Stages of filtering: 1) Emoji pass through 2) Eliminating nonstandard unicode chars 3) Regex Substitutions to eliminate non word characters
+        
+        strict = (message.author.id in cfg["THREATS"] and cfg["THREATS"][message.author.id]["LETHALITY"] >= 3) or cfg["LETHALITY"] >= 3 # determines whether message filtering should be relaxed (needs exact content) or strict (75% match)
+        superStrict = (message.author.id in cfg["THREATS"] and cfg["THREATS"][message.author.id]["LETHALITY"] >= 4) or cfg["LETHALITY"] >=3 # even more strict filtering when needed
+
+        for word in set(cfg["GLOBAL_BANNED_WORDS"]).union(set(cfg["THREATS"][message.author.id]["BANNED_WORDS"] if message.author.id in cfg["THREATS"] else set())):
+            # checks every banned word for that user
+            if word in query or (len(query) > 2 and strict and fuzz.partial_ratio(word, query) > 75):
+                # passes query through fuzzy filtering system IF length of word is long enough and author is subhect to strict filtering
+                await message.delete()
+                await log('Message purged for bad word:\n'+ str(message.content) + "\nsent by " + str(message.author.name))
+            
+            elif word in utilitymodules.emojiToText(message.content.lower()):
+                await message.delete()
+                await log('Message purged for bad word:\n'+ str(message.content) + "\nsent by " + str(message.author.name))
+        
+        # Stage 2: Attachment Filtering
+        if strict and (len(message.attachments) > 0 or len(message.embeds) > 0):
             await message.delete()
-            await log('Message purged for bad word:\n'+ str(message.content) + "\nsent by " + str(message.author.name))
-    
-    # Stage 2: Attachment Filtering
-    if strict and (len(message.attachments) > 0 or len(message.embeds) > 0):
-        await message.delete()
-        await log('Message purged for embed; sent by ' + str(message.author.name))
+            await log('Message purged for embed; sent by ' + str(message.author.name))
 
-    # Stage 3: Ping Filtering
-    if superStrict and len(message.mentions) > 0:
-        await message.delete()
-        await message.channel.send("USELESS PING DETECTED SENT BY {}".format(message.author.mention))
+        # Stage 3: Ping Filtering
+        if superStrict and len(message.mentions) > 0:
+            await message.delete()
+            await message.channel.send("USELESS PING DETECTED SENT BY {}".format(message.author.mention))
 
 # TODO new infraction System?
 async def infraction():
@@ -368,7 +379,7 @@ async def callQuarantine(ctx):
     Quarantines mentioned user
     '''
     user = ctx.message.mentions[0]
-    await ctx.send(quarantine(user))
+    await ctx.send(await quarantine(user))
 
 @client.command(name = "ZAHANDO")
 @commands.check(isOP)
@@ -376,7 +387,7 @@ async def ZAHANDO(ctx, num):
     '''
     Calls on the ZA_HANDO method in command form.
     '''
-    await ZA_HANDO(ctx.message, num)
+    await ZA_HANDO(ctx.message, int(num))
 
 # Dire moderation methods
 @client.command
@@ -432,7 +443,7 @@ async def addThreat(ctx, *args):
     '''
     Adds user to threats list with or without a preset lethality level (default: 3)
     '''
-    level = args[0] if len(args) > 0 else 3 # ternary assignment to use as default parameter
+    level = int(args[0]) if len(args) > 0 else 3 # ternary assignment to use as default parameter
     user = ctx.message.mentions[0]
     if not user.id in cfg["THREATS"]:
         cfg["THREATS"][user.id] = {"LETHALITY":level, "BANNED_WORDS":set()}
@@ -805,7 +816,7 @@ async def on_message(message:discord.message):
         # Check to prevent feedback loop
 
         # Filter messages
-        if cfg["LETHALITY"] >= 4 or (cfg["LETHALITY"] >= 2 and message.author.id in cfg["THREATS"] and cfg["THREATS"][message.author.id] >= 2):
+        if cfg["LETHALITY"] >= 4 or (cfg["LETHALITY"] >= 2 and message.author.id in cfg["THREATS"] and cfg["THREATS"][message.author.id]["LETHALITY"] >= 2):
             await sentinelFilter(message)
         
         # Greeting function (one of the earliest functions that Comrade had)
