@@ -67,6 +67,7 @@ VERSION = "Comrade 2.0.0 Osprey"
 # Temporary Variables
 vaultCandidates = {}
 handoList = {}
+infractions = {}
 
 print('All variables loaded.')
 
@@ -152,12 +153,14 @@ async def dailyMSG(force = False):
     await client.wait_until_ready()
     
     while not client.is_closed():
-        if (datetime.utcnow().date() > lastDaily().date() and datetime.utcnow().hour == 12) or force:
+        if (datetime.utcnow().date() > lastDaily().date() and datetime.utcnow().hour == 12 and datetime.utcnow().minute <= 5) or force:
             '''
             await cleanMSG()
             asyncio.sleep(30)
             # allow 30 seconds for script to run to clean messages
             '''
+
+            del infractions # reset infractions
 
             await client.get_guild(419214713252216848).get_channel(419214713755402262).send('Good morning everyone!\nToday is {}. Have a prosperous day! <:FeelsProsperousMan:419256328465285131>'.format(datetime.utcnow().date()))
             cfg["LAST_DAILY"] = str(datetime.utcnow().date())
@@ -223,25 +226,40 @@ async def sentinelFilter(message:discord.message):
 
         for word in set(cfg["GLOBAL_BANNED_WORDS"]).union(set(cfg["THREATS"][message.author.id]["BANNED_WORDS"] if message.author.id in cfg["THREATS"] else set())):
             # checks every banned word for that user
-            if (word in query or (len(query) > 2 and strict and fuzz.partial_ratio(word, query) > 75)) or (word in utilitymodules.emojiToText(message.content.lower()) or (strict and fuzz.partial_ratio(word, utilitymodules.emojiToText(message.content.lower())) > 75)):
+            if (word in query or (len(query) > 2 and strict and fuzz.partial_ratio(word, query) > 70)) or (word in utilitymodules.emojiToText(message.content.lower()) or (strict and fuzz.partial_ratio(word, utilitymodules.emojiToText(message.content.lower())) > 66)):
                 # passes query through fuzzy filtering system IF length of word is long enough and author is subhect to strict filtering
                 await message.delete()
-                await log('Message purged for bad word:\n'+ str(message.content) + "\nsent by " + str(message.author.name))
-        
+                await log('Message purged for bad word:\n'+ str(message.content) + "\nSent By " + str(message.author.name) + "\nTrigger:" + str(word) + "\nMatch %:" + str(max([fuzz.partial_ratio(word, query), fuzz.partial_ratio(word, utilitymodules.emojiToText(message.content.lower()))])))
+                await infraction(message, message.author, 1)
+
         # Stage 2: Attachment Filtering
         if strict and (len(message.attachments) > 0 or len(message.embeds) > 0):
             await message.delete()
             await log('Message purged for embed; sent by ' + str(message.author.name))
+            await infraction(message, message.author, 2)
 
         # Stage 3: Ping Filtering
         if superStrict and len(message.mentions) > 0:
             await message.delete()
             await message.channel.send("USELESS PING DETECTED SENT BY {}".format(message.author.mention))
+            await infraction(message, message.author, 4)
 
-# TODO new infraction System?
-async def infraction():
-    pass
+async def infraction(msg, user, weight):
+    '''
+    Social credit-esque score used to punish users.
+    '''
+    LIMIT = 10
 
+    if not user.id in infractions:
+        infractions[user.id] = weight
+    else:
+        infractions[user.id] += weight
+        await msg.channel.send("{3} demerit points added to {0}. ({1}/{2})".format(user.mention, infractions[user.id], LIMIT, weight))
+    
+    if infractions[user.id] >= LIMIT:
+        await msg.channel.send("Kicking {}...".format(user.name))
+        await msg.guild.kick(user)
+        
 '''
 COMMANDS
 '''
