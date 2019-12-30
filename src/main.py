@@ -27,6 +27,7 @@ from datetime import datetime, timedelta # Time func
 import asyncio # Dependancy for Discord py
 
 import random
+from importlib import reload
 
 # II: Internal Imports
 import keep_alive
@@ -62,7 +63,7 @@ PROTECTED_NAMES = ["LETHALITY", "THREATS", "kickVotes", "OPS", "GLOBAL_BANNED_WO
 WHITELISTED_CHANNELS = [558408620476203021, 522428899184082945] # TODO Command-ify
 # exempt from filter
 
-VERSION = "Comrade 2.0.0 Osprey"
+VERSION = "Comrade 2.0.1 Osprey"
 
 # Temporary Variables
 vaultCandidates = {}
@@ -79,9 +80,12 @@ FUNCTIONS
 '''
 async def log(msg):
     '''
-    Logs stuff into preferred log channel.
+    Logs stuff into preferred log channel and keeps server-side log.
     '''
     await client.get_guild(419214713252216848).get_channel(446457522862161920).send(msg)
+    with open("log.txt", "a") as f:
+        f.write("{0} UTC: {1}\n".format(datetime.utcnow(), msg))
+
 
 async def writeInfo():
     '''
@@ -101,6 +105,7 @@ async def reloadVars():
     Reloads variables from configuration file dynamically if needed
     '''
     global cfg
+    reload(comrade_cfg)
     cfg = comrade_cfg.data
     await log("Variables Successfully Reloaded From File.")
 
