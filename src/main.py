@@ -95,7 +95,7 @@ async def writeInfo():
         os.remove("comrade_cfg.py")
         with open("comrade_cfg.py", "w") as f:
             f.write("{} = {}\n".format("data", cfg))
-        reload(comrade_cfg)
+        await reloadVars()
         # announce to log channel
         await log("Data Written Successfully.")
     else:
