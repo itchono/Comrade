@@ -767,8 +767,15 @@ async def tomato(ctx, *args):
     # Mode 2: vote
     elif str(args[0]).isnumeric() and int(args[0]) in vaultCandidates and vaultCandidates[int(args[0])]["Author"] != ctx.author:
         # check if another unique author confirms
-        await client.get_guild(419214713252216848).get_channel(587743411499565067).send(
-            "Sent by {0}:\n{1}".format(vaultCandidates[int(args[0])]["Author"].mention, vaultCandidates[int(args[0])]["URL"]))
+        embed = discord.Embed(
+            title = 'Sent by ' + vaultCandidates[int(args[0])]["Author"].mention,
+            colour = discord.Colour.from_rgb(r=215, g=52, b=42)
+        )   
+
+        embed.set_image(url = vaultCandidates[int(args[0])]["URL"])
+        # EXPERIMENTAL!
+
+        await client.get_guild(419214713252216848).get_channel(587743411499565067).send(embed = embed)
 # Fun stuff
 @client.command()
 @commands.check(notThreat)
@@ -785,6 +792,21 @@ async def emojiToText(ctx, s):
     Uses the emoji converter in utilities to convert some emojis to plaintext.
     '''
     await ctx.send(utilitymodules.emojiToText(s))
+
+@client.command()
+async def yes(ctx):
+    '''
+    Posts protegent guy saying "Yes"
+    '''
+
+    embed = discord.Embed(
+        title = 'Yes',
+        colour = discord.Colour.from_rgb(r=215, g=52, b=42)
+    )
+
+    embed.set_image(url = "https://i.kym-cdn.com/photos/images/original/001/628/719/085.jpg")
+
+    await ctx.send(embed = embed)
 
 @client.command()
 async def version(ctx):
