@@ -761,19 +761,19 @@ async def tomato(ctx, *args):
             u = ctx.message.attachments[0].url
         else:
             u = args[0]
-        vaultCandidates[ctx.message.id] = {"Author":ctx.author, "URL":u}
+        vaultCandidates[ctx.message.id] = {"Author":ctx.author, "URL":u, "Channel":ctx.channel.name}
         await ctx.send("Candidate created. One more person must confirm, using $comrade <:tomato:644700384291586059> {}".format(ctx.message.id))
 
     # Mode 2: vote
     elif str(args[0]).isnumeric() and int(args[0]) in vaultCandidates and vaultCandidates[int(args[0])]["Author"] != ctx.author:
         # check if another unique author confirms
         embed = discord.Embed(
-            title = 'Sent by ' + vaultCandidates[int(args[0])]["Author"].mention,
+            title = u"\U0001F345" + ' Vault Entry',
+            description = 'Sent by ' + vaultCandidates[int(args[0])]["Author"].name + ' in ' + vaultCandidates[int(args[0])]["Channel"],
             colour = discord.Colour.from_rgb(r=215, g=52, b=42)
         )   
 
         embed.set_image(url = vaultCandidates[int(args[0])]["URL"])
-        # EXPERIMENTAL!
 
         await client.get_guild(419214713252216848).get_channel(587743411499565067).send(embed = embed)
 # Fun stuff
@@ -814,6 +814,19 @@ async def version(ctx):
     Indicates version
     '''
     await ctx.send("Comrade is currently running on version: {}".format(VERSION))
+
+@client.command()
+async def emote(ctx, name):
+    '''
+    Sends custom emote
+    '''
+
+    emoteURL = "https://raw.githubusercontent.com/itchono/Comrade/master/CustomEmotes/{}.jpg".format(name)
+
+    embed = discord.Embed()
+    embed.set_image(url = emoteURL)
+
+    await ctx.send(embed = embed)
 
 '''
 MESSAGE EVENTS
