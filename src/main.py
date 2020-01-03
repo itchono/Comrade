@@ -815,18 +815,25 @@ async def version(ctx):
     '''
     await ctx.send("Comrade is currently running on version: {}".format(VERSION))
 
-@client.command()
-async def emote(ctx, name):
+async def emoteInterpreter(channel, name):
     '''
-    Sends custom emote
+    Sends custom emote top a channel
     '''
-
-    emoteURL = "https://raw.githubusercontent.com/itchono/Comrade/master/CustomEmotes/{}.jpg".format(name)
+    emoteURL = "https://raw.githubusercontent.com/itchono/Comrade/master/CustomEmotes/{}.png".format(name)
 
     embed = discord.Embed()
     embed.set_image(url = emoteURL)
 
-    await ctx.send(embed = embed)
+    await channel.send(embed = embed)
+
+@client.command()
+async def emote(ctx, name):
+    '''
+    Sends custom emote from command FoR
+    '''
+
+    await emoteInterpreter(ctx.channel, name)
+
 
 '''
 MESSAGE EVENTS
@@ -892,6 +899,10 @@ async def on_message(message:discord.message):
         if message.mention_everyone or len(message.mentions) > 2:
             # react to @everyone
             await message.add_reaction(client.get_emoji(659263935979192341))
+
+        # emote system
+        if len(message.content) > 0 and message.content[0] == ':' and message.content[-1] == ':':
+            await emoteInterpreter(message.channel, message.content.strip(':'))
 
         await client.process_commands(message) # interpret commands
 
