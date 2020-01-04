@@ -776,6 +776,7 @@ async def tomato(ctx, *args):
         embed.set_image(url = vaultCandidates[int(args[0])]["URL"])
 
         await client.get_guild(419214713252216848).get_channel(587743411499565067).send(embed = embed)
+        await ctx.send("Vault operation for message {} successful.".format(int(args[0])))
 # Fun stuff
 @client.command()
 @commands.check(notThreat)
