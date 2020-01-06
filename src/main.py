@@ -70,6 +70,40 @@ vaultCandidates = {}
 handoList = {}
 infractions = {}
 
+
+# set of valid emotes
+DEFINED_EMOTES = {
+    'bruh',
+    'chinothink',
+    'choke',
+    'comradelogo',
+    'emotes',
+    'feelssurrenderman',
+    'goldexperience',
+    'hahaa',
+    'hope',
+    'htfu',
+    'killerqueen',
+    'kilogram2002',
+    'kinthonk',
+    'mald',
+    'mingoggles',
+    'mrping',
+    'nani',
+    'pepeclown',
+    'pepecucumber',
+    'pepegun',
+    'pepeheh',
+    'poggershd',
+    'serverlogo',
+    'spung',
+    'starplatinum',
+    'stickyfingers',
+    'ultrathonk',
+    'ymleayauosi',
+    'zahando'
+}
+
 print('All variables loaded.')
 
 # II: Client startup PT 1
@@ -727,7 +761,7 @@ async def status(ctx, *args):
     '''
     kickList = [(str(ctx.guild.get_member(i)) + ": " + str(len(cfg["kickVotes"][i]))) for i in cfg["kickVotes"] if len(cfg["kickVotes"][i]) > 0]
     OPS = [str(ctx.guild.get_member(i)) for i in cfg["OPS"]]
-    THREATS = [(str(ctx.guild.get_member(i)) + " - Lethality = " + str(cfg["THREATS"][i]["LETHALITY"]) + " - Banned Words:" + str(cfg["THREATS"][i]["BANNED_WORDS"])) for i in cfg["THREATS"]]
+    THREATS = [(str(ctx.guild.get_member(i)) + " - Lethality = " + str(cfg["THREATS"][i]["LETHALITY"]) + " - Banned Words:" + str(cfg["THREATS"][i]["BANNED_WORDS"]) + "\n") for i in cfg["THREATS"]]
     LETHALITY = cfg["LETHALITY"]
     KICK_REQ = cfg["KICK_REQ"]
     KICK_SAFE = [str(ctx.guild.get_member(i)) for i in cfg["KICK_SAFE"]]
@@ -735,9 +769,9 @@ async def status(ctx, *args):
 
     uptime = datetime.utcnow() - t_start
     if len(args) > 0 and args[0] == "full":
-        await ctx.send("Uptime: {0}\nGlobal Lethality: {1}\nKick Votes: {2}\nKick Requirement: {3}\nOPS: {4}\nThreats: {5}\nKick Safe: {6}\n Global Banned Words: {7}".format(uptime, LETHALITY, kickList, KICK_REQ, OPS, THREATS, KICK_SAFE, GLOBAL_WDS))
+        await ctx.send("```Uptime: {0}\nGlobal Lethality: {1}\nKick Votes: {2}\nKick Requirement: {3}\nOPS: {4}\nThreats: {5}\nKick Safe: {6}\n Global Banned Words: {7}```".format(uptime, LETHALITY, kickList, KICK_REQ, OPS, THREATS, KICK_SAFE, GLOBAL_WDS))
     else:
-        await ctx.send("Uptime: {0}\nGlobal Lethality: {1}\nKick Votes: {2}\nKick Requirement: {3}".format(uptime, LETHALITY, kickList, KICK_REQ))
+        await ctx.send("```Uptime: {0}\nGlobal Lethality: {1}\nKick Votes: {2}\nKick Requirement: {3}```".format(uptime, LETHALITY, kickList, KICK_REQ))
         
 @client.command()
 async def lethalityhelp(ctx):
@@ -820,12 +854,15 @@ async def emoteInterpreter(channel, name):
     '''
     Sends custom emote to a channel
     '''
-    emoteURL = "https://raw.githubusercontent.com/itchono/Comrade/master/CustomEmotes/{}.png".format(name.lower())
+    if name.lower() in DEFINED_EMOTES:
+        emoteURL = "https://raw.githubusercontent.com/itchono/Comrade/master/CustomEmotes/{}.png".format(name.lower())
 
-    embed = discord.Embed()
-    embed.set_image(url = emoteURL)
+        embed = discord.Embed()
+        embed.set_image(url = emoteURL)
 
-    await channel.send(embed = embed)
+        await channel.send(embed = embed)
+    else:
+        await channel.send('Invalid Emote. Here is a valid list of emotes: ```{}```'.format(DEFINED_EMOTES))
 
 @client.command()
 async def emote(ctx, name):
