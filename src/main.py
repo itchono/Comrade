@@ -818,9 +818,9 @@ async def version(ctx):
 
 async def emoteInterpreter(channel, name):
     '''
-    Sends custom emote top a channel
+    Sends custom emote to a channel
     '''
-    emoteURL = "https://raw.githubusercontent.com/itchono/Comrade/master/CustomEmotes/{}.png".format(name)
+    emoteURL = "https://raw.githubusercontent.com/itchono/Comrade/master/CustomEmotes/{}.png".format(name.lower())
 
     embed = discord.Embed()
     embed.set_image(url = emoteURL)
@@ -830,7 +830,7 @@ async def emoteInterpreter(channel, name):
 @client.command()
 async def emote(ctx, name):
     '''
-    Sends custom emote from command FoR
+    Sends a custom emote. Shorthand --> :emote:
     '''
 
     await emoteInterpreter(ctx.channel, name)
