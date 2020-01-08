@@ -899,7 +899,7 @@ async def STAR_PLATINUM(message, time):
 purge_tgt = None
 
 def is_user(m):
-    return m.author == u
+    return m.author == purge_tgt
 
 async def ZA_HANDO(message, num=10, user=None):
     '''
