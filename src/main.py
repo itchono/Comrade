@@ -446,7 +446,10 @@ async def ZAHANDO(ctx, num):
     '''
     Calls on the ZA_HANDO method in command form.
     '''
-    await ZA_HANDO(ctx.message, int(num))
+    if len(ctx.message.mentions) > 0:
+        await ZA_HANDO(ctx.message, num=int(num), user=ctx.message.mentions[0])
+    else:
+        await ZA_HANDO(ctx.message, num=int(num))
 
 # Dire moderation methods
 @client.command
@@ -893,14 +896,24 @@ async def STAR_PLATINUM(message, time):
     await message.channel.set_permissions(message.guild.get_role(419215295232868361), send_messages=True)
     await message.channel.send('Time has begun to move again.')
 
-async def ZA_HANDO(message, num=10):
+purge_tgt = None
+
+def is_user(m):
+    return m.author == u
+
+async def ZA_HANDO(message, num=10, user=None):
     '''
     Purges messages en masse.
     '''
     PURGE_REQ = 3 # Tunable
 
     if message.author.id in cfg["OPS"]:
-        await message.channel.purge(limit=num)
+        if user is None:
+            await message.channel.purge(limit=num)
+        else:
+            global purge_tgt
+            purge_tgt = user
+            await message.channel.purge(limit=num, check=is_user)
     else:
         if not message.channel.id in handoList:
             handoList[message.channel.id] = [message.author.id]
