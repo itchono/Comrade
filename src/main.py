@@ -73,11 +73,12 @@ infractions = {}
 
 # set of valid emotes
 DEFINED_EMOTES = {
-    'angry',
+    'angery',
     'bruh',
     'chinothink',
     'choke',
     'comradelogo',
+    'deskslam',
     'emotes',
     'feelssurrenderman',
     'goldexperience',
