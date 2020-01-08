@@ -96,6 +96,7 @@ DEFINED_EMOTES = {
     'pepeheh',
     'poggershd',
     'serverlogo',
+    'smuguca',
     'spung',
     'starplatinum',
     'stickyfingers',
