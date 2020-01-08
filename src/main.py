@@ -73,6 +73,7 @@ infractions = {}
 
 # set of valid emotes
 DEFINED_EMOTES = {
+    'angry',
     'bruh',
     'chinothink',
     'choke',
@@ -90,6 +91,7 @@ DEFINED_EMOTES = {
     'mingoggles',
     'mrping',
     'nani',
+    'no',
     'pepeclown',
     'pepecucumber',
     'pepegun',
