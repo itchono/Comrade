@@ -334,7 +334,7 @@ async def addKick(ctx, user):
     Generalized manner of adding a voteKick to a user. Helper function for voteKick command.
     '''
     cfg["kickVotes"][user].append(ctx.author.id) # Add vote
-    num_votes = len(cfg["kickVotes"][user])
+    num_votes = len(cfg["kickVotes"][user.id])
     await writeInfo()
     await ctx.send("Vote added for {0} ({1}/{2}).".format(user.name, num_votes, cfg["KICK_REQ"]))
 
