@@ -490,7 +490,7 @@ async def executePurge(ctx):
     else:
         await ctx.send("Please set global lethality to level 4 or higher. {} members will be kicked.".format(len(cfg["PURGE"])))
 
-@client.command
+@client.command()
 @commands.check(isOP)
 async def timeStop(ctx, time):
     '''
