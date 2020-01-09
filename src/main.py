@@ -892,7 +892,7 @@ async def STAR_PLATINUM(message, time):
     await message.channel.send('ZA WARUDO')
     # Remove ability for people to talk and TODO: allow daily member to talk
     await message.channel.set_permissions(message.guild.get_role(419215295232868361), send_messages=False)
-    await asyncio.sleep(time)
+    await asyncio.sleep(int(time))
     await message.channel.set_permissions(message.guild.get_role(419215295232868361), send_messages=True)
     await message.channel.send('Time has begun to move again.')
 
