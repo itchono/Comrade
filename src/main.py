@@ -452,18 +452,20 @@ async def ZAHANDO(ctx, num):
         await ZA_HANDO(ctx.message, num=int(num))
 
 # Dire moderation methods
-@client.command
+@client.command()
 @commands.check(isOP)
 async def SCRAM(ctx):
     '''
     Puts server into lockdown mode. Quite Dangerous.
     '''
-    await setLethality(ctx, 4)
+    cfg["LETHALITY"] = 4
+    await writeInfo()
+    await ctx.send("Global Lethality has been set to {}.".format(cfg["LETHALITY"]))
     for i in cfg["THREATS"]:
         quarantine(client.get_guild(419214713252216848).get_member(i))
     await ctx.send("LOCKDOWN SUCCESSFUL. PROCEED WITH CONTINGENCY OPERATIONS.")
 
-@client.command
+@client.command()
 @commands.check(isOwner)
 async def requiem(ctx, mode):
     '''
@@ -472,7 +474,7 @@ async def requiem(ctx, mode):
     cfg["PURGE"] = [m.id for m in await utilitymodules.generateRequiem(ctx.message, mode)]
     await writeInfo()
 
-@client.command
+@client.command()
 @commands.check(isOwner)
 async def executePurge(ctx):
     '''
@@ -582,7 +584,7 @@ async def callreloadVars(ctx):
     await reloadVars()
     await ctx.send("Variables reloaded from file.")
 
-@client.command
+@client.command()
 @commands.check(isOwner)
 async def shutdown(ctx):
     '''
