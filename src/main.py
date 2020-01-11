@@ -902,7 +902,7 @@ async def STAR_PLATINUM(message, time):
     # Remove ability for people to talk and TODO: allow daily member to talk
     await message.channel.set_permissions(message.guild.get_role(419215295232868361), send_messages=False)
 
-    await asyncio.sleep(2)
+    await asyncio.sleep(1.95)
     await m1.delete()
 
     mt = await message.channel.send("*Time is frozen*")
@@ -932,7 +932,7 @@ async def STAR_PLATINUM(message, time):
     
     m2 = await message.channel.send(embed=embed)
 
-    await asyncio.sleep(1.5)
+    await asyncio.sleep(1.35)
     await m2.delete()
     await mt.edit(content = "*Time has begun to move again.*", suppress = False)
 
