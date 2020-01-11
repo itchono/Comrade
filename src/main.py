@@ -333,7 +333,7 @@ async def addKick(ctx, user):
     '''
     Generalized manner of adding a voteKick to a user. Helper function for voteKick command.
     '''
-    cfg["kickVotes"][user].append(ctx.author.id) # Add vote
+    cfg["kickVotes"][user.id].append(ctx.author.id) # Add vote
     num_votes = len(cfg["kickVotes"][user.id])
     await writeInfo()
     await ctx.send("Vote added for {0} ({1}/{2}).".format(user.name, num_votes, cfg["KICK_REQ"]))
@@ -373,7 +373,7 @@ async def unKick(ctx):
     user = ctx.message.mentions[0]
     if ctx.author.id in cfg["kickVotes"][user.id]:
         cfg["kickVotes"][user.id].remove(ctx.author.id)
-        num_votes = len(cfg["kickVotes"][user])
+        num_votes = len(cfg["kickVotes"][user.id])
         await writeInfo()
         await ctx.send("Vote removed for {0} ({1}/{2}).".format(user.name, num_votes, cfg["KICK_REQ"]))
     else:
@@ -891,19 +891,59 @@ async def STAR_PLATINUM(message, time):
     '''
     Stops time.
     '''
-    await message.channel.send('ZA WARUDO')
+    embed = discord.Embed(
+        title = "ZA WARUDO",
+        colour = discord.Colour.from_rgb(r=102, g=0, b=204)
+        
+    )
+    embed.set_image(url = "https://media1.tenor.com/images/4b953bf5b5ba531099a823944a5626c2/tenor.gif")
+
+    m1 = await message.channel.send(embed = embed)
     # Remove ability for people to talk and TODO: allow daily member to talk
     await message.channel.set_permissions(message.guild.get_role(419215295232868361), send_messages=False)
-    await asyncio.sleep(int(time))
+
+    await asyncio.sleep(2 if int(time) >= 2 else int(time))
+    await m1.delete()
+
+    mt = await message.channel.send("*Time is frozen*")
+    
+    # fun counter thing
+    if int(time) <= 20:
+        for i in range(int(time)-2 if int(time) >= 2 else 0):
+            await asyncio.sleep(1)
+
+            t = i+1
+            if t == 1:
+                await mt.edit(content = "1 second has passed", suppress = False)
+            else:
+                await mt.edit(content = "{} seconds have passed".format(t), suppress = False)
+
+
+    else:
+        await asyncio.sleep(int(time)-2 if int(time) >= 2 else 0)
+    
     await message.channel.set_permissions(message.guild.get_role(419215295232868361), send_messages=True)
-    await message.channel.send('Time has begun to move again.')
+
+    embed = discord.Embed(
+        title = "Time has begun to move again.",
+        colour = discord.Colour.from_rgb(r=102, g=0, b=204)
+    )
+    embed.set_image(url = "https://media1.tenor.com/images/02c68c840e943c4aa2ebfdb7c8a6ea46/tenor.gif")
+    
+    m2 = await message.channel.send(embed=embed)
+
+    await asyncio.sleep(1.5)
+    await m2.delete()
+    await mt.edit(content = "*Time has begun to move again.*", suppress = False)
+
+    await log("Time stop of duration {}".format(time))
 
 purge_tgt = None
 
 def is_user(m):
     return m.author == purge_tgt
 
-async def ZA_HANDO(message, num=10, user=None):
+async def ZA_HANDO(message, num=20, user=None):
     '''
     Purges messages en masse.
     '''
