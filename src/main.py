@@ -889,7 +889,7 @@ MESSAGE EVENTS
 # TODO these need some work (user is able to speak)
 async def STAR_PLATINUM(message, time):
     '''
-    Stops time.
+    Stops time for (time + 2) seconds (includes windup animation)
     '''
     embed = discord.Embed(
         title = "ZA WARUDO",
@@ -902,14 +902,14 @@ async def STAR_PLATINUM(message, time):
     # Remove ability for people to talk and TODO: allow daily member to talk
     await message.channel.set_permissions(message.guild.get_role(419215295232868361), send_messages=False)
 
-    await asyncio.sleep(2 if int(time) >= 2 else int(time))
+    await asyncio.sleep(2)
     await m1.delete()
 
     mt = await message.channel.send("*Time is frozen*")
     
     # fun counter thing
     if int(time) <= 20:
-        for i in range(int(time)-2 if int(time) >= 2 else 0):
+        for i in range(int(time)):
             await asyncio.sleep(1)
 
             t = i+1
