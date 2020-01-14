@@ -778,9 +778,13 @@ async def status(ctx, *args):
 
     uptime = datetime.utcnow() - t_start
     if len(args) > 0 and args[0] == "full":
-        await ctx.send("```Uptime: {0}\nGlobal Lethality: {1}\nKick Votes: {2}\nKick Requirement: {3}\nOPS: {4}\nThreats: {5}\nKick Safe: {6}\n Global Banned Words: {7}```".format(uptime, LETHALITY, kickList, KICK_REQ, OPS, THREATS, KICK_SAFE, GLOBAL_WDS))
+        msg = await ctx.send("```Uptime: {0}\nGlobal Lethality: {1}\nKick Votes: {2}\nKick Requirement: {3}\nOPS: {4}\nThreats: {5}\nKick Safe: {6}\n Global Banned Words: {7}```".format(uptime, LETHALITY, kickList, KICK_REQ, OPS, THREATS, KICK_SAFE, GLOBAL_WDS))
+        await asyncio.sleep(10)
+        await msg.delete()
     else:
-        await ctx.send("```Uptime: {0}\nGlobal Lethality: {1}\nKick Votes: {2}\nKick Requirement: {3}```".format(uptime, LETHALITY, kickList, KICK_REQ))
+        msg = await ctx.send("```Uptime: {0}\nGlobal Lethality: {1}\nKick Votes: {2}\nKick Requirement: {3}```".format(uptime, LETHALITY, kickList, KICK_REQ))
+        await asyncio.sleep(10)
+        await msg.delete()
         
 @client.command()
 async def lethalityhelp(ctx):
@@ -871,7 +875,9 @@ async def emoteInterpreter(channel, name):
 
         await channel.send(embed = embed)
     else:
-        await channel.send('Invalid Emote. Here is a valid list of emotes: ```{}```'.format(DEFINED_EMOTES))
+        msg = await channel.send('Invalid Emote. Here is a valid list of emotes: ```{}```'.format(DEFINED_EMOTES))
+        await asyncio.sleep(10)
+        await msg.delete()
 
 @client.command()
 async def emote(ctx, name):
