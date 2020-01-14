@@ -763,6 +763,7 @@ async def clear(ctx):
 
 # *STATUS OF BOT TODO
 @client.command()
+@commands.check(notThreat)
 async def status(ctx, *args):
     '''
     Reports the bot's status.
