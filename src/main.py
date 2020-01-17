@@ -79,7 +79,7 @@ DEFINED_EMOTES = {
     'choke',
     'comradelogo',
     'deskslam',
-    'emotes',
+    'dummy'
     'feelssurrenderman',
     'goldexperience',
     'hahaa',
@@ -103,6 +103,7 @@ DEFINED_EMOTES = {
     'spung',
     'starplatinum',
     'stickyfingers',
+    'stupid',
     'ultrathonk',
     'ymleayauosi',
     'zahando'
