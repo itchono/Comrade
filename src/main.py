@@ -79,12 +79,13 @@ DEFINED_EMOTES = {
     'choke',
     'comradelogo',
     'deskslam',
-    'dummy'
+    'dummy',
     'feelssurrenderman',
     'goldexperience',
     'hahaa',
     'hope',
     'htfu',
+    'jotarogun',
     'killerqueen',
     'kilogram2002',
     'kinthonk',
@@ -104,6 +105,7 @@ DEFINED_EMOTES = {
     'starplatinum',
     'stickyfingers',
     'stupid',
+    'truth',
     'ultrathonk',
     'ymleayauosi',
     'zahando'
