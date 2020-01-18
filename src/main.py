@@ -80,6 +80,7 @@ DEFINED_EMOTES = {
     'comradelogo',
     'deskslam',
     'dummy',
+    'feelsmodsman',
     'feelssurrenderman',
     'goldexperience',
     'hahaa',
