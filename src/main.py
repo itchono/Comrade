@@ -1008,7 +1008,14 @@ async def on_message(message:discord.message):
 
         if message.mention_everyone or len(message.mentions) > 2:
             # react to @everyone
-            await message.add_reaction(client.get_emoji(659263935979192341))
+            await message.add_reaction(await client.get_guild(419214713252216848).fetch_emoji(609216526666432534))
+            668273444684693516
+
+        if message.author.id == 545672836124246024 and len(message.mentions) > 0:
+            # react, specifically to raf
+            await message.add_reaction(await client.get_guild(419214713252216848).fetch_emoji(609216526666432534))
+            await message.add_reaction(await client.get_guild(419214713252216848).fetch_emoji(471877591557734401))
+            
 
         # emote system
         if len(message.content) > 0 and message.content[0] == ':' and message.content[-1] == ':':
