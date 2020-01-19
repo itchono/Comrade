@@ -902,52 +902,54 @@ async def STAR_PLATINUM(message, time):
     '''
     Stops time for (time + 2) seconds (includes windup animation)
     '''
-    embed = discord.Embed(
-        title = "ZA WARUDO",
-        colour = discord.Colour.from_rgb(r=102, g=0, b=204)
+
+    if not message.author.id in cfg["THREATS"] or cfg["THREATS"][message.author.id]["LETHALITY"] == 0:
+        embed = discord.Embed(
+            title = "ZA WARUDO",
+            colour = discord.Colour.from_rgb(r=102, g=0, b=204)
+            
+        )
+        embed.set_image(url = "https://media1.tenor.com/images/4b953bf5b5ba531099a823944a5626c2/tenor.gif")
+
+        m1 = await message.channel.send(embed = embed)
+        # Remove ability for people to talk and TODO: allow daily member to talk
+        await message.channel.set_permissions(message.guild.get_role(419215295232868361), send_messages=False)
+
+        await asyncio.sleep(1.95)
+        await m1.delete()
+
+        mt = await message.channel.send("*Time is frozen*")
         
-    )
-    embed.set_image(url = "https://media1.tenor.com/images/4b953bf5b5ba531099a823944a5626c2/tenor.gif")
+        # fun counter thing
+        if int(time) <= 20:
+            for i in range(int(time)):
+                await asyncio.sleep(1)
 
-    m1 = await message.channel.send(embed = embed)
-    # Remove ability for people to talk and TODO: allow daily member to talk
-    await message.channel.set_permissions(message.guild.get_role(419215295232868361), send_messages=False)
-
-    await asyncio.sleep(1.95)
-    await m1.delete()
-
-    mt = await message.channel.send("*Time is frozen*")
-    
-    # fun counter thing
-    if int(time) <= 20:
-        for i in range(int(time)):
-            await asyncio.sleep(1)
-
-            t = i+1
-            if t == 1:
-                await mt.edit(content = "1 second has passed", suppress = False)
-            else:
-                await mt.edit(content = "{} seconds have passed".format(t), suppress = False)
+                t = i+1
+                if t == 1:
+                    await mt.edit(content = "1 second has passed", suppress = False)
+                else:
+                    await mt.edit(content = "{} seconds have passed".format(t), suppress = False)
 
 
-    else:
-        await asyncio.sleep(int(time)-2 if int(time) >= 2 else 0)
-    
-    await message.channel.set_permissions(message.guild.get_role(419215295232868361), send_messages=True)
+        else:
+            await asyncio.sleep(int(time)-2 if int(time) >= 2 else 0)
+        
+        await message.channel.set_permissions(message.guild.get_role(419215295232868361), send_messages=True)
 
-    embed = discord.Embed(
-        title = "Time has begun to move again.",
-        colour = discord.Colour.from_rgb(r=102, g=0, b=204)
-    )
-    embed.set_image(url = "https://media1.tenor.com/images/02c68c840e943c4aa2ebfdb7c8a6ea46/tenor.gif")
-    
-    m2 = await message.channel.send(embed=embed)
+        embed = discord.Embed(
+            title = "Time has begun to move again.",
+            colour = discord.Colour.from_rgb(r=102, g=0, b=204)
+        )
+        embed.set_image(url = "https://media1.tenor.com/images/02c68c840e943c4aa2ebfdb7c8a6ea46/tenor.gif")
+        
+        m2 = await message.channel.send(embed=embed)
 
-    await asyncio.sleep(1.35)
-    await m2.delete()
-    await mt.edit(content = "*Time has begun to move again.*", suppress = False)
+        await asyncio.sleep(1.35)
+        await m2.delete()
+        await mt.edit(content = "*Time has begun to move again.*", suppress = False)
 
-    await log("Time stop of duration {}".format(time))
+        await log("Time stop of duration {}".format(time))
 
 purge_tgt = None
 
