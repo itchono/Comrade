@@ -899,22 +899,33 @@ async def emote(ctx, name):
 
 @client.command()
 @commands.check(notThreat)
-async def addEmote(ctx, name, url):
+async def addEmote(ctx, *args):
     '''
-    Adds a custom emote to the directory of emotes. Provide a NAME and a URL linking directly to a picture.
+    Adds a custom emote to the directory of emotes. Provide a NAME and a URL linking directly to a picture, or provide NAME and file
     '''
-    await client.get_guild(419214713252216848).get_channel(669353887735611430).send("{}\n{}".format(name, url))
+    if len(ctx.message.attachments) > 0:
+        u = ctx.message.attachments[0].url
+    else:
+        u = args[1] # url term
+
+    await client.get_guild(419214713252216848).get_channel(669353887735611430).send("{}\n{}".format(args[0], u))
     await refreshEmotes()
-    await ctx.send("Emote {} has been added. You can call it using :{}:".format(name, name.lower()))
+    await ctx.send("Emote {} has been added. You can call it using :{}:".format(args[0], args[0].lower()))
     
 
 @client.command()
-@commands.check(notThreat)
+@commands.check(isOP)
 async def removeEmote(ctx, name):
     '''
-    Removes an emote from the list
+    Removes an emote from the list.
     '''
-    await ctx.send("{} remove the emote {} please.".format(client.get_guild(419214713252216848).get_member(66137108124803072).mention))
+    async for m in client.get_guild(419214713252216848).get_channel(669353887735611430).history(limit = None):
+        if name.lower() in m.content:
+            await m.delete()
+            DEFINED_EMOTES.remove(name.lower())
+            del EMOTE_INDEX[name.lower()]
+            continue
+    await ctx.send("Emote {} was removed.".format(name.lower()))
     
 '''
 MESSAGE EVENTS
