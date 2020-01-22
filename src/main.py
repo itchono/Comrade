@@ -112,6 +112,8 @@ DEFINED_EMOTES = {
     'zahando'
 }
 
+EMOTE_INDEX = {}
+
 print('All variables loaded.')
 
 # II: Client startup PT 1
@@ -873,7 +875,10 @@ async def emoteInterpreter(channel, name):
     Sends custom emote to a channel
     '''
     if name.lower() in DEFINED_EMOTES:
-        emoteURL = "https://raw.githubusercontent.com/itchono/Comrade/master/CustomEmotes/{}.png".format(name.lower())
+
+     
+        emoteURL = "https://raw.githubusercontent.com/itchono/Comrade/master/CustomEmotes/{}.png".format(name.lower()) if not name.lower() in EMOTE_INDEX else EMOTE_INDEX[name.lower()]
+        # choose between default and custom list of emotes
 
         embed = discord.Embed()
         embed.set_image(url = emoteURL)
@@ -892,7 +897,25 @@ async def emote(ctx, name):
 
     await emoteInterpreter(ctx.channel, name)
 
+@client.command()
+@commands.check(notThreat)
+async def addEmote(ctx, name, url):
+    '''
+    Adds a custom emote to the directory of emotes. Provide a NAME and a URL linking directly to a picture.
+    '''
+    await client.get_guild(419214713252216848).get_channel(669353887735611430).send("{}\n{}".format(name, url))
+    await refreshEmotes()
+    await ctx.send("Emote {} has been added. You can call it using :{}:".format(name, name.lower()))
+    
 
+@client.command()
+@commands.check(notThreat)
+async def removeEmote(ctx, name):
+    '''
+    Removes an emote from the list
+    '''
+    await ctx.send("{} remove the emote {} please.".format(client.get_guild(419214713252216848).get_member(66137108124803072).mention))
+    
 '''
 MESSAGE EVENTS
 '''
@@ -1011,10 +1034,24 @@ async def on_message(message:discord.message):
             await message.add_reaction(await client.get_guild(419214713252216848).fetch_emoji(609216526666432534))
             668273444684693516
 
-        if message.author.id == 545672836124246024 and len(message.mentions) > 0:
+        '''if message.author.id == 545672836124246024 and len(message.mentions) > 0:
             # react, specifically to raf
             await message.add_reaction(await client.get_guild(419214713252216848).fetch_emoji(609216526666432534))
-            await message.add_reaction(await client.get_guild(419214713252216848).fetch_emoji(471877591557734401))
+            await message.add_reaction(await client.get_guild(419214713252216848).fetch_emoji(471877591557734401))'''
+
+        if message.author.id == 545672836124246024 and len(message.mentions) > 0:
+            # react, specifically to raf
+            l = message.content
+
+            await message.delete()
+
+            m = await message.channel.send("Message deleted due to useless ping")
+            
+            await message.channel.send("```" + l + "```")
+
+            await asyncio.sleep(5)
+            
+            await m.delete
             
 
         # emote system
@@ -1032,6 +1069,23 @@ async def on_message_edit(OG:discord.message, message:discord.message):
     if cfg["LETHALITY"] >= 4 or (cfg["LETHALITY"] >= 2 and message.author.id in cfg["THREATS"] and cfg["THREATS"][message.author.id]["LETHALITY"] >= 2):
             await sentinelFilter(message)
 
+async def refreshEmotes():
+    emcounter = 0
+
+    async for m in client.get_guild(419214713252216848).get_channel(669353887735611430).history(limit=None):
+        # import custom emotes
+        arr = str(m.content).split("\n")
+
+        DEFINED_EMOTES.add(arr[0].lower())
+
+        EMOTE_INDEX[arr[0].lower()] = arr[1]
+
+        # insert image url
+
+        emcounter += 1
+
+    await log("{} custom emotes loaded".format(emcounter))
+
 '''
 CLIENT INIT Cont'
 '''
@@ -1047,6 +1101,8 @@ async def on_ready():
                 await genKick()
                 print("ATTN: kickVotes was updated due to a change in the number of members")
             print("{} members detected.".format(len(guild.members)))
+
+    await refreshEmotes()
 
     print("{} is online and ready to go.".format(client.user))
     
