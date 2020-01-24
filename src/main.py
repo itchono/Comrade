@@ -58,7 +58,7 @@ TOKEN = os.environ.get('TOKEN') # bot token; kept private
 
 cfg = comrade_cfg.data # load config variables
 
-PROTECTED_NAMES = ["LETHALITY", "THREATS", "kickVotes", "OPS", "GLOBAL_BANNED_WORDS", "PURGE", "LAST_DAILY", "KICK_REQ", "KICK_SAFE"]
+PROTECTED_NAMES = ["LETHALITY", "THREATS", "kickVotes", "OPS", "GLOBAL_BANNED_WORDS", "PURGE", "LAST_DAILY", "KICK_REQ", "KICK_SAFE", "ANTIPING"]
 # Protected dictionary elements in cfg file
 WHITELISTED_CHANNELS = [558408620476203021, 522428899184082945] # TODO Command-ify
 # exempt from filter
@@ -656,12 +656,12 @@ async def removeList(ListName, SUDO = False):
         del cfg[ListName]
         await writeInfo()
 
-def getListUsers(ListName):
+def getListUsers(ListName, SUDO = False):
     '''
     Returns a list of users who are in the list of choice.
     '''
     try:
-        if not ListName in PROTECTED_NAMES:
+        if not ListName in PROTECTED_NAMES or SUDO:
             return [client.get_guild(419214713252216848).get_member(i) for i in cfg[ListName]]
     except:
         return None
@@ -707,6 +707,18 @@ async def removeKickSafe(ctx):
     '''
     user = ctx.message.mentions[0]
     await removeFromList("KICK_SAFE", user, SUDO=True)
+
+@client.command()
+@commands.check(isOP)
+async def antiping(ctx):
+    '''
+    Prevents user from pinging
+    '''
+    user = ctx.message.mentions[0]
+    if user in getListUsers("ANTIPING", SUDO=True):
+        await removeFromList("ANTIPING", user, SUDO=True)
+    else:
+        await addToList("ANTIPING", user, SUDO=True)
 
 # Custom list additions
 @client.command()
@@ -1050,19 +1062,19 @@ async def on_message(message:discord.message):
             await message.add_reaction(await client.get_guild(419214713252216848).fetch_emoji(609216526666432534))
             await message.add_reaction(await client.get_guild(419214713252216848).fetch_emoji(471877591557734401))'''
 
-        if message.author.id == 545672836124246024 and len(message.mentions) > 0:
+        if message.author in getListUsers("ANTIPING", SUDO=True) and len(message.mentions) > 0:
             # react, specifically to raf
             l = message.content
 
             await message.delete()
 
-            m = await message.channel.send("Message deleted due to useless ping")
+            m = await message.channel.send("Message deleted due to useless ping mentioning {}".format(message.mentions[0].name))
             
             await message.channel.send("```" + l + "```")
 
             await asyncio.sleep(5)
             
-            await m.delete
+            await m.delete()
             
 
         # emote system
