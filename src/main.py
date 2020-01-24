@@ -63,7 +63,7 @@ PROTECTED_NAMES = ["LETHALITY", "THREATS", "kickVotes", "OPS", "GLOBAL_BANNED_WO
 WHITELISTED_CHANNELS = [558408620476203021, 522428899184082945] # TODO Command-ify
 # exempt from filter
 
-VERSION = "Comrade 2.0.1 Osprey"
+VERSION = "Comrade 2.2 Build K"
 
 # Temporary Variables
 vaultCandidates = {}
