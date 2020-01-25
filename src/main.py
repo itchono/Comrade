@@ -944,24 +944,24 @@ MESSAGE EVENTS
 '''
 
 # TODO these need some work (user is able to speak)
-async def STAR_PLATINUM(message, time):
+async def STAR_PLATINUM(message, time, DIO=False):
     '''
     Stops time for (time + 2) seconds (includes windup animation)
     '''
 
     if not message.author.id in cfg["THREATS"] or cfg["THREATS"][message.author.id]["LETHALITY"] == 0:
         embed = discord.Embed(
-            title = "ZA WARUDO",
+            title = ("ZA WARUDO" if not DIO else "TOKI WO TOMARE"),
             colour = discord.Colour.from_rgb(r=102, g=0, b=204)
             
         )
-        embed.set_image(url = "https://media1.tenor.com/images/4b953bf5b5ba531099a823944a5626c2/tenor.gif")
+        embed.set_image(url = ("https://media1.tenor.com/images/4b953bf5b5ba531099a823944a5626c2/tenor.gif" if not DIO else "https://media1.tenor.com/images/afc87b53146aaeaf78eaad0bb50fd8a2/tenor.gif"))
 
         m1 = await message.channel.send(embed = embed)
         # Remove ability for people to talk and TODO: allow daily member to talk
         await message.channel.set_permissions(message.guild.get_role(419215295232868361), send_messages=False)
 
-        await asyncio.sleep(1.95)
+        await asyncio.sleep((1.95 if not DIO else 1.65))
         await m1.delete()
 
         mt = await message.channel.send("*Time is frozen*")
@@ -987,7 +987,7 @@ async def STAR_PLATINUM(message, time):
             title = "Time has begun to move again.",
             colour = discord.Colour.from_rgb(r=102, g=0, b=204)
         )
-        embed.set_image(url = "https://media1.tenor.com/images/02c68c840e943c4aa2ebfdb7c8a6ea46/tenor.gif")
+        embed.set_image(url = ("https://media1.tenor.com/images/02c68c840e943c4aa2ebfdb7c8a6ea46/tenor.gif" if not DIO else "https://media1.tenor.com/images/70e9c6a725051566e1bd6ce79e34d136/tenor.gif"))
         
         m2 = await message.channel.send(embed=embed)
 
@@ -1024,7 +1024,7 @@ async def ZA_HANDO(message, num=20, user=None):
             await message.channel.send("Message purge vote registered. {0}/{1}".format(len(handoList[message.channel.id]), PURGE_REQ))
             if len(handoList[message.channel.id]) >= PURGE_REQ:
                 await message.channel.purge(limit=num)
-            del handoList[message.channel.id]
+                del handoList[message.channel.id] # reset list
 
 @client.event
 async def on_message(message:discord.message):
@@ -1049,6 +1049,8 @@ async def on_message(message:discord.message):
         # fun stuff
         if message.content == "STAR PLATINUM":
             await STAR_PLATINUM(message, 5)
+        elif message.content == "ZA WARUDO":
+            await STAR_PLATINUM(message, 10, DIO=True)
         elif message.content == "ZA HANDO":
             await ZA_HANDO(message)
 
