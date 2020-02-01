@@ -58,12 +58,12 @@ TOKEN = os.environ.get('TOKEN') # bot token; kept private
 
 cfg = comrade_cfg.data # load config variables
 
-PROTECTED_NAMES = ["LETHALITY", "THREATS", "kickVotes", "OPS", "GLOBAL_BANNED_WORDS", "PURGE", "LAST_DAILY", "KICK_REQ", "KICK_SAFE"]
+PROTECTED_NAMES = ["LETHALITY", "THREATS", "kickVotes", "OPS", "GLOBAL_BANNED_WORDS", "PURGE", "LAST_DAILY", "KICK_REQ", "KICK_SAFE", "ANTIPING"]
 # Protected dictionary elements in cfg file
 WHITELISTED_CHANNELS = [558408620476203021, 522428899184082945] # TODO Command-ify
 # exempt from filter
 
-VERSION = "Comrade 2.0.1 Osprey"
+VERSION = "Comrade 2.2 Build K"
 
 # Temporary Variables
 vaultCandidates = {}
@@ -79,12 +79,14 @@ DEFINED_EMOTES = {
     'choke',
     'comradelogo',
     'deskslam',
-    'emotes',
+    'dummy',
+    'feelsmodsman',
     'feelssurrenderman',
     'goldexperience',
     'hahaa',
     'hope',
     'htfu',
+    'jotarogun',
     'killerqueen',
     'kilogram2002',
     'kinthonk',
@@ -103,10 +105,14 @@ DEFINED_EMOTES = {
     'spung',
     'starplatinum',
     'stickyfingers',
+    'stupid',
+    'truth',
     'ultrathonk',
     'ymleayauosi',
     'zahando'
 }
+
+EMOTE_INDEX = {}
 
 print('All variables loaded.')
 
@@ -659,12 +665,12 @@ async def removeList(ListName, SUDO = False):
         del cfg[ListName]
         await writeInfo()
 
-def getListUsers(ListName):
+def getListUsers(ListName, SUDO = False):
     '''
     Returns a list of users who are in the list of choice.
     '''
     try:
-        if not ListName in PROTECTED_NAMES:
+        if not ListName in PROTECTED_NAMES or SUDO:
             return [client.get_guild(419214713252216848).get_member(i) for i in cfg[ListName]]
     except:
         return None
@@ -710,6 +716,18 @@ async def removeKickSafe(ctx):
     '''
     user = ctx.message.mentions[0]
     await removeFromList("KICK_SAFE", user, SUDO=True)
+
+@client.command()
+@commands.check(isOP)
+async def antiping(ctx):
+    '''
+    Prevents user from pinging
+    '''
+    user = ctx.message.mentions[0]
+    if user in getListUsers("ANTIPING", SUDO=True):
+        await removeFromList("ANTIPING", user, SUDO=True)
+    else:
+        await addToList("ANTIPING", user, SUDO=True)
 
 # Custom list additions
 @client.command()
@@ -772,6 +790,7 @@ async def clear(ctx):
 
 # *STATUS OF BOT TODO
 @client.command()
+@commands.check(notThreat)
 async def status(ctx, *args):
     '''
     Reports the bot's status.
@@ -787,9 +806,13 @@ async def status(ctx, *args):
 
     uptime = datetime.utcnow() - t_start
     if len(args) > 0 and args[0] == "full":
-        await ctx.send("```Uptime: {0}\nGlobal Lethality: {1}\nKick Votes: {2}\nKick Requirement: {3}\nOPS: {4}\nThreats: {5}\nKick Safe: {6}\n Global Banned Words: {7}```".format(uptime, LETHALITY, kickList, KICK_REQ, OPS, THREATS, KICK_SAFE, GLOBAL_WDS))
+        msg = await ctx.send("```Uptime: {0}\nGlobal Lethality: {1}\nKick Votes: {2}\nKick Requirement: {3}\nOPS: {4}\nThreats: {5}\nKick Safe: {6}\n Global Banned Words: {7}```".format(uptime, LETHALITY, kickList, KICK_REQ, OPS, THREATS, KICK_SAFE, GLOBAL_WDS))
+        await asyncio.sleep(10)
+        await msg.delete()
     else:
-        await ctx.send("```Uptime: {0}\nGlobal Lethality: {1}\nKick Votes: {2}\nKick Requirement: {3}```".format(uptime, LETHALITY, kickList, KICK_REQ))
+        msg = await ctx.send("```Uptime: {0}\nGlobal Lethality: {1}\nKick Votes: {2}\nKick Requirement: {3}```".format(uptime, LETHALITY, kickList, KICK_REQ))
+        await asyncio.sleep(10)
+        await msg.delete()
         
 @client.command()
 async def lethalityhelp(ctx):
@@ -873,14 +896,19 @@ async def emoteInterpreter(channel, name):
     Sends custom emote to a channel
     '''
     if name.lower() in DEFINED_EMOTES:
-        emoteURL = "https://raw.githubusercontent.com/itchono/Comrade/master/CustomEmotes/{}.png".format(name.lower())
+
+     
+        emoteURL = "https://raw.githubusercontent.com/itchono/Comrade/master/CustomEmotes/{}.png".format(name.lower()) if not name.lower() in EMOTE_INDEX else EMOTE_INDEX[name.lower()]
+        # choose between default and custom list of emotes
 
         embed = discord.Embed()
         embed.set_image(url = emoteURL)
 
         await channel.send(embed = embed)
     else:
-        await channel.send('Invalid Emote. Here is a valid list of emotes: ```{}```'.format(DEFINED_EMOTES))
+        msg = await channel.send('Invalid Emote. Here is a valid list of emotes: ```{}```'.format(DEFINED_EMOTES))
+        await asyncio.sleep(10)
+        await msg.delete()
 
 @client.command()
 async def emote(ctx, name):
@@ -890,62 +918,93 @@ async def emote(ctx, name):
 
     await emoteInterpreter(ctx.channel, name)
 
+@client.command()
+@commands.check(notThreat)
+async def addEmote(ctx, *args):
+    '''
+    Adds a custom emote to the directory of emotes. Provide a NAME and a URL linking directly to a picture, or provide NAME and file
+    '''
+    if len(ctx.message.attachments) > 0:
+        u = ctx.message.attachments[0].url
+    else:
+        u = args[1] # url term
 
+    await client.get_guild(419214713252216848).get_channel(669353887735611430).send("{}\n{}".format(args[0], u))
+    await refreshEmotes()
+    await ctx.send("Emote {} has been added. You can call it using :{}:".format(args[0], args[0].lower()))
+    
+
+@client.command()
+@commands.check(isOP)
+async def removeEmote(ctx, name):
+    '''
+    Removes an emote from the list.
+    '''
+    async for m in client.get_guild(419214713252216848).get_channel(669353887735611430).history(limit = None):
+        if name.lower() in m.content:
+            await m.delete()
+            DEFINED_EMOTES.remove(name.lower())
+            del EMOTE_INDEX[name.lower()]
+            continue
+    await ctx.send("Emote {} was removed.".format(name.lower()))
+    
 '''
 MESSAGE EVENTS
 '''
 
 # TODO these need some work (user is able to speak)
-async def STAR_PLATINUM(message, time):
+async def STAR_PLATINUM(message, time, DIO=False):
     '''
     Stops time for (time + 2) seconds (includes windup animation)
     '''
-    embed = discord.Embed(
-        title = "ZA WARUDO",
-        colour = discord.Colour.from_rgb(r=102, g=0, b=204)
+
+    if not message.author.id in cfg["THREATS"] or cfg["THREATS"][message.author.id]["LETHALITY"] == 0:
+        embed = discord.Embed(
+            title = ("ZA WARUDO" if not DIO else "TOKI WO TOMARE"),
+            colour = discord.Colour.from_rgb(r=102, g=0, b=204)
+            
+        )
+        embed.set_image(url = ("https://media1.tenor.com/images/4b953bf5b5ba531099a823944a5626c2/tenor.gif" if not DIO else "https://media1.tenor.com/images/afc87b53146aaeaf78eaad0bb50fd8a2/tenor.gif"))
+
+        m1 = await message.channel.send(embed = embed)
+        # Remove ability for people to talk and TODO: allow daily member to talk
+        await message.channel.set_permissions(message.guild.get_role(419215295232868361), send_messages=False)
+
+        await asyncio.sleep((1.95 if not DIO else 1.65))
+        await m1.delete()
+
+        mt = await message.channel.send("*Time is frozen*")
         
-    )
-    embed.set_image(url = "https://media1.tenor.com/images/4b953bf5b5ba531099a823944a5626c2/tenor.gif")
+        # fun counter thing
+        if int(time) <= 20:
+            for i in range(int(time)):
+                await asyncio.sleep(1)
 
-    m1 = await message.channel.send(embed = embed)
-    # Remove ability for people to talk and TODO: allow daily member to talk
-    await message.channel.set_permissions(message.guild.get_role(419215295232868361), send_messages=False)
-
-    await asyncio.sleep(1.95)
-    await m1.delete()
-
-    mt = await message.channel.send("*Time is frozen*")
-    
-    # fun counter thing
-    if int(time) <= 20:
-        for i in range(int(time)):
-            await asyncio.sleep(1)
-
-            t = i+1
-            if t == 1:
-                await mt.edit(content = "1 second has passed", suppress = False)
-            else:
-                await mt.edit(content = "{} seconds have passed".format(t), suppress = False)
+                t = i+1
+                if t == 1:
+                    await mt.edit(content = "1 second has passed", suppress = False)
+                else:
+                    await mt.edit(content = "{} seconds have passed".format(t), suppress = False)
 
 
-    else:
-        await asyncio.sleep(int(time)-2 if int(time) >= 2 else 0)
-    
-    await message.channel.set_permissions(message.guild.get_role(419215295232868361), send_messages=True)
+        else:
+            await asyncio.sleep(int(time)-2 if int(time) >= 2 else 0)
+        
+        await message.channel.set_permissions(message.guild.get_role(419215295232868361), send_messages=True)
 
-    embed = discord.Embed(
-        title = "Time has begun to move again.",
-        colour = discord.Colour.from_rgb(r=102, g=0, b=204)
-    )
-    embed.set_image(url = "https://media1.tenor.com/images/02c68c840e943c4aa2ebfdb7c8a6ea46/tenor.gif")
-    
-    m2 = await message.channel.send(embed=embed)
+        embed = discord.Embed(
+            title = "Time has begun to move again.",
+            colour = discord.Colour.from_rgb(r=102, g=0, b=204)
+        )
+        embed.set_image(url = ("https://media1.tenor.com/images/02c68c840e943c4aa2ebfdb7c8a6ea46/tenor.gif" if not DIO else "https://media1.tenor.com/images/70e9c6a725051566e1bd6ce79e34d136/tenor.gif"))
+        
+        m2 = await message.channel.send(embed=embed)
 
-    await asyncio.sleep(1.35)
-    await m2.delete()
-    await mt.edit(content = "*Time has begun to move again.*", suppress = False)
+        await asyncio.sleep(1.35)
+        await m2.delete()
+        await mt.edit(content = "*Time has begun to move again.*", suppress = False)
 
-    await log("Time stop of duration {}".format(time))
+        await log("Time stop of duration {}".format(time))
 
 purge_tgt = None
 
@@ -974,7 +1033,7 @@ async def ZA_HANDO(message, num=20, user=None):
             await message.channel.send("Message purge vote registered. {0}/{1}".format(len(handoList[message.channel.id]), PURGE_REQ))
             if len(handoList[message.channel.id]) >= PURGE_REQ:
                 await message.channel.purge(limit=num)
-            del handoList[message.channel.id]
+                del handoList[message.channel.id] # reset list
 
 @client.event
 async def on_message(message:discord.message):
@@ -999,12 +1058,35 @@ async def on_message(message:discord.message):
         # fun stuff
         if message.content == "STAR PLATINUM":
             await STAR_PLATINUM(message, 5)
+        elif message.content == "ZA WARUDO":
+            await STAR_PLATINUM(message, 10, DIO=True)
         elif message.content == "ZA HANDO":
             await ZA_HANDO(message)
 
         if message.mention_everyone or len(message.mentions) > 2:
             # react to @everyone
-            await message.add_reaction(client.get_emoji(659263935979192341))
+            await message.add_reaction(await client.get_guild(419214713252216848).fetch_emoji(609216526666432534))
+            668273444684693516
+
+        '''if message.author.id == 545672836124246024 and len(message.mentions) > 0:
+            # react, specifically to raf
+            await message.add_reaction(await client.get_guild(419214713252216848).fetch_emoji(609216526666432534))
+            await message.add_reaction(await client.get_guild(419214713252216848).fetch_emoji(471877591557734401))'''
+
+        if message.author in getListUsers("ANTIPING", SUDO=True) and len(message.mentions) > 0:
+            # react, specifically to raf
+            l = message.content
+
+            await message.delete()
+
+            m = await message.channel.send("Message deleted due to useless ping mentioning {}".format(message.mentions[0].name))
+            
+            await message.channel.send("```" + l + "```")
+
+            await asyncio.sleep(5)
+            
+            await m.delete()
+            
 
         # emote system
         if len(message.content) > 0 and message.content[0] == ':' and message.content[-1] == ':':
@@ -1021,6 +1103,23 @@ async def on_message_edit(OG:discord.message, message:discord.message):
     if cfg["LETHALITY"] >= 4 or (cfg["LETHALITY"] >= 2 and message.author.id in cfg["THREATS"] and cfg["THREATS"][message.author.id]["LETHALITY"] >= 2):
             await sentinelFilter(message)
 
+async def refreshEmotes():
+    emcounter = 0
+
+    async for m in client.get_guild(419214713252216848).get_channel(669353887735611430).history(limit=None):
+        # import custom emotes
+        arr = str(m.content).split("\n")
+
+        DEFINED_EMOTES.add(arr[0].lower())
+
+        EMOTE_INDEX[arr[0].lower()] = arr[1]
+
+        # insert image url
+
+        emcounter += 1
+
+    await log("{} custom emotes loaded".format(emcounter))
+
 '''
 CLIENT INIT Cont'
 '''
@@ -1036,6 +1135,8 @@ async def on_ready():
                 await genKick()
                 print("ATTN: kickVotes was updated due to a change in the number of members")
             print("{} members detected.".format(len(guild.members)))
+
+    await refreshEmotes()
 
     print("{} is online and ready to go.".format(client.user))
     
