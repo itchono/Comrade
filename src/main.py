@@ -204,7 +204,7 @@ async def dailyMSG(force = False):
             # allow 30 seconds for script to run to clean messages
             '''
             global infractions
-            del infractions # reset infractions
+            infractions = {} # reset infractions
 
             await client.get_guild(419214713252216848).get_channel(419214713755402262).send('Good morning everyone!\nToday is {}. Have a prosperous day! <:FeelsProsperousMan:419256328465285131>'.format(datetime.utcnow().date()))
             cfg["LAST_DAILY"] = str(datetime.utcnow().date())
@@ -574,6 +574,15 @@ async def resetKick(ctx):
     '''
     await genKick()
     await ctx.send("Kick Votes list has been successfully generated.")
+
+@client.command()
+@commands.check(isOP)
+async def resetInfractions(ctx):
+    '''
+    Resets demerit points
+    '''
+    global infractions
+    infractions = {}
 
 @client.command(name = "reloadVars")
 @commands.check(isOP)
