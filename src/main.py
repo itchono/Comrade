@@ -960,6 +960,7 @@ async def STAR_PLATINUM(message, time, DIO=False):
         m1 = await message.channel.send(embed = embed)
         # Remove ability for people to talk and TODO: allow daily member to talk
         await message.channel.set_permissions(message.guild.get_role(419215295232868361), send_messages=False)
+        await message.channel.set_permissions(message.guild.get_role(675888063192236067), send_messages=False)
 
         await asyncio.sleep((1.95 if not DIO else 1.65))
         await m1.delete()
@@ -982,6 +983,7 @@ async def STAR_PLATINUM(message, time, DIO=False):
             await asyncio.sleep(int(time)-2 if int(time) >= 2 else 0)
         
         await message.channel.set_permissions(message.guild.get_role(419215295232868361), send_messages=True)
+        await message.channel.set_permissions(message.guild.get_role(675888063192236067), send_messages=True)
 
         embed = discord.Embed(
             title = "Time has begun to move again.",
@@ -996,6 +998,13 @@ async def STAR_PLATINUM(message, time, DIO=False):
         await mt.edit(content = "*Time has begun to move again.*", suppress = False)
 
         await log("Time stop of duration {}".format(time))
+    else:
+
+        m2 = await message.channel.send("You are unworthy to use the power of a stand!")
+
+        await asyncio.sleep(5)
+        await m2.delete()
+
 
 purge_tgt = None
 
