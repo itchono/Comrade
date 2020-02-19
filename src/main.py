@@ -63,12 +63,14 @@ PROTECTED_NAMES = ["LETHALITY", "THREATS", "kickVotes", "OPS", "GLOBAL_BANNED_WO
 WHITELISTED_CHANNELS = [558408620476203021, 522428899184082945] # TODO Command-ify
 # exempt from filter
 
-VERSION = "Comrade 2.2 Build K"
+VERSION = "Comrade 2.2.1 Build K"
 
 # Temporary Variables
 vaultCandidates = {}
 handoList = {}
 infractions = {}
+
+wholesomebuffer = []
 
 
 # set of valid emotes
@@ -281,19 +283,19 @@ async def sentinelFilter(message:discord.message):
                 # passes query through fuzzy filtering system IF length of word is long enough and author is subhect to strict filtering
                 await message.delete()
                 await log('Message purged for bad word:\n'+ str(message.content) + "\nSent By " + str(message.author.name) + "\nTrigger:" + str(word) + "\nMatch %:" + str(max([fuzz.partial_ratio(word, query), fuzz.partial_ratio(word, utilitymodules.emojiToText(message.content.lower()))])))
-                await infraction(message, message.author, 1)
+                await infraction(message, message.author, int(cfg["THREATS"][message.author.id]["LETHALITY"]/4))
 
         # Stage 2: Attachment Filtering
         if strict and (len(message.attachments) > 0 or len(message.embeds) > 0):
             await message.delete()
             await log('Message purged for embed; sent by ' + str(message.author.name))
-            await infraction(message, message.author, 2)
+            await infraction(message, message.author, int(cfg["THREATS"][message.author.id]["LETHALITY"]/4)*2)
 
         # Stage 3: Ping Filtering
         if superStrict and len(message.mentions) > 0:
             await message.delete()
             await message.channel.send("USELESS PING DETECTED SENT BY {}".format(message.author.mention))
-            await infraction(message, message.author, 4)
+            await infraction(message, message.author, int(cfg["THREATS"][message.author.id]["LETHALITY"]/4)*4)
 
 async def infraction(msg, user, weight):
     '''
@@ -301,15 +303,19 @@ async def infraction(msg, user, weight):
     '''
     LIMIT = 10
 
-    if not user.id in infractions:
-        infractions[user.id] = weight
-    else:
-        infractions[user.id] += weight
-    await msg.channel.send("{3} demerit points added to {0}. ({1}/{2})".format(user.mention, infractions[user.id], LIMIT, weight))
-    
-    if infractions[user.id] >= LIMIT:
-        await msg.channel.send("Kicking {}...".format(user.name))
-        await msg.guild.kick(user)
+    if (weight > 0):
+        if not user.id in infractions:
+            infractions[user.id] = weight
+        else:
+            infractions[user.id] += weight
+        m = await msg.channel.send("{3} demerit points added to {0}. ({1}/{2})".format(user.mention, infractions[user.id], LIMIT, weight))
+        await log("{3} demerit points added to {0}. ({1}/{2})".format(user.mention, infractions[user.id], LIMIT, weight))
+        await asyncio.sleep(10)
+        await m.delete()
+        
+        if infractions[user.id] >= LIMIT:
+            await msg.channel.send("Kicking {}...".format(user.name))
+            await msg.guild.kick(user)
         
 '''
 COMMANDS
@@ -365,7 +371,7 @@ async def voteKick(ctx):
         await ctx.send("You have already voted!")
     elif user.id in cfg["KICK_SAFE"]:
         await ctx.send("Target is in Kick Safe list!")
-    elif ctx.author.id in cfg["THREATS"] and cfg["THREATS"][ctx.author.id] >= 1:
+    elif ctx.author.id in cfg["THREATS"] and cfg["THREATS"][ctx.author.id]["LETHALITY"] >= 1:
         await ctx.send("Due to you being a threat, you are not allowed to vote!")
     else:
         await addKick(ctx, user)
@@ -911,11 +917,55 @@ async def emoteInterpreter(channel, name):
         await msg.delete()
 
 @client.command()
+async def wholesome(ctx):
+    '''
+    Sends a random image from the wholesome channel.
+    '''
+
+    n = random.randint(0, len(wholesomebuffer)-1)
+    
+    embed = discord.Embed()
+    embed.set_image(url = wholesomebuffer[n])
+
+    await ctx.send(embed = embed)
+
+async def constructWBuffer():
+    '''
+    builds buffer of wholesome images
+    '''
+
+    buffer = []
+
+    async for m in client.get_guild(419214713252216848).get_channel(642923261977559061).history(limit=None):
+        if len(m.attachments) > 0:
+            buffer.append(m.attachments[0].url)
+
+    await log("Wholesome buffer of {} images.".format(len(buffer)))
+        
+    return buffer
+
+@client.command()
+@commands.check(isOP)
+async def reloadEmotes(ctx, name):
+    '''
+    Reloads Emotes Database.
+    '''
+    EMOTE_INDEX.clear()
+    await refreshEmotes()
+
+@client.command()
+@commands.check(isOP)
+async def reloadWholesome(ctx, name):
+    global wholesomebuffer
+    wholesomebuffer = await constructWBuffer()
+    await ctx.send("Buffer reconstructed with {} images".format(len(wholesomebuffer)))
+
+
+@client.command()
 async def emote(ctx, name):
     '''
     Sends a custom emote. Shorthand --> :emote:
     '''
-
     await emoteInterpreter(ctx.channel, name)
 
 @client.command()
@@ -944,9 +994,10 @@ async def removeEmote(ctx, name):
         if name.lower() in m.content:
             await m.delete()
             DEFINED_EMOTES.remove(name.lower())
-            del EMOTE_INDEX[name.lower()]
+            EMOTE_INDEX.pop(name.lower())
+            await ctx.send("Emote {} was removed.".format(name.lower()))
             continue
-    await ctx.send("Emote {} was removed.".format(name.lower()))
+            
     
 '''
 MESSAGE EVENTS
@@ -1072,6 +1123,16 @@ async def on_message(message:discord.message):
         elif message.content == "ZA HANDO":
             await ZA_HANDO(message)
 
+        # wholesome
+        if message.content == ";td":
+            n = random.randint(0, len(wholesomebuffer)-1)
+    
+            embed = discord.Embed()
+            embed.set_image(url = wholesomebuffer[n])
+
+            await message.channel.send(embed = embed)
+
+
         if message.mention_everyone or len(message.mentions) > 2:
             # react to @everyone
             await message.add_reaction(await client.get_guild(419214713252216848).fetch_emoji(609216526666432534))
@@ -1127,7 +1188,7 @@ async def refreshEmotes():
 
         emcounter += 1
 
-    await log("{} custom emotes loaded".format(emcounter))
+    await log("{} custom emotes loaded".format(emcounter))  
 
 '''
 CLIENT INIT Cont'
@@ -1146,6 +1207,10 @@ async def on_ready():
             print("{} members detected.".format(len(guild.members)))
 
     await refreshEmotes()
+
+    global wholesomebuffer
+
+    wholesomebuffer = await constructWBuffer()
 
     print("{} is online and ready to go.".format(client.user))
     
