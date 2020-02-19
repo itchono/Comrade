@@ -70,6 +70,8 @@ vaultCandidates = {}
 handoList = {}
 infractions = {}
 
+wholesomebuffer = []
+
 
 # set of valid emotes
 DEFINED_EMOTES = {
@@ -911,6 +913,35 @@ async def emoteInterpreter(channel, name):
         await msg.delete()
 
 @client.command()
+async def wholesome(ctx):
+    '''
+    Sends a random image from the wholesome channel.
+    '''
+
+    n = random.randint(0, len(wholesomebuffer)-1)
+    
+    embed = discord.Embed()
+    embed.set_image(url = wholesomebuffer[n])
+
+    await ctx.send(embed = embed)
+
+async def constructWBuffer():
+    '''
+    builds buffer of wholesome images
+    '''
+
+    buffer = []
+
+    async for m in client.get_guild(419214713252216848).get_channel(642923261977559061).history(limit=None):
+        if len(m.attachments) > 0:
+            buffer.append(m.attachments[0].url)
+
+    await log("Wholesome buffer of {} images.".format(len(buffer)))
+        
+    return buffer
+
+
+@client.command()
 async def emote(ctx, name):
     '''
     Sends a custom emote. Shorthand --> :emote:
@@ -1072,6 +1103,16 @@ async def on_message(message:discord.message):
         elif message.content == "ZA HANDO":
             await ZA_HANDO(message)
 
+        # wholesome
+        if message.content == ";td":
+            n = random.randint(0, len(wholesomebuffer)-1)
+    
+            embed = discord.Embed()
+            embed.set_image(url = wholesomebuffer[n])
+
+            await message.channel.send(embed = embed)
+
+
         if message.mention_everyone or len(message.mentions) > 2:
             # react to @everyone
             await message.add_reaction(await client.get_guild(419214713252216848).fetch_emoji(609216526666432534))
@@ -1127,7 +1168,7 @@ async def refreshEmotes():
 
         emcounter += 1
 
-    await log("{} custom emotes loaded".format(emcounter))
+    await log("{} custom emotes loaded".format(emcounter))  
 
 '''
 CLIENT INIT Cont'
@@ -1146,6 +1187,10 @@ async def on_ready():
             print("{} members detected.".format(len(guild.members)))
 
     await refreshEmotes()
+
+    global wholesomebuffer
+
+    wholesomebuffer = await constructWBuffer()
 
     print("{} is online and ready to go.".format(client.user))
     
