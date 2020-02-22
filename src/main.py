@@ -63,7 +63,7 @@ PROTECTED_NAMES = ["LETHALITY", "THREATS", "kickVotes", "OPS", "GLOBAL_BANNED_WO
 WHITELISTED_CHANNELS = [558408620476203021, 522428899184082945] # TODO Command-ify
 # exempt from filter
 
-VERSION = "Comrade 2.2 Build K"
+VERSION = "Comrade 2.2.1 Build K"
 
 # Temporary Variables
 vaultCandidates = {}
@@ -940,13 +940,28 @@ async def constructWBuffer():
         
     return buffer
 
+@client.command()
+@commands.check(isOP)
+async def reloadEmotes(ctx, name):
+    '''
+    Reloads Emotes Database.
+    '''
+    EMOTE_INDEX.clear()
+    await refreshEmotes()
+
+@client.command()
+@commands.check(isOP)
+async def reloadWholesome(ctx, name):
+    global wholesomebuffer
+    wholesomebuffer = await constructWBuffer()
+    await ctx.send("Buffer reconstructed with {} images".format(len(wholesomebuffer)))
+
 
 @client.command()
 async def emote(ctx, name):
     '''
     Sends a custom emote. Shorthand --> :emote:
     '''
-
     await emoteInterpreter(ctx.channel, name)
 
 @client.command()
@@ -975,9 +990,10 @@ async def removeEmote(ctx, name):
         if name.lower() in m.content:
             await m.delete()
             DEFINED_EMOTES.remove(name.lower())
-            del EMOTE_INDEX[name.lower()]
+            EMOTE_INDEX.pop(name.lower())
+            await ctx.send("Emote {} was removed.".format(name.lower()))
             continue
-    await ctx.send("Emote {} was removed.".format(name.lower()))
+            
     
 '''
 MESSAGE EVENTS
