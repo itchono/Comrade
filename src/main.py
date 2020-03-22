@@ -367,7 +367,7 @@ async def voteKick(ctx):
         await ctx.send("You have already voted!")
     elif user.id in cfg["KICK_SAFE"]:
         await ctx.send("Target is in Kick Safe list!")
-    elif ctx.author.id in cfg["THREATS"] and cfg["THREATS"][ctx.author.id] >= 1:
+    elif ctx.author.id in cfg["THREATS"] and cfg["THREATS"][ctx.author.id]["LETHALITY"] >= 1:
         await ctx.send("Due to you being a threat, you are not allowed to vote!")
     else:
         await addKick(ctx, user)
