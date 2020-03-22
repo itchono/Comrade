@@ -309,6 +309,7 @@ async def infraction(msg, user, weight):
         else:
             infractions[user.id] += weight
         m = await msg.channel.send("{3} demerit points added to {0}. ({1}/{2})".format(user.mention, infractions[user.id], LIMIT, weight))
+        await log("{3} demerit points added to {0}. ({1}/{2})".format(user.mention, infractions[user.id], LIMIT, weight))
         await asyncio.sleep(10)
         await m.delete()
         
