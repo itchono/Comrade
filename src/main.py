@@ -283,19 +283,19 @@ async def sentinelFilter(message:discord.message):
                 # passes query through fuzzy filtering system IF length of word is long enough and author is subhect to strict filtering
                 await message.delete()
                 await log('Message purged for bad word:\n'+ str(message.content) + "\nSent By " + str(message.author.name) + "\nTrigger:" + str(word) + "\nMatch %:" + str(max([fuzz.partial_ratio(word, query), fuzz.partial_ratio(word, utilitymodules.emojiToText(message.content.lower()))])))
-                await infraction(message, message.author, 1)
+                await infraction(message, message.author, int(cfg["THREATS"][message.author.id]["LETHALITY"]/4))
 
         # Stage 2: Attachment Filtering
         if strict and (len(message.attachments) > 0 or len(message.embeds) > 0):
             await message.delete()
             await log('Message purged for embed; sent by ' + str(message.author.name))
-            await infraction(message, message.author, 2)
+            await infraction(message, message.author, int(cfg["THREATS"][message.author.id]["LETHALITY"]/4)*2)
 
         # Stage 3: Ping Filtering
         if superStrict and len(message.mentions) > 0:
             await message.delete()
             await message.channel.send("USELESS PING DETECTED SENT BY {}".format(message.author.mention))
-            await infraction(message, message.author, 4)
+            await infraction(message, message.author, int(cfg["THREATS"][message.author.id]["LETHALITY"]/4)*4)
 
 async def infraction(msg, user, weight):
     '''
@@ -303,15 +303,18 @@ async def infraction(msg, user, weight):
     '''
     LIMIT = 10
 
-    if not user.id in infractions:
-        infractions[user.id] = weight
-    else:
-        infractions[user.id] += weight
-    await msg.channel.send("{3} demerit points added to {0}. ({1}/{2})".format(user.mention, infractions[user.id], LIMIT, weight))
-    
-    if infractions[user.id] >= LIMIT:
-        await msg.channel.send("Kicking {}...".format(user.name))
-        await msg.guild.kick(user)
+    if (weight > 0):
+        if not user.id in infractions:
+            infractions[user.id] = weight
+        else:
+            infractions[user.id] += weight
+        m = await msg.channel.send("{3} demerit points added to {0}. ({1}/{2})".format(user.mention, infractions[user.id], LIMIT, weight))
+        await asyncio.sleep(10)
+        await m.delete()
+        
+        if infractions[user.id] >= LIMIT:
+            await msg.channel.send("Kicking {}...".format(user.name))
+            await msg.guild.kick(user)
         
 '''
 COMMANDS
