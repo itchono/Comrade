@@ -1,6 +1,9 @@
 # Comrade
 Discord bot for my personal server
 
+**
+See the V3-dev branch for the latest developments!
+
 Check out the wiki page for more details!
 https://github.com/itchono/Comrade/wiki
 
