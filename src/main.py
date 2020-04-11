@@ -179,7 +179,7 @@ async def dailyRole():
     '''
     Sets new daily member, removing all previous daily member roles
     '''
-    members = list(filter(lambda member: (not member.user.bot),client.get_guild(419214713252216848).members)) 
+    members = list(filter(lambda member: (not member.bot),client.get_guild(419214713252216848).members)) 
     random.seed() # important to seed random user
     chosenone = random.randint(0, len(members)-1)
 
