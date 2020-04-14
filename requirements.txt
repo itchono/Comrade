@@ -1,9 +1,0 @@
-flask
-unidecode
-fuzzywuzzy
-requests
-discord
-discord.py
-discord.ext
-python-dotenv
-python-Levenshtein
