@@ -1,0 +1,7 @@
+discord
+discord.py
+fuzzywuzzy
+python-dotenv
+python-Levenshtein
+requests
+unidecode
