@@ -15,6 +15,10 @@ import asyncio
 import discord # core to bot
 from discord.ext import commands
 
+from AuxilliaryListener import *
+from Commands import *
+from MessageHandler import *
+
 
 '''
 VARIABLES
@@ -22,24 +26,29 @@ VARIABLES
 '''
 
 print("Comrade V3 Starting...")
+
+# private variable loading
 dotenv.load_dotenv()
 TOKEN = os.environ.get('TOKEN') # bot token; kept private
-client = commands.Bot(command_prefix="$c ") # declare bot with prefix $c
 
-@client.command
-async def memeapproved(ctx):
-    await ctx.send("Meme Approved")
+print("Variable Loading Complete")
+
+from MongoInterface import *
+
+client = commands.Bot(command_prefix="$c ", case_insensitive=True) # declare bot with prefix $c
+client.add_cog(AuxilliaryListener(client))
+client.add_cog(MessageHandler(client))
+client.add_cog(Commands(client))
+
 
 @client.event
-async def on_message(message:discord.message):
-    if message.author != client.user:
-        if "hello" in message.content.lower():
-            msg = await message.channel.send("Henlo")
-            await asyncio.sleep(5)
-            await msg.delete()
+async def on_ready():
+    await client.change_presence(status=discord.Status.online, activity=discord.Game("Testing Communism"))
+    print("Bot is online")
 
-print("Bot is online")
+
 client.run(TOKEN)
+
 
 
 
