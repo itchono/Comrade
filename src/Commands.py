@@ -2,7 +2,7 @@ import discord # core to bot
 from discord.ext import commands
 import asyncio
 
-from MongoInterface import updateUser
+from MongoInterface import *
 
 class Commands(commands.Cog):
     def __init__(self, bot):
@@ -14,6 +14,14 @@ class Commands(commands.Cog):
         msg = await ctx.send("Meme Approved")
         await asyncio.sleep(10)
         await msg.add_reaction("🗑️")
+
+    @commands.command()
+    async def getuser(self, ctx, userID):
+        userID = eval(userID)
+        msg = await ctx.send("{}".format(getUser(userID)))
+        await asyncio.sleep(10)
+        await msg.add_reaction("🗑️")
+
 
     @commands.command()
     async def buymefood(self, ctx:commands.Context):

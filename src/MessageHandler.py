@@ -12,5 +12,5 @@ class MessageHandler(commands.Cog):
         if message.author != self.bot.user:
             if "hello" in message.content.lower():
                 msg = await message.channel.send("Henlo")
-                await asyncio.sleep(5)
-                await msg.delete()
+                await asyncio.sleep(10)
+                await msg.add_reaction("🗑️")
