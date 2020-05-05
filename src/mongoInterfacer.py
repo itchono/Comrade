@@ -1,5 +1,0 @@
-'''
-Comrade - Python Interfacer
-'''
-
-
