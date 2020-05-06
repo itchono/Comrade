@@ -1,6 +1,4 @@
-import discord # core to bot
-from discord.ext import commands
-import asyncio
+from Utilities import *
 
 class MessageHandler(commands.Cog):
     def __init__(self, bot):
@@ -14,3 +12,6 @@ class MessageHandler(commands.Cog):
                 msg = await message.channel.send("Henlo")
                 await asyncio.sleep(10)
                 await msg.add_reaction("🗑️")
+
+            if "wait" in message.content.lower():
+                await delSend("https://www.youtube.com/watch?v=sBl9qcaQos4", message.channel)
