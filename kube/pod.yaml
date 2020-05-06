@@ -11,15 +11,15 @@ spec:
       persistentVolumeClaim:
         claimName: comrade-pvc
   containers:
-   - image: comrade-v2-kubernetes:latest
-      name: comrade-container
-      imagePullPolicy: Always
+   - image: itchono/comrade:latest
+     name: comrade-container
+     imagePullPolicy: Always
   
-      envFrom:
-        - configMapRef:
-            name: comrade-configs
+     envFrom:
+       - configMapRef:
+           name: comrade-configs
 
-      volumeMounts:
-        - name: comrade-vol
-          mountPath: /app/data
-      
+     volumeMounts:
+       - name: comrade-vol
+         mountPath: /app/data
+     
