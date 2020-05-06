@@ -1,6 +1,4 @@
-import discord # core to bot
-from discord.ext import commands
-import asyncio
+from Utilities import *
 
 
 class AuxilliaryListener(commands.Cog):
