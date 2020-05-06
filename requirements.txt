@@ -1,9 +1,8 @@
-flask
-unidecode
-fuzzywuzzy
-requests
 discord
 discord.py
-discord.ext
+fuzzywuzzy
 python-dotenv
 python-Levenshtein
+requests
+unidecode
+flask
