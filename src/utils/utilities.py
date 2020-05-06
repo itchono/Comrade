@@ -9,11 +9,13 @@ Checks
 
 # Checks
 
-def isOwner(ctx:discord.Guild):
+def isOwner(ctx:commands.Context):
     '''
     Determines whether message author is server owner
     '''
     return ctx.author.id == ctx.guild.owner.id
+
+def isOP(ctx:discord.)
 
 '''
 Message Helpers

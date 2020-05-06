@@ -36,6 +36,7 @@ def updateCFG(newCFG:dict):
     '''
     Updates configuration file for a given server based on the ID
     '''
+    print("cfgupdate call")
     cfg = client['Comrade']['cfg']
     cfg.update({"_id":newCFG["_id"]}, newCFG, True)
 
@@ -43,8 +44,6 @@ def updateUser(userData:dict):
     '''
     Upserts user into userData collection
     '''
-    print("Attempting user push")
-    print(client.list_database_names())
     users = client.Comrade.UserData
     users.update({"_id":userData["_id"]}, userData, True) # upsert
 

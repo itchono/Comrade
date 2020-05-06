@@ -75,6 +75,9 @@ class Setup(commands.Cog):
         d["joke mode"] = True
         d["kick requirement"] = 6
         d["lethality override"] = 0
+        d["announcements channel"] = -1
+        d["bot channel"] = -1
+        d["log channel"] = -1
 
         updateCFG(d)
 
