@@ -1,5 +1,4 @@
-from Utilities import *
-
+from utils.utilities import *
 
 class AuxilliaryListener(commands.Cog):
     def __init__(self, bot):

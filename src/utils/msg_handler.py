@@ -1,4 +1,5 @@
-from Utilities import *
+from utils.utilities import *
+from utils.mongo_interface import *
 
 class MessageHandler(commands.Cog):
     def __init__(self, bot):
