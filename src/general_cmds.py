@@ -26,7 +26,16 @@ class General(commands.Cog):
         '''
         Echoes a command back to the user under their form
         '''
+        
+        member = ctx.guild.get_member(self.bot.user.id)
+
+        old = member.display_name
+
+        await member.edit(nick=ctx.author.display_name)
+
         await ctx.send(text)
+
+        await member.edit(nick=old)
 
     @commands.command()
     async def buymefood(self, ctx:commands.Context):

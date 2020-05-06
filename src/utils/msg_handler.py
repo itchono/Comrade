@@ -10,9 +10,7 @@ class MessageHandler(commands.Cog):
     async def on_message(self, message:discord.message):
         if message.author != self.bot.user:
             if "hello" in message.content.lower():
-                msg = await message.channel.send("Henlo")
-                await asyncio.sleep(10)
-                await msg.add_reaction("🗑️")
+                await delSend("Henlo", message.channel)
 
             if "wait" in message.content.lower():
                 await delSend("https://www.youtube.com/watch?v=sBl9qcaQos4", message.channel)

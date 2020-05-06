@@ -25,14 +25,12 @@ VARIABLES
 Note: Perms integer 536083799
 '''
 
-print("Comrade v3.0_alpha Starting...")
+print("Comrade v3.0_alpha Starting.")
 
 # private variable loading
 dotenv.load_dotenv()
 TOKEN = os.environ.get('TOKEN') # bot token; kept private
 from utils.mongo_interface import *
-
-print("Variable Loading Complete...")
 
 '''
 INIT
@@ -44,7 +42,7 @@ cogs = [AuxilliaryListener, MessageHandler, General, Setup]
 for c in cogs:
     client.add_cog(c(client))
     
-print("Bot components initialized, awaiting login...")
+print("Bot components initialized, awaiting login.")
 
 @client.event
 async def on_ready():
