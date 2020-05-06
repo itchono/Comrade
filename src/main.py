@@ -13,10 +13,12 @@ import dotenv
 import time
 
 # internal imports
-from Utilities import *
-from AuxilliaryListener import *
-from Commands import *
-from MessageHandler import *
+from utils.utilities import *
+from utils.msg_handler import *
+from utils.aux_listeners import *
+
+from general_cmds import *
+from setup_cmds import *
 
 '''
 VARIABLES
@@ -28,10 +30,7 @@ print("Comrade v3.0_alpha Starting...")
 # private variable loading
 dotenv.load_dotenv()
 TOKEN = os.environ.get('TOKEN') # bot token; kept private
-
-
-
-from MongoInterface import *
+from utils.mongo_interface import *
 
 print("Variable Loading Complete...")
 
@@ -39,9 +38,12 @@ print("Variable Loading Complete...")
 INIT
 '''
 client = commands.Bot(command_prefix="$c ", case_insensitive=True) # declare bot with prefix $c
-client.add_cog(AuxilliaryListener(client))
-client.add_cog(MessageHandler(client))
-client.add_cog(Commands(client))
+
+cogs = [AuxilliaryListener, MessageHandler, General, Setup]
+
+for c in cogs:
+    client.add_cog(c(client))
+    
 print("Bot components initialized, awaiting login...")
 
 @client.event
