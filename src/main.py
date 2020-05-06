@@ -32,7 +32,6 @@ from importlib import reload
 
 # II: Internal Imports
 import keep_alive
-from data import comrade_cfg
 import utilitymodules
 
 '''
@@ -57,7 +56,11 @@ t_start = datetime.utcnow()  # start time
 dotenv.load_dotenv()
 TOKEN = os.environ.get('TOKEN')  # bot token; kept private
 
-cfg = comrade_cfg.data  # load config variables
+try:
+    from data import comrade_cfg
+    cfg = comrade_cfg.data  # load config variables
+except:
+    cfg = {}
 
 PROTECTED_NAMES = ["LETHALITY", "THREATS", "kickVotes", "OPS",
                    "GLOBAL_BANNED_WORDS", "PURGE", "LAST_DAILY", "KICK_REQ", "KICK_SAFE", "ANTIPING"]
@@ -1307,7 +1310,7 @@ async def on_ready():
 # Client startup PT 2
 print('Starting Internal Server...')
 # Create webserver to keep bot running on Repl.it
-keep_alive.keep_alive()
+#keep_alive.keep_alive()
 # Create loop task to perform timed actions
 client.loop.create_task(dailyMSG())
 # Finally, start the bot
