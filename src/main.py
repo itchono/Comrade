@@ -32,7 +32,7 @@ from importlib import reload
 
 # II: Internal Imports
 import keep_alive
-import .data.comrade_cfg
+from data import comrade_cfg
 import utilitymodules
 
 '''
