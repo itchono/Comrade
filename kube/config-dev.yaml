@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: comrade-configs
+  namespace: comrade-v2
+data:
+  TOKEN: "NDcxODczNTQ1MTczOTkxNDM0.Dk0-1g.my3_6PwuzajIkw7CzqAV2hzT2tM"
