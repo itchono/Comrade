@@ -146,9 +146,9 @@ async def writeInfo():
     '''
     Writes changes made to cfg dictionary to configuration file.
     '''
-    if os.path.exists("comrade_cfg.py"):
-        os.remove("comrade_cfg.py")
-        with open("comrade_cfg.py", "w") as f:
+    if os.path.exists("data/comrade_cfg.py"):
+        os.remove("data/comrade_cfg.py")
+        with open("data/comrade_cfg.py", "w") as f:
             f.write("{} = {}\n".format("data", cfg))
         await reloadVars()
         # announce to log channel
