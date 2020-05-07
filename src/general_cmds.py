@@ -60,6 +60,9 @@ class General(commands.Cog):
 
     @commands.command()
     async def test_userinfo(self, ctx, member: discord.member):
+        '''
+        testestestesstetstststs
+        '''
 
         embed = discord.Embed(colour = member.color)
 
