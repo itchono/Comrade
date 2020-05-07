@@ -70,9 +70,13 @@ async def getavatar(member:discord.Member):
     Returns file bytes of avatar
     '''
     r = requests.get(member.avatar_url)
-    with open("avatars/{}.png".format(member.id), "wb") as f:
-        f.write(r.content)
     return r.content
 
+DEFAULT_NAME = "Comrade Dev"
+DEFAULT_AVATAR_URL = ""
+
 async def doppel(member:discord.Member):
-    pass
+    '''
+    EXPERIMENTAL: Turns Comrade into another user
+    Currently this function does not allow
+    '''

@@ -26,7 +26,9 @@ class General(commands.Cog):
     @commands.check(isnotThreat)
     async def echo(self, ctx:commands.Context, text:str, tgt=None):
         '''
-        Echoes a command back to the user under their form
+        Echoes a block of text as if it were sent by someone else.
+        Defaults to the author of the message is no target is given.
+        Can mention by nickname.
         '''
 
         if not tgt: tgt = ctx.author

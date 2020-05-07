@@ -1,6 +1,8 @@
 from utils.utilities import *
 from utils.mongo_interface import *
 
+import os
+
 class MessageHandler(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -16,7 +18,8 @@ class MessageHandler(commands.Cog):
                 await delSend("https://www.youtube.com/watch?v=sBl9qcaQos4", message.channel)
 
             if "approved" in message.content.lower():
-                with open("vid\meme_approved.mp4", "rb") as f:
+                print(os.getcwd())
+                with open("vids/meme_approved.mp4", "rb") as f:
                     await message.channel.send(file=discord.File(f, "meme_approved.mp4"))
                 
                 #await delSend("https://youtu.be/LabIat9t-uY", message.channel)
@@ -30,18 +33,18 @@ class MessageHandler(commands.Cog):
                 if len(message.attachments) > 0:
                     attach = message.attachments[0].filename
                     fn = Knuckles_VD[hash(attach) % len(Knuckles_VD)]
-                    with open("vid\{}".format(fn), "rb") as f:
+                    with open("vid\\{}".format(fn), "rb") as f:
                         await message.channel.send(file=discord.File(f, fn))
 
                 elif len(message.embeds) > 0:
                     attach = message.embeds[0].url
                     fn = Knuckles_VD[hash(attach) % len(Knuckles_VD)]
-                    with open("vid\{}".format(fn), "rb") as f:
+                    with open("vid\\{}".format(fn), "rb") as f:
                         await message.channel.send(file=discord.File(f, fn))
 
                 elif "http" in message.content.lower():
                     fn = Knuckles_VD[hash(message.content.lower()) % len(Knuckles_VD)]
-                    with open("vid\{}".format(fn), "rb") as f:
+                    with open("vid\\{}".format(fn), "rb") as f:
                         await message.channel.send(file=discord.File(f, fn))                
                 
                 

@@ -20,6 +20,7 @@ from utils.keep_alive import *
 
 from general_cmds import *
 from setup_cmds import *
+from nsfw_cmds import *
 
 '''
 VARIABLES
@@ -38,7 +39,7 @@ INIT
 '''
 client = commands.Bot(command_prefix="$c ", case_insensitive=True) # declare bot with prefix $c
 
-cogs = [AuxilliaryListener, MessageHandler, General, Setup]
+cogs = [AuxilliaryListener, MessageHandler, General, Setup, NSFW]
 
 for c in cogs:
     client.add_cog(c(client))
