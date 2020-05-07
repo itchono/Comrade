@@ -34,7 +34,7 @@ class General(commands.Cog):
 
         if not tgt: tgt = ctx.author
         else: tgt = ctx.message.mentions[0]
-        
+
         webhook = discord.Webhook.partial(707756204969033731, 'fBGEs9CYku6Cs9qbXTfu1HkyycZnR9zQbCbdlL7o3b0ul7xbHArae7B0pBCRMsBfX3Wy', adapter=discord.RequestsWebhookAdapter())
         #webhook.edit()
         webhook.send(text, username=tgt.display_name, avatar_url=tgt.avatar_url)
@@ -53,9 +53,12 @@ class General(commands.Cog):
         Displays the avatar of the said person
         '''
         u = ctx.guild.get_member((getUserfromNick(nickname))["_id"])
-        a = discord.Embed(color = discord.Color.dark_blue(), title="{}'s Avatar".format(u.display_name), url=str(u.avatar_url_as(static_format="png")))
-        a.set_image(url='{}'.format(u.avatar_url))
-        await ctx.send(embed=a)
+        if not u:
+            await ctx.send("Member with username " + nickname + " not found.")
+        else:
+            a = discord.Embed(color = discord.Color.dark_blue(), title="{}'s Avatar".format(u.display_name), url=str(u.avatar_url_as(static_format="png")))
+            a.set_image(url='{}'.format(u.avatar_url))
+            await ctx.send(embed=a)
 
     @commands.command()
     async def test_userinfo(self, ctx, member: discord.member):
@@ -63,14 +66,7 @@ class General(commands.Cog):
         testestestesstetstststs
         '''
 
-        roles = [role for role in member.roles]
-
         embed = discord.Embed(colour = member.color)
+
         embed.set_author(name=f"User Info - {member}")
         embed.set_thumbnail(url=member.avatar_url)
-        embed.set_footer(icon_url=ctx.author.avatar_url)
-        embed.add_field(name=f'Roles: ({len(roles)})', value="".join([role for role in member.roles]))
-
-        await ctx.send(embed=embed)
-
-
