@@ -48,11 +48,12 @@ class General(commands.Cog):
         await delSend("Enter Your Credit Card Info...", ctx.channel)
 
     @commands.command()
-    async def avatar(ctx, nickname):
+    async def avatar(self, ctx, nickname):
         '''
         Displays the avatar of the said person
         '''
-        u = getUserfromNick(nickname)
+        u = await self.bot.fetch_user((getUserfromNick(nickname))["_id"])
+        print(str(u))
         a = discord.Embed(color = discord.Color.dark_blue())
         a.set_image(url='{}'.format(u.avatar_url))
         await ctx.send(embed=a)
