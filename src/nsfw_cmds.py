@@ -11,13 +11,21 @@ class NSFW(commands.Cog):
         self._last_member = None
 
     @commands.command()
-    async def hentai(self, ctx, tags:str):
+    async def hentai(self, ctx:commands.Context, tags:str, num:int):
         print("working...")
 
         if ctx.channel.id == getCFG(ctx.guild.id)["hentai channel"]:
             client = Danbooru('danbooru')
             
-            posts = client.post_list(tags='blue_eyes', limit=5)
+            posts = client.post_list(tags=tags, limit=num)
 
-            for post in posts:
-                print("Image path: {0}".format(post['file_url']))
+            if not posts:
+                await ctx.send("No results found. Please try another tag.")
+            else:
+                for post in posts:
+                    e = discord.Embed(title=tags, url=post["file_url"])
+                    e.set_image(url=post["file_url"])
+                    print("sending...")
+                    await ctx.send(embed=e)
+        else:
+            await delSend("Please use this command in the hentai channel.", ctx.channel)
