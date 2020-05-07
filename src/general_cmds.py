@@ -61,7 +61,7 @@ class General(commands.Cog):
             await ctx.send(embed=a)
 
     @commands.command()
-    async def test_userinfo(self, ctx, member: discord.member = None):
+    async def test_userinfo(self, ctx, member = None):
         '''
         testestestesstetstststs
         '''
@@ -72,3 +72,9 @@ class General(commands.Cog):
 
         embed.set_author(name=f"User Info - {member}")
         embed.set_thumbnail(url=member.avatar_url)
+        embed.set_footer(icon_url=ctx.author.avatar_url)
+        embed.add_field(name=f"Roles: ({len(roles)})", value=" ".join([role.mention for role in member.roles]))
+
+        await ctx.send(embed=embed)
+
+
