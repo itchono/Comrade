@@ -63,19 +63,18 @@ class General(commands.Cog):
         
 
     @commands.command()
-    async def test_userinfo(self, ctx, member):
+    async def test_userinfo(self, ctx, member = None):
         '''
         testestestesstetstststs
         '''
-        member = ctx.message.mentions[0]
-
+        member = ctx.author if not member else ctx.message.mentions[0]
         roles = [role for role in member.roles]
 
         embed = discord.Embed(colour = member.color)
         embed.set_author(name=f"User Info - {member}")
         embed.set_thumbnail(url=member.avatar_url)
         embed.set_footer(icon_url=ctx.author.avatar_url)
-        embed.add_field(name=f'Roles: ({len(roles)})', value=" ".join([role.mention for role in member.roles]))
+        embed.add_field(name="Roles", value=" ".join([role.mention for role in member.roles]))
 
         await ctx.send(embed=embed)
 
