@@ -69,6 +69,8 @@ class General(commands.Cog):
         embed.set_author(name=f"User Info - {member}")
         embed.set_thumbnail(url=member.avatar_url)
         embed.set_footer(icon_url=ctx.author.avatar_url)
-        embed.add_field(name=f'Roles: ({len(roles)})')
+        embed.add_field(name=f'Roles: ({len(roles)})', value="".join([role for role in member.roles]))
+
+        await ctx.send(embed=embed)
 
 
