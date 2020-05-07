@@ -54,6 +54,6 @@ class General(commands.Cog):
         '''
         u = await self.bot.fetch_user((getUserfromNick(nickname))["_id"])
         print(str(u))
-        a = discord.Embed(color = discord.Color.dark_blue())
+        a = discord.Embed(color = discord.Color.red())
         a.set_image(url='{}'.format(u.avatar_url))
         await ctx.send(embed=a)
