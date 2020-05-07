@@ -52,8 +52,7 @@ class General(commands.Cog):
         '''
         Displays the avatar of the said person
         '''
-        u = await self.bot.fetch_user((getUserfromNick(nickname))["_id"])
-        print(str(u))
-        a = discord.Embed(color = discord.Color.dark_blue())
+        u = ctx.guild.get_member((getUserfromNick(nickname))["_id"])
+        a = discord.Embed(color = discord.Color.dark_blue(), title="{}'s Avatar".format(u.display_name), url=str(u.avatar_url_as(static_format="png")))
         a.set_image(url='{}'.format(u.avatar_url))
         await ctx.send(embed=a)
