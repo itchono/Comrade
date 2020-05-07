@@ -65,11 +65,8 @@ class General(commands.Cog):
         '''
         testestestesstetstststs
         '''
-<<<<<<< HEAD
-=======
-        member = ctx.author if not member else member
+        member = ctx.author if not member else ctx.message.mentions[0]
         roles = [role for role in member.roles]
->>>>>>> 441d56e7812b1d733a95c2b96b2791465c4a775d
 
         embed = discord.Embed(colour = member.color)
 
