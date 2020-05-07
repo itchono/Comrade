@@ -63,9 +63,12 @@ class General(commands.Cog):
         testestestesstetstststs
         '''
 
-        embed = discord.Embed(colour = member.color)
+        roles = [role for role in member.roles]
 
+        embed = discord.Embed(colour = member.color)
         embed.set_author(name=f"User Info - {member}")
         embed.set_thumbnail(url=member.avatar_url)
+        embed.set_footer(icon_url=ctx.author.avatar_url)
+        embed.add_field(name=f'Roles: ({len(roles)})')
 
 
