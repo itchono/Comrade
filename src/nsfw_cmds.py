@@ -19,6 +19,7 @@ class NSFW(commands.Cog):
         User $c hentai clear to purge all hentai messages
         '''
         if tags.lower() == "clear":
+            pass
 
         else:
             if ctx.channel.id == getCFG(ctx.guild.id)["hentai channel"]:
