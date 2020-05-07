@@ -48,7 +48,7 @@ class General(commands.Cog):
         await delSend("Enter Your Credit Card Info...", ctx.channel)
 
     @commands.command()
-    async def avatar(ctx, nickname):
+    async def avatar(self, ctx, nickname):
         '''
         Displays the avatar of the said person
         '''
