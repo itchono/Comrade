@@ -1,6 +1,7 @@
 from utils.utilities import *
 from utils.mongo_interface import *
 
+import discord
 import aiohttp
 
 class General(commands.Cog):
@@ -46,6 +47,12 @@ class General(commands.Cog):
         '''
         await delSend("Enter Your Credit Card Info...", ctx.channel)
 
-
-    
-    
+    @commands.command()
+    async def avatar(ctx, nickname):
+        '''
+        Displays the avatar of the said person
+        '''
+        u = getUserfromNick(nickname)
+        a = discord.Embed(color = discord.Color.dark_blue())
+        a.set_image(url='{}'.format(u.avatar_url))
+        await ctx.send(embed=a)
