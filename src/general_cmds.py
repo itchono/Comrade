@@ -52,10 +52,15 @@ class General(commands.Cog):
         '''
         Displays the avatar of the said person
         '''
-        u = ctx.guild.get_member((getUserfromNick(nickname))["_id"])
-        a = discord.Embed(color = discord.Color.dark_blue(), title="{}'s Avatar".format(u.display_name), url=str(u.avatar_url_as(static_format="png")))
-        a.set_image(url='{}'.format(u.avatar_url))
-        await ctx.send(embed=a)
+
+        if getUserfromNick(nickname):
+            u = ctx.guild.get_member((getUserfromNick(nickname))["_id"])
+            a = discord.Embed(color = discord.Color.dark_blue(), title="{}'s Avatar".format(u.display_name), url=str(u.avatar_url_as(static_format="png")))
+            a.set_image(url='{}'.format(u.avatar_url))
+            await ctx.send(embed=a)
+        else:
+            await ctx.send("Member with nickname {} does not exist".format(nickname))
+        
 
     @commands.command()
     async def test_userinfo(self, ctx, member):
@@ -70,8 +75,8 @@ class General(commands.Cog):
         embed.set_author(name=f"User Info - {member}")
         embed.set_thumbnail(url=member.avatar_url)
         embed.set_footer(icon_url=ctx.author.avatar_url)
-        embed.add_field(name='Roles: ({})'.format(len(roles)), value="henlo")
+        embed.add_field(name=f'Roles: ({len(roles)})', value=" ".join([role.mention for role in member.roles]))
 
-        await ctx.send(embed = embed)
+        await ctx.send(embed=embed)
 
 
