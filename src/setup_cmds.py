@@ -31,6 +31,21 @@ class Setup(commands.Cog):
 
     @commands.command()
     @commands.check(isOwner)
+    async def user(self, ctx:commands.Context, tgt, cfgitem, value):
+        tgt = ctx.message.mentions[0]
+
+        u = getUser(tgt.id)
+
+        try:
+            u[cfgitem] = eval(str(value))
+        except:
+            u[cfgitem] = value
+        updateUser(u)
+
+        await delSend("Value updated.", ctx.channel)
+
+    @commands.command()
+    @commands.check(isOwner)
     async def cfg(self, ctx:commands.Context, cfgitem, value):
         '''
         modifies a value in Comrade's configuration.

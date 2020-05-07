@@ -16,6 +16,7 @@ import time
 from utils.utilities import *
 from utils.msg_handler import *
 from utils.aux_listeners import *
+from utils.keep_alive import *
 
 from general_cmds import *
 from setup_cmds import *
@@ -55,6 +56,7 @@ async def on_ready():
     
     print("Startup completed in {} seconds.".format(time.perf_counter()))
 
+keep_alive()
 client.run(TOKEN)
 
 

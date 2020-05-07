@@ -25,6 +25,13 @@ def getUserfromNick(nickname:str):
     users = client['Comrade']['UserData']
     return users.find_one({"nickname":nickname})
 
+def userQuery(query:dict):
+    '''
+    Returns a set of users given a query
+    '''
+    users = client['Comrade']['UserData']
+    return users.find(query)
+
 def getCFG(serverID:int):
     '''
     Returns a dictionary with the cfg values for Comrade in a given server

@@ -1,5 +1,6 @@
 from utils.utilities import *
 from utils.mongo_interface import *
+import datetime
 
 class AuxilliaryListener(commands.Cog):
     def __init__(self, bot):
@@ -35,7 +36,7 @@ class AuxilliaryListener(commands.Cog):
         elif user.status != before.status:
             ch = user.guild.get_channel(int(getCFG(user.guild.id)["log channel"]))
             e = discord.Embed(title = "Status Change: {}".format(user.display_name), 
-                                description = "{} --> {}". format(before.status, user.status),
+                                description = "Time: {}\n{} --> {}". format(datetime.datetime.now().strftime("%H:%M:%S"),before.status, user.status),
                                 colour = discord.Color.from_rgb(51, 204, 51))
             await ch.send(embed=e)
 
@@ -46,7 +47,6 @@ class AuxilliaryListener(commands.Cog):
             print("Updated {}".format(user.name))
             d = getUser(before.id)
             d["name"] = user.name
-            d["nickname"] = user.nick if user.nick else user.name
 
             updateUser(d)
 
