@@ -1,17 +1,12 @@
 from utils.utilities import *
 from utils.mongo_interface import *
 
+import aiohttp
+
 class General(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self._last_member = None
-
-    @commands.command()
-    async def memeapproved(self, ctx:commands.Context):
-        '''
-        Approves a meme.
-        '''
-        await delSend("Meme approved", ctx.channel)
 
     @commands.command()
     async def getuser(self, ctx:commands.Context, nickname):
@@ -19,23 +14,28 @@ class General(commands.Cog):
         Looks up a user based on their server nickname, returning a dictionary with the document entry
         HINT: Use Quotes like this "A user's name" to deal with names containing spaces
         '''
-        await delSend("{}".format(getUserfromNick(nickname)), ctx.channel)
+        e = discord.Embed(title="Info for {}".format(nickname))
+        u = getUserfromNick(nickname)
+
+        for c in u:
+            if c != "_id":
+                e.add_field(name=c, value=u[c], inline=True)
+        await ctx.send(embed=e)
 
     @commands.command()
-    async def echo(self, ctx:commands.Context, text:str):
+    @commands.check(isnotThreat)
+    async def echo(self, ctx:commands.Context, text:str, tgt=None):
         '''
         Echoes a command back to the user under their form
         '''
+
+        if not tgt: tgt = ctx.author
+        else: tgt = ctx.message.mentions[0]
         
-        member = ctx.guild.get_member(self.bot.user.id)
-
-        old = member.display_name
-
-        await member.edit(nick=ctx.author.display_name)
-
-        await ctx.send(text)
-
-        await member.edit(nick=old)
+        webhook = discord.Webhook.partial(707756204969033731, 'fBGEs9CYku6Cs9qbXTfu1HkyycZnR9zQbCbdlL7o3b0ul7xbHArae7B0pBCRMsBfX3Wy', adapter=discord.RequestsWebhookAdapter())
+        #webhook.edit()
+        webhook.send(text, username=tgt.display_name, avatar_url=tgt.avatar_url)
+        await ctx.message.delete()
 
     @commands.command()
     async def buymefood(self, ctx:commands.Context):
