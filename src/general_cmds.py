@@ -61,10 +61,15 @@ class General(commands.Cog):
             await ctx.send(embed=a)
 
     @commands.command()
-    async def test_userinfo(self, ctx, member: discord.member):
+    async def test_userinfo(self, ctx, member: discord.member = None):
         '''
         testestestesstetstststs
         '''
+<<<<<<< HEAD
+=======
+        member = ctx.author if not member else member
+        roles = [role for role in member.roles]
+>>>>>>> 441d56e7812b1d733a95c2b96b2791465c4a775d
 
         embed = discord.Embed(colour = member.color)
 
