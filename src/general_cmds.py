@@ -56,3 +56,16 @@ class General(commands.Cog):
         a = discord.Embed(color = discord.Color.dark_blue(), title="{}'s Avatar".format(u.display_name), url=str(u.avatar_url_as(static_format="png")))
         a.set_image(url='{}'.format(u.avatar_url))
         await ctx.send(embed=a)
+
+    @commands.command()
+    async def test_userinfo(self, ctx, member: discord.member):
+        '''
+        testestestesstetstststs
+        '''
+
+        embed = discord.Embed(colour = member.color)
+
+        embed.set_author(name=f"User Info - {member}")
+        embed.set_thumbnail(url=member.avatar_url)
+
+
