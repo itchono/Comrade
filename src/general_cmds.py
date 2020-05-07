@@ -52,7 +52,7 @@ class General(commands.Cog):
         '''
         Displays the avatar of the said person
         '''
-        if not (getUserfromNick(nickname))["_id"]:
+        if not (getUserfromNick(nickname)):
             await ctx.send("Member with username " + nickname + " not found.")
         else:
             u = ctx.guild.get_member((getUserfromNick(nickname))["_id"])
