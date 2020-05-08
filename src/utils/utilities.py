@@ -70,6 +70,12 @@ async def timedSend(s:str, channel:discord.TextChannel, time:int = 10):
     await asyncio.sleep(time)
     await msg.delete()
 
+async def DM(s:str,userID:int):
+    '''
+    DMs a person
+    '''
+    pass
+
 '''
 Image Extractor
 '''
