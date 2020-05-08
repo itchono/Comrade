@@ -82,12 +82,13 @@ class General(commands.Cog):
             await ctx.send(embed=a)
 
     @commands.command()
-    async def test_userinfo(self, ctx, member = None):
+    async def test_userinfo(self, ctx, nickname):
         '''
         testestestesstetstststs
 
         Made by Slyflare
         '''
+        member = ctx.guild.get_member((getUserfromNick(nickname))["_id"])
         member = ctx.author if not member else ctx.message.mentions[0]
         roles = [role for role in member.roles]
 
@@ -96,6 +97,9 @@ class General(commands.Cog):
         embed.set_author(name=f"User Info - {member}")
         embed.set_thumbnail(url=member.avatar_url)
         embed.set_footer(icon_url=ctx.author.avatar_url)
+        for c in member:
+            if c != "_id":
+                embed.add_field(name=c, value=u[c], inline=True)
         embed.add_field(name=f"Roles: ({len(roles)})", value=" ".join([role.mention for role in member.roles]))
 
         await ctx.send(embed=embed)
