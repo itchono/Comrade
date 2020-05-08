@@ -5,6 +5,7 @@ from discord.ext import commands
 from utils.mongo_interface import *
 
 import requests
+import random
 
 '''
 Checks
@@ -39,6 +40,14 @@ def isnotThreat(ctx:commands.Context):
         if ctx.author.id == op["_id"]:
             return False
     return True
+
+purgeTGT = None
+
+def purgeCheck(message:discord.Message):
+    '''
+    Checks whether or not to delete the message
+    '''
+    return message.author == purgeTGT
 
 '''
 Message Helpers
