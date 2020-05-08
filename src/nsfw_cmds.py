@@ -11,7 +11,7 @@ class NSFW(commands.Cog):
         self._last_member = None
 
     @commands.command()
-    async def hentai(self, ctx:commands.Context, tags:str, num:int = 1):
+    async def hentai(self, ctx:commands.Context, tags:str="", num:int = 1):
         '''
         Fetches a number of posts from Danbooru given a series of tags. Input with quotes.
         Ex. $c hentai "arms_up solo" 2
@@ -19,8 +19,12 @@ class NSFW(commands.Cog):
         User $c hentai clear to purge all hentai messages
         '''
         if tags.lower() == "clear":
-            pass
-
+            global purgeTGT
+            purgeTGT = self.bot.user
+            await ctx.channel.purge(check=purgeCheck, bulk=True)
+            purgeTGT = None
+        elif num > 20:
+            await ctx.send("Are you fucking serious")
         else:
             if ctx.channel.id == getCFG(ctx.guild.id)["hentai channel"]:
                 client = Danbooru('danbooru')

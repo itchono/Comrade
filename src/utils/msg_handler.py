@@ -15,12 +15,17 @@ class MessageHandler(commands.Cog):
             if "wait" in message.content.lower():
                 await delSend("https://www.youtube.com/watch?v=sBl9qcaQos4", message.channel)
 
-            if "approved" in message.content.lower():
+            if "@someone" in message.content.lower():
+                mems = list(message.guild.members)
+                random.shuffle(mems)
 
+                unlucky = mems.pop()
+
+                await delSend("{}".format(unlucky.mention), message.channel)
+
+            if "approved" in message.content.lower():
                 with open("vid/meme_approved.mp4", "rb") as f:
                     await message.channel.send(file=discord.File(f, "meme_approved.mp4"))
-                
-                #await delSend("https://youtu.be/LabIat9t-uY", message.channel)
 
             Knuckles_VD = ["meme_approved.mp4", "meme_what.mp4", "meme_denied.mp4", "meme_huh.mp4", "meme_illegal.mov", "no_meme_no_meme_no_meme.mp4", "meme_no.mp4", "meme_already_approved.mp4", "meme_wait.mp4", "meme_purple.mp4", "meme_eggman_steal.mp4", "Meme_failed.mp4"]
 
