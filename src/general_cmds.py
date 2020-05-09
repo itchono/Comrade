@@ -82,7 +82,7 @@ class General(commands.Cog):
             await ctx.send(embed=a)
 
     @commands.command()
-    async def test_userinfo(self, ctx, nickname):
+    async def userinfo(self, ctx, nickname):
         '''
         testestestesstetstststs
 
