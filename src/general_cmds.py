@@ -88,8 +88,10 @@ class General(commands.Cog):
 
         Made by Slyflare
         '''
-        e = discord.Embed(title="Info for {}".format(nickname))
         u = getUserfromNick(nickname)
+        member = ctx.guild.get_member(u["_id"])
+
+        e = discord.Embed(title="Info for {}".format(nickname), colour=member.colour)
 
         e.set_author(name=f"User Info - {member}")
         e.set_thumbnail(url=member.avatar_url)
