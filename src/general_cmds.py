@@ -89,6 +89,7 @@ class General(commands.Cog):
         Made by Slyflare
         '''
         member = ctx.guild.get_member((getUserfromNick(nickname))["_id"])
+        member = ctx.author if not member else ctx.message.mentions[0]
         roles = [role for role in member.roles]
 
         embed = discord.Embed(colour = member.color)
