@@ -96,7 +96,8 @@ class General(commands.Cog):
         embed.set_author(name=f"User Info - {member}")
         embed.set_thumbnail(url=member.avatar_url)
         embed.set_footer(icon_url=ctx.author.avatar_url)
-        for c in member:
+        u = getUserfromNick(nickname)
+        for c in u:
             if c != "_id":
                 embed.add_field(name=c, value=u[c], inline=True)
         embed.add_field(name=f"Roles: ({len(roles)})", value=" ".join([role.mention for role in member.roles]))
