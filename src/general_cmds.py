@@ -3,13 +3,14 @@ from utils.mongo_interface import *
 
 import aiohttp
 
+
 class General(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self._last_member = None
 
     @commands.command()
-    async def getuser(self, ctx:commands.Context, nickname):
+    async def getuser(self, ctx: commands.Context, nickname):
         '''
         Looks up a user based on their server nickname, returning a dictionary with the document entry
         HINT: Use Quotes like this "A user's name" to deal with names containing spaces
@@ -24,28 +25,30 @@ class General(commands.Cog):
 
     @commands.command()
     @commands.check(isnotThreat)
-    async def echo(self, ctx:commands.Context, text:str, tgt=None, deleteMsg=True):
+    async def echo(self, ctx: commands.Context, text: str, tgt=None, deleteMsg=True):
         '''
         Echoes a block of text as if it were sent by someone else.
         Defaults to the author of the message is no target is given.
         Can mention by nickname.
         '''
 
-        if not tgt: 
+        if not tgt:
             tgt = ctx.author
         elif getUserfromNick(tgt):
             tgt = ctx.guild.get_member((getUserfromNick(tgt))["_id"])
-        else: 
+        else:
             tgt = ctx.message.mentions[0]
 
-        webhook = discord.Webhook.partial(707756204969033731, 'fBGEs9CYku6Cs9qbXTfu1HkyycZnR9zQbCbdlL7o3b0ul7xbHArae7B0pBCRMsBfX3Wy', adapter=discord.RequestsWebhookAdapter())
-        #webhook.edit()
+        webhook = discord.Webhook.partial(707756204969033731,
+                                          'fBGEs9CYku6Cs9qbXTfu1HkyycZnR9zQbCbdlL7o3b0ul7xbHArae7B0pBCRMsBfX3Wy',
+                                          adapter=discord.RequestsWebhookAdapter())
+        # webhook.edit()
         webhook.send(text, username=tgt.display_name, avatar_url=tgt.avatar_url)
         if deleteMsg: await ctx.message.delete()
-    
+
     @commands.command()
     @commands.check(isnotThreat)
-    async def everyonesays(self, ctx:commands.Context, text:str):
+    async def everyonesays(self, ctx: commands.Context, text: str):
         '''
         Please don't use this oh god
         '''
@@ -60,7 +63,7 @@ class General(commands.Cog):
             if count < 0: break
 
     @commands.command()
-    async def buymefood(self, ctx:commands.Context):
+    async def buymefood(self, ctx: commands.Context):
         '''
         Maybe buys you food
         '''
@@ -70,22 +73,21 @@ class General(commands.Cog):
     async def avatar(self, ctx, nickname):
         '''
         Displays the avatar of the said person
-
         Made by Slyflare and PhtephenLuu
         '''
         if not (getUserfromNick(nickname)):
             await ctx.send("Member with username " + nickname + " not found.")
         else:
             u = ctx.guild.get_member((getUserfromNick(nickname))["_id"])
-            a = discord.Embed(color = discord.Color.dark_blue(), title="{}'s Avatar".format(u.display_name), url=str(u.avatar_url_as(static_format="png")))
+            a = discord.Embed(color=discord.Color.dark_blue(), title="{}'s Avatar".format(u.display_name),
+                              url=str(u.avatar_url_as(static_format="png")))
             a.set_image(url='{}'.format(u.avatar_url))
             await ctx.send(embed=a)
 
     @commands.command()
     async def userinfo(self, ctx, nickname):
         '''
-        testestestesstetstststs
-
+        Displays User Information of said person
         Made by Slyflare
         '''
         if not (getUserfromNick(nickname)):
