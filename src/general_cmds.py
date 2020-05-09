@@ -88,18 +88,21 @@ class General(commands.Cog):
 
         Made by Slyflare
         '''
-        u = getUserfromNick(nickname)
-        member = ctx.guild.get_member(u["_id"])
+        if not (getUserfromNick(nickname)):
+            await ctx.send("Member with username " + nickname + " not found.")
+        else:
+            u = getUserfromNick(nickname)
+            member = ctx.guild.get_member(u["_id"])
 
-        e = discord.Embed(title="Info for {}".format(nickname), colour=member.colour)
+            e = discord.Embed(title="Info for {}".format(nickname), colour=member.colour)
 
-        e.set_author(name=f"User Info - {member}")
-        e.set_thumbnail(url=member.avatar_url)
-        e.set_footer(icon_url=ctx.author.avatar_url)
-        roles = [role for role in member.roles]
-        for c in u:
-            if c != "_id":
-                e.add_field(name=c, value=u[c], inline=True)
-        e.add_field(name=f"Roles: ({len(roles)})", value=" ".join([role.mention for role in member.roles]))
+            e.set_author(name=f"User Info - {member}")
+            e.set_thumbnail(url=member.avatar_url)
+            e.set_footer(icon_url=ctx.author.avatar_url)
+            roles = [role for role in member.roles]
+            for c in u:
+                if c != "_id":
+                    e.add_field(name=c, value=u[c], inline=True)
+            e.add_field(name=f"Roles: ({len(roles)})", value=" ".join([role.mention for role in member.roles]))
 
-        await ctx.send(embed=e)
+            await ctx.send(embed=e)
