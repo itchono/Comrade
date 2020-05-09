@@ -88,18 +88,16 @@ class General(commands.Cog):
 
         Made by Slyflare
         '''
-        member = ctx.guild.get_member((getUserfromNick(nickname))["_id"])
-        member = ctx.author if not member else ctx.message.mentions[0]
+        e = discord.Embed(title="Info for {}".format(nickname))
+        u = getUserfromNick(nickname)
+
+        e.set_author(name=f"User Info - {member}")
+        e.set_thumbnail(url=member.avatar_url)
+        e.set_footer(icon_url=ctx.author.avatar_url)
         roles = [role for role in member.roles]
-
-        embed = discord.Embed(colour = member.color)
-
-        embed.set_author(name=f"User Info - {member}")
-        embed.set_thumbnail(url=member.avatar_url)
-        embed.set_footer(icon_url=ctx.author.avatar_url)
-        for c in member:
+        for c in u:
             if c != "_id":
-                embed.add_field(name=c, value=u[c], inline=True)
-        embed.add_field(name=f"Roles: ({len(roles)})", value=" ".join([role.mention for role in member.roles]))
+                e.add_field(name=c, value=u[c], inline=True)
+        e.add_field(name=f"Roles: ({len(roles)})", value=" ".join([role.mention for role in member.roles]))
 
-        await ctx.send(embed=embed)
+        await ctx.send(embed=e)
