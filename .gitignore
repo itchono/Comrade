@@ -2,4 +2,4 @@
 .env
 *.pyc
 *.pyc
-*.py.swp
+*.swp
