@@ -23,6 +23,12 @@ class MessageHandler(commands.Cog):
 
                 await delSend("{}".format(unlucky.mention), message.channel)
 
+            if message.author.id == 545672836124246024 and len(message.attachments) > 0:
+                e = discord.Embed(title="You just posted cringe")
+                e.set_image(url="https://cdn.discordapp.com/attachments/419214713755402262/709165272447057981/unknown-11.png")
+                await ctx.send(embed=e)
+                
+
             if "approved" in message.content.lower():
                 with open("vid/meme_approved.mp4", "rb") as f:
                     await message.channel.send(file=discord.File(f, "meme_approved.mp4"))
