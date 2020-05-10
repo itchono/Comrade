@@ -54,5 +54,11 @@ def updateUser(userData:dict):
     users = client.Comrade.UserData
     users.update({"_id":userData["_id"]}, userData, True) # upsert
 
+def addCustomUser(name, url):
+    '''
+    Adds a boi to the boi world
+    '''
+
+    
 
 

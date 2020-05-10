@@ -31,6 +31,26 @@ class Setup(commands.Cog):
 
     @commands.command()
     @commands.check(isOwner)
+    async def updateallfields(self, ctx:commands.Context, fieldname, value):
+        '''
+        updates all fields of users to some default value
+        '''
+        for user in ctx.guild.members:
+            # each user is stored, themselves each as a dictionary
+
+            d = getUser(user.id)
+            
+            try:
+                d[fieldname] = eval(str(value))
+            except:
+                d[fieldname] = value
+
+            updateUser(d)
+
+        await delSend("Update Complete", ctx.channel)
+
+    @commands.command()
+    @commands.check(isOwner)
     async def user(self, ctx:commands.Context, tgt, cfgitem, value):
         tgt = ctx.message.mentions[0]
 

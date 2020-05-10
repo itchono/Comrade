@@ -59,9 +59,3 @@ async def on_ready():
 
 keep_alive()
 client.run(TOKEN)
-
-
-
-
-
-
