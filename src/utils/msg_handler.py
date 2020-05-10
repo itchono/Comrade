@@ -26,7 +26,7 @@ class MessageHandler(commands.Cog):
             if message.author.id == 545672836124246024 and len(message.attachments) > 0:
                 e = discord.Embed(title="You just posted cringe")
                 e.set_image(url="https://cdn.discordapp.com/attachments/419214713755402262/709165272447057981/unknown-11.png")
-                await ctx.send(embed=e)
+                await message.channel.send(embed=e)
                 
 
             if "approved" in message.content.lower():
