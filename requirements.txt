@@ -6,3 +6,4 @@ python-Levenshtein
 requests
 unidecode
 pymongo
+pybooru
