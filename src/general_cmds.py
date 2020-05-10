@@ -70,6 +70,25 @@ class General(commands.Cog):
         await delSend("Enter Your Credit Card Info...", ctx.channel)
 
     @commands.command()
+    async def dmUser(self, ctx: commands.Context, nickname):
+        '''
+        DM given user
+        Made by vdoubleu
+        '''
+
+        await delSend("dm user in progress...", ctx.channel)
+        
+        if not (getUserfromNick(nickname)):
+            await ctx.send("Member with username " + nickname + " not found.")
+        else:
+            userId = (getUserfromNick(nickname))["_id"]
+            user = ctx.guild.get_member(userId)
+            
+            await DM("hello", user)
+
+            await delSend("I have sent a dm to that person", ctx.channel)
+
+    @commands.command()
     async def avatar(self, ctx, nickname):
         '''
         Displays the avatar of the said person
