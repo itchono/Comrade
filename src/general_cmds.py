@@ -48,19 +48,27 @@ class General(commands.Cog):
 
     @commands.command()
     @commands.check(isnotThreat)
-    async def everyonesays(self, ctx: commands.Context, text: str):
+    async def everyonesays(self, ctx: commands.Context, text: str, count: int = 5):
         '''
         Please don't use this oh god
         '''
-        count = 5
 
-        mems = list(ctx.guild.members)
-        random.shuffle(mems)
+        onlinecount = 0
 
-        for member in mems:
-            await self.echo(ctx, text, member.display_name, False)
-            count -= 1
-            if count < 0: break
+        for member in ctx.guild.members:
+            if str(member.status) != "offline":
+                onlinecount += 1
+
+        if count > onlinecount/3:
+            await delSend("Are you fucking serious", ctx.channel)
+        else:
+            mems = list(ctx.guild.members)
+            random.shuffle(mems)
+
+            for member in mems:
+                await self.echo(ctx, text, member.display_name, False)
+                count -= 1
+                if count < 0: break
 
     @commands.command()
     async def buymefood(self, ctx: commands.Context):
@@ -102,6 +110,32 @@ class General(commands.Cog):
                               url=str(u.avatar_url_as(static_format="png")))
             a.set_image(url='{}'.format(u.avatar_url))
             await ctx.send(embed=a)
+
+    @commands.command()
+    async def rolluser(self, ctx: commands.context):
+
+        '''
+        Roles a random ulcer, based on relative weights stored in user configuration file.
+
+        '''
+        pool = []
+
+        for member in ctx.guild.members:
+            weight = getUser(member.id)["daily weight"]
+            if not member.bot:
+                pool += [member for i in range(weight)]
+
+        print(pool)
+
+        random.shuffle(pool)
+
+        luckyperson = pool.pop()
+
+        await self.userinfo(ctx, getUser(luckyperson.id)["nickname"])
+
+    @commands.command()
+    async def addUser(self, ctx, username, avatar_url):
+
 
     @commands.command()
     async def userinfo(self, ctx, nickname):
