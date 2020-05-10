@@ -5,4 +5,5 @@ python-dotenv
 python-Levenshtein
 requests
 unidecode
+pymongo
 pybooru
