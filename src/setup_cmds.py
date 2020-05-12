@@ -10,7 +10,7 @@ class Setup(commands.Cog):
     @commands.check(isOwner)
     async def reloadusers(self, ctx:commands.Context):
         '''
-        repopulates the UserData collection on Atlas with default values
+        repopulates the UserData collection on Atlas with default values. POTENTIALLY DESTRUCTIVE
         '''
         for user in ctx.guild.members:
             # each user is stored, themselves each as a dictionary
@@ -33,8 +33,10 @@ class Setup(commands.Cog):
     @commands.check(isOwner)
     async def updateallfields(self, ctx:commands.Context, fieldname, value):
         '''
-        updates all fields of users to some default value
+        updates all fields of users to some given value.
         '''
+        await ctx.channel.trigger_typing()
+
         for user in ctx.guild.members:
             # each user is stored, themselves each as a dictionary
 
@@ -51,37 +53,59 @@ class Setup(commands.Cog):
 
     @commands.command()
     @commands.check(isOwner)
-    async def user(self, ctx:commands.Context, tgt, cfgitem, value):
-        tgt = ctx.message.mentions[0]
+    async def user(self, ctx:commands.Context, tgt, cfgitem, value=None):
+        '''
+        Configures a user, mentioned by ping, id, or nickname. Leave value as none to delete field.
+        '''
+        u = getUser(await extractUser(tgt).id)
 
-        u = getUser(tgt.id)
+        if not value:
+            try:
+                del u[cfgitem]
+                updateUser(u)
+                await delSend("User config value deleted.", ctx.channel)
+            except:
+                await delSend("Value was not found.", ctx.channel)
+        
+        else:
+            try:
+                u[cfgitem] = eval(str(value))
+            except:
+                u[cfgitem] = value
+            updateUser(u)
 
-        try:
-            u[cfgitem] = eval(str(value))
-        except:
-            u[cfgitem] = value
-        updateUser(u)
-
-        await delSend("Value updated.", ctx.channel)
+            await delSend("User updated.", ctx.channel)
 
     @commands.command()
     @commands.check(isOwner)
-    async def cfg(self, ctx:commands.Context, cfgitem, value):
+    async def cfg(self, ctx:commands.Context, cfgitem, value=None):
         '''
-        modifies a value in Comrade's configuration.
+        Modifies a value in Comrade's configuration. Leave value blank to delete the field.
         '''
         c = getCFG(ctx.guild.id)
 
-        try:
-            c[cfgitem] = eval(str(value))
-        except:
-            c[cfgitem] = value
-        updateCFG(c)
+        if not value:
+            try:
+                del c[cfgitem]
+                updateCFG(c)
+                await delSend("Config value deleted.", ctx.channel)
+            except:
+                await delSend("Value was not found.", ctx.channel)
 
-        await delSend("Value updated.", ctx.channel)
+        else:
+            try:
+                c[cfgitem] = eval(str(value))
+            except:
+                c[cfgitem] = value
+            updateCFG(c)
+
+            await delSend("Value updated.", ctx.channel)
 
     @commands.command()
     async def cfgstatus(self, ctx:commands.Context):
+        '''
+        Sends an embed providing a dump of all Comrade configuration data for this server.
+        '''
         c = getCFG(ctx.guild.id)
 
         s = ""
@@ -103,7 +127,7 @@ class Setup(commands.Cog):
     @commands.check(isOwner)
     async def resetcfg(self, ctx:commands.Context):
         '''
-        Resets the configuration file for a server back to a default state.
+        Resets the configuration file for a server back to a default state. POTENTIALLY DESTRUCTIVE.
         '''
         d = {"_id":ctx.guild.id}
         d["last daily"] = "2020-05-04" # default "time = 0" for comrade
@@ -113,7 +137,22 @@ class Setup(commands.Cog):
         d["announcements channel"] = -1
         d["bot channel"] = -1
         d["log channel"] = -1
-
+        d["hentai channel"] = -1
+        d["emote directory"]
         updateCFG(d)
 
         await delSend("Update Complete", ctx.channel)
+
+    @commands.command()
+    @commands.check(isOwner)
+    async def injectEmotes(self, ctx:commands.Context):
+        '''
+        Inserts each image located inside the local /emotes folder and uploads it to the custom emotes channel in the server
+        '''
+        for n in os.listdir("emotes"):
+            with open("emotes/{}".format(n), "rb") as f:
+                msg = await ctx.send(file=discord.File(f))
+                url = msg.attachments[0].url
+                c = await getChannel(ctx, "emote directory")
+                await c.send(n[:n.index(".")] + "\n" + url)
+        

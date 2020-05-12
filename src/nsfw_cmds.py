@@ -29,7 +29,7 @@ class NSFW(commands.Cog):
             if ctx.channel.id == getCFG(ctx.guild.id)["hentai channel"]:
                 client = Danbooru('danbooru')
                 
-                posts = client.post_list(tags=tags, limit=num, random=True)
+                posts = client.post_list(tags=(tags+" rating:e"), limit=num, random=True)
 
                 if not posts:
                     await ctx.send("No results found. Please try another tag.")
