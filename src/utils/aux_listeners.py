@@ -1,5 +1,6 @@
 from utils.utilities import *
 from utils.mongo_interface import *
+
 import datetime
 
 class AuxilliaryListener(commands.Cog):
@@ -9,6 +10,9 @@ class AuxilliaryListener(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, user:discord.Member):
+        '''
+        When a member joins the server.
+        '''
         # member join
         print("Join {}".format(user.name))
         d = {"_id":user.id}
@@ -17,14 +21,16 @@ class AuxilliaryListener(commands.Cog):
         d["threat level"] = 0
         d["banned words"] = []
         d["kick votes"] = []
-        d["Bot"] = user.bot
         d["OP"] = False
-        d["daily count"] = 0
+        d["daily weight"] = 0
 
         updateUser(d)
 
     @commands.Cog.listener()
     async def on_member_update(self, before, user):
+        '''
+        Whenever a server member changes their state.
+        '''
         if (user.display_name != before.display_name):
             # member update
             print("Updated {}".format(user.name))
@@ -33,26 +39,49 @@ class AuxilliaryListener(commands.Cog):
             d["nickname"] = user.nick if user.nick else user.name
 
             updateUser(d)
+
         elif user.status != before.status:
-            ch = user.guild.get_channel(int(getCFG(user.guild.id)["log channel"]))
+            # status update
             e = discord.Embed(title = "Status Change: {}".format(user.display_name), 
                                 description = "Time: {}\n{} --> {}". format(datetime.datetime.now().strftime("%H:%M:%S"),before.status, user.status),
                                 colour = discord.Color.from_rgb(51, 204, 51))
-            await ch.send(embed=e)
+            await log(user.guild, "",e)
 
     @commands.Cog.listener()
     async def on_user_update(self, before, user):
+        '''
+        Whenever a general user changes their state.
+        '''
         if (user.name != before.name):
             # user update
             print("Updated {}".format(user.name))
             d = getUser(before.id)
             d["name"] = user.name
-
             updateUser(d)
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction:discord.Reaction, user:discord.User):
-    
+        '''
+        When a user adds a reaction to a message.
+        '''
         # self-cleanup
         if reaction.message.author == self.bot.user and reaction.emoji == "🗑️" and user != self.bot.user:
             await reaction.message.delete()
+
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx: commands.Context, exception):
+        '''
+        When a command fails to execute
+        '''
+        await reactQuestion(ctx)
+        if type(exception) == commands.CheckFailure:
+            await timedSend("You have insufficient permission to use this command {}".format(ctx.author.mention))
+
+        elif type(exception) == commands.CommandNotFound:
+            await timedSend("'{}' is not a valid command.".format(ctx.message.content), ctx.channel)
+        else:
+            await timedSend("Failure: {}".format(exception), ctx.channel)
+
+        await log(ctx.guild, "Failure: {}\nType: {}".format(exception, type(exception)))
+    
+

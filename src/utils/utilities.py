@@ -6,6 +6,7 @@ from utils.mongo_interface import *
 
 import requests
 import random
+import datetime
 
 '''
 Checks
@@ -42,6 +43,12 @@ def isnotThreat(ctx:commands.Context):
     return True
 
 purgeTGT = None
+def setTGT(tgt):
+    '''
+    Sets purge target
+    '''
+    global purgeTGT
+    purgeTGT = tgt
 
 def purgeCheck(message:discord.Message):
     '''
@@ -66,9 +73,9 @@ def isCommand(message:discord.Message):
 Message Helpers
 '''
 
-async def delSend(s:str, channel:discord.TextChannel, time:int = 10):
+async def delSend(s:str, channel:discord.TextChannel, time:int = 5):
     '''
-    Sends a message to the desired channel, with a deletion option after a fixed time, default 10 seconds.
+    Sends a message to the desired channel, with a deletion option after a fixed time, default 5 seconds.
     Standard sending module for Comrade
     '''
     msg = await channel.send(s)
@@ -82,6 +89,19 @@ async def timedSend(s:str, channel:discord.TextChannel, time:int = 10):
     msg = await channel.send(s)
     await asyncio.sleep(time)
     await msg.delete()
+
+async def reactOK(ctx: commands.Context):
+    '''
+    Adds reaction to show that task was completed successfully.
+    '''
+    await ctx.message.add_reaction("👍")
+
+async def reactQuestion(ctx: commands.Context):
+    '''
+    Adds reaction to show that something went wrong
+    '''
+    await ctx.message.add_reaction("❓")
+    
 
 async def DM(s:str, member:discord.Member):
     '''
@@ -123,19 +143,30 @@ async def extractUser(bot: commands.Bot, ctx: commands.Context, tgt: str):
     if u:
         return ctx.guild.get_member(u["_id"]) if ctx.guild else bot.get_user(u["_id"])
     else:
-        await ctx.send("Unable to find user with input {}".format(tgt))
+        await ctx.send("User with input '{}' could not be found.".format(tgt))
         return None
 
-async def getChannel(ctx:commands.Context, name: str):
+async def getChannel(guild: discord.Guild, name: str):
     '''
     Gets a channel in a server, given a NAME of the channel; uses mongoDB cfg file. 
     '''
-
-    c = ctx.guild.get_channel(getCFG(ctx.guild.id)[name])
+    c = guild.get_channel(getCFG(guild.id)[name])
     if not c or c == -1:
-        await delSend("Channel not found.", ctx.channel)
+        await log(guild, "Channel not found.")
     else:
         return c
-
+'''
+logger
+'''
+async def log(guild, m:str, embed=None):
+    '''
+    Logs a message in the server's log channel in a clean embed form, or sends a pre-made embed.
+    '''
+    lgc = await getChannel(guild, "log channel")
+    if not embed:
+        embed = discord.Embed(title="Log Entry",
+        description=m)
+        embed.add_field(name="Time", value=(datetime.datetime.now()))
+    await lgc.send(embed=embed)
 
 

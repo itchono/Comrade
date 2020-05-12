@@ -27,7 +27,7 @@ class Setup(commands.Cog):
 
             updateUser(d)
 
-        await delSend("Update Complete", ctx.channel)
+        await reactOK(ctx)
 
     @commands.command()
     @commands.check(isOwner)
@@ -49,7 +49,7 @@ class Setup(commands.Cog):
 
             updateUser(d)
 
-        await delSend("Update Complete", ctx.channel)
+        await reactOK(ctx)
 
     @commands.command()
     @commands.check(isOwner)
@@ -57,7 +57,7 @@ class Setup(commands.Cog):
         '''
         Configures a user, mentioned by ping, id, or nickname. Leave value as none to delete field.
         '''
-        u = getUser(await extractUser(tgt).id)
+        u = getUser(await extractUser(ctx, tgt).id)
 
         if not value:
             try:
@@ -74,7 +74,7 @@ class Setup(commands.Cog):
                 u[cfgitem] = value
             updateUser(u)
 
-            await delSend("User updated.", ctx.channel)
+            await reactOK(ctx)
 
     @commands.command()
     @commands.check(isOwner)
@@ -141,18 +141,18 @@ class Setup(commands.Cog):
         d["emote directory"]
         updateCFG(d)
 
-        await delSend("Update Complete", ctx.channel)
+        await reactOK(ctx)
 
     @commands.command()
     @commands.check(isOwner)
     async def injectEmotes(self, ctx:commands.Context):
         '''
-        Inserts each image located inside the local /emotes folder and uploads it to the custom emotes channel in the server
+        Inserts each image located inside the a folder called emotes and uploads it to the custom emotes channel in the server.
         '''
         for n in os.listdir("emotes"):
             with open("emotes/{}".format(n), "rb") as f:
                 msg = await ctx.send(file=discord.File(f))
                 url = msg.attachments[0].url
-                c = await getChannel(ctx, "emote directory")
+                c = await getChannel(ctx.guild, "emote directory")
                 await c.send(n[:n.index(".")] + "\n" + url)
         

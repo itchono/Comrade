@@ -8,3 +8,4 @@ unidecode
 dnspython
 pymongo
 pybooru
+flask
