@@ -30,10 +30,12 @@ class General(commands.Cog):
         await ctx.trigger_typing()
         
         if u := await extractUser(self.bot, ctx, target):
-            
-            await DM(message, u)
 
+            e = discord.Embed(title="", description = "Sent by {}".format(ctx.author))
+            
+            await DM(message, u, e)
             await reactOK(ctx)
+            await timedSend("DM sent to {}".format(target), ctx.channel)
 
     @commands.command()
     async def msgInfo(self, ctx, msgid):

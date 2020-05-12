@@ -103,12 +103,12 @@ async def reactQuestion(ctx: commands.Context):
     await ctx.message.add_reaction("❓")
     
 
-async def DM(s:str, member:discord.Member):
+async def DM(s:str, member:discord.Member, embed=None):
     '''
     DMs a person
     '''
     memberChannel = await member.create_dm()
-    await memberChannel.send(s)
+    await memberChannel.send(content=s, embed=embed)
 
 '''
 Image Extractor
