@@ -75,7 +75,7 @@ class AuxilliaryListener(commands.Cog):
         '''
         await reactQuestion(ctx)
         if type(exception) == commands.CheckFailure:
-            await timedSend("You have insufficient permission to use this command {}".format(ctx.author.mention))
+            await timedSend("You have insufficient permission to use this command {}".format(ctx.author.mention), ctx.channel)
 
         elif type(exception) == commands.CommandNotFound:
             await timedSend("'{}' is not a valid command.".format(ctx.message.content), ctx.channel)

@@ -8,4 +8,8 @@ class Vault(commands.Cog):
         self.bot = bot
         self._last_member = None
 
-    #@commands.command()
+    @commands.command()
+    async def randomvaultpost(self, ctx):
+        '''
+        Returns a random post from the vault.
+        '''

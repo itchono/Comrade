@@ -37,7 +37,7 @@ class Users(commands.Cog):
  
         if member:= await extractUser(self.bot, ctx, target):
             if ctx.guild:
-                e = discord.Embed(title="Info for {}".format(member.display_name), colour=member.colour)
+                e = discord.Embed(title="{}".format(member.display_name), colour=member.colour)
 
                 e.set_author(name=f"User Info - {member}")
                 e.set_thumbnail(url=member.avatar_url)
