@@ -13,14 +13,14 @@ import dotenv
 import time
 
 # internal imports
-from src.utils.utilities import *
-from src.utils.msg_handler import *
-from src.utils.aux_listeners import *
-from src.utils.keep_alive import *
+from utils.utilities import *
+from utils.msg_handler import *
+from utils.aux_listeners import *
+from utils.keep_alive import *
 
-from src.vid.general_cmds import *
-from src.vid.setup_cmds import *
-from src.vid.nsfw_cmds import *
+from general_cmds import *
+from setup_cmds import *
+from nsfw_cmds import *
 
 '''
 VARIABLES
@@ -32,7 +32,7 @@ print("Comrade v3.0_alpha Starting.")
 # private variable loading
 dotenv.load_dotenv()
 TOKEN = os.environ.get('TOKEN') # bot token; kept private
-from src.utils.mongo_interface import *
+from utils.mongo_interface import *
 
 '''
 INIT
