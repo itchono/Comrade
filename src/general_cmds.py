@@ -1,5 +1,5 @@
-from src.utils.utilities import *
-from src.utils.mongo_interface import *
+from utils.utilities import *
+from utils.mongo_interface import *
 
 import aiohttp
 
