@@ -27,10 +27,12 @@ from echo_cmds import *
 from user_cmds import *
 
 '''
+
 VARIABLES
 Note: Perms integer 536083799
 '''
 
+start_time = time.perf_counter()
 print("Comrade v3.0_alpha Starting.")
 
 # private variable loading
@@ -60,7 +62,7 @@ async def on_ready():
     print("Server List:")
     for server in client.guilds: print("\t{} ({} members)".format(server.name, len(server.members)))
     
-    print("Startup completed in {} seconds.".format(time.perf_counter()))
+    print("Startup completed in {} seconds.".format(time.perf_counter() - start_time))
 
 keep_alive()
 client.run(TOKEN)
