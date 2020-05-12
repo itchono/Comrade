@@ -155,17 +155,15 @@ class General(commands.Cog):
         '''
         pool = []
 
+        await ctx.channel.trigger_typing()
+
         for member in ctx.guild.members:
             weight = getUser(member.id)["daily weight"]
             if not member.bot:
                 pool += [member for i in range(weight)]
 
-        print(pool)
-
         random.shuffle(pool)
-
         luckyperson = pool.pop()
-
         await self.userinfo(ctx, getUser(luckyperson.id)["nickname"])
 
     @commands.command()

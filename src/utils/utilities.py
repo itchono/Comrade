@@ -90,7 +90,6 @@ async def DM(s:str, member:discord.Member):
     memberChannel = await member.create_dm()
     await memberChannel.send(s)
 
-
 '''
 Image Extractor
 '''
@@ -126,6 +125,17 @@ async def extractUser(bot: commands.Bot, ctx: commands.Context, tgt: str):
     else:
         await ctx.send("Unable to find user with input {}".format(tgt))
         return None
+
+async def getChannel(ctx:commands.Context, name: str):
+    '''
+    Gets a channel in a server, given a NAME of the channel; uses mongoDB cfg file. 
+    '''
+
+    c = ctx.guild.get_channel(getCFG(ctx.guild.id)[name])
+    if not c or c == -1:
+        await delSend("Channel not found.", ctx.channel)
+    else:
+        return c
 
 
 
