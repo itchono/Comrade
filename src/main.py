@@ -18,9 +18,13 @@ from utils.msg_handler import *
 from utils.aux_listeners import *
 from utils.keep_alive import *
 
+# command modules
 from general_cmds import *
 from setup_cmds import *
 from nsfw_cmds import *
+from vault_cmds import *
+from echo_cmds import *
+from user_cmds import *
 
 '''
 VARIABLES
@@ -39,21 +43,22 @@ INIT
 '''
 client = commands.Bot(command_prefix="$c ", case_insensitive=True) # declare bot with prefix $c
 
-cogs = [AuxilliaryListener, MessageHandler, General, Setup, NSFW]
+cogs = [AuxilliaryListener, MessageHandler, General, Setup, NSFW, Vault, Echo, Users]
 
-for c in cogs:
-    client.add_cog(c(client))
+for c in cogs: client.add_cog(c(client))
     
 print("Bot components initialized, awaiting login.")
 
 @client.event
 async def on_ready():
+    '''
+    On successful login
+    '''
     await client.change_presence(status=discord.Status.online, activity=discord.Game("Testing Communism"))
     print("{} is online, logged into {} server(s).".format(client.user, len(client.guilds)))
     
     print("Server List:")
-    for server in client.guilds:
-        print("\t{} ({} members)".format(server.name, len(server.members)))
+    for server in client.guilds: print("\t{} ({} members)".format(server.name, len(server.members)))
     
     print("Startup completed in {} seconds.".format(time.perf_counter()))
 
