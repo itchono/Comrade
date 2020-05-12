@@ -29,22 +29,32 @@ class General(commands.Cog):
         '''
         Echoes a block of text as if it were sent by someone else.
         Defaults to the author of the message is no target is given.
-        Can mention by nickname.
+        Can mention people by nickname or user ID too.
+
+        Ex. $c echo "HELLO THERE SIR" @itchono
         '''
+        u = getCustomUser(tgt)
 
-        if not tgt:
-            tgt = ctx.author
-        elif getUserfromNick(tgt):
-            tgt = ctx.guild.get_member((getUserfromNick(tgt))["_id"])
-        else:
-            tgt = ctx.message.mentions[0]
+        if not u:
+            u = await extractUser(self.bot, ctx, tgt)
 
-        webhook = discord.Webhook.partial(707756204969033731,
+            if not tgt:
+                u = ctx.author
+
+            webhook = discord.Webhook.partial(707756204969033731,
                                           'fBGEs9CYku6Cs9qbXTfu1HkyycZnR9zQbCbdlL7o3b0ul7xbHArae7B0pBCRMsBfX3Wy',
                                           adapter=discord.RequestsWebhookAdapter())
-        # webhook.edit()
-        webhook.send(text, username=tgt.display_name, avatar_url=tgt.avatar_url)
-        if deleteMsg: await ctx.message.delete()
+            # webhook.edit()
+            webhook.send(text, username=u.display_name, avatar_url=u.avatar_url)
+            if deleteMsg: await ctx.message.delete()
+            
+        else:
+            webhook = discord.Webhook.partial(707756204969033731,
+                                          'fBGEs9CYku6Cs9qbXTfu1HkyycZnR9zQbCbdlL7o3b0ul7xbHArae7B0pBCRMsBfX3Wy',
+                                          adapter=discord.RequestsWebhookAdapter())
+            # webhook.edit()
+            webhook.send(text, username=u["name"], avatar_url=u["url"])
+            if deleteMsg: await ctx.message.delete()
 
     @commands.command()
     @commands.check(isnotThreat)
@@ -52,14 +62,13 @@ class General(commands.Cog):
         '''
         Please don't use this oh god
         '''
-
         onlinecount = 0
 
         for member in ctx.guild.members:
             if str(member.status) != "offline":
                 onlinecount += 1
 
-        if count > onlinecount/3:
+        if count > onlinecount/2:
             await delSend("Are you fucking serious", ctx.channel)
         else:
             mems = list(ctx.guild.members)
@@ -68,7 +77,26 @@ class General(commands.Cog):
             for member in mems:
                 await self.echo(ctx, text, member.display_name, False)
                 count -= 1
-                if count < 0: break
+                if count <= 0: break
+
+            await asyncio.sleep(30)
+
+            if count > 5:
+                await self.cleanwebhooks(ctx)
+
+    @commands.command()
+    async def cleanwebhooks(self, ctx:commands.Context):
+        '''
+        Deletes echoed messages from Comrade
+        '''
+        await ctx.channel.purge(check=isWebhook, bulk=True)
+
+    @commands.command()
+    async def clearcommands(self, ctx:commands.Context):
+        '''
+        Cleans up commands from sent from users in a channel.
+        '''
+        await ctx.channel.purge(check=isCommand, bulk=True)
 
     @commands.command()
     async def buymefood(self, ctx: commands.Context):
@@ -97,23 +125,30 @@ class General(commands.Cog):
             await delSend("I have sent a dm to that person", ctx.channel)
 
     @commands.command()
-    async def avatar(self, ctx, nickname):
+    async def avatar(self, ctx, tgt):
         '''
         Displays the avatar of the said person
-        Made by Slyflare and PhtephenLuu
+        Made by Slyflare, PhtephenLuu, itchono
         '''
-        if not (getUserfromNick(nickname)):
-            await ctx.send("Member with username " + nickname + " not found.")
-        else:
-            u = ctx.guild.get_member((getUserfromNick(nickname))["_id"])
-            a = discord.Embed(color=discord.Color.dark_blue(), title="{}'s Avatar".format(u.display_name),
-                              url=str(u.avatar_url_as(static_format="png")))
-            a.set_image(url='{}'.format(u.avatar_url))
-            await ctx.send(embed=a)
+        u = await extractUser(self.bot, ctx, tgt)
+
+        if u:
+            if ctx.guild:
+                # server environment
+                a = discord.Embed(color=discord.Color.dark_blue(), 
+                                title="{}'s Avatar".format(u.display_name),
+                                url=str(u.avatar_url_as(static_format="png")))
+                a.set_image(url='{}'.format(u.avatar_url))
+                await ctx.send(embed=a)
+            else:
+                a = discord.Embed(color=discord.Color.dark_blue(), 
+                                    title="{}'s Avatar".format(u.name),
+                                    url=str(u.avatar_url_as(static_format="png")))
+                a.set_image(url='{}'.format(u.avatar_url))
+                await ctx.send(embed=a)
 
     @commands.command()
     async def rolluser(self, ctx: commands.context):
-
         '''
         Roles a random ulcer, based on relative weights stored in user configuration file.
 
@@ -135,29 +170,55 @@ class General(commands.Cog):
 
     @commands.command()
     async def addUser(self, ctx, username, avatar_url):
-
+        '''
+        Adds custom user to database, which can be mentioned.
+        '''
+        addCustomUser(username, avatar_url)
+        await self.echo(ctx, "I have been added.", username)
 
     @commands.command()
-    async def userinfo(self, ctx, nickname):
+    async def msgInfo(self, ctx, msgid):
+        msg = await ctx.channel.fetch_message(msgid)
+
+        await ctx.send("Author: {}".format(msg.author))
+
+    @commands.command()
+    async def userinfo(self, ctx, tgt):
         '''
         Displays User Information of said person
-        Made by Slyflare
+        Made by Slyflare, upgraded by itchono
         '''
-        if not (getUserfromNick(nickname)):
-            await ctx.send("Member with username " + nickname + " not found.")
-        else:
-            u = getUserfromNick(nickname)
-            member = ctx.guild.get_member(u["_id"])
+        member = await extractUser(self.bot, ctx, tgt)
 
-            e = discord.Embed(title="Info for {}".format(nickname), colour=member.colour)
+        if member:
 
-            e.set_author(name=f"User Info - {member}")
-            e.set_thumbnail(url=member.avatar_url)
-            e.set_footer(icon_url=ctx.author.avatar_url)
-            roles = [role for role in member.roles]
-            for c in u:
-                if c != "_id":
-                    e.add_field(name=c, value=u[c], inline=True)
-            e.add_field(name=f"Roles: ({len(roles)})", value=" ".join([role.mention for role in member.roles]))
+            if ctx.guild:
 
-            await ctx.send(embed=e)
+                e = discord.Embed(title="Info for {}".format(member.display_name), colour=member.colour)
+
+                e.set_author(name=f"User Info - {member}")
+                e.set_thumbnail(url=member.avatar_url)
+                e.set_footer(icon_url=ctx.author.avatar_url)
+                roles = [role for role in member.roles]
+
+                u = getUser(member.id)
+                for c in u:
+                    if c != "_id":
+                        e.add_field(name=c, value=u[c], inline=True)
+                e.add_field(name=f"Roles: ({len(roles)})", value=" ".join([role.mention for role in member.roles]))
+
+                await ctx.send(embed=e)
+
+            else:
+                e = discord.Embed(title="Info for {}".format(member.name))
+
+                e.set_author(name=f"User Info - {member}")
+                e.set_thumbnail(url=member.avatar_url)
+                e.set_footer(icon_url=ctx.author.avatar_url)
+                u = getUser(member.id)
+                for c in u:
+                    if c != "_id":
+                        e.add_field(name=c, value=u[c], inline=True)
+
+                await ctx.send(embed=e)
+
