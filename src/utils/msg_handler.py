@@ -12,7 +12,7 @@ class MessageHandler(commands.Cog):
             if "hello" in message.content.lower():
                 await delSend("Henlo", message.channel)
 
-            if "wait" in message.content.lower():
+            if "wait" in message.content.lower() and ((message.guild and getCFG(message.guild.id)["joke mode"]) or not message.guild):
                 await delSend("https://www.youtube.com/watch?v=sBl9qcaQos4", message.channel)
 
             if "@someone" in message.content.lower():

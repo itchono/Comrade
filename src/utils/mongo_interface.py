@@ -43,7 +43,6 @@ def updateCFG(newCFG:dict):
     '''
     Updates configuration file for a given server based on the ID
     '''
-    print("cfgupdate call")
     cfg = client['Comrade']['cfg']
     cfg.update({"_id":newCFG["_id"]}, newCFG, True)
 
@@ -56,8 +55,19 @@ def updateUser(userData:dict):
 
 def addCustomUser(name, url):
     '''
-    Adds a boi to the boi world
+    Adds a custom user to the CustomUsers collection, for use with echo command etc.
     '''
+    customs = client.Comrade.CustomUsers
+    customs.insert({"name":name, "url":url})
+
+def getCustomUser(name):
+    '''
+    Gets a custom user from the database
+    '''
+    customs = client.Comrade.CustomUsers
+    return customs.find_one({"name":name})
+
+
 
     
 

@@ -49,6 +49,19 @@ def purgeCheck(message:discord.Message):
     '''
     return message.author == purgeTGT
 
+def isWebhook(message:discord.Message):
+    '''
+    Checks if it's a webhook
+    '''
+    return message.author.discriminator == "0000"
+
+def isCommand(message:discord.Message):
+    '''
+    Check's if it's a Comrade Command
+    '''
+    return "$c" in message.content.lower()
+
+
 '''
 Message Helpers
 '''
@@ -89,11 +102,30 @@ async def getavatar(member:discord.Member):
     r = requests.get(member.avatar_url)
     return r.content
 
-DEFAULT_NAME = "Comrade Dev"
-DEFAULT_AVATAR_URL = ""
+'''
+Converters and Stuff
+'''
 
-async def doppel(member:discord.Member):
+async def extractUser(bot: commands.Bot, ctx: commands.Context, tgt: str):
     '''
-    EXPERIMENTAL: Turns Comrade into another user
-    Currently this function does not allow
+    Returns a server member or user; based on display name in server, user ID, or by mention.
     '''
+    if not tgt: 
+        return None
+
+    u = getUserfromNick(tgt)
+    if tgt.isnumeric():
+        # if user ID
+        u = {"_id":int(tgt)}
+    elif not u:
+        # if mention
+        u = {"_id":int(tgt[3:-1])} if tgt[3:-1].isnumeric() else None
+
+    if u:
+        return ctx.guild.get_member(u["_id"]) if ctx.guild else bot.get_user(u["_id"])
+    else:
+        await ctx.send("Unable to find user with input {}".format(tgt))
+        return None
+
+
+
