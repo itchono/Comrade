@@ -13,3 +13,6 @@ class Vault(commands.Cog):
         '''
         Returns a random post from the vault.
         '''
+        vault = getChannel(ctx.guild, "vault channel")
+
+        msgs = vault.messages

@@ -4,15 +4,17 @@ from utils.mongo_interface import *
 class Users(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.RND_USER = []
+        self.RND_USER_T = datetime.datetime(2000, 1, 1)
         self._last_member = None
 
     @commands.command()
-    async def avatar(self, ctx, target):
+    async def avatar(self, ctx:commands.Context, target):
         '''
         Displays the avatar of a target user.
         Made by Slyflare, PhtephenLuu, itchono
         '''
-        if u:= await extractUser(self.bot, ctx, target):
+        if u := await extractUser(self.bot, ctx, target):
             if ctx.guild:
                 # server environment
                 a = discord.Embed(color=discord.Color.dark_blue(), 
@@ -64,6 +66,12 @@ class Users(commands.Cog):
                         e.add_field(name=c, value=u[c], inline=True)
 
                 await ctx.send(embed=e)
+
+    '''
+    Random User Functions
+    '''
+
+    
     
     @commands.command()
     async def rolluser(self, ctx: commands.context):
@@ -71,14 +79,26 @@ class Users(commands.Cog):
         Roles a random ulcer, based on relative weights stored in user configuration file.
 
         '''
-        pool = []
-
+    
         await ctx.channel.trigger_typing()
 
-        for member in ctx.guild.members:
-            weight = getUser(member.id)["daily weight"]
-            if not member.bot:
-                pool += [member for i in range(weight)]
+        '''
+        refresh pool
+        '''
+        pool = []
+
+        if (datetime.datetime.utcnow() - self.RND_USER_T > datetime.timedelta(hours = 1)):
+            # rebuilding cache
+            print("Rebuild cache")
+            for member in ctx.guild.members:
+                weight = getUser(member.id)["daily weight"]
+                if not member.bot:
+                    pool += [member for i in range(weight)]
+            self.RND_USER = pool[:]
+            self.RND_USER_T = datetime.datetime.utcnow()
+
+        else:
+            pool = self.RND_USER[:]
 
         random.shuffle(pool)
         luckyperson = pool.pop()
