@@ -110,4 +110,7 @@ class Users(commands.Cog):
         Adds custom user to database, which can be mentioned.
         '''
         addCustomUser(username, avatar_url)
-        await self.echo(ctx, "I have been added.", username)    
+
+        e =  self.bot.get_cog('Echo')
+
+        await e.echo(ctx, "I have been added.", username)    
