@@ -154,8 +154,10 @@ async def getChannel(guild: discord.Guild, name: str):
     Gets a channel in a server, given a NAME of the channel; uses mongoDB cfg file. 
     '''
     c = guild.get_channel(getCFG(guild.id)[name])
-    if not c or c == -1:
+    if not c:
         await log(guild, "Channel not found.")
+    elif c == -1:
+        print("Error: (Log Channel not set up); channel not found")
     else:
         return c
 '''

@@ -22,8 +22,8 @@ class NSFW(commands.Cog):
         if num > 20:
             await ctx.send("Are you fucking serious")
         else:
-            if ctx.channel.id == getCFG(ctx.guild.id)["hentai channel"]:
-
+            if not ctx.guild or ctx.channel.id == getCFG(ctx.guild.id)["hentai channel"]:
+                # correct channel (or DM)
                 if tags.lower() == "clear":
                     setTGT(self.bot.user)
                     await ctx.channel.purge(check=purgeCheck, bulk=True)
