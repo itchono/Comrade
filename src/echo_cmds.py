@@ -53,7 +53,7 @@ class Echo(commands.Cog):
             if str(member.status) != "offline":
                 onlinecount += 1
 
-        if count > onlinecount/2:
+        if count > onlinecount:
             await delSend("Are you fucking serious", ctx.channel)
         else:
             mems = list(ctx.guild.members)
