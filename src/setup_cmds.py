@@ -138,7 +138,7 @@ class Setup(commands.Cog):
         d["bot channel"] = -1
         d["log channel"] = -1
         d["hentai channel"] = -1
-        d["emote directory"]
+        d["emote directory"] = -1
         updateCFG(d)
 
         await reactOK(ctx)
