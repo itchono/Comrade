@@ -14,6 +14,14 @@ class General(commands.Cog):
         await ctx.channel.purge(check=isCommand, bulk=True)
 
     @commands.command()
+    @commands.check(isOwner)
+    async def shutdown(self, ctx:commands.Context):
+        '''
+        Logs out the user.
+        '''
+        await self.bot.logout()
+
+    @commands.command()
     async def buymefood(self, ctx: commands.Context):
         '''
         Maybe buys you food

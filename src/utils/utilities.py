@@ -8,6 +8,9 @@ import requests
 import random
 import datetime
 
+DEVELOPMENT_MODE = False
+# set to true for pre-testing.
+
 '''
 Checks
 '''
@@ -18,7 +21,7 @@ def isOwner(ctx:commands.Context):
     '''
     Determines whether message author is server owner
     '''
-    return ctx.author.id == ctx.guild.owner.id
+    return ctx.author.id == ctx.guild.owner.id or DEVELOPMENT_MODE
 
 def isOP(ctx:commands.Context):
     '''
