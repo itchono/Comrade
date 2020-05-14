@@ -1,0 +1,6 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+    name: comrade-v3
+    labels:
+        name: comrade-v3
