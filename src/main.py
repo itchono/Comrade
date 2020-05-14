@@ -17,6 +17,7 @@ from utils.utilities import *
 from utils.msg_handler import *
 from utils.aux_listeners import *
 from utils.keep_alive import *
+from utils.optimus_prime import *
 
 # command modules
 from general_cmds import *
@@ -43,9 +44,9 @@ from utils.mongo_interface import *
 '''
 INIT
 '''
-client = commands.Bot(command_prefix="$c ", case_insensitive=True) # declare bot with prefix $c
+client = commands.Bot(command_prefix="$canary ", case_insensitive=True) # declare bot with prefix $c
 
-cogs = [AuxilliaryListener, MessageHandler, General, Setup, NSFW, Vault, Echo, Users]
+cogs = [AuxilliaryListener, MessageHandler, General, Setup, NSFW, Vault, Echo, Users, Prime]
 
 for c in cogs: client.add_cog(c(client))
     
@@ -62,7 +63,7 @@ async def on_ready():
     print("Server List:")
     for server in client.guilds: print("\t{} ({} members)".format(server.name, len(server.members)))
     
-    print("Startup completed in {} seconds.".format(time.perf_counter() - start_time))
+    print("Startup completed in {:.2f} seconds.".format(time.perf_counter() - start_time))
 
 keep_alive()
 client.run(TOKEN)

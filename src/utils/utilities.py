@@ -34,6 +34,17 @@ def isOP(ctx:commands.Context):
             return True
     return False
 
+def isUserOP(user:discord.User):
+    '''
+    Determines whether message author is an OP
+    '''
+    OPS = userQuery({"OP":True})
+
+    for op in OPS:
+        if user.id == op["_id"]:
+            return True
+    return False
+
 def isnotThreat(ctx:commands.Context):
     '''
     Determines whether message author is a threat
