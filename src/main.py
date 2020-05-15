@@ -37,7 +37,7 @@ print("Comrade v3.0_alpha Starting.")
 
 # private variable loading
 dotenv.load_dotenv()
-TOKEN = os.environ.get('TOKEN') # bot token; kept private
+TOKEN = 'NzA5OTg3OTI2NDY0NzkwNTg5.Xrt6Cw.Fr17ApRy44XtbQDggeoKnq_XziU' # bot token; kept private
 from utils.mongo_interface import *
 
 '''
