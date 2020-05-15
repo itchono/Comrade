@@ -60,5 +60,14 @@ class General(commands.Cog):
         msg = await ctx.channel.fetch_message(msgid)
         await ctx.send("Author: {}".format(msg.author))
 
+    @commands.command()
+    async def emoteCall(self, ctx, name):
+        directory = getChannel(ctx.guild, 'emote directory')
+        async for e in directory.history(limit=None):
+            if name.lower() in e.split():
+                emote = e.split[1]
+                ctx.send(emote)
+            else:
+                ctx.send('{} exist not'.format(name))
     
 
