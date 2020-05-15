@@ -7,7 +7,7 @@ class Prime(commands.Cog):
     '''
     def __init__(self, bot):
         self.bot = bot
-        self.activemsgids = [] # active for ZAHANDO
+        self.activepurge = {} # active for ZAHANDO
         self._last_member = None
 
     async def zahando(self, ctx:commands.Context, num:int=20, user:discord.User=None):
@@ -15,7 +15,10 @@ class Prime(commands.Cog):
         erases a set number of messages in a context (Default 20)
         '''
         setTGT(user)
-        await ctx.channel.purge(limit=num, check=purgeCheck if user else None)
+        if user:
+            await ctx.channel.purge(limit=num, check=purgeCheck)
+        else:
+            await ctx.channel.purge(limit=num)
 
         with open("vid/Za_Hando_erase_that.mp4", "rb") as f:
             m = await ctx.send(content="ZA HANDO Successful.", file=discord.File(f, "ZA HANDO.mp4"))
@@ -27,13 +30,25 @@ class Prime(commands.Cog):
     async def on_message(self, message:discord.message):
         if not message.author.bot:
             if "za hando" in message.content.lower():
-                m = await message.channel.send("React with '✋' to purge the channel.")
-                self.activemsgids.append(m.id)
+
+                args = (message.content.lower()).split()
+                amount = 20
+
+                if len(args) > 2 and args[2].isnumeric():
+                    amount = eval(args[2])
+
+                
+
+                m = await message.channel.send("React with '✋' to purge the channel of {} messages {}".format(amount,"from " + str(message.mentions[0] if message.mentions else None)))
+                self.activepurge[m.id] = {}
+                self.activepurge[m.id]["amount"] = amount
+                self.activepurge[m.id]["user"] = message.mentions[0] if message.mentions else None
+                
                 await m.add_reaction("✋")
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction:discord.Reaction, user:discord.User):
         if reaction.emoji == "✋":
-            if (reaction.count > getCFG(reaction.message.guild.id)["zahando threshold"] or isUserOP(user)) and reaction.message.id in self.activemsgids:
-                await self.zahando(await self.bot.get_context(reaction.message))
-                self.activemsgids.remove(reaction.message.id)
+            if (reaction.count > getCFG(reaction.message.guild.id)["zahando threshold"] or isUserOP(user)) and reaction.message.id in self.activepurge:
+                await self.zahando(await self.bot.get_context(reaction.message), self.activepurge[reaction.message.id]["amount"], self.activepurge[reaction.message.id]["user"])
+                del self.activepurge[reaction.message.id]
