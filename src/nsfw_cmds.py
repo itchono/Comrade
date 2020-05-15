@@ -62,8 +62,7 @@ class NSFW(commands.Cog):
                         postid = posts[i]['id']
                         tags = ""
                         for k in range(len(tag_list)):
-                            tags += " " + tag_list[k]
-                        print('checkpoint 3')  
+                            tags += " " + tag_list[k] 
                         tag_string = posts[i]['tags']
                         e = discord.Embed(title=tags, description ='ID: {postid}'.format(postid=postid), url=img_url, color=0xfecbed)
                         e.set_author(name='Retrieved from Gelbooru')
