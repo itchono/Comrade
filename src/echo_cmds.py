@@ -33,9 +33,9 @@ class Echo(commands.Cog):
         if u := getCustomUser(target):
             await webhook.send(text, username=u["name"], avatar_url=u["url"])
         else:
-            u = await extractUser(self.bot, ctx, target) if target else ctx.author
-            # uses self if no target given
-            await webhook.send(text, username=u.display_name, avatar_url=u.avatar_url)
+            if u := (await extractUser(self.bot, ctx, target) if target else ctx.author):
+                # uses self if no target given
+                await webhook.send(text, username=u.display_name, avatar_url=u.avatar_url)
             
         if deleteMsg: 
             await log(ctx.guild, "Echo for {} sent by {} ({})".format(target,ctx.author.display_name, ctx.author))
@@ -53,7 +53,7 @@ class Echo(commands.Cog):
             if str(member.status) != "offline":
                 onlinecount += 1
 
-        if count > onlinecount/2:
+        if count > onlinecount:
             await delSend("Are you fucking serious", ctx.channel)
         else:
             mems = list(ctx.guild.members)

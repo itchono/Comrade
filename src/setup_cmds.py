@@ -10,7 +10,7 @@ class Setup(commands.Cog):
     @commands.check(isOwner)
     async def reloadusers(self, ctx:commands.Context):
         '''
-        repopulates the UserData collection on Atlas with default values. POTENTIALLY DESTRUCTIVE
+        POTENTIALLY DESTRUCTIVE. repopulates the UserData collection on Atlas with default values.
         '''
         for user in ctx.guild.members:
             # each user is stored, themselves each as a dictionary
@@ -57,7 +57,7 @@ class Setup(commands.Cog):
         '''
         Configures a user, mentioned by ping, id, or nickname. Leave value as none to delete field.
         '''
-        u = getUser(await extractUser(ctx, tgt).id)
+        u = getUser((await extractUser(self.bot, ctx, tgt)).id)
 
         if not value:
             try:
@@ -119,6 +119,7 @@ class Setup(commands.Cog):
             description = s,
             colour = discord.Colour.from_rgb(r=215, g=52, b=42)
             )
+        e.set_thumbnail(url=ctx.guild.icon_url)
 
         await ctx.send(embed=e)
 
@@ -127,18 +128,20 @@ class Setup(commands.Cog):
     @commands.check(isOwner)
     async def resetcfg(self, ctx:commands.Context):
         '''
-        Resets the configuration file for a server back to a default state. POTENTIALLY DESTRUCTIVE.
+        POTENTIALLY DESTRUCTIVE. Resets the configuration file for a server back to a default state. 
         '''
         d = {"_id":ctx.guild.id}
         d["last daily"] = "2020-05-04" # default "time = 0" for comrade
         d["joke mode"] = True
         d["kick requirement"] = 6
         d["lethality override"] = 0
+        d["zahando threshold"] = 3
         d["announcements channel"] = -1
+        d["meme channel"] = -1
         d["bot channel"] = -1
         d["log channel"] = -1
         d["hentai channel"] = -1
-        d["emote directory"]
+        d["emote directory"] = -1
         updateCFG(d)
 
         await reactOK(ctx)
