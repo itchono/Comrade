@@ -8,6 +8,10 @@ class Prime(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.activepurge = {} # active for ZAHANDO
+        '''
+        Stores stuff like
+        {1231240914120412:{"User":@Some user, "Amount":20}, ....}
+        '''
         self._last_member = None
 
     async def zahando(self, ctx:commands.Context, num:int=20, user:discord.User=None):
@@ -36,8 +40,6 @@ class Prime(commands.Cog):
 
                 if len(args) > 2 and args[2].isnumeric():
                     amount = eval(args[2])
-
-                
 
                 m = await message.channel.send("React with '✋' to purge the channel of {} messages {}".format(amount,"from " + str(message.mentions[0] if message.mentions else None)))
                 self.activepurge[m.id] = {}

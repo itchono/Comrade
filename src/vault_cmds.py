@@ -60,6 +60,4 @@ class Vault(commands.Cog):
                 await vault.send("Vimal Code this")
 
 
-                
-                
-                del self.activepurge[reaction.message.id]
+                del self.activeposts[reaction.message.id]
