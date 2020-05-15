@@ -18,21 +18,24 @@ class Vault(commands.Cog):
         msgs = vault.messages
 
     @commands.command(name=u"\U0001F345")
-    async def tomato(self, ctx: commands.Context, url: str = None):
+    async def tomato(self, ctx: commands.Context, tgt = None):
         '''
         Vaults a post.
         '''
 
+        IDmode = False
+
         if len(ctx.message.attachments) > 0:
             u = ctx.message.attachments[0].url
-        elif tgt.isnumeric():
-            u = ctx.fetch_message(eval(tgt))
+        elif tgt and tgt.isnumeric():
+            u = await ctx.fetch_message(eval(tgt))
+            IDmode = True
         else:
-            u = tgt
+            u = tgt # URL directly
         
-        m = await ctx.send("React to this message with 🍅 to vault the post {}".format(ctx.message.jump_url if not tgt.isnumeric() else u.jump_url))
+        m = await ctx.send("React to this message with 🍅 to vault the post {}".format(ctx.message.jump_url if not IDmode else u.jump_url))
 
-        self.activeposts[m.id] = {"Message": ctx.message, "Attachment URL": u}
+        self.activeposts[m.id] = {"Message": ctx.message if not IDmode else u, "Attachment URL": u if not IDmode else None}
 
         await m.add_reaction("🍅")
 
@@ -49,15 +52,31 @@ class Vault(commands.Cog):
             if reaction.count > 1 and reaction.message.id in self.activeposts and \
                     (user != self.activeposts[reaction.message.id]["Message"].author or DEVELOPMENT_MODE):
                 attachment_url = self.activeposts[reaction.message.id]["Attachment URL"]
+                
                 msg = self.activeposts[reaction.message.id]["Message"]
 
                 vault = await getChannel(reaction.message.guild, "vault channel")
 
-                e = discord.Embed(title=":tomato: Vault Entry", colour=discord.Colour.from_rgb(r=215, g=52, b=42))
-                e.set_image(url=str(attachment_url))
-                e.add_field(name='Original Post: ',value=msg.jump_url)
-                e.set_footer(text="Sent by {}".format(user))
+                if not attachment_url:
 
-                await vault.send(embed=e)
+                    m = await vault.send("Vault operation in progress...")
+
+                    e = discord.Embed(title=":tomato: Echoed Vault Entry", description="See Echoed Message Below.",colour=discord.Colour.from_rgb(r=215, g=52, b=42))
+                    e.add_field(name='Original Post: ',value=msg.jump_url)
+                    e.set_footer(text="Sent by {}".format(user))
+                    c = await self.bot.get_context(m)
+                    E = self.bot.get_cog("Echo")
+                    await vault.send(embed=e)
+                    await E.echo(c, msg.content, msg.author.display_name)
+
+                else:
+                    # made by Slyflare
+
+                    e = discord.Embed(title=":tomato: Vault Entry", colour=discord.Colour.from_rgb(r=215, g=52, b=42))
+                    e.set_image(url=str(attachment_url))
+                    e.add_field(name='Original Post: ',value=msg.jump_url)
+                    e.set_footer(text="Sent by {}".format(user))
+
+                    await vault.send(embed=e)
 
                 del self.activeposts[reaction.message.id]
