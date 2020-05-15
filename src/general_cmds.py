@@ -62,12 +62,12 @@ class General(commands.Cog):
 
     @commands.command()
     async def emoteCall(self, ctx, name):
-        directory = getChannel(ctx.guild, 'emote directory')
+        directory = await getChannel(ctx.guild, 'emote directory')
         async for e in directory.history(limit=None):
-            if name.lower() in e.split():
-                emote = e.split[1]
-                ctx.send(emote)
+            if name.lower() in e.content.split("\n")[0]:
+                emote = e.content.split("\n")[1]
+                await ctx.send(emote)
             else:
-                ctx.send('{} exist not'.format(name))
+                await ctx.send('{} exist not'.format(name))
     
 
