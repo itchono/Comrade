@@ -7,6 +7,13 @@ class General(commands.Cog):
         self._last_member = None
 
     @commands.command()
+    async def version(self, ctx:commands.Context):
+        '''
+        Logs version of the bot.
+        '''
+        await ctx.send("Comrade is running version: 3.0alpha build May 15")
+
+    @commands.command()
     async def clearcommands(self, ctx:commands.Context):
         '''
         Cleans up commands from sent from users in a channel.

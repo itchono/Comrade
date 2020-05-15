@@ -69,3 +69,4 @@ async def on_ready():
     print("Startup completed in {:.2f} seconds.".format(time.perf_counter() - start_time))
 
 client.run(TOKEN)
+keep_alive.keep_alive()

@@ -63,7 +63,7 @@ class Vault(commands.Cog):
 
                     e = discord.Embed(title=":tomato: Echoed Vault Entry", description="See Echoed Message Below.",colour=discord.Colour.from_rgb(r=215, g=52, b=42))
                     e.add_field(name='Original Post: ',value=msg.jump_url)
-                    e.set_footer(text="Sent by {}".format(user))
+                    e.set_footer(text="Sent by {}".format(msg.author))
                     c = await self.bot.get_context(m)
                     E = self.bot.get_cog("Echo")
                     await vault.send(embed=e)
@@ -75,8 +75,10 @@ class Vault(commands.Cog):
                     e = discord.Embed(title=":tomato: Vault Entry", colour=discord.Colour.from_rgb(r=215, g=52, b=42))
                     e.set_image(url=str(attachment_url))
                     e.add_field(name='Original Post: ',value=msg.jump_url)
-                    e.set_footer(text="Sent by {}".format(user))
+                    e.set_footer(text="Sent by {}".format(msg.author))
 
                     await vault.send(embed=e)
-
+                
                 del self.activeposts[reaction.message.id]
+                await reactOK(await self.bot.get_context(reaction.message))
+                await reaction.message.edit("Vault operation successful.")
