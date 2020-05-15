@@ -61,6 +61,17 @@ class General(commands.Cog):
         await ctx.send("Author: {}".format(msg.author))
 
     @commands.command()
+    async def addEmote(self, ctx, name, *args):
+        if len(ctx.message.attachments) > 0:
+            u = ctx.message.attachments[0].url
+        else:
+            u = args[(len(args)-1)]
+
+        emoteDirectory = await getChannel(ctx.guild, 'emote directory')
+        await emoteDirectory.send('{}\n{}'.format(name.lower(), u))
+        await ctx.send('Emote {} was added'.format(name.lower()))
+        
+    @commands.command()
     async def emoteCall(self, ctx, name):
         directory = await getChannel(ctx.guild, 'emote directory')
         async for e in directory.history(limit=None):
