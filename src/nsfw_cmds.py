@@ -2,7 +2,11 @@ from __future__ import unicode_literals
 from utils.utilities import *
 from utils.mongo_interface import *
 
-from pybooru import Danbooru
+import requests
+import json
+import string
+import io
+import aiohttp
 
 class NSFW(commands.Cog):
     def __init__(self, bot):
@@ -10,36 +14,78 @@ class NSFW(commands.Cog):
         self._last_member = None
 
     @commands.command()
-    async def hentai(self, ctx:commands.Context, tags:str="", num:int = 1):
+    async def hentai(self, ctx:commands.Context, *args):
         '''
-        Fetches a number of posts from Danbooru given a series of tags. Input with quotes.
-        Ex. $c hentai "arms_up solo" 2
+        Fetches a number of posts from Danbooru given a series of tags.
+        Ex. $c hentai arms_up solo 2
 
         User $c hentai clear to purge all hentai messages
         '''
-        
+        limit = 1
+        tag_list = []
+        if len(args) > 0:
+            if args[len(args) - 1].isnumeric():
+                limit = int(args[len(args) - 1])
+                for i in range(len(args) - 1):
+                    tag_list.append(args[i])
+            else:
+                for i in range(len(args)):
+                    tag_list.append(args[i])
 
-        if num > 20:
-            await ctx.send("Are you fucking serious")
+        if limit > 20:
+            await ctx.send("Can you calm your genitals")
         else:
             if ctx.channel.id == getCFG(ctx.guild.id)["hentai channel"]:
-
-                if tags.lower() == "clear":
+                if "clear" in tag_list:
                     setTGT(self.bot.user)
                     await ctx.channel.purge(check=purgeCheck, bulk=True)
                 else:
-                    client = Danbooru('danbooru')
-                    posts = client.post_list(tags=(tags+" rating:e"), limit=num, random=True)
-
-                    if not posts:
+                    url_base = 'https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1'
+                    url_base = url_base + '&limit={limit}&tags=-rating%3asafe+sort:random+'.format(limit=limit)
+                    for i in range(len(tag_list)):
+                        url_base = url_base + '{tag}+'.format(tag=tag_list[i])
+                    try:
+                        posts = requests.get(url_base).json()
+                    except ValueError:
                         await ctx.send("No results found. Please try another tag.")
+                        return
+                    
+                    if len(tag_list) == 0:
+                        count = 0
                     else:
-                        for post in posts:
-                            try:
-                                e = discord.Embed(title=tags, url=post["file_url"])
-                                e.set_image(url=post["file_url"])
-                                await ctx.send(embed=e)
-                            except:
-                                e = discord.Embed(title=tags, description="Unknown Image Format, Could not be embedded.")
+                        num_results = requests.get('https://gelbooru.com/index.php?page=dapi&s=tag&q=index&json=1&name={tags}'.format(tags=tag_list[0])).json()
+                        count = num_results[0]['count']
+                    for i in range(len(posts)):
+                        img_url = posts[i]['file_url']
+
+                        score = posts[i]['score']
+                        postid = posts[i]['id']
+                        tags = ""
+                        for k in range(len(tag_list)):
+                            tags += " " + tag_list[k]
+                        print('checkpoint 3')  
+                        tag_string = posts[i]['tags']
+                        e = discord.Embed(title=tags, description ='ID: {postid}'.format(postid=postid), url=img_url, color=0xfecbed)
+                        e.set_author(name='Retrieved from Gelbooru')
+                        e.add_field(name='score', value=posts[i]['score'], inline=True)
+                        e.add_field(name='rating', value=posts[i]['rating'], inline=True)
+                        e.add_field(name='hit count', value=count, inline=True)
+                        e.set_footer(text=tag_string)
+                        e.set_image(url=img_url)
+
+                        if img_url.endswith(".webm"):
+                            async with aiohttp.ClientSession() as session:
+                                async with session.get(img_url) as resp:
+                                    if resp.status != 200:
+                                        await channel.send('Could not download file.')
+                                    else:
+                                        data = io.BytesIO(await resp.read())
+                                        e.set_thumbnail(url='https://img.icons8.com/cotton/2x/movie-beginning.png')
+                                        await ctx.send(embed=e)
+                                        await ctx.send(file=discord.File(data, img_url))
+                        else:
+                            e.set_thumbnail(url='https://vectorified.com/images/image-gallery-icon-21.png')
+                            await ctx.send(embed=e)
+
             else:
                 await delSend("Please use this command in the hentai channel.", ctx.channel)
