@@ -17,17 +17,19 @@ class Vault(commands.Cog):
         msgs = vault.messages
 
     @commands.command(name=u"\U0001F345")
-    async def tomato(self, ctx:commands.Context, url:str=None):
+    async def tomato(self, ctx:commands.Context, tgt=None):
         '''
         Vaults a post.
         '''
         
         if len(ctx.message.attachments) > 0:
             u = ctx.message.attachments[0].url
+        elif tgt.isnumeric():
+            u = ctx.fetch_message(eval(tgt))
         else:
-            u = url
+            u = tgt
         
-        m = await ctx.send("React to this message with 🍅 to vault the post {}".format(ctx.message.jump_url))
+        m = await ctx.send("React to this message with 🍅 to vault the post {}".format(ctx.message.jump_url if not tgt.isnumeric() else u.jump_url))
 
         self.activeposts[m.id] = {"Message":ctx.message, "Attachment URL":u}
 
