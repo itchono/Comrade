@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: comrade-pod
+  namespace: comrade-v3
+  labels:
+    app: comrade-app
+spec:
+  containers:
+   - image: itchono/comrade:COMMIT
+     name: comrade-container
+     imagePullPolicy: Always
+  
+     envFrom:
+       - configMapRef:
+           name: comrade-configs

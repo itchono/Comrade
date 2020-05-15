@@ -33,9 +33,9 @@ class MessageHandler(commands.Cog):
                 with open("vid/meme_approved.mp4", "rb") as f:
                     await message.channel.send(file=discord.File(f, "meme_approved.mp4"))
 
-            Knuckles_VD = ["meme_approved.mp4", "meme_what.mp4", "meme_denied.mp4", "meme_huh.mp4", "meme_illegal.mov", "no_meme_no_meme_no_meme.mp4", "meme_no.mp4", "meme_already_approved.mp4", "meme_wait.mp4", "meme_purple.mp4", "meme_eggman_steal.mp4", "Meme_failed.mp4"]
+            Knuckles_VD = ["meme_approved.mp4", "meme_what.mp4", "meme_denied.mp4", "meme_huh.mp4", "meme_illegal.mov", "no_meme_no_meme_no_meme.mp4", "meme_no.mp4", "meme_already_approved.mp4", "meme_wait.mp4", "meme_purple.mp4", "meme_eggman_steal.mp4", "Meme_failed.mp4", "meme.mp4", "meme_rick_roll.mov"]
 
-            if message.channel.id == getCFG(message.guild.id)["meme channel"]:
+            if message.guild and message.channel.id == getCFG(message.guild.id)["meme channel"]:
 
                 fn = "meme_what.mp4" # default safety
 

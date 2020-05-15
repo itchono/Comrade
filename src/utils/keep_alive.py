@@ -2,6 +2,12 @@ from flask import Flask, render_template
 from threading import Thread
 from datetime import datetime
 
+import logging
+import os
+
+logging.getLogger('werkzeug').disabled = True
+os.environ['WERKZEUG_RUN_MAIN'] = 'true'
+
 t_start = 0
 
 app = Flask('')

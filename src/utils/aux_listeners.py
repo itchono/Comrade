@@ -74,6 +74,7 @@ class AuxilliaryListener(commands.Cog):
         When a command fails to execute
         '''
         await reactQuestion(ctx)
+        await log(ctx.guild, "Failure: {}\nType: {}".format(exception, type(exception)))
         if type(exception) == commands.CheckFailure:
             await timedSend("You have insufficient permission to use this command {}".format(ctx.author.mention), ctx.channel)
 
@@ -82,6 +83,6 @@ class AuxilliaryListener(commands.Cog):
         else:
             await timedSend("Failure: {}".format(exception), ctx.channel)
 
-        await log(ctx.guild, "Failure: {}\nType: {}".format(exception, type(exception)))
+        
     
 

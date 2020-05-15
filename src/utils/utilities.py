@@ -8,6 +8,9 @@ import requests
 import random
 import datetime
 
+DEVELOPMENT_MODE = True
+# set to true for pre-testing.
+
 '''
 Checks
 '''
@@ -18,7 +21,7 @@ def isOwner(ctx:commands.Context):
     '''
     Determines whether message author is server owner
     '''
-    return ctx.author.id == ctx.guild.owner.id
+    return ctx.author.id == ctx.guild.owner.id or DEVELOPMENT_MODE
 
 def isOP(ctx:commands.Context):
     '''
@@ -28,6 +31,17 @@ def isOP(ctx:commands.Context):
 
     for op in OPS:
         if ctx.author.id == op["_id"]:
+            return True
+    return False
+
+def isUserOP(user:discord.User):
+    '''
+    Determines whether message author is an OP
+    '''
+    OPS = userQuery({"OP":True})
+
+    for op in OPS:
+        if user.id == op["_id"]:
             return True
     return False
 
@@ -151,8 +165,10 @@ async def getChannel(guild: discord.Guild, name: str):
     Gets a channel in a server, given a NAME of the channel; uses mongoDB cfg file. 
     '''
     c = guild.get_channel(getCFG(guild.id)[name])
-    if not c or c == -1:
+    if not c:
         await log(guild, "Channel not found.")
+    elif c == -1:
+        print("Error: (Log Channel not set up); channel not found")
     else:
         return c
 '''
