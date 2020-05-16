@@ -36,6 +36,20 @@ def userQuery(query: dict):
     users = client['Comrade']['UserData']
     return users.find(query)
 
+def cfgQuery(query:dict):
+    '''
+    Returns a set of cfgs given a query
+    '''
+    cfg = client['Comrade']['cfg']
+    return cfg.find(query)
+
+def customUserQuery(query:dict):
+    '''
+    Returns a set of custom users given a query
+    '''
+    customs = client.Comrade.CustomUsers
+    return customs.find(query)
+
 
 def getCFG(serverID: int):
     '''
@@ -71,10 +85,20 @@ def addCustomUser(name, url, server):
     customs = client.Comrade.CustomUsers
     customs.insert({"name": name, "url": url, "server": server})
 
+def updateCustomUser(userData:dict):
+    '''
+    Updates a custom user.
+    '''
+    customs = client.Comrade.CustomUsers
+    customs.update({
+        "name": userData["name"],
+        "server": userData["server"]
+    }, userData, True)  # upsert
 
-def getCustomUser(name):
+
+def getCustomUser(name, server):
     '''
     Gets a custom user from the database
     '''
     customs = client.Comrade.CustomUsers
-    return customs.find_one({"name": name})
+    return customs.find_one({"name": name, "server": server})
