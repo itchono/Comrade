@@ -7,7 +7,6 @@ Mingde Yin
 April - May 2020
 
 '''
-from utils.mongo_interface import *
 import os
 import dotenv
 
@@ -19,6 +18,7 @@ from utils.msg_handler import *
 from utils.aux_listeners import *
 from utils.keep_alive import *
 from utils.optimus_prime import *
+from utils.mongo_interface import *
 
 # command modules
 from general_cmds import *
@@ -68,5 +68,5 @@ async def on_ready():
     
     print("Startup completed in {:.2f} seconds.".format(time.perf_counter() - start_time))
 
+keep_alive()
 client.run(TOKEN)
-keep_alive.keep_alive()

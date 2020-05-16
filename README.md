@@ -33,3 +33,30 @@ MONGOKEY = yourmongoconnectionstring
 ```
 
 
+# Bot Setup
+
+You will want to run a few key commmands upon adding the bot to your server.
+
+```
+$c resetcfg
+$c reloadusers
+```
+
+These commands set the server-side configuration and user settings for the bot.
+
+## Channel-Mappings
+
+Comrade relies on the server owner to feed text channels into Comrade for some of its funtionality.
+This includes:
+- announcements channel: A place for the bot to make announcements
+- log channel: A place for the bot to log internal status
+- meme channel: A place in which all newly posted image or videos are "reviewed"
+- hentai channel: A channel for Comrade's Hentai Module
+- emote directory: A place where custom emotes are stored. Make this restricted such that only Comrade can post.
+- vault channel: A place where users can vote to "pin" a message. Make this restricted such that only Comrade can post.
+
+You must map each channel using
+```
+$c cfg "<channel name>" <channel id>
+ex. $c cfg "vault channel" 587743411499565067
+```
