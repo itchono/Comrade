@@ -27,7 +27,6 @@ from nsfw_cmds import *
 from vault_cmds import *
 from echo_cmds import *
 from user_cmds import *
-
 '''
 
 VARIABLES
@@ -40,34 +39,41 @@ print("Comrade v3.0_alpha Starting.")
 # private variable loading
 dotenv.load_dotenv()
 TOKEN = os.environ.get('TOKEN')  # bot token; kept private
-
 '''
 INIT
 '''
 
-client = commands.Bot(command_prefix="$c ", case_insensitive=True) # declare bot with prefix $c
+client = commands.Bot(command_prefix="$c ",
+                      case_insensitive=True)  # declare bot with prefix $c
 
-cogs = [AuxilliaryListener, MessageHandler, General, Setup, NSFW, Vault, Echo, Users, Prime]
+cogs = [
+    AuxilliaryListener, MessageHandler, General, Setup, NSFW, Vault, Echo,
+    Users, Prime
+]
 
 for c in cogs:
     client.add_cog(c(client))
 
 print("Bot components initialized, awaiting login.")
 
+
 @client.event
 async def on_ready():
     '''
     On successful login
     '''
-    await client.change_presence(status=discord.Status.online, activity=discord.Game("Testing Communism"))
+    await client.change_presence(status=discord.Status.online,
+                                 activity=discord.Game("Testing Communism"))
     print("{} is online, logged into {} server(s).".format(
         client.user, len(client.guilds)))
 
     print("Server List:")
-    for server in client.guilds: print("\t{} ({} members)".format(server.name, len(server.members)))
-    
-    print("Startup completed in {:.2f} seconds.".format(time.perf_counter() - start_time))
+    for server in client.guilds:
+        print("\t{} ({} members)".format(server.name, len(server.members)))
+
+    print("Startup completed in {:.2f} seconds.".format(time.perf_counter() -
+                                                        start_time))
+
 
 keep_alive()
 client.run(TOKEN)
-
