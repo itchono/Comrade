@@ -56,9 +56,11 @@ class AuxilliaryListener(commands.Cog):
         if (user.name != before.name):
             # user update
             print("Updated {}".format(user.name))
-            d = getUser(before.id) #TODO fix
-            d["name"] = user.name
-            updateUser(d)
+
+            POSSIBLES = userQuery({"user":user.id})
+            for u in POSSIBLES:
+                u["name"] = user.name
+                updateUser(u)
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction:discord.Reaction, user:discord.User):
