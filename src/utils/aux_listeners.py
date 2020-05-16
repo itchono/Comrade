@@ -35,7 +35,7 @@ class AuxilliaryListener(commands.Cog):
         if (user.display_name != before.display_name):
             # member update
             print("Updated {}".format(user.name))
-            d = getUser(before.id)
+            d = getUser(before.id, user.guild.id)
             d["name"] = user.name
             d["nickname"] = user.nick if user.nick else user.name
 
@@ -56,7 +56,7 @@ class AuxilliaryListener(commands.Cog):
         if (user.name != before.name):
             # user update
             print("Updated {}".format(user.name))
-            d = getUser(before.id)
+            d = getUser(before.id) #TODO fix
             d["name"] = user.name
             updateUser(d)
 

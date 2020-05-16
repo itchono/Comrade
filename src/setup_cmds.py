@@ -24,7 +24,7 @@ class Setup(commands.Cog):
             d["Bot"] = user.bot
             d["OP"] = False
             d["server"] = ctx.guild.id
-            d["daily count"] = 0
+            d["daily weight"] = 5
 
             updateUser(d)
 
@@ -41,7 +41,7 @@ class Setup(commands.Cog):
         for user in ctx.guild.members:
             # each user is stored, themselves each as a dictionary
 
-            d = getUser(user.id)
+            d = getUser(user.id, ctx.guild.id)
             
             try:
                 d[fieldname] = eval(str(value))
@@ -58,7 +58,7 @@ class Setup(commands.Cog):
         '''
         Configures a user, mentioned by ping, id, or nickname. Leave value as none to delete field.
         '''
-        u = getUser((await extractUser(self.bot, ctx, tgt)).id)
+        u = getUser((await extractUser(self.bot, ctx, tgt)).id, ctx.guild.id)
 
         if not value:
             try:
