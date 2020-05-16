@@ -3,19 +3,20 @@ from utils.mongo_interface import *
 
 import datetime
 
+
 class AuxilliaryListener(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self._last_member = None
 
     @commands.Cog.listener()
-    async def on_member_join(self, user:discord.Member):
+    async def on_member_join(self, user: discord.Member):
         '''
         When a member joins the server.
         '''
         # member join
         print("Join {}".format(user.name))
-        d = {"user":user.id}
+        d = {"user": user.id}
         d["name"] = user.name
         d["nickname"] = user.nick if user.nick else user.name
         d["threat level"] = 0
@@ -43,10 +44,13 @@ class AuxilliaryListener(commands.Cog):
 
         elif user.status != before.status:
             # status update
-            e = discord.Embed(title = "Status Change: {}".format(user.display_name), 
-                                description = "Time: {}\n{} --> {}". format(datetime.datetime.now().strftime("%H:%M:%S"),before.status, user.status),
-                                colour = discord.Color.from_rgb(51, 204, 51))
-            await log(user.guild, "",e)
+            e = discord.Embed(title="Status Change: {}".format(
+                user.display_name),
+                              description="Time: {}\n{} --> {}".format(
+                                  datetime.datetime.now().strftime("%H:%M:%S"),
+                                  before.status, user.status),
+                              colour=discord.Color.from_rgb(51, 204, 51))
+            await log(user.guild, "", e)
 
     @commands.Cog.listener()
     async def on_user_update(self, before, user):
@@ -56,12 +60,13 @@ class AuxilliaryListener(commands.Cog):
         if (user.name != before.name):
             # user update
             print("Updated {}".format(user.name))
-            d = getUser(before.id) #TODO fix
+            d = getUser(before.id)  #TODO fix
             d["name"] = user.name
             updateUser(d)
 
     @commands.Cog.listener()
-    async def on_reaction_add(self, reaction:discord.Reaction, user:discord.User):
+    async def on_reaction_add(self, reaction: discord.Reaction,
+                              user: discord.User):
         '''
         When a user adds a reaction to a message.
         '''
@@ -75,15 +80,16 @@ class AuxilliaryListener(commands.Cog):
         When a command fails to execute
         '''
         await reactQuestion(ctx)
-        await log(ctx.guild, "Failure: {}\nType: {}".format(exception, type(exception)))
+        await log(ctx.guild,
+                  "Failure: {}\nType: {}".format(exception, type(exception)))
         if type(exception) == commands.CheckFailure:
-            await timedSend("You have insufficient permission to use this command {}".format(ctx.author.mention), ctx.channel)
+            await timedSend(
+                "You have insufficient permission to use this command {}".
+                format(ctx.author.mention), ctx.channel)
 
         elif type(exception) == commands.CommandNotFound:
-            await timedSend("'{}' is not a valid command.".format(ctx.message.content), ctx.channel)
+            await timedSend(
+                "'{}' is not a valid command.".format(ctx.message.content),
+                ctx.channel)
         else:
             await timedSend("Failure: {}".format(exception), ctx.channel)
-
-        
-    
-
