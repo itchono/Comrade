@@ -49,11 +49,11 @@ These commands set the server-side configuration and user settings for the bot.
 Comrade relies on the server owner to feed text channels into Comrade for some of its funtionality.
 This includes:
 - announcements channel: A place for the bot to make announcements
-- log channel: 707709158933266503
-- meme channel: 419214992517234728
-- hentai channel: 558408620476203021
-- emote directory: 669353887735611430
-- vault channel: 587743411499565067
+- log channel: A place for the bot to log internal status
+- meme channel: A place in which all newly posted image or videos are "reviewed"
+- hentai channel: A channel for Comrade's Hentai Module
+- emote directory: A place where custom emotes are stored. Make this restricted such that only Comrade can post.
+- vault channel: A place where users can vote to "pin" a message. Make this restricted such that only Comrade can post.
 
 You must map each channel using
 ```
