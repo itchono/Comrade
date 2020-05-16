@@ -44,6 +44,8 @@ class NSFW(commands.Cog):
                     url_base = url_base + '&limit={limit}&tags=-rating%3asafe+sort:random+'.format(limit=limit)
                     for i in range(len(tag_list)):
                         url_base = url_base + '{tag}+'.format(tag=tag_list[i])
+                        
+                    print(url_base)
                     try:
                         posts = requests.get(url_base).json()
                     except ValueError:
@@ -51,10 +53,20 @@ class NSFW(commands.Cog):
                         return
                     
                     if len(tag_list) == 0:
-                        count = 0
+                        count = "N/A"
                     else:
-                        num_results = requests.get('https://gelbooru.com/index.php?page=dapi&s=tag&q=index&json=1&name={tags}'.format(tags=tag_list[0])).json()
-                        count = num_results[0]['count']
+                        new_tag = tag_list[0]
+                        if tag_list[0].endswith('*'):
+                            new_tag = tag_list[0][:len(tag_list[0])-1]
+                        try:
+                            num_results = requests.get('https://gelbooru.com/index.php?page=dapi&s=tag&q=index&json=1&name={tags}'.format(tags=new_tag)).json()
+                        except:
+                            count = "N/A"
+                        else:
+                            if len(num_results) != 0:
+                                count = num_results[0]['count']
+                            else:
+                                count = 0
                     for i in range(len(posts)):
                         img_url = posts[i]['file_url']
 
