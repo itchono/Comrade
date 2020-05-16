@@ -20,7 +20,12 @@ class NSFW(commands.Cog):
         Ex. $c hentai arms_up solo 2
 
         User $c hentai clear to purge all hentai messages
+
+        Creds to Sunekku on Github
         '''
+
+        # Made by Sunekku
+
         limit = 1
         tag_list = []
         if len(args) > 0:
@@ -45,7 +50,6 @@ class NSFW(commands.Cog):
                     for i in range(len(tag_list)):
                         url_base = url_base + '{tag}+'.format(tag=tag_list[i])
                         
-                    print(url_base)
                     try:
                         posts = requests.get(url_base).json()
                     except ValueError:
