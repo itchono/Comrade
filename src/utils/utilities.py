@@ -1,6 +1,6 @@
 import asyncio
 
-import discord # core to bot
+import discord  # core to bot
 from discord.ext import commands
 from utils.mongo_interface import *
 
@@ -10,53 +10,59 @@ import datetime
 
 DEVELOPMENT_MODE = False
 # set to true for pre-testing.
-
 '''
 Checks
 '''
 
 # Checks
 
-def isOwner(ctx:commands.Context):
+
+def isOwner(ctx: commands.Context):
     '''
     Determines whether message author is server owner
     '''
     return ctx.author.id == ctx.guild.owner.id or DEVELOPMENT_MODE
 
-def isOP(ctx:commands.Context):
+
+def isOP(ctx: commands.Context):
     '''
     Determines whether message author is an OP
     '''
-    OPS = userQuery({"OP":True})
+    OPS = userQuery({"OP": True})
 
     for op in OPS:
         if ctx.author.id == op["user"]:
             return True
     return False
 
-def isUserOP(user:discord.User):
+
+def isUserOP(user: discord.User):
     '''
     Determines whether message author is an OP
     '''
-    OPS = userQuery({"OP":True})
+    OPS = userQuery({"OP": True})
 
     for op in OPS:
         if user.id == op["user"]:
             return True
     return False
 
-def isnotThreat(ctx:commands.Context):
+
+def isnotThreat(ctx: commands.Context):
     '''
     Determines whether message author is a threat
     '''
-    OPS = userQuery({"threat level":{"$gt":0}, "server":ctx.guild.id})
+    OPS = userQuery({"threat level": {"$gt": 0}, "server": ctx.guild.id})
 
     for op in OPS:
         if ctx.author.id == op["user"]:
             return False
     return True
 
+
 purgeTGT = None
+
+
 def setTGT(tgt):
     '''
     Sets purge target
@@ -64,19 +70,22 @@ def setTGT(tgt):
     global purgeTGT
     purgeTGT = tgt
 
-def purgeCheck(message:discord.Message):
+
+def purgeCheck(message: discord.Message):
     '''
     Checks whether or not to delete the message
     '''
     return message.author == purgeTGT
 
-def isWebhook(message:discord.Message):
+
+def isWebhook(message: discord.Message):
     '''
     Checks if it's a webhook
     '''
     return message.author.discriminator == "0000"
 
-def isCommand(message:discord.Message):
+
+def isCommand(message: discord.Message):
     '''
     Check's if it's a Comrade Command
     '''
@@ -87,7 +96,8 @@ def isCommand(message:discord.Message):
 Message Helpers
 '''
 
-async def delSend(s:str, channel:discord.TextChannel, time:int = 5):
+
+async def delSend(s: str, channel: discord.TextChannel, time: int = 5):
     '''
     Sends a message to the desired channel, with a deletion option after a fixed time, default 5 seconds.
     Standard sending module for Comrade
@@ -96,7 +106,8 @@ async def delSend(s:str, channel:discord.TextChannel, time:int = 5):
     await asyncio.sleep(time)
     await msg.add_reaction("🗑️")
 
-async def timedSend(s:str, channel:discord.TextChannel, time:int = 10):
+
+async def timedSend(s: str, channel: discord.TextChannel, time: int = 10):
     '''
     Sends a message to the desired channel, with deletion after a fixed time, default 10 seconds.
     '''
@@ -104,61 +115,69 @@ async def timedSend(s:str, channel:discord.TextChannel, time:int = 10):
     await asyncio.sleep(time)
     await msg.delete()
 
+
 async def reactOK(ctx: commands.Context):
     '''
     Adds reaction to show that task was completed successfully.
     '''
     await ctx.message.add_reaction("👍")
 
+
 async def reactQuestion(ctx: commands.Context):
     '''
     Adds reaction to show that something went wrong
     '''
     await ctx.message.add_reaction("❓")
-    
 
-async def DM(s:str, member:discord.Member, embed=None):
+
+async def DM(s: str, member: discord.Member, embed=None):
     '''
     DMs a person
     '''
     memberChannel = await member.create_dm()
     await memberChannel.send(content=s, embed=embed)
 
+
 '''
 Image Extractor
 '''
 
-async def getavatar(member:discord.Member):
+
+async def getavatar(member: discord.Member):
     '''
     Returns file bytes of avatar
     '''
     r = requests.get(member.avatar_url)
     return r.content
 
+
 '''
 Converters and Stuff
 '''
+
 
 async def extractUser(bot: commands.Bot, ctx: commands.Context, tgt: str):
     '''
     Returns a server member or user; based on display name in server, user ID, or by mention.
     '''
-    if not tgt: 
+    if not tgt:
         return None
 
     u = getUserfromNick(tgt, ctx.guild.id)
     if tgt.isnumeric():
         # if user ID
-        u = {"user":int(tgt)}
+        u = {"user": int(tgt)}
     elif not u:
         # if mention
-        u = {"user":int(tgt[3:-1])} if tgt[3:-1].isnumeric() else None
+        u = {"user": int(tgt[3:-1])} if tgt[3:-1].isnumeric() else None
 
     if u:
-        return ctx.guild.get_member(u["user"]) if ctx.guild else bot.get_user(u["user"])
+        return ctx.guild.get_member(u["user"]) if ctx.guild else bot.get_user(
+            u["user"])
     else:
         await ctx.send("User with input '{}' could not be found.".format(tgt))
         return None
+
 
 async def getChannel(guild: discord.Guild, name: str):
     '''
@@ -171,18 +190,19 @@ async def getChannel(guild: discord.Guild, name: str):
         print("Error: (Log Channel not set up); channel not found")
     else:
         return c
+
+
 '''
 logger
 '''
-async def log(guild, m:str, embed=None):
+
+
+async def log(guild, m: str, embed=None):
     '''
     Logs a message in the server's log channel in a clean embed form, or sends a pre-made embed.
     '''
     lgc = await getChannel(guild, "log channel")
     if not embed:
-        embed = discord.Embed(title="Log Entry",
-        description=m)
+        embed = discord.Embed(title="Log Entry", description=m)
         embed.add_field(name="Time", value=(datetime.datetime.now()))
     await lgc.send(embed=embed)
-
-
