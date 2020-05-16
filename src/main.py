@@ -7,7 +7,6 @@ Mingde Yin
 April - May 2020
 
 '''
-from utils.mongo_interface import *
 import os
 import dotenv
 
@@ -19,6 +18,7 @@ from utils.msg_handler import *
 from utils.aux_listeners import *
 from utils.keep_alive import *
 from utils.optimus_prime import *
+from utils.mongo_interface import *
 
 # command modules
 from general_cmds import *
@@ -45,7 +45,7 @@ TOKEN = os.environ.get('TOKEN')  # bot token; kept private
 INIT
 '''
 
-client = commands.Bot(command_prefix="$canary ", case_insensitive=True) # declare bot with prefix $c
+client = commands.Bot(command_prefix="$c ", case_insensitive=True) # declare bot with prefix $c
 
 cogs = [AuxilliaryListener, MessageHandler, General, Setup, NSFW, Vault, Echo, Users, Prime]
 
@@ -68,5 +68,6 @@ async def on_ready():
     
     print("Startup completed in {:.2f} seconds.".format(time.perf_counter() - start_time))
 
+keep_alive()
 client.run(TOKEN)
-keep_alive.keep_alive()
+

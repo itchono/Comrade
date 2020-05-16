@@ -23,6 +23,7 @@ class Setup(commands.Cog):
             d["kick votes"] = []
             d["Bot"] = user.bot
             d["OP"] = False
+            d["server"] = ctx.guild.id
             d["daily count"] = 0
 
             updateUser(d)
@@ -31,7 +32,7 @@ class Setup(commands.Cog):
 
     @commands.command()
     @commands.check(isOwner)
-    async def updateallfields(self, ctx:commands.Context, fieldname, value):
+    async def updatealluserfields(self, ctx:commands.Context, fieldname, value):
         '''
         updates all fields of users to some given value.
         '''

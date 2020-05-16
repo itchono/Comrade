@@ -8,7 +8,7 @@ import requests
 import random
 import datetime
 
-DEVELOPMENT_MODE = True
+DEVELOPMENT_MODE = False
 # set to true for pre-testing.
 
 '''
