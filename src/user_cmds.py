@@ -46,7 +46,8 @@ class Users(commands.Cog):
                 e.set_footer(icon_url=ctx.author.avatar_url)
                 roles = [role for role in member.roles]
 
-                u = getUser(member.id)
+                u = getUser(member.id, ctx.guild.id)
+                print(u)
                 for c in u:
                     if c != "_id":
                         e.add_field(name=c, value=u[c], inline=True)
@@ -60,7 +61,7 @@ class Users(commands.Cog):
                 e.set_author(name=f"User Info - {member}")
                 e.set_thumbnail(url=member.avatar_url)
                 e.set_footer(icon_url=ctx.author.avatar_url)
-                u = getUser(member.id)
+                u = getUser(member.id, ctx.guild.id)
                 for c in u:
                     if c != "_id":
                         e.add_field(name=c, value=u[c], inline=True)
@@ -91,7 +92,7 @@ class Users(commands.Cog):
             # rebuilding cache
             print("Rebuild cache")
             for member in ctx.guild.members:
-                weight = getUser(member.id)["daily weight"]
+                weight = getUser(member.id, ctx.guild.id)["daily weight"]
                 if not member.bot:
                     pool += [member for i in range(weight)]
             self.RND_USER = pool[:]
@@ -102,7 +103,7 @@ class Users(commands.Cog):
 
         random.shuffle(pool)
         luckyperson = pool.pop()
-        await self.userinfo(ctx, getUser(luckyperson.id)["nickname"])
+        await self.userinfo(ctx, getUser(luckyperson.id, ctx.guild.id)["nickname"])
 
     @commands.command()
     async def addUser(self, ctx, username, avatar_url):
