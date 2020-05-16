@@ -15,12 +15,13 @@ class AuxilliaryListener(commands.Cog):
         '''
         # member join
         print("Join {}".format(user.name))
-        d = {"_id":user.id}
+        d = {"user":user.id}
         d["name"] = user.name
         d["nickname"] = user.nick if user.nick else user.name
         d["threat level"] = 0
         d["banned words"] = []
         d["kick votes"] = []
+        d["server"] = user.guild.id
         d["OP"] = False
         d["daily weight"] = 0
 

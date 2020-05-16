@@ -11,19 +11,19 @@ dotenv.load_dotenv()
 client = MongoClient(os.environ.get('MONGOKEY'))
 print("Atlas Cluster Connected, Running Version {}.".format(client.server_info()['version']))
 
-def getUser(userID:int):
+def getUser(userID:int, serverID:int):
     '''
-    gets a user based on user ID
+    gets a user based on user ID and guild ID.
     '''
     users = client['Comrade']['UserData']
-    return users.find_one({"_id":userID})
+    return users.find_one({"user":userID, "server":serverID})
 
-def getUserfromNick(nickname:str):
+def getUserfromNick(nickname:str, serverID:int):
     '''
     gets a user based on server nickname
     '''
     users = client['Comrade']['UserData']
-    return users.find_one({"nickname":nickname})
+    return users.find_one({"nickname":nickname, "server":serverID})
 
 def userQuery(query:dict):
     '''
@@ -51,14 +51,14 @@ def updateUser(userData:dict):
     Upserts user into userData collection
     '''
     users = client.Comrade.UserData
-    users.update({"_id":userData["_id"]}, userData, True) # upsert
+    users.update({"user":userData["user"], "server":userData["server"]}, userData, True) # upsert
 
-def addCustomUser(name, url):
+def addCustomUser(name, url, server):
     '''
     Adds a custom user to the CustomUsers collection, for use with echo command etc.
     '''
     customs = client.Comrade.CustomUsers
-    customs.insert({"name":name, "url":url})
+    customs.insert({"name":name, "url":url, "server":server})
 
 def getCustomUser(name):
     '''
