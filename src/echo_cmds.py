@@ -30,7 +30,7 @@ class Echo(commands.Cog):
         '''
         Send the actual webhook
         '''
-        if u := getCustomUser(target):
+        if u := getCustomUser(target, ctx.guild.id):
             await webhook.send(text, username=u["name"], avatar_url=u["url"])
         else:
             if u := (await extractUser(self.bot, ctx, target) if target else ctx.author):
