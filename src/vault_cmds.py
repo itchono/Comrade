@@ -18,7 +18,7 @@ class Vault(commands.Cog):
         msgs = vault.messages
 
     @commands.command(name=u"\U0001F345")
-    async def tomato(self, ctx: commands.Context, tgt = None):
+    async def tomato(self, ctx: commands.Context, tgt=None):
         '''
         Vaults a post.
         '''
@@ -31,11 +31,16 @@ class Vault(commands.Cog):
             u = await ctx.fetch_message(eval(tgt))
             IDmode = True
         else:
-            u = tgt # URL directly
-        
-        m = await ctx.send("React to this message with 🍅 to vault the post {}".format(ctx.message.jump_url if not IDmode else u.jump_url))
+            u = tgt  # URL directly
 
-        self.activeposts[m.id] = {"Message": ctx.message if not IDmode else u, "Attachment URL": u if not IDmode else None}
+        m = await ctx.send(
+            "React to this message with 🍅 to vault the post {}".format(
+                ctx.message.jump_url if not IDmode else u.jump_url))
+
+        self.activeposts[m.id] = {
+            "Message": ctx.message if not IDmode else u,
+            "Attachment URL": u if not IDmode else None
+        }
 
         await m.add_reaction("🍅")
 
@@ -47,22 +52,29 @@ class Vault(commands.Cog):
         await self.tomato(ctx, url)
 
     @commands.Cog.listener()
-    async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):
+    async def on_reaction_add(self, reaction: discord.Reaction,
+                              user: discord.User):
         if reaction.emoji == "🍅":
             if reaction.count > 1 and reaction.message.id in self.activeposts and \
                     (user != self.activeposts[reaction.message.id]["Message"].author or DEVELOPMENT_MODE):
-                attachment_url = self.activeposts[reaction.message.id]["Attachment URL"]
-                
+                attachment_url = self.activeposts[
+                    reaction.message.id]["Attachment URL"]
+
                 msg = self.activeposts[reaction.message.id]["Message"]
 
-                vault = await getChannel(reaction.message.guild, "vault channel")
+                vault = await getChannel(reaction.message.guild,
+                                         "vault channel")
 
                 if not attachment_url:
 
                     m = await vault.send("Vault operation in progress...")
 
-                    e = discord.Embed(title=":tomato: Echoed Vault Entry", description="See Echoed Message Below.",colour=discord.Colour.from_rgb(r=215, g=52, b=42))
-                    e.add_field(name='Original Post: ',value=msg.jump_url)
+                    e = discord.Embed(title=":tomato: Echoed Vault Entry",
+                                      description="See Echoed Message Below.",
+                                      colour=discord.Colour.from_rgb(r=215,
+                                                                     g=52,
+                                                                     b=42))
+                    e.add_field(name='Original Post: ', value=msg.jump_url)
                     e.set_footer(text="Sent by {}".format(msg.author))
                     c = await self.bot.get_context(m)
                     E = self.bot.get_cog("Echo")
@@ -72,13 +84,16 @@ class Vault(commands.Cog):
                 else:
                     # made by Slyflare
 
-                    e = discord.Embed(title=":tomato: Vault Entry", colour=discord.Colour.from_rgb(r=215, g=52, b=42))
+                    e = discord.Embed(title=":tomato: Vault Entry",
+                                      colour=discord.Colour.from_rgb(r=215,
+                                                                     g=52,
+                                                                     b=42))
                     e.set_image(url=str(attachment_url))
-                    e.add_field(name='Original Post: ',value=msg.jump_url)
+                    e.add_field(name='Original Post: ', value=msg.jump_url)
                     e.set_footer(text="Sent by {}".format(msg.author))
 
                     await vault.send(embed=e)
-                
+
                 del self.activeposts[reaction.message.id]
                 await reactOK(await self.bot.get_context(reaction.message))
                 await reaction.message.edit("Vault operation successful.")

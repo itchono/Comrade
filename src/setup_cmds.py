@@ -1,6 +1,7 @@
 from utils.utilities import *
 from utils.mongo_interface import *
 
+
 class Setup(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -8,14 +9,14 @@ class Setup(commands.Cog):
 
     @commands.command()
     @commands.check(isOwner)
-    async def reloadusers(self, ctx:commands.Context):
+    async def reloadusers(self, ctx: commands.Context):
         '''
         POTENTIALLY DESTRUCTIVE. repopulates the UserData collection on Atlas with default values.
         '''
         for user in ctx.guild.members:
             # each user is stored, themselves each as a dictionary
 
-            d = {"user":user.id}
+            d = {"user": user.id}
             d["name"] = user.name
             d["nickname"] = user.nick if user.nick else user.name
             d["threat level"] = 0
@@ -32,7 +33,8 @@ class Setup(commands.Cog):
 
     @commands.command()
     @commands.check(isOwner)
-    async def updatealluserfields(self, ctx:commands.Context, fieldname, value):
+    async def updatealluserfields(self, ctx: commands.Context, fieldname,
+                                  value):
         '''
         updates all fields of users to some given value.
         '''
@@ -42,7 +44,7 @@ class Setup(commands.Cog):
             # each user is stored, themselves each as a dictionary
 
             d = getUser(user.id, ctx.guild.id)
-            
+
             try:
                 d[fieldname] = eval(str(value))
             except:
@@ -54,7 +56,7 @@ class Setup(commands.Cog):
 
     @commands.command()
     @commands.check(isOwner)
-    async def user(self, ctx:commands.Context, tgt, cfgitem, value=None):
+    async def user(self, ctx: commands.Context, tgt, cfgitem, value=None):
         '''
         Configures a user, mentioned by ping, id, or nickname. Leave value as none to delete field.
         '''
@@ -67,7 +69,7 @@ class Setup(commands.Cog):
                 await delSend("User config value deleted.", ctx.channel)
             except:
                 await delSend("Value was not found.", ctx.channel)
-        
+
         else:
             try:
                 u[cfgitem] = eval(str(value))
@@ -79,7 +81,7 @@ class Setup(commands.Cog):
 
     @commands.command()
     @commands.check(isOwner)
-    async def cfg(self, ctx:commands.Context, cfgitem, value=None):
+    async def cfg(self, ctx: commands.Context, cfgitem, value=None):
         '''
         Modifies a value in Comrade's configuration. Leave value blank to delete the field.
         '''
@@ -103,7 +105,7 @@ class Setup(commands.Cog):
             await delSend("Value updated.", ctx.channel)
 
     @commands.command()
-    async def cfgstatus(self, ctx:commands.Context):
+    async def cfgstatus(self, ctx: commands.Context):
         '''
         Sends an embed providing a dump of all Comrade configuration data for this server.
         '''
@@ -114,25 +116,23 @@ class Setup(commands.Cog):
         for k in c:
             if k != "_id":
                 s += str(k) + ": " + str(c[k]) + "\n"
-        
-        e = discord.Embed(
-            title="Comrade Configuration for {}".format(ctx.guild.name),
-            description = s,
-            colour = discord.Colour.from_rgb(r=215, g=52, b=42)
-            )
+
+        e = discord.Embed(title="Comrade Configuration for {}".format(
+            ctx.guild.name),
+                          description=s,
+                          colour=discord.Colour.from_rgb(r=215, g=52, b=42))
         e.set_thumbnail(url=ctx.guild.icon_url)
 
         await ctx.send(embed=e)
 
-
     @commands.command()
     @commands.check(isOwner)
-    async def resetcfg(self, ctx:commands.Context):
+    async def resetcfg(self, ctx: commands.Context):
         '''
         POTENTIALLY DESTRUCTIVE. Resets the configuration file for a server back to a default state. 
         '''
-        d = {"_id":ctx.guild.id}
-        d["last daily"] = "2020-05-04" # default "time = 0" for comrade
+        d = {"_id": ctx.guild.id}
+        d["last daily"] = "2020-05-04"  # default "time = 0" for comrade
         d["joke mode"] = True
         d["kick requirement"] = 6
         d["lethality override"] = 0
@@ -149,7 +149,7 @@ class Setup(commands.Cog):
 
     @commands.command()
     @commands.check(isOwner)
-    async def injectEmotes(self, ctx:commands.Context):
+    async def injectEmotes(self, ctx: commands.Context):
         '''
         Inserts each image located inside the a folder called emotes and uploads it to the custom emotes channel in the server.
         '''
@@ -159,4 +159,3 @@ class Setup(commands.Cog):
                 url = msg.attachments[0].url
                 c = await getChannel(ctx.guild, "emote directory")
                 await c.send(n[:n.index(".")] + "\n" + url)
-        
