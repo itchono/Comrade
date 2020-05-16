@@ -33,3 +33,30 @@ MONGOKEY = yourmongoconnectionstring
 ```
 
 
+# Bot Setup
+
+You will want to run a few key commmands upon adding the bot to your server.
+
+```
+$c resetcfg
+$c reloadusers
+```
+
+These commands set the server-side configuration and user settings for the bot.
+
+## Channel-Mappings
+
+Comrade relies on the server owner to feed text channels into Comrade for some of its funtionality.
+This includes:
+- announcements channel: A place for the bot to make announcements
+- log channel: 707709158933266503
+- meme channel: 419214992517234728
+- hentai channel: 558408620476203021
+- emote directory: 669353887735611430
+- vault channel: 587743411499565067
+
+You must map each channel using
+```
+$c cfg "<channel name>" <channel id>
+ex. $c cfg "vault channel" 587743411499565067
+```
