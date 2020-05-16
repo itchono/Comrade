@@ -109,7 +109,7 @@ class Users(commands.Cog):
         '''
         Adds custom user to database, which can be mentioned.
         '''
-        addCustomUser(username, avatar_url)
+        addCustomUser(username, avatar_url, ctx.guild.id)
 
         e =  self.bot.get_cog('Echo')
 

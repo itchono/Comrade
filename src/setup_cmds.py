@@ -15,7 +15,7 @@ class Setup(commands.Cog):
         for user in ctx.guild.members:
             # each user is stored, themselves each as a dictionary
 
-            d = {"_id":user.id}
+            d = {"user":user.id}
             d["name"] = user.name
             d["nickname"] = user.nick if user.nick else user.name
             d["threat level"] = 0

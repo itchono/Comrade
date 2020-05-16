@@ -30,7 +30,7 @@ def isOP(ctx:commands.Context):
     OPS = userQuery({"OP":True})
 
     for op in OPS:
-        if ctx.author.id == op["_id"]:
+        if ctx.author.id == op["user"]:
             return True
     return False
 
@@ -41,7 +41,7 @@ def isUserOP(user:discord.User):
     OPS = userQuery({"OP":True})
 
     for op in OPS:
-        if user.id == op["_id"]:
+        if user.id == op["user"]:
             return True
     return False
 
@@ -49,10 +49,10 @@ def isnotThreat(ctx:commands.Context):
     '''
     Determines whether message author is a threat
     '''
-    OPS = userQuery({"threat level":{"$gt":0}})
+    OPS = userQuery({"threat level":{"$gt":0}, "server":ctx.guild.id})
 
     for op in OPS:
-        if ctx.author.id == op["_id"]:
+        if ctx.author.id == op["user"]:
             return False
     return True
 
@@ -146,16 +146,16 @@ async def extractUser(bot: commands.Bot, ctx: commands.Context, tgt: str):
     if not tgt: 
         return None
 
-    u = getUserfromNick(tgt)
+    u = getUserfromNick(tgt, ctx.guild.id)
     if tgt.isnumeric():
         # if user ID
-        u = {"_id":int(tgt)}
+        u = {"user":int(tgt)}
     elif not u:
         # if mention
-        u = {"_id":int(tgt[3:-1])} if tgt[3:-1].isnumeric() else None
+        u = {"user":int(tgt[3:-1])} if tgt[3:-1].isnumeric() else None
 
     if u:
-        return ctx.guild.get_member(u["_id"]) if ctx.guild else bot.get_user(u["_id"])
+        return ctx.guild.get_member(u["user"]) if ctx.guild else bot.get_user(u["user"])
     else:
         await ctx.send("User with input '{}' could not be found.".format(tgt))
         return None
