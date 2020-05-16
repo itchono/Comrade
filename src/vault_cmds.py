@@ -20,7 +20,13 @@ class Vault(commands.Cog):
     @commands.command(name=u"\U0001F345")
     async def tomato(self, ctx: commands.Context, tgt=None):
         '''
-        Vaults a post.
+        Vaults a post. Operates in 3 modes
+        1. Vault a message sent by a user based on Message ID.
+        ex. $c 🍅 711064013387071620
+        2. Vault a message with an image attachment
+        ex. $c 🍅    and then upload an image with this message
+        3. Vault a message with an image url
+        ex. $c 🍅 https://cdn.discordapp.com/attachments/419214713755402262/697604506975993896/2Q.png
         '''
 
         IDmode = False
@@ -96,4 +102,4 @@ class Vault(commands.Cog):
 
                 del self.activeposts[reaction.message.id]
                 await reactOK(await self.bot.get_context(reaction.message))
-                await reaction.message.edit("Vault operation successful.")
+                await reaction.message.edit(content="Vault operation successful.", embed=None)
