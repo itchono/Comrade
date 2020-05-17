@@ -5,10 +5,11 @@ class Users(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.RND_USER = []
-        self.RND_USER_T = datetime.datetime(2000, 1, 1)
+        self.RND_USER_T = datetime.datetime(2000, 1, 1) #stored as UTC
         self._last_member = None
 
     @commands.command()
+    @commands.check(isServer)
     async def avatar(self, ctx:commands.Context, target):
         '''
         Displays the avatar of a target user.
@@ -31,6 +32,7 @@ class Users(commands.Cog):
         # error case triggers automatically.
 
     @commands.command()
+    @commands.check(isServer)
     async def userinfo(self, ctx, target):
         '''
         Displays User Information of said person
@@ -72,15 +74,13 @@ class Users(commands.Cog):
     Random User Functions
     '''
 
-    
-    
     @commands.command()
+    @commands.check(isServer)
     async def rolluser(self, ctx: commands.context):
         '''
         Roles a random ulcer, based on relative weights stored in user configuration file.
 
         '''
-    
         await ctx.channel.trigger_typing()
 
         '''
@@ -106,6 +106,7 @@ class Users(commands.Cog):
         await self.userinfo(ctx, getUser(luckyperson.id, ctx.guild.id)["nickname"])
 
     @commands.command()
+    @commands.check(isServer)
     async def addUser(self, ctx, username, avatar_url):
         '''
         Adds custom user to database, which can be mentioned.
@@ -115,3 +116,11 @@ class Users(commands.Cog):
         e =  self.bot.get_cog('Echo')
 
         await e.echo(ctx, "I have been added.", username)    
+
+    @commands.command()
+    @commands.check(isServer)
+    async def listCustomUsers(self, ctx: commands.Context):
+        '''
+        Lists all custom users
+        '''
+        u = customUserQuery({"server":ctx.guild.id}) # all custom users

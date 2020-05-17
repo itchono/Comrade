@@ -15,18 +15,11 @@ class AuxilliaryListener(commands.Cog):
         When a member joins the server.
         '''
         # member join
-        print("Join {}".format(user.name))
-        d = {"user": user.id}
-        d["name"] = user.name
-        d["nickname"] = user.nick if user.nick else user.name
-        d["threat level"] = 0
-        d["banned words"] = []
-        d["kick votes"] = []
-        d["server"] = user.guild.id
-        d["OP"] = False
-        d["daily weight"] = 0
+        await log(user.guild, "Join {}".format(user.name))
+        
+        stp = self.bot.get_cog("Setup")
 
-        updateUser(d)
+        updateUser(stp.setupuser(user))
 
     @commands.Cog.listener()
     async def on_member_update(self, before, user):
@@ -76,11 +69,10 @@ class AuxilliaryListener(commands.Cog):
         if reaction.message.author == self.bot.user and reaction.emoji == "🗑️" and user != self.bot.user:
             await reaction.message.delete()
 
-    @commands.Cog.listener()
+    '''@commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, exception):
-        '''
-        When a command fails to execute
-        '''
+        # When a command fails to execute
+        print(exception)
         await reactQuestion(ctx)
         await log(ctx.guild,
                   "Failure: {}\nType: {}".format(exception, type(exception)))
@@ -94,4 +86,4 @@ class AuxilliaryListener(commands.Cog):
                 "'{}' is not a valid command.".format(ctx.message.content),
                 ctx.channel)
         else:
-            await timedSend("Failure: {}".format(exception), ctx.channel)
+            await timedSend("Failure: {}".format(exception), ctx.channel)'''

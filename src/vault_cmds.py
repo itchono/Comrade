@@ -9,6 +9,7 @@ class Vault(commands.Cog):
         self._last_member = None
 
     @commands.command()
+    @commands.check(isServer)
     async def randomvaultpost(self, ctx: commands.Context):
         '''
         Returns a random post from the vault.
@@ -18,6 +19,7 @@ class Vault(commands.Cog):
         msgs = vault.messages
 
     @commands.command(name=u"\U0001F345")
+    @commands.check(isServer)
     async def tomato(self, ctx: commands.Context, tgt=None):
         '''
         Vaults a post. Operates in 3 modes
@@ -51,6 +53,7 @@ class Vault(commands.Cog):
         await m.add_reaction("🍅")
 
     @commands.command()
+    @commands.check(isServer)
     async def vault(self, ctx: commands.Context, url: str = None):
         '''
         Alias for vault

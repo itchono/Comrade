@@ -8,6 +8,7 @@ class Echo(commands.Cog):
 
     @commands.command()
     @commands.check(isnotThreat)
+    @commands.check(isServer)
     async def echo(self, ctx: commands.Context, text: str, target=None, deleteMsg=True):
         '''
         Echoes a block of text as if it were sent by someone else.
@@ -43,6 +44,7 @@ class Echo(commands.Cog):
             
     @commands.command()
     @commands.check(isnotThreat)
+    @commands.check(isServer)
     async def everyonesays(self, ctx: commands.Context, text: str, count: int = 5):
         '''
         Says something a lot of times.
@@ -68,7 +70,9 @@ class Echo(commands.Cog):
 
             if count > 5:
                 await self.cleanwebhooks(ctx)
+    
     @commands.command()
+    @commands.check(isServer)
     async def cleanwebhooks(self, ctx:commands.Context):
         '''
         Deletes echoed messages from Comrade andn cleans up Webhooks.

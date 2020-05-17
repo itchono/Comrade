@@ -7,28 +7,32 @@ class Setup(commands.Cog):
         self.bot = bot
         self._last_member = None
 
+    
+    def setupuser(self, user: discord.Member):
+
+        d = {"user": user.id}
+        d["name"] = user.name
+        d["nickname"] = user.nick if user.nick else user.name
+        d["threat level"] = 0
+        d["banned words"] = []
+        d["kick votes"] = []
+        d["server"] = user.guild.id
+        d["OP"] = False
+        d["daily weight"] = 0
+        d["bot"] = user.bot
+
+        return d
+
     @commands.command()
     @commands.check(isOwner)
     async def reloadusers(self, ctx: commands.Context):
         '''
         POTENTIALLY DESTRUCTIVE. repopulates the UserData collection on Atlas with default values.
         '''
+        await ctx.channel.trigger_typing()
         for user in ctx.guild.members:
             # each user is stored, themselves each as a dictionary
-
-            d = {"user": user.id}
-            d["name"] = user.name
-            d["nickname"] = user.nick if user.nick else user.name
-            d["threat level"] = 0
-            d["banned words"] = []
-            d["kick votes"] = []
-            d["Bot"] = user.bot
-            d["OP"] = False
-            d["server"] = ctx.guild.id
-            d["daily weight"] = 5
-
-            updateUser(d)
-
+            updateUser(self.setupuser(user))
         await reactOK(ctx)
 
     @commands.command()
@@ -102,7 +106,7 @@ class Setup(commands.Cog):
                 c[cfgitem] = value
             updateCFG(c)
 
-            await delSend("Value updated.", ctx.channel)
+            await reactOK(ctx)
 
     @commands.command()
     async def cfgstatus(self, ctx: commands.Context):

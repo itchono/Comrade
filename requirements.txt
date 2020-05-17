@@ -8,3 +8,5 @@ unidecode
 dnspython
 pymongo
 pybooru
+bs4
+pytz

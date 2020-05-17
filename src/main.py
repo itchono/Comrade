@@ -19,6 +19,7 @@ from utils.aux_listeners import *
 from utils.keep_alive import *
 from utils.optimus_prime import *
 from utils.mongo_interface import *
+from utils.time_wizard import *
 
 # command modules
 from general_cmds import *
@@ -27,6 +28,7 @@ from nsfw_cmds import *
 from vault_cmds import *
 from echo_cmds import *
 from user_cmds import *
+from fun_cmds import *
 '''
 
 VARIABLES
@@ -34,7 +36,6 @@ Note: Perms integer 536083799
 '''
 
 start_time = time.perf_counter()
-print("Comrade v3.0_alpha Starting.")
 
 # private variable loading
 dotenv.load_dotenv()
@@ -48,13 +49,13 @@ client = commands.Bot(command_prefix="$c ",
 
 cogs = [
     AuxilliaryListener, MessageHandler, General, Setup, NSFW, Vault, Echo,
-    Users, Prime
+    Users, Prime, Fun, TimeWizard
 ]
 
 for c in cogs:
     client.add_cog(c(client))
 
-print("Bot components initialized, awaiting login.")
+print("Bot components initialized, awaiting login...")
 
 
 @client.event
@@ -73,7 +74,6 @@ async def on_ready():
 
     print("Startup completed in {:.2f} seconds.".format(time.perf_counter() -
                                                         start_time))
-
 
 keep_alive()
 client.run(TOKEN)
