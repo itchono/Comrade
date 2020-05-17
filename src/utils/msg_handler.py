@@ -76,3 +76,17 @@ class MessageHandler(commands.Cog):
             if "cesb" in message.content.lower():
                 await delSend("https://www.youtube.com/watch?v=ON-7v4qnHP8",
                               message.channel)
+                
+            if ':' in message.content.lower():
+                e = message.content.split(':')
+                e = e[1]
+                directory = await getChannel(message.guild, 'emote directory')
+                name = []
+                async for i in directory.history(limit=None):
+                    temp = i.content.split('\n')
+                    name.append(temp[0])
+                async for p in directory.history(limit=None):
+                    if e in p.content.split('\n'):
+                        emote = p.content.split('\n')[1]
+                        await message.channel.send(emote)
+                        
