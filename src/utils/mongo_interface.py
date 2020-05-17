@@ -1,17 +1,16 @@
-'''
-Comrade - Python-MongoDB Interfacer
-'''
-
 from pymongo import MongoClient
 import json
 import os
 import dotenv
 
+'''
+Comrade - Python-MongoDB Interfacer
+'''
+
 dotenv.load_dotenv()
 client = MongoClient(os.environ.get('MONGOKEY'))
 print("Atlas Cluster Connected, Running Version {}.".format(
     client.server_info()['version']))
-
 
 def getUser(userID: int, serverID: int):
     '''

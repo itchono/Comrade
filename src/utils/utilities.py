@@ -7,6 +7,9 @@ from utils.mongo_interface import *
 import requests
 import random
 import datetime
+import pytz
+
+import socket
 
 DEVELOPMENT_MODE = False
 # set to true for pre-testing.
@@ -23,6 +26,11 @@ def isOwner(ctx: commands.Context):
     '''
     return ctx.author.id == ctx.guild.owner.id or DEVELOPMENT_MODE
 
+def isServer(ctx: commands.Context):
+    '''
+    Determines whether message was called in a server
+    '''
+    return (ctx.guild is not None)
 
 def isOP(ctx: commands.Context):
     '''
@@ -61,8 +69,6 @@ def isnotThreat(ctx: commands.Context):
 
 
 purgeTGT = None
-
-
 def setTGT(tgt):
     '''
     Sets purge target
@@ -95,8 +101,6 @@ def isCommand(message: discord.Message):
 '''
 Message Helpers
 '''
-
-
 async def delSend(s: str, channel: discord.TextChannel, time: int = 5):
     '''
     Sends a message to the desired channel, with a deletion option after a fixed time, default 5 seconds.
@@ -121,6 +125,12 @@ async def reactOK(ctx: commands.Context):
     Adds reaction to show that task was completed successfully.
     '''
     await ctx.message.add_reaction("👍")
+
+async def reactX(ctx: commands.Context):
+    '''
+    Adds reaction to show that task was forbidden.
+    '''
+    await ctx.message.add_reaction("❌")
 
 
 async def reactQuestion(ctx: commands.Context):
@@ -184,18 +194,18 @@ async def getChannel(guild: discord.Guild, name: str):
     Gets a channel in a server, given a NAME of the channel; uses mongoDB cfg file. 
     '''
     c = guild.get_channel(getCFG(guild.id)[name])
+    
     if not c:
-        await log(guild, "Channel not found.")
-    elif c == -1:
-        print("Error: (Log Channel not set up); channel not found")
-    else:
-        return c
+        if name != "log channel":
+            await log(guild, "Channel not found.")
+        else:
+            print("Error: (Log Channel not set up); channel not found")
+    return c
 
 
 '''
 logger
 '''
-
 
 async def log(guild, m: str, embed=None):
     '''
@@ -204,5 +214,15 @@ async def log(guild, m: str, embed=None):
     lgc = await getChannel(guild, "log channel")
     if not embed:
         embed = discord.Embed(title="Log Entry", description=m)
-        embed.add_field(name="Time", value=(datetime.datetime.now()))
+        embed.add_field(name="Time", value=(pytz.timezone("Canada/Eastern").localize(datetime.datetime.now())))
     await lgc.send(embed=embed)
+
+def getHost(): 
+    '''
+    Gets the name of the host.
+    '''
+    try: 
+        host_name = socket.gethostname() 
+        return "{}".format(host_name)
+    except: 
+        return "IP could not be determined."
