@@ -36,13 +36,46 @@ class TimeWizard(commands.Cog):
 
             if now.date() > ld.date() and now.hour >= 8:
                 c = self.bot.get_channel(s["announcements channel"])
-                await c.send("Good morning everyone! Today is {}. Have a great day.".format(now.strftime("%A, %B %d")))
+                m = await c.send("Good morning everyone! Today is {}. Have a great day.".format(now.strftime("%A, %B %d")))
+                
                 s["last daily"] = str(now.date())
                 updateCFG(s)
+
+                '''
+                Daily user
+                '''
+                cog = self.bot.get_cog("Users")
+
+                pool = []
+
+                ctx = await self.bot.get_context(m)
+                
+                if (datetime.datetime.utcnow() - cog.RND_USER_T > datetime.timedelta(hours = 1)):
+                    pool = cog.rebuildusercache(ctx)
+                else:
+                    pool = cog.RND_USER[:]
+
+                random.shuffle(pool)
+                luckyperson = pool.pop()
+
+                await c.send("Today's Bonus Daily Member is {}".format(luckyperson.display_name))
+                
+                # up everyone's percentage
+
+                for member in ctx.guild.members:
+                    d = getUser(member.id, ctx.guild.id)
+                    d["daily weight"] += 1 if member != luckyperson else 0
+                    updateUser(d)
+
+                await cog.userinfo(ctx, luckyperson.display_name)
+
+                return
+            else:
+                return
+
     
     @dailyannounce.before_loop
     async def before_dailyannounce(self):
-        print('waiting for login to check announcements...')
         await self.bot.wait_until_ready()
 
     @commands.command()
