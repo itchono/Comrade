@@ -89,4 +89,7 @@ class MessageHandler(commands.Cog):
                     if e in p.content.split('\n'):
                         emote = p.content.split('\n')[1]
                         await message.channel.send(emote)
+                        embed = discord.Embed()
+                        embed.set_image(url=emoteURL)
+                        await message.channel.send(embed=embed)
                         
