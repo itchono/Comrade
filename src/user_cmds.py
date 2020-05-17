@@ -49,7 +49,7 @@ class Users(commands.Cog):
                 roles = [role for role in member.roles]
 
                 u = getUser(member.id, ctx.guild.id)
-                print(u)
+
                 for c in u:
                     if c != "_id":
                         e.add_field(name=c, value=u[c], inline=True)
@@ -74,9 +74,22 @@ class Users(commands.Cog):
     Random User Functions
     '''
 
+    def rebuildusercache(self, ctx: commands.Context):
+        '''
+        Rebuilds the user cache and returns it.
+        '''
+        self.RND_USER = []
+        for member in ctx.guild.members:
+            weight = getUser(member.id, ctx.guild.id)["daily weight"]
+            if not member.bot:
+                self.RND_USER += [member for i in range(weight)]
+        self.RND_USER_T = datetime.datetime.utcnow()
+
+        return self.RND_USER[:]
+
     @commands.command()
     @commands.check(isServer)
-    async def rolluser(self, ctx: commands.context):
+    async def rolluser(self, ctx: commands.Context):
         '''
         Roles a random ulcer, based on relative weights stored in user configuration file.
 
@@ -89,15 +102,8 @@ class Users(commands.Cog):
         pool = []
 
         if (datetime.datetime.utcnow() - self.RND_USER_T > datetime.timedelta(hours = 1)):
-            # rebuilding cache
-            print("Rebuild cache")
-            for member in ctx.guild.members:
-                weight = getUser(member.id, ctx.guild.id)["daily weight"]
-                if not member.bot:
-                    pool += [member for i in range(weight)]
-            self.RND_USER = pool[:]
-            self.RND_USER_T = datetime.datetime.utcnow()
-
+            # TODO REVAMP SYSTEM TO ACCOMODATE MULTIPLE SERVERS
+            pool = self.rebuildusercache(ctx)
         else:
             pool = self.RND_USER[:]
 

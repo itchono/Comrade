@@ -55,7 +55,7 @@ cogs = [
 for c in cogs:
     client.add_cog(c(client))
 
-print("Bot components initialized, awaiting login...")
+print("Bot components initialized, awaiting login.")
 
 
 @client.event
