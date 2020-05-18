@@ -37,33 +37,32 @@ class Users(commands.Cog):
         Displays User Information of said person
         Made by Slyflare, upgraded by itchono
         '''
+
+        if custom := getCustomUser(target, ctx.guild.id):
+            e = discord.Embed(title="{} (Custom User)".format(target))
+            e.set_author(name=f"User Info - {target}")
+            e.set_thumbnail(url=custom["url"])
+            e.set_footer(icon_url=custom["url"])
+
+            await ctx.send(embed=e)
  
-        if member := await extractUser(self.bot, ctx, target):
+        elif member := await extractUser(self.bot, ctx, target):
             if ctx.guild:
 
-                if custom := getCustomUser(target, ctx.guild):
-                    e = discord.Embed(title="{} (Custom User)".format(target))
-                    e.set_author(name=f"User Info - {target}")
-                    e.set_thumbnail(url=custom["url"])
-                    e.set_footer(icon_url=custom["url"])
+                e = discord.Embed(title="{}".format(member.display_name), colour=member.colour)
+                e.set_author(name=f"User Info - {member}")
+                e.set_thumbnail(url=member.avatar_url)
+                e.set_footer(icon_url=ctx.author.avatar_url)
+                roles = [role for role in member.roles]
 
-                    await ctx.send(embed=e)
+                u = getUser(member.id, ctx.guild.id)
 
-                else:
-                    e = discord.Embed(title="{}".format(member.display_name), colour=member.colour)
-                    e.set_author(name=f"User Info - {member}")
-                    e.set_thumbnail(url=member.avatar_url)
-                    e.set_footer(icon_url=ctx.author.avatar_url)
-                    roles = [role for role in member.roles]
+                for c in u:
+                    if c != "_id":
+                        e.add_field(name=c, value=u[c], inline=True)
+                e.add_field(name=f"Roles: ({len(roles)})", value=" ".join([role.mention for role in member.roles]))
 
-                    u = getUser(member.id, ctx.guild.id)
-
-                    for c in u:
-                        if c != "_id":
-                            e.add_field(name=c, value=u[c], inline=True)
-                    e.add_field(name=f"Roles: ({len(roles)})", value=" ".join([role.mention for role in member.roles]))
-
-                    await ctx.send(embed=e)
+                await ctx.send(embed=e)
 
             else:
                 e = discord.Embed(title="Info for {}".format(member.name))
