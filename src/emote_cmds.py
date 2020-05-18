@@ -41,49 +41,44 @@ class Emotes(commands.Cog):
         emoteDirectory = await getChannel(ctx.guild, 'emote directory')
         await emoteDirectory.send('{}\n{}'.format(name.lower(), u))
 
-        await rebuildcache(ctx) # refresh cache
+        await self.rebuildcache() # refresh cache
 
         await ctx.send('Emote {} was added. you can call it using :{}:.'.format(name.lower(), name.lower()))
         
     @commands.command()
     @commands.check(isnotSuperThreat)
     async def emoteCall(self, ctx, name):
-        directory = await getChannel(ctx.guild, 'emote directory')
-        async for e in directory.history(limit=None):
-            if name.lower() in e.content.split("\n")[0]:
-                emote = e.content.split("\n")[1]
-                await ctx.send(emote)
-            else:
-                await ctx.send('{} exist not'.format(name))
+        '''
+        Calls an emote by name. You can equivalently call using :emotename:
+        '''
+        try:
+            embed = discord.Embed()
+            embed.set_image(url=self.EMOTE_CACHE[message.guild.id][name])
+            await ctx.send(embed=embed)
+        except:
+            pass
 
     @commands.Cog.listener()
     async def on_ready(self):
         '''
         When bot is loaded
         '''
-
-
+        await self.rebuildcache()
     
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
+        '''
+        Emote listener
+        '''
 
         if re.search(":*:", message.content.lower()):
             # see if emote header is in the 
 
+            s = message.content.lower()
+            e = s[s.find(":")+1:s.find(":",s.find(":")+1)]
 
-        if ':' in message.content.lower():
-            e = message.content.split(':')
-            e = e[1]
-            directory = await getChannel(message.guild, 'emote directory')
-            name = []
-            async for i in directory.history(limit=None):
-                temp = i.content.split('\n')
-                name.append(temp[0])
-            async for p in directory.history(limit=None):
-                if e in p.content.split('\n'):
-                    emote = p.content.split('\n')[1]
-                    await message.channel.send(emote)
-                    embed = discord.Embed()
-                    embed.set_image(url=emoteURL)
-                    await message.channel.send(embed=embed)
+            c = self.bot.get_context(message)
+            await self.emoteCall(c, e) # run through command to get checks
+
+            
     

@@ -29,6 +29,7 @@ from vault_cmds import *
 from echo_cmds import *
 from user_cmds import *
 from fun_cmds import *
+from emote_cmds import *
 '''
 
 VARIABLES
@@ -49,7 +50,7 @@ client = commands.Bot(command_prefix="$c ",
 
 cogs = [
     AuxilliaryListener, MessageHandler, General, Setup, NSFW, Vault, Echo,
-    Users, Prime, Fun, TimeWizard
+    Users, Prime, Fun, TimeWizard, Emotes
 ]
 
 for c in cogs:
