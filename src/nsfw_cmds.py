@@ -13,9 +13,15 @@ class NSFW(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self._last_member = None
+        self.last_search = ""
+    
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.message):
+        if "next" in message.content.lower():
+            await self.hentai(ctx = await self.bot.get_context(message), args = self.last_search)
 
     @commands.command()
-    async def hentai(self, ctx: commands.Context, *args):
+    async def hentai(self, ctx: commands.Context, *, args:str = ""):
         '''
         Fetches a number of posts from Danbooru given a series of tags.
         Ex. $c hentai arms_up solo 2
@@ -26,6 +32,8 @@ class NSFW(commands.Cog):
         '''
 
         # Made by Sunekku
+
+        args = args.split()
 
         limit = 1
         tag_list = []
@@ -51,6 +59,8 @@ class NSFW(commands.Cog):
                         limit=limit)
                     for i in range(len(tag_list)):
                         url_base = url_base + '{tag}+'.format(tag=tag_list[i])
+
+                    print(url_base)
                         
                     try:
                         posts = requests.get(url_base).json()
@@ -122,7 +132,13 @@ class NSFW(commands.Cog):
                                 'https://vectorified.com/images/image-gallery-icon-21.png'
                             )
                             await ctx.send(embed=e)
+                        
+                        s = ""
+                        for k in range(len(args)):
+                            s = s + args[k] + " "
+                        self.last_search = s
 
             else:
                 await delSend("Please use this command in the hentai channel.",
                               ctx.channel)
+            
