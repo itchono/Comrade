@@ -167,6 +167,8 @@ class Users(commands.Cog):
             s += "\n" + usr["name"]
         
         s += "```"
+
+        await ctx.send(s)
     
     @commands.Cog.listener()
     async def on_ready(self):
