@@ -15,7 +15,7 @@ class General(commands.Cog):
         '''
         Logs version of the bot.
         '''
-        await ctx.send("Comrade is running version: 3.0alpha build May 16")
+        await ctx.send("Comrade is running version: 3.0alpha build May 17")
 
     @commands.command()
     async def host(self, ctx: commands.Context):
@@ -70,26 +70,5 @@ class General(commands.Cog):
         '''
         msg = await ctx.channel.fetch_message(msgid)
         await ctx.send("Author: {}".format(msg.author))
-
-    @commands.command()
-    async def addEmote(self, ctx, name, *args):
-        if len(ctx.message.attachments) > 0:
-            u = ctx.message.attachments[0].url
-        else:
-            u = args[(len(args)-1)]
-
-        emoteDirectory = await getChannel(ctx.guild, 'emote directory')
-        await emoteDirectory.send('{}\n{}'.format(name.lower(), u))
-        await ctx.send('Emote {} was added'.format(name.lower()))
-        
-    @commands.command()
-    async def emoteCall(self, ctx, name):
-        directory = await getChannel(ctx.guild, 'emote directory')
-        async for e in directory.history(limit=None):
-            if name.lower() in e.content.split("\n")[0]:
-                emote = e.content.split("\n")[1]
-                await ctx.send(emote)
-            else:
-                await ctx.send('{} exist not'.format(name))
     
 

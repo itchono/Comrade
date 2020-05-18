@@ -2,7 +2,8 @@ from utils.utilities import *
 from utils.mongo_interface import *
 
 import datetime
-
+import traceback
+import sys
 
 class AuxilliaryListener(commands.Cog):
     def __init__(self, bot):
@@ -69,21 +70,33 @@ class AuxilliaryListener(commands.Cog):
         if reaction.message.author == self.bot.user and reaction.emoji == "🗑️" and user != self.bot.user:
             await reaction.message.delete()
 
-    '''@commands.Cog.listener()
+    @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, exception):
         # When a command fails to execute
-        print(exception)
-        await reactQuestion(ctx)
+
+        print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
+        traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
+        
         await log(ctx.guild,
-                  "Failure: {}\nType: {}".format(exception, type(exception)))
-        if type(exception) == commands.CheckFailure:
+                  "Failure: {}\nType: {}\nTraceback:{}".format(exception, type(exception), exception.__traceback__))
+
+        if not ctx.guild:
+            await reactX(ctx)
+            await delSend("This command can only be used in a server.", ctx.channel)
+            
+        elif type(exception) == commands.CheckFailure:
+            await reactX(ctx)
             await timedSend(
                 "You have insufficient permission to use this command {}".
                 format(ctx.author.mention), ctx.channel)
-
+            
         elif type(exception) == commands.CommandNotFound:
+            await reactQuestion(ctx)
             await timedSend(
                 "'{}' is not a valid command.".format(ctx.message.content),
                 ctx.channel)
         else:
-            await timedSend("Failure: {}".format(exception), ctx.channel)'''
+            await reactQuestion(ctx)
+            await timedSend("Failure: {}".format(exception), ctx.channel)
+
+        

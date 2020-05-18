@@ -4,8 +4,7 @@ from utils.mongo_interface import *
 class Users(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.RND_USER = []
-        self.RND_USER_T = datetime.datetime(2000, 1, 1) #stored as UTC
+        self.RND_USER = {} # Cache of users for daily roll, per server
         self._last_member = None
 
     @commands.command()
@@ -39,27 +38,35 @@ class Users(commands.Cog):
         Made by Slyflare, upgraded by itchono
         '''
  
-        if member:= await extractUser(self.bot, ctx, target):
+        if member := await extractUser(self.bot, ctx, target):
             if ctx.guild:
-                e = discord.Embed(title="{}".format(member.display_name), colour=member.colour)
 
-                e.set_author(name=f"User Info - {member}")
-                e.set_thumbnail(url=member.avatar_url)
-                e.set_footer(icon_url=ctx.author.avatar_url)
-                roles = [role for role in member.roles]
+                if custom := getCustomUser(target, ctx.guild):
+                    e = discord.Embed(title="{} (Custom User)".format(target))
+                    e.set_author(name=f"User Info - {target}")
+                    e.set_thumbnail(url=custom["url"])
+                    e.set_footer(icon_url=custom["url"])
 
-                u = getUser(member.id, ctx.guild.id)
+                    await ctx.send(embed=e)
 
-                for c in u:
-                    if c != "_id":
-                        e.add_field(name=c, value=u[c], inline=True)
-                e.add_field(name=f"Roles: ({len(roles)})", value=" ".join([role.mention for role in member.roles]))
+                else:
+                    e = discord.Embed(title="{}".format(member.display_name), colour=member.colour)
+                    e.set_author(name=f"User Info - {member}")
+                    e.set_thumbnail(url=member.avatar_url)
+                    e.set_footer(icon_url=ctx.author.avatar_url)
+                    roles = [role for role in member.roles]
 
-                await ctx.send(embed=e)
+                    u = getUser(member.id, ctx.guild.id)
+
+                    for c in u:
+                        if c != "_id":
+                            e.add_field(name=c, value=u[c], inline=True)
+                    e.add_field(name=f"Roles: ({len(roles)})", value=" ".join([role.mention for role in member.roles]))
+
+                    await ctx.send(embed=e)
 
             else:
                 e = discord.Embed(title="Info for {}".format(member.name))
-
                 e.set_author(name=f"User Info - {member}")
                 e.set_thumbnail(url=member.avatar_url)
                 e.set_footer(icon_url=ctx.author.avatar_url)
@@ -73,39 +80,30 @@ class Users(commands.Cog):
     '''
     Random User Functions
     '''
-
-    def rebuildusercache(self, ctx: commands.Context):
+    def rebuildUserCache(self):
         '''
-        Rebuilds the user cache and returns it.
+        Rebuilds the random user cache for all servers.
         '''
-        self.RND_USER = []
-        for member in ctx.guild.members:
-            weight = getUser(member.id, ctx.guild.id)["daily weight"]
-            if not member.bot:
-                self.RND_USER += [member for i in range(weight)]
-        self.RND_USER_T = datetime.datetime.utcnow()
+        self.RND_USER = {}
 
-        return self.RND_USER[:]
+        for g in self.bot.guilds:
+            self.RND_USER[g.id] = []
+            for member in g:
+                weight = getUser(member.id, g.id)["daily weight"]
+                if not member.bot:
+                    self.RND_USER[g.id] += [member for i in range(weight)]
+        print("User cache built successfully.")
 
     @commands.command()
     @commands.check(isServer)
-    async def rolluser(self, ctx: commands.Context):
+    async def rollUser(self, ctx: commands.Context):
         '''
         Roles a random ulcer, based on relative weights stored in user configuration file.
 
         '''
         await ctx.channel.trigger_typing()
 
-        '''
-        refresh pool
-        '''
-        pool = []
-
-        if (datetime.datetime.utcnow() - self.RND_USER_T > datetime.timedelta(hours = 1)):
-            # TODO REVAMP SYSTEM TO ACCOMODATE MULTIPLE SERVERS
-            pool = self.rebuildusercache(ctx)
-        else:
-            pool = self.RND_USER[:]
+        pool = self.RND_USER[ctx.guild.id][:]
 
         random.shuffle(pool)
         luckyperson = pool.pop()
@@ -113,15 +111,47 @@ class Users(commands.Cog):
 
     @commands.command()
     @commands.check(isServer)
-    async def addUser(self, ctx, username, avatar_url):
+    async def addCustomUser(self, ctx, username, avatar_url):
         '''
         Adds custom user to database, which can be mentioned.
         '''
-        addCustomUser(username, avatar_url, ctx.guild.id)
+        u = ({"name": username, "url": avatar_url, "server": ctx.guild.id})
+        updateCustomUser(u)
 
         e =  self.bot.get_cog('Echo')
-
         await e.echo(ctx, "I have been added.", username)    
+
+    @commands.command()
+    @commands.check(isServer)
+    @commands.check(isOP)
+    async def editCustomUser(self, ctx, username, field, value):
+        '''
+        Edits a custom user's fields
+        '''
+        u = getCustomUser(username, ctx.guild.id)
+
+        if not value:
+            try:
+                del u[field]
+                updateCustomUser(u)
+                await delSend("User config value deleted.", ctx.channel)
+            except:
+                await delSend("Value was not found.", ctx.channel)
+        
+        else:
+            u[field] = value
+            updateCustomUser(u)
+            await reactOK(ctx)
+    
+    @commands.command()
+    @commands.check(isServer)
+    @commands.check(isOP)
+    async def removeCustomUser(self, ctx, username):
+        '''
+        Edits a custom user's fields
+        '''
+        removeCustomUser(username, ctx.guild.id)
+        await reactOK(ctx)
 
     @commands.command()
     @commands.check(isServer)
@@ -130,3 +160,19 @@ class Users(commands.Cog):
         Lists all custom users
         '''
         u = customUserQuery({"server":ctx.guild.id}) # all custom users
+
+        s = "```Custom Users in {}".format(ctx.guild.name)
+
+        for usr in u:
+            s += "\n" + usr["name"]
+        
+        s += "```"
+    
+    @commands.Cog.listener()
+    async def on_ready(self):
+        '''
+        When bot is loaded, rebuild the cache.
+        '''
+        self.rebuildUserCache()
+
+    

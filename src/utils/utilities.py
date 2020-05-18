@@ -67,6 +67,28 @@ def isnotThreat(ctx: commands.Context):
             return False
     return True
 
+def isnotSuperThreat(ctx: commands.Context):
+    '''
+    Determines whether message author is threat level 2 or higher
+    '''
+    OPS = userQuery({"threat level": {"$gte": 2}, "server": ctx.guild.id})
+
+    for op in OPS:
+        if ctx.author.id == op["user"]:
+            return False
+    return True
+
+def isnotUltraThreat(ctx: commands.Context):
+    '''
+    Determines whether message author is threat level 3 or higher
+    '''
+    OPS = userQuery({"threat level": {"$gte": 3}, "server": ctx.guild.id})
+
+    for op in OPS:
+        if ctx.author.id == op["user"]:
+            return False
+    return True
+
 
 purgeTGT = None
 def setTGT(tgt):
