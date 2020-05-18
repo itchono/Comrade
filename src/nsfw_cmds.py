@@ -10,6 +10,10 @@ import aiohttp
 
 
 class NSFW(commands.Cog):
+    '''
+    Hentai.
+    Credits to Sunekku.
+    '''
     def __init__(self, bot):
         self.bot = bot
         self._last_member = None
@@ -17,7 +21,7 @@ class NSFW(commands.Cog):
     
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
-        if "next" in message.content.lower():
+        if "next" in message.content.lower() and message.channel.id == getCFG(message.guild.id)["hentai channel"]:
             await self.hentai(ctx = await self.bot.get_context(message), args = self.last_search)
 
     @commands.command()
