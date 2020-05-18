@@ -53,7 +53,7 @@ class Emotes(commands.Cog):
         '''
         try:
             embed = discord.Embed()
-            embed.set_image(url=self.EMOTE_CACHE[message.guild.id][name])
+            embed.set_image(url=self.EMOTE_CACHE[ctx.guild.id][name])
             await ctx.send(embed=embed)
         except:
             pass
