@@ -2,6 +2,7 @@ from utils.utilities import *
 from utils.mongo_interface import *
 
 import re
+from fuzzywuzzy import fuzz
 
 class Emotes(commands.Cog):
     '''
@@ -43,20 +44,7 @@ class Emotes(commands.Cog):
 
         await self.rebuildcache() # refresh cache
 
-        await ctx.send('Emote {} was added. you can call it using :{}:.'.format(name.lower(), name.lower()))
-        
-    @commands.command()
-    @commands.check(isnotSuperThreat)
-    async def emoteCall(self, ctx, name):
-        '''
-        Calls an emote by name. You can equivalently call using :emotename:
-        '''
-        try:
-            embed = discord.Embed()
-            embed.set_image(url=self.EMOTE_CACHE[ctx.guild.id][name])
-            await ctx.send(embed=embed)
-        except:
-            pass
+        await ctx.send('Emote {} was added. you can call it using :{}:'.format(name.lower(), name.lower()))
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -81,7 +69,21 @@ class Emotes(commands.Cog):
                 embed.set_image(url=self.EMOTE_CACHE[message.guild.id][e])
                 await message.channel.send(embed=embed)
             except:
-                pass
+                await reactX(await self.bot.get_context(message))
+                similar = [i for i in self.EMOTE_CACHE[message.guild.id] if fuzz.ratio(i, e) > 80]
+
+                embed = discord.Embed(description="Emote not found. Did you mean one of the following?")
+
+                if similar != []:
+                    for k in similar:
+                        embed.add_field(name="Suggestion", value=":{}:".format(k))
+                else:
+                    directory = await getChannel(message.guild, 'emote directory')
+                    embed.add_field(name="Sorry, no similar results were found.", value="See {} for a list of all emotes.".format(directory.mention))
+
+                await message.channel.send(embed=embed)
+                    
+
 
             
     

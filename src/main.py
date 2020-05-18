@@ -72,6 +72,7 @@ async def on_ready():
     print("Server List:")
     for server in client.guilds:
         print("\t{} ({} members)".format(server.name, len(server.members)))
+        await log(server, "Comrade is online, logged in from {}.".format(getHost()))
 
     print("Startup completed in {:.2f} seconds.".format(time.perf_counter() -
                                                         start_time))
