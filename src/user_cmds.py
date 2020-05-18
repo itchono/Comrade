@@ -88,11 +88,11 @@ class Users(commands.Cog):
 
         for g in self.bot.guilds:
             self.RND_USER[g.id] = []
-            for member in g:
+            for member in g.members:
                 weight = getUser(member.id, g.id)["daily weight"]
                 if not member.bot:
                     self.RND_USER[g.id] += [member for i in range(weight)]
-        print("User cache built successfully.")
+        print("User Cache Built Successfully.")
 
     @commands.command()
     @commands.check(isServer)
