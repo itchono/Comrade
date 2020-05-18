@@ -63,8 +63,6 @@ class NSFW(commands.Cog):
                         limit=limit)
                     for i in range(len(tag_list)):
                         url_base = url_base + '{tag}+'.format(tag=tag_list[i])
-
-                    print(url_base)
                         
                     try:
                         posts = requests.get(url_base).json()
