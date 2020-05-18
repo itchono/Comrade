@@ -1,6 +1,7 @@
 from utils.utilities import *
 from utils.mongo_interface import *
-
+import urllib.request
+from bs4 import BeautifulSoup
 
 class Fun(commands.Cog):
     '''

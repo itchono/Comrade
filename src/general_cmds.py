@@ -1,7 +1,5 @@
 from utils.utilities import *
 from utils.mongo_interface import *
-import urllib.request
-from bs4 import BeautifulSoup
 import socket 
 
 class General(commands.Cog):
