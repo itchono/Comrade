@@ -41,7 +41,7 @@ class AuxilliaryListener(commands.Cog):
             e = discord.Embed(title="Status Change: {}".format(
                 user.display_name),
                               description="Time: {}\n{} --> {}".format(
-                                  datetime.datetime.now().strftime("%H:%M:%S"),
+                                  localTime().strftime("%I:%M:%S %p %Z"),
                                   before.status, user.status),
                               colour=discord.Color.from_rgb(51, 204, 51))
             await log(user.guild, "", e)

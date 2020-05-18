@@ -6,6 +6,8 @@ Mingde Yin
 
 April - May 2020
 
+CONFIGURE LOCAL VARIABLES IN utils.utilities.py
+
 '''
 import os
 import dotenv
@@ -45,19 +47,17 @@ TOKEN = os.environ.get('TOKEN')  # bot token; kept private
 INIT
 '''
 
-client = commands.Bot(command_prefix="$c ",
-                      case_insensitive=True)  # declare bot with prefix $c
+client = commands.Bot(command_prefix=BOT_PREFIX,
+                      case_insensitive=True)
 
 cogs = [
     AuxilliaryListener, MessageHandler, General, Setup, NSFW, Vault, Echo,
     Users, Prime, Fun, TimeWizard, Emotes
 ]
 
-for c in cogs:
-    client.add_cog(c(client))
+for c in cogs: client.add_cog(c(client))
 
 print("Bot components initialized, awaiting login.")
-
 
 @client.event
 async def on_ready():
@@ -75,6 +75,7 @@ async def on_ready():
 
     print("Startup completed in {:.2f} seconds.".format(time.perf_counter() -
                                                         start_time))
+    print("Current Local Time: {}".format(localTime().strftime("%I:%M:%S %p %Z")))
 
 keep_alive()
 client.run(TOKEN)
