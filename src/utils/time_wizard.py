@@ -26,17 +26,15 @@ class TimeWizard(commands.Cog):
         Daily announcement, made at 8 AM Eastern Time
         TODO: Custom timezones
         '''
-        await self.bot.wait_until_ready()
-
         servers = list(cfgQuery(None))
 
         for s in servers:
-            ld = pytz.timezone("Canada/Eastern").localize(datetime.datetime.strptime(s["last daily"], "%Y-%m-%d"))
-            now = pytz.timezone("Canada/Eastern").localize(datetime.datetime.now())
+            ld = datetime.datetime.strptime(s["last daily"], "%Y-%m-%d")
+            now = localTime()
 
             if now.date() > ld.date() and now.hour >= 8:
                 c = self.bot.get_channel(s["announcements channel"])
-                m = await c.send("Good morning everyone! Today is {}. Have a great day.".format(now.strftime("%A, %B %d")))
+                m = await c.send("Good morning everyone! Today is {}. Have a great day.".format(now.strftime("%A, %B %d. It's %I:%M:%S %p")))
                 
                 s["last daily"] = str(now.date())
                 updateCFG(s)
@@ -46,33 +44,22 @@ class TimeWizard(commands.Cog):
                 '''
                 cog = self.bot.get_cog("Users")
 
-                pool = []
-
                 ctx = await self.bot.get_context(m)
                 
-                if (datetime.datetime.utcnow() - cog.RND_USER_T > datetime.timedelta(hours = 1)):
-                    pool = cog.rebuildusercache(ctx)
-                else:
-                    pool = cog.RND_USER[:]
+                pool = cog.RND_USER[s["_id"]][:]
 
                 random.shuffle(pool)
                 luckyperson = pool.pop()
 
                 await c.send("Today's Bonus Daily Member is {}".format(luckyperson.display_name))
-                
-                # up everyone's percentage
-
-                for member in ctx.guild.members:
-                    d = getUser(member.id, ctx.guild.id)
-                    d["daily weight"] += 1 if member != luckyperson else 0
-                    updateUser(d)
-
                 await cog.userinfo(ctx, luckyperson.display_name)
-
-                return
-            else:
-                return
-
+                
+                d = getUser(luckyperson.id, s["_id"])
+                d["daily weight"] -= 1
+                updateUser(d)
+                # self regulating; once probability drops to zero, we just need to refill.
+                
+                cog.rebuildUserCache()
     
     @dailyannounce.before_loop
     async def before_dailyannounce(self):

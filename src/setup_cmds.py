@@ -18,7 +18,7 @@ class Setup(commands.Cog):
         d["kick votes"] = []
         d["server"] = user.guild.id
         d["OP"] = False
-        d["daily weight"] = 0
+        d["daily weight"] = 2
         d["bot"] = user.bot
 
         return d

@@ -20,7 +20,7 @@ class General(commands.Cog):
         '''
         Returns name of host machine.
         '''
-        await ctx.send("Comrade is currently hosted from: {}".format(getHost()))
+        await ctx.send("Comrade is currently hosted from: {}. Local time: {}".format(getHost(), localTime().strftime("%I:%M:%S %p %Z")))
 
     @commands.command()
     async def clearcommands(self, ctx:commands.Context):
@@ -36,13 +36,6 @@ class General(commands.Cog):
         Logs out the user.
         '''
         await self.bot.logout()
-
-    @commands.command()
-    async def buymefood(self, ctx: commands.Context):
-        '''
-        Maybe buys you food
-        '''
-        await delSend("Enter Your Credit Card Info...", ctx.channel)
 
     @commands.command()
     @commands.check(isnotThreat)

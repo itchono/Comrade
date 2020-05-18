@@ -13,6 +13,16 @@ import socket
 
 DEVELOPMENT_MODE = False
 # set to true for pre-testing.
+
+LOCAL_TIMEZONE = 'Canada/Eastern'
+# change depending on host.
+
+BOT_PREFIX = "$c "
+
+DEFAULT_DAILY_COUNT = 2
+# amount of daily member counts everyone starts with
+
+
 '''
 Checks
 '''
@@ -229,6 +239,7 @@ async def getChannel(guild: discord.Guild, name: str):
 logger
 '''
 
+
 async def log(guild, m: str, embed=None):
     '''
     Logs a message in the server's log channel in a clean embed form, or sends a pre-made embed.
@@ -236,7 +247,7 @@ async def log(guild, m: str, embed=None):
     lgc = await getChannel(guild, "log channel")
     if not embed:
         embed = discord.Embed(title="Log Entry", description=m)
-        embed.add_field(name="Time", value=(pytz.timezone("Canada/Eastern").localize(datetime.datetime.now())))
+        embed.add_field(name="Time", value=(localTime().strftime("%I:%M:%S %p %Z")))
     await lgc.send(embed=embed)
 
 def getHost(): 
@@ -248,3 +259,21 @@ def getHost():
         return "{}".format(host_name)
     except: 
         return "IP could not be determined."
+
+'''
+Misc
+'''
+
+def localTime(zone=LOCAL_TIMEZONE):
+    '''
+    Returns local time based on some input TZ.
+    '''
+    utc = pytz.timezone("UTC").localize(datetime.datetime.utcnow())
+    return utc.astimezone(pytz.timezone(LOCAL_TIMEZONE))
+
+def UTCtoLocalTime(t, zone=LOCAL_TIMEZONE):
+    '''
+    Converts UTC to local time
+    '''
+    utc = pytz.timezone("UTC").localize(t)
+    return utc.astimezone(pytz.timezone(LOCAL_TIMEZONE))

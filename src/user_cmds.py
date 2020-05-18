@@ -89,8 +89,15 @@ class Users(commands.Cog):
             self.RND_USER[g.id] = []
             for member in g.members:
                 weight = getUser(member.id, g.id)["daily weight"]
-                if not member.bot:
-                    self.RND_USER[g.id] += [member for i in range(weight)]
+                if not member.bot: self.RND_USER[g.id] += [member for i in range(weight)]
+            
+            # special case: list is empty
+            if self.RND_USER[g.id] == []:
+                for member in g.members:
+                    d = getUser(member.id, g.id)
+                    d["daily weight"] = 2
+                    updateUser(d)
+                print("Refilled daily count for {}".format(g))
         print("User Cache Built Successfully.")
 
     @commands.command()
