@@ -70,15 +70,18 @@ class Emotes(commands.Cog):
         '''
         Emote listener
         '''
-
         if re.search(":*:", message.content.lower()):
             # see if emote header is in the 
 
             s = message.content.lower()
             e = s[s.find(":")+1:s.find(":",s.find(":")+1)]
 
-            c = self.bot.get_context(message)
-            await self.emoteCall(c, e) # run through command to get checks
+            try:
+                embed = discord.Embed()
+                embed.set_image(url=self.EMOTE_CACHE[message.guild.id][e])
+                await message.channel.send(embed=embed)
+            except:
+                pass
 
             
     
