@@ -25,7 +25,7 @@ class Emotes(commands.Cog):
             directory = await getChannel(g, 'emote directory')
             
             async for e in directory.history(limit=None):
-                self.EMOTE_CACHE[g.id][e.content.split("\n")[0]] = e.content.split("\n")[1]
+                self.EMOTE_CACHE[g.id][e.content.lower().split("\n")[0]] = e.content.lower().split("\n")[1]
         
         print("Emote Cache Built Successfully.")
 
