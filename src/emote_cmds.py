@@ -58,7 +58,7 @@ class Emotes(commands.Cog):
         '''
         Emote listener
         '''
-        if re.search(":*:", message.content.lower()):
+        if not message.author.bot and re.search(":*:", message.content.lower()):
             # see if emote header is in the 
 
             s = message.content.lower()
@@ -70,7 +70,7 @@ class Emotes(commands.Cog):
                 await message.channel.send(embed=embed)
             except:
                 await reactX(await self.bot.get_context(message))
-                similar = [i for i in self.EMOTE_CACHE[message.guild.id] if fuzz.ratio(i, e) > 80]
+                similar = [i for i in self.EMOTE_CACHE[message.guild.id] if fuzz.ratio(i, e) > 60]
 
                 embed = discord.Embed(description="Emote not found. Did you mean one of the following?")
 
