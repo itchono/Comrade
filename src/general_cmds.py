@@ -1,11 +1,19 @@
 from utils.utilities import *
 from utils.mongo_interface import *
 import socket
+import pickle
 from utils.TextProducer import *
 
 class General(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+    
+        with open("Prose Model.mdl", "rb") as f:
+            self.modelKZ = pickle.load(f)
+        with open("Oishee Model.mdl", "rb") as f:
+            self.modelOi = pickle.load(f)
+        print("Datasets Initialized")
+
         self._last_member = None
 
 
