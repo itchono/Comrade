@@ -1,6 +1,7 @@
 from utils.utilities import *
 from utils.mongo_interface import *
-import socket 
+import socket
+from utils.TextProducer import *
 
 class General(commands.Cog):
     def __init__(self, bot):
@@ -61,5 +62,14 @@ class General(commands.Cog):
         '''
         msg = await ctx.channel.fetch_message(msgid)
         await ctx.send("Author: {}".format(msg.author))
+
+    @commands.command()
+    async def genKevin(self, ctx, number: int = 20):
+        '''
+        Generates text from Kevin Zhao
+        '''
+        c = self.bot.get_cog("Echo")
+        await c.echo(ctx, text("utils/Prose Model.mdl", number), "268173116474130443", deleteMsg=False)
+
     
 

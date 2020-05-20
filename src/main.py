@@ -22,6 +22,7 @@ from utils.keep_alive import *
 from utils.optimus_prime import *
 from utils.mongo_interface import *
 from utils.time_wizard import *
+from utils.TextProducer import *
 
 # command modules
 from general_cmds import *
