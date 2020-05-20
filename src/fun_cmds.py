@@ -23,9 +23,7 @@ class Fun(commands.Cog):
         await ctx.send("4")
         await ctx.send("3")
         await ctx.send("2")
-        await ctx.send("1")
-        for i in range(100):
-           await ctx.send("BREAKING: get naenaed")
+        await ctx.send("no")
            
     @commands.command()
     @commands.check(isnotThreat)

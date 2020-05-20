@@ -1,10 +1,4 @@
 import random
-
-VALID_PUNCTUATION = ['?', '.' , '!', ',', ':', ';']
-END_OF_SENTENCE_PUNCTUATION = ['?', '.', '!']
-ALWAYS_CAPITALIZE = ["I", "Montmorency", "George", "Harris", "J", "London", "Thames", "Liverpool", \
-                     "Flatland", "", "Mrs", "Ms", "Mr", "William", "Samuel"]
-BAD_CHARS = ['"', "(", ")", "{", "}", "[", "]", "_"]
     
 def check_open_ngram(current_ngram, ngram_model):
     '''
@@ -24,28 +18,13 @@ def gen_seed(ngram_model):
     (Dict{tup: List[List[int]]}) -> tup
     
     Returns a tuple of length n by selecting a random n-gram from the
-    keys of the ngram_model. You are guaranteed that the generated
-    seed (i.e. tuple) will contain no punctuation.
-
-    The function assumes that there is at least one tuple without punctuation that
-    has a non-empty list of words associated with it.
+    keys of the ngram_model.
     '''
     ngram_model_key_list = sorted(list(ngram_model)) # sort for repeatability
     ngram = random.choice(ngram_model_key_list)
-
     
-    punc_in_ngram = False
-    for item in ngram:
-        if item in VALID_PUNCTUATION:
-            punc_in_ngram = True
-    
-    while not check_open_ngram(ngram, ngram_model) or punc_in_ngram:
+    while not check_open_ngram(ngram, ngram_model):
         ngram = random.choice(ngram_model_key_list)
-
-        punc_in_ngram = False
-        for item in ngram:
-            if item in VALID_PUNCTUATION:
-                punc_in_ngram = True
     
     return ngram
 
@@ -67,7 +46,7 @@ def gen_next_token(current_ngram, ngram_model):
     words = ngram_model[current_ngram][0]
     # create a copy that the code below does not modify the ngram model
     # Note: shallow copy is sufficient for a list of numbers
-    cdf = ngram_model[current_ngram][1].copy()
+    cdf = ngram_model[current_ngram][1][:]
     
     for i in range(1, len(cdf)):
         cdf[i] += cdf[i-1]
