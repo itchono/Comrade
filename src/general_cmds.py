@@ -8,9 +8,9 @@ class General(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     
-        with open("Prose Model.mdl", "rb") as f:
+        with open("utils/Prose Model.mdl", "rb") as f:
             self.modelKZ = pickle.load(f)
-        with open("Oishee Model.mdl", "rb") as f:
+        with open("utils/Oishee Model.mdl", "rb") as f:
             self.modelOi = pickle.load(f)
         print("Datasets Initialized")
 
@@ -72,20 +72,20 @@ class General(commands.Cog):
         await ctx.send("Author: {}".format(msg.author))
 
     @commands.command()
-    async def genKevin(self, ctx, number: int = 20):
+    async def genKevin(self, ctx, number: int = 15):
         '''
         Generates text from Kevin Zhao
         '''
         c = self.bot.get_cog("Echo")
-        await c.echo(ctx, text("utils/Prose Model.mdl", number), "268173116474130443", deleteMsg=False)
+        await c.echo(ctx, text(self.modelKZ, number), "268173116474130443", deleteMsg=False)
 
     @commands.command()
-    async def genOishee(self, ctx, number: int = 20):
+    async def genOishee(self, ctx, number: int = 15):
         '''
         Generates text from Oishee
         '''
         c = self.bot.get_cog("Echo")
-        await c.echo(ctx, text("utils/Oishee Model.mdl", number), "341736321410400276", deleteMsg=False)
+        await c.echo(ctx, text(self.modelOi, number), "341736321410400276", deleteMsg=False)
 
     
 
