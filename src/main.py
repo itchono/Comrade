@@ -22,7 +22,9 @@ from utils.keep_alive import *
 from utils.optimus_prime import *
 from utils.mongo_interface import *
 from utils.time_wizard import *
-from utils.TextProducer import *
+
+from polymorph.text_gen import *
+from polymorph.model_gen import *
 
 # command modules
 from general_cmds import *
@@ -33,6 +35,7 @@ from echo_cmds import *
 from user_cmds import *
 from fun_cmds import *
 from emote_cmds import *
+from polymorph_cmds import *
 '''
 
 VARIABLES

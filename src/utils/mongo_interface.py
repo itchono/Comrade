@@ -95,3 +95,26 @@ def getCustomUser(name, server):
     '''
     customs = client.Comrade.CustomUsers
     return customs.find_one({"name": name, "server": server})
+
+
+def fillmodel(userID: int, serverID: int, model):
+    '''
+    Uploads a data model to Mongo.
+    '''
+    models = client.Comrade.NLPmodels
+    models.update({
+        "user": userID,
+        "server": serverID
+    }, {
+        "user": userID,
+        "server": serverID,
+        "model": model
+    }, True)  # upsert
+
+def getmodel(userID: int, serverID: int):
+    '''
+    Gets a NLP model from the database.
+    '''
+    models = client.Comrade.NLPmodels
+    return models.find_one({"user": userID, "server": serverID})
+

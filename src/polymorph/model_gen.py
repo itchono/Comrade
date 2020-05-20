@@ -1,4 +1,3 @@
-from string import punctuation
 import re
 import pickle
 
@@ -27,6 +26,23 @@ def parse_text(text, reverse=False):
       for line in reversed(arrclean) if reverse else arrclean:
           f.write(line + "\n")
           arrsuperclean.extend(line.split(" "))
+
+    return arrsuperclean
+
+def parse_arr(arr, reverse=False):
+    '''
+    cleans a long list of messages into list of usable words (lowercase letters only)
+    '''
+
+    arrclean = []
+    for t in arr:
+        if not re.search("\$[a-zA-z]|<*>|[0-9]{6,}|http", t) or t.encode("ascii", "ignore").decode() != t:
+           arrclean.append(t.translate(str.maketrans("", "", "#!$%&:\"\'()*+,-./;<=>?@[\\]^_`{|}~")).lower())
+
+    # arrclean is now a bunch of lines
+    arrsuperclean = []
+    for line in reversed(arrclean) if reverse else arrclean:
+        arrsuperclean.extend(line.split(" "))
 
     return arrsuperclean
 
@@ -132,6 +148,12 @@ def build_ngram_model(words, n):
     '''
     print("Building {}-gram model".format(n))
     return probify_ngram_counts(prune_ngram_counts(build_ngram_counts(words, n), 10)) # combine functions
+
+
+def modelfrommsgs(msgs, n=2, reverse=True):
+    t = parse_arr(msgs, reverse=reverse)
+
+    return build_ngram_model(t, n)
 
 if __name__ == "__main__":
     with open("KZ Super.txt", "r", encoding="utf-8") as f:
