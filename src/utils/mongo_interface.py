@@ -118,3 +118,22 @@ def getmodel(userID: int, serverID: int):
     models = client.Comrade.NLPmodels
     return models.find_one({"user": userID, "server": serverID})
 
+def fillcache(channelID, cache):
+    '''
+    Fills channel message cache
+    '''
+    channels = client.Comrade.ChannelCache
+    channels.update({
+        "_id": channelID,
+    }, {"_id": channelID,
+        "cache": cache
+    }, True)  # upsert
+
+def getcache(channelID):
+    '''
+    Tries to get message cache
+    '''
+    channels = client.Comrade.ChannelCache
+    return channels.find_one({"_id": channelID})
+
+
