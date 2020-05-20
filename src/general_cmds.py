@@ -1,19 +1,9 @@
 from utils.utilities import *
 from utils.mongo_interface import *
-import socket
-import pickle
-from utils.TextProducer import *
 
 class General(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-    
-        with open("utils/Prose Model.mdl", "rb") as f:
-            self.modelKZ = pickle.load(f)
-        with open("utils/Oishee Model.mdl", "rb") as f:
-            self.modelOi = pickle.load(f)
-        print("Datasets Initialized")
-
         self._last_member = None
 
 
@@ -71,21 +61,7 @@ class General(commands.Cog):
         msg = await ctx.channel.fetch_message(msgid)
         await ctx.send("Author: {}".format(msg.author))
 
-    @commands.command()
-    async def genKevin(self, ctx, number: int = 15):
-        '''
-        Generates text from Kevin Zhao
-        '''
-        c = self.bot.get_cog("Echo")
-        await c.echo(ctx, text(self.modelKZ, number), "268173116474130443", deleteMsg=False)
-
-    @commands.command()
-    async def genOishee(self, ctx, number: int = 15):
-        '''
-        Generates text from Oishee
-        '''
-        c = self.bot.get_cog("Echo")
-        await c.echo(ctx, text(self.modelOi, number), "341736321410400276", deleteMsg=False)
+    
 
     
 
