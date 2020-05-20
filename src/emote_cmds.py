@@ -58,7 +58,7 @@ class Emotes(commands.Cog):
         '''
         Emote listener
         '''
-        if not message.author.bot and message.content[0] == ':' and message.content[-1] == ':':
+        if not message.author.bot and message.content and message.content[0] == ':' and message.content[-1] == ':':
             # see if emote header is in the 
 
             s = message.content.lower()
