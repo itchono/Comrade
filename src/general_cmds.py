@@ -71,5 +71,13 @@ class General(commands.Cog):
         c = self.bot.get_cog("Echo")
         await c.echo(ctx, text("utils/Prose Model.mdl", number), "268173116474130443", deleteMsg=False)
 
+    @commands.command()
+    async def genOishee(self, ctx, number: int = 20):
+        '''
+        Generates text from Oishee
+        '''
+        c = self.bot.get_cog("Echo")
+        await c.echo(ctx, text("utils/Oishee Model.mdl", number), "341736321410400276", deleteMsg=False)
+
     
 
