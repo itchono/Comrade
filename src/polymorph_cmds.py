@@ -13,9 +13,9 @@ class General(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     
-        with open("utils/Prose Model.mdl", "rb") as f:
+        with open("polymorph/Prose Model.mdl", "rb") as f:
             self.modelKZ = pickle.load(f)
-        with open("utils/Oishee Model.mdl", "rb") as f:
+        with open("polymorph/Oishee Model.mdl", "rb") as f:
             self.modelOi = pickle.load(f)
         print("Datasets Initialized")
 
