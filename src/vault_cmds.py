@@ -18,7 +18,7 @@ class Vault(commands.Cog):
 
         msgs = vault.messages
 
-    @commands.command(name=u"\U0001F345")
+    @commands.command(name=u"\U0001F345", aliases = ["vault"])
     @commands.check(isServer)
     async def tomato(self, ctx: commands.Context, tgt=None):
         '''
@@ -51,14 +51,6 @@ class Vault(commands.Cog):
         }
 
         await m.add_reaction("🍅")
-
-    @commands.command()
-    @commands.check(isServer)
-    async def vault(self, ctx: commands.Context, url: str = None):
-        '''
-        Alias for vault
-        '''
-        await self.tomato(ctx, url)
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction,

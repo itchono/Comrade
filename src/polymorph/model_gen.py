@@ -1,5 +1,6 @@
 import re
 import pickle
+import json
 
 def parse_text(text, reverse=False):
     '''
@@ -71,7 +72,6 @@ def build_ngram_counts(words, n):
     build_ngram_counts returns a dictionary of n-grams and the counts of the words that follow the n-gram.
     The key will be the tuple containing words in a sequence.
     '''
-    print("Building n-grams. Token Count: {}".format(len(words)))
 
     result = {} # empty dict
 
@@ -106,7 +106,6 @@ def prune_ngram_counts(counts, prune_len):
     and removes entries in counts with low frequency. it will keep the prune_len highest frequency words. 
     If there is a tie, it will keep all tied words.
     '''
-    print("Pruning in progress...")
     result = {} # new empty dict for output
 
     for k in counts.keys():
@@ -131,7 +130,6 @@ def probify_ngram_counts(counts):
     probify_ngram_counts takes in a dict with the same output format as prune_ngram_counts, and converts the counts
     into probabilities.
     '''
-    print("Assigning Probabilities...")
     result = {} # new empty dict for output
 
     for k in counts.keys():
@@ -146,22 +144,25 @@ def build_ngram_model(words, n):
     build_ngram_model returns a dict representing an n-gram-count model, given a size of n-gram (n) and an input set of words (words).
     This will take the 10 most common words, and show each count as a probability.
     '''
-    print("Building {}-gram model".format(n))
     return probify_ngram_counts(prune_ngram_counts(build_ngram_counts(words, n), 10)) # combine functions
 
 
-def modelfrommsgs(msgs, n=2, reverse=True):
+def modelfrommsgs(msgs, n=3, reverse=True):
     t = parse_arr(msgs, reverse=reverse)
-
-    return build_ngram_model(t, n)
+    m = build_ngram_model(t, n)
+    '''with open("polymorph/{}.mdl".format(msgs[0].translate(str.maketrans("", "", "#!$%&:\"\'()*+,-./;<=>?@[\\]^_`{|}~"))), "wb") as f:
+          pickle.dump(m, f)'''
+    return m
 
 if __name__ == "__main__":
-    with open("KZ Super.txt", "r", encoding="utf-8") as f:
+    fname = input("Filename? (.txt)")
+
+    with open("{}.txt".format(fname), "r", encoding="utf-8") as f:
         t = parse_text(f.read(), reverse=True)
 
-        mdl = build_ngram_model(t, 2)
+        mdl = build_ngram_model(t, 4)
 
-        with open("modelNOVA.mdl", "wb") as m:
+        with open("{}.mdl".format(fname), "wb") as m:
           pickle.dump(mdl, m)
 
         print("Model built.")

@@ -58,11 +58,11 @@ class Emotes(commands.Cog):
         '''
         Emote listener
         '''
-        if not message.author.bot and re.search(":*:", message.content.lower()):
+        if not message.author.bot and message.content[0] == ':' and message.content[-1] == ':':
             # see if emote header is in the 
 
             s = message.content.lower()
-            e = s[s.find(":")+1:s.find(":",s.find(":")+1)]
+            e = s.strip(':')
 
             try:
                 embed = discord.Embed()
