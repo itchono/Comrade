@@ -28,12 +28,12 @@ class General(commands.Cog):
             self.localcache = {"cache":cache}
 
     @commands.command(aliases = ["gen"])
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def polymorph(self, ctx, tgt, number: int = 15):
         '''
         Generates text from model
         '''
-        if number > 100:
+        if number > 100 or number < 0:
             await ctx.send("No")
         elif user := await extractUser(self.bot, ctx, tgt):
             c = self.bot.get_cog("Echo")
