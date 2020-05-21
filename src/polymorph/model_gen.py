@@ -37,7 +37,7 @@ def parse_arr(arr, reverse=False):
 
     arrclean = []
     for t in arr:
-        if not re.search("\$[a-zA-z]|<*>|[0-9]{6,}|http", t) or t.encode("ascii", "ignore").decode() != t:
+        if not (re.search("\$[a-zA-z]|<*>|[0-9]{6,}|http", t) or t.encode("ascii", "ignore").decode() != t):
            arrclean.append(t.translate(str.maketrans("", "", "#!$%&:\"\'()*+,-./;<=>?@[\\]^_`{|}~")).lower())
 
     # arrclean is now a bunch of lines
