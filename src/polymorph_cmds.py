@@ -29,7 +29,6 @@ class General(commands.Cog):
             print("Cache loaded.")
 
     @commands.command(aliases = ["gen"])
-    @commands.cooldown(1, 3, commands.BucketType.user)
     async def polymorph(self, ctx, tgt, number: int = 15):
         '''
         Generates text from model
