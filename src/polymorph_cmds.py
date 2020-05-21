@@ -26,6 +26,7 @@ class General(commands.Cog):
         with open("polymorph/{}.dat".format(self.defaultload), "rb") as f:
             cache = pickle.load(f)
             self.localcache = {"cache":cache}
+            print("Cache loaded.")
 
     @commands.command(aliases = ["gen"])
     @commands.cooldown(1, 3, commands.BucketType.user)
