@@ -42,15 +42,10 @@ class General(commands.Cog):
                 model = self.models[(user.id, ctx.guild.id)]
                 await c.echo(ctx, text(model, number), str(user.id), deleteMsg=False)
             else:
-                await ctx.send("Model is not yet cached, it will take a bit longer to produce this first iteration of text.")
-                await ctx.trigger_typing()
-                if model := getmodel(user.id, ctx.guild.id):
-                    model = ast.literal_eval((model["model"]))
-                    self.models[(user.id, ctx.guild.id)] = model
-                    await c.echo(ctx, text(model, number), str(user.id), deleteMsg=False)
-                else:
-                    await reactX(ctx)
-                    await ctx.send("Please build this user first using $c buildmodel {}".format(user.display_name))
+                await ctx.send("Model is not yet built, it will take a bit longer to produce this first iteration of text.")
+                await self.buildmodel(ctx, tgt)
+                model = self.models[(user.id, ctx.guild.id)]
+                await c.echo(ctx, text(model, number), str(user.id), deleteMsg=False)
 
     @commands.command()
     async def extractChannel(self, ctx):
@@ -93,7 +88,7 @@ class General(commands.Cog):
 
                 self.models[(user.id, ctx.guild.id)] = model
 
-                fillmodel(user.id, ctx.guild.id, str(model))
+                # fillmodel(user.id, ctx.guild.id, str(model))
 
                 await reactOK(ctx)
                 await ctx.send("Model for {} built in {:.3f}s.".format(user.display_name, time.perf_counter()-t_start))
