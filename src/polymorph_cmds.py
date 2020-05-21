@@ -28,11 +28,14 @@ class General(commands.Cog):
             self.localcache = {"cache":cache}
 
     @commands.command(aliases = ["gen"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def polymorph(self, ctx, tgt, number: int = 15):
         '''
         Generates text from model
         '''
-        if user := await extractUser(self.bot, ctx, tgt):
+        if number > 100:
+            await ctx.send("No")
+        elif user := await extractUser(self.bot, ctx, tgt):
             c = self.bot.get_cog("Echo")
 
             if (user.id, ctx.guild.id) in self.models:
@@ -86,7 +89,11 @@ class General(commands.Cog):
 
                 msgs = [m["content"] for m in cache["cache"] if m["author"] == user.id]
 
-                fillmodel(user.id, ctx.guild.id, str(modelfrommsgs(msgs)))
+                model = modelfrommsgs(msgs)
+
+                self.models[(user.id, ctx.guild.id)] = model
+
+                fillmodel(user.id, ctx.guild.id, str(model))
 
                 await reactOK(ctx)
                 await ctx.send("Model for {} built in {:.3f}s.".format(user.display_name, time.perf_counter()-t_start))
