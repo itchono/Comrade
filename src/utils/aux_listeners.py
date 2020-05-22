@@ -29,22 +29,23 @@ class AuxilliaryListener(commands.Cog):
         '''
         if (user.display_name != before.display_name):
             # member update
-            print("Updated {}".format(user.name))
             d = getUser(before.id, user.guild.id)
             d["name"] = user.name
             d["nickname"] = user.nick if user.nick else user.name
-
             updateUser(d)
+            await log(user.guild, "Member Updated: {}".format(before.name))
 
         elif user.status != before.status:
             # status update
-            e = discord.Embed(title="Status Change: {}".format(
-                user.display_name),
-                              description="Time: {}\n{} --> {}".format(
-                                  localTime().strftime("%I:%M:%S %p %Z"),
-                                  before.status, user.status),
-                              colour=discord.Color.from_rgb(51, 204, 51))
-            await log(user.guild, "", e)
+
+            if str(user.status) == "offline":
+                d = getUser(before.id, user.guild.id)
+                d["last online"] = localTime().strftime("%I:%M:%S %p %Z")
+                updateUser(d)
+            else:
+                d = getUser(before.id, user.guild.id)
+                d["last online"] = "now"
+                updateUser(d)
 
     @commands.Cog.listener()
     async def on_user_update(self, before, user):
@@ -53,12 +54,12 @@ class AuxilliaryListener(commands.Cog):
         '''
         if (user.name != before.name):
             # user update
-            print("Updated {}".format(user.name))
-
             POSSIBLES = userQuery({"user":user.id})
             for u in POSSIBLES:
                 u["name"] = user.name
                 updateUser(u)
+
+            await log(user.guild, "User Updated: {}".format(before.name))
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction,

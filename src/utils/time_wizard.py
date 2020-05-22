@@ -51,13 +51,13 @@ class TimeWizard(commands.Cog):
                 random.shuffle(pool)
                 luckyperson = pool.pop()
 
-                await c.send("Today's Bonus Daily Member is {}".format(luckyperson.display_name))
-                await cog.userinfo(ctx, luckyperson.display_name)
-                
                 d = getUser(luckyperson.id, s["_id"])
                 d["daily weight"] -= 1
                 updateUser(d)
                 # self regulating; once probability drops to zero, we just need to refill.
+
+                await c.send("Today's Bonus Daily Member is {}".format(luckyperson.display_name))
+                await cog.userinfo(ctx, target=luckyperson.mention)
                 
                 cog.rebuildUserCache()
     

@@ -41,6 +41,8 @@ class Users(commands.Cog):
         if not target:
             target = ctx.author.mention
 
+        target = target.strip("\"")
+
         if ctx.guild and (custom := getCustomUser(target, ctx.guild.id)):
             e = discord.Embed(title="{} (Custom User)".format(target))
             e.set_author(name=f"User Info - {target}")
@@ -113,7 +115,7 @@ class Users(commands.Cog):
 
         random.shuffle(pool)
         luckyperson = pool.pop()
-        await self.userinfo(ctx, getUser(luckyperson.id, ctx.guild.id)["nickname"])
+        await self.userinfo(ctx, target=getUser(luckyperson.id, ctx.guild.id)["nickname"])
 
     @commands.command()
     @commands.check(isServer)

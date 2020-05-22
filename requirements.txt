@@ -10,3 +10,5 @@ pymongo
 pybooru
 bs4
 pytz
+matplotlib
+numpy

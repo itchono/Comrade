@@ -44,7 +44,7 @@ class Prime(commands.Cog):
                 amount = 20
 
                 if len(args) > 2 and args[2].isnumeric():
-                    amount = eval(args[2])
+                    amount = int(args[2])
 
                 m = await message.channel.send(
                     "React with '✋' to purge the channel of {} messages {}".
