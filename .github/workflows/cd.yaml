@@ -4,7 +4,7 @@ on:
     # Sequence of patterns matched against refs/heads
     branches:    
       - master   
-        Comrade-v3-dev   
+      - Comrade-v3-dev   
 jobs:
     push_to_registry:
         name: Push Docker image to Docker Hub
