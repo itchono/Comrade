@@ -53,7 +53,8 @@ INIT
 
 
 client = commands.Bot(command_prefix=BOT_PREFIX,
-                      case_insensitive=True)
+                      case_insensitive=True,
+                      help_command=commands.MinimalHelpCommand())
 
 cogs = [
     AuxilliaryListener, MessageHandler, General, Setup, NSFW, Vault, Echo,
