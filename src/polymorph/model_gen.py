@@ -160,7 +160,7 @@ if __name__ == "__main__":
     with open("{}.txt".format(fname), "r", encoding="utf-8") as f:
         t = parse_text(f.read(), reverse=True)
 
-        mdl = build_ngram_model(t, 4)
+        mdl = build_ngram_model(t, 3)
 
         with open("{}.mdl".format(fname), "wb") as m:
           pickle.dump(mdl, m)
