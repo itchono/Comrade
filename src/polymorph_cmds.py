@@ -95,6 +95,19 @@ class Polymorph(commands.Cog):
         else:
             await reactX(ctx)
             await ctx.send("Please extract the channel first using $c extractChannel.")
+
+    @commands.command()
+    async def buildallmodels(self, ctx):
+        await ctx.send("Building all models. This will take a WHILE.")
+        await ctx.trigger_typing()
+    
+        if cache := getcache(ctx.channel.id) if not self.localcache else self.localcache:
+            for u in ctx.channel.members:
+                await self.buildmodel(ctx, u.mention)
+        else:
+            await reactX(ctx)
+            await ctx.send("Please extract the channel first using $c extractChannel.")
+        await ctx.send("DONE!")
         
     @commands.command()
     async def injectcache(self, ctx, filename=None):
