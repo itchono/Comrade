@@ -64,7 +64,7 @@ class Setup(commands.Cog):
         '''
         Configures a user, mentioned by ping, id, or nickname. Leave value as none to delete field.
         '''
-        u = getUser((await extractUser(self.bot, ctx, tgt)).id, ctx.guild.id)
+        u = getUser((await extractUser(ctx, tgt)).id, ctx.guild.id)
 
         if not value:
             try:

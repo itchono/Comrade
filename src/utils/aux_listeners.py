@@ -73,11 +73,12 @@ class AuxilliaryListener(commands.Cog):
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, exception):
         # When a command fails to execute
-
-        print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
-        traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
+        if not type(exception) == commands.CheckFailure:
+            print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
+            traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
         
-        await log(ctx.guild,
+        if ctx.guild:
+            await log(ctx.guild,
                   "Failure: {}\nType: {}\nTraceback:{}".format(exception, type(exception), exception.__traceback__))
 
         if not ctx.guild:

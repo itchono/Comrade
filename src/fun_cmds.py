@@ -1,5 +1,6 @@
 from utils.utilities import *
 from utils.mongo_interface import *
+from utils.emoji_converter import *
 import urllib.request
 from bs4 import BeautifulSoup
 
@@ -11,6 +12,15 @@ class Fun(commands.Cog):
         self.bot = bot
         self.activetrivia = {}
         self._last_member = None
+
+    # TODO: add moderation checks
+    @commands.command()
+    async def textToEmoji(self, ctx, *, text):
+        await ctx.send(textToEmoji(text))
+
+    @commands.command()
+    async def emojiToText(self, ctx, *, text):
+        await ctx.send(emojiToText(text))
 
     @commands.command()
     @commands.check(isnotThreat)
@@ -123,6 +133,16 @@ class Fun(commands.Cog):
 
             if not check:
                 await ctx.send("Nobody said anything so you all get chlamydia!")
+
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        '''
+        Emoji call listener
+        '''
+        if message.content.lower()[0:3] == "tte":
+            await self.textToEmoji(await self.bot.get_context(message), text=message.content.lower().strip("tte "))
+        elif message.content.lower()[0:3] == "ett":
+            await self.emojiToText(await self.bot.get_context(message), text=message.content.lower().strip("ett "))
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction:discord.Reaction, user:discord.User):
