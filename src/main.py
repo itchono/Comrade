@@ -969,8 +969,6 @@ async def on_ready():
                     "ATTN: kickVotes was updated due to a change in the number of members")
             print("{} members detected.".format(len(guild.members)))
 
-    await refreshEmotes()
-
     global wholesomebuffer
 
     wholesomebuffer = await constructWBuffer()
