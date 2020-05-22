@@ -2,6 +2,7 @@ from pymongo import MongoClient
 import json
 import os
 import dotenv
+from polymorph.data_compressor import *
 
 '''
 Comrade - Python-MongoDB Interfacer
@@ -96,28 +97,6 @@ def getCustomUser(name, server):
     customs = client.Comrade.CustomUsers
     return customs.find_one({"name": name, "server": server})
 
-
-def fillmodel(userID: int, serverID: int, model):
-    '''
-    Uploads a data model to Mongo.
-    '''
-    models = client.Comrade.NLPmodels
-    models.update({
-        "user": userID,
-        "server": serverID
-    }, {
-        "user": userID,
-        "server": serverID,
-        "model": model
-    }, True)  # upsert
-
-def getmodel(userID: int, serverID: int):
-    '''
-    Gets a NLP model from the database.
-    '''
-    models = client.Comrade.NLPmodels
-    return models.find_one({"user": userID, "server": serverID})
-
 def fillcache(channelID, cache):
     '''
     Fills channel message cache
@@ -131,9 +110,11 @@ def fillcache(channelID, cache):
 
 def getcache(channelID):
     '''
-    Tries to get message cache
+    Tries to get message cache in list form.
     '''
     channels = client.Comrade.ChannelCache
-    return channels.find_one({"_id": channelID})
+    d = channels.find_one({"_id": channelID})
+    if d: return decompressObj(d["cache"])
+    return None
 
 

@@ -16,6 +16,8 @@ class Users(commands.Cog):
         if not target:
             target = ctx.author.mention
 
+        target = target.strip("\"")
+
         if u := await extractUser(ctx, target):
             if ctx.guild:
                 # server environment

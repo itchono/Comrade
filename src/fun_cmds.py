@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 import parser
 import io
 
+import re
+
 class Fun(commands.Cog):
     '''
     Fun stuff.
@@ -25,37 +27,40 @@ class Fun(commands.Cog):
         '''
         Graphs a single variable algebraic function in some domain.
         '''
+        await ctx.trigger_typing()
+        if "." in function:
+            await ctx.send("Function rejected for invalid syntax.")
+        else:
+            function = re.sub(r"([0-9])([a-z])", r"\1*\2", function)
+            function = function.replace("^", "**") # exponentiation
 
-        # TODO filter the function input
-        function = function.replace("^", "**") # exponentiation
+            stepsize = 500
+            try:
+                D = xend-xstart
+                x = np.arange(xstart, xend, D/stepsize)
 
-        stepsize = 500
-        '''try:'''
-        D = xend-xstart
-        x = np.arange(xstart, xend, D/stepsize)
+                fnc = parser.expr(function).compile()
+                
+                arr = eval(fnc)
 
-        fnc = parser.expr(function).compile()
-        
-        arr = eval(fnc)
+                plt.plot(x, arr, label=function)
 
-        plt.plot(x, arr, label=function)
+                plt.title("Plot Requested by {}".format(ctx.author.name))
+                plt.ylabel("y")
+                plt.xlabel("x")
+                plt.legend()
+                plt.axhline(y=0, color='k')
+                plt.axvline(x=0, color='k')
+                plt.grid()
+                f = io.BytesIO()
+                plt.savefig(f, format="png")
+                f.seek(0)
+                plt.clf()
 
-        plt.title("Plot Requested by {}".format(ctx.author.name))
-        plt.ylabel("y")
-        plt.xlabel("x")
-        plt.legend()
-        plt.axhline(y=0, color='k')
-        plt.axvline(x=0, color='k')
-        plt.grid()
-        f = io.BytesIO()
-        plt.savefig(f, format="png")
-        f.seek(0)
-        plt.clf()
+                await ctx.send(file=discord.File(f, "graph.png"))
 
-        await ctx.send(file=discord.File(f, "graph.png"))
-
-        '''except:
-            await ctx.send("Something went wrong with parsing. Try again.")'''
+            except:
+                await ctx.send("Something went wrong with parsing. Try again.")
 
 
     @commands.command()
@@ -65,7 +70,7 @@ class Fun(commands.Cog):
         Posts text with stars and space. Best used on dark theme.
         '''
 
-        await ctx.send(".　　　　　　　　　　 ✦ 　　　　   　 　　　˚　　　　　　　　　　　　　　*　　　　　　   　　　　　　　　　　　　　　　.　　　　　　　　　　　　　　. 　　 　　　　　　　 ✦ 　　　　　　　　　　 　 ‍ ‍ ‍ ‍ 　　　　 　　　　　　　　　　　　,　　   　\n\n.　　　　　　　　　　　　　.　　　ﾟ　  　　　.　　　　　　　　　　　　　.\n\n　　　　　　,　　　　　　　.　　　　　　    　　　　 　　　　　　　　　　　　　　　　　　 ☀️ 　　　　　　　　　　　　　　　　　　    　      　　　　　        　　　　　　　　　　　　　. 　　　　　　　　　　.　　　　　　　　　　　　　. 　　　　　　　　　　　　　　　　       　   　　　　 　　　　　　　　　　　　　　　　       　   　　　　　　　　　　　　　　　　       　    ✦ 　   　　　,　　　　　　　　　　　    🚀 　　　　 　　,　　　 ‍ ‍ ‍ ‍ 　 　　　　　　　　　　　　.　　　　　 　　 　　　.　　　　　　　　　　　　　 　           　　　　　　　　　　　　　　　　　　　˚　　　 　   　　　　,　　　　　　　　　　　       　    　　　　　　　　　　　　　　　　.　　　  　　    　　　　　 　　　　　.　　　　　　　　　　　　　.　　　　　　　　　　　　　　　* 　　   　　　　　 ✦ 　　　　　　　         　        　　　　 　　 　　　　　　　 　　　　　.　　　　　　　　　　　　　　　　　　.　　　　　    　　. 　 　　　　　.　　　　 🌑 　　　　　   　　　　　.　　　　　　　　　　　.　　　　　　　　　　   　\n\n　˚　　　　　　　　　　　　　　　　　　　　　ﾟ　　　　　.　　　　　　　　　　　　　　　. 　　 　 🌎 ‍ ‍ ‍ ‍ ‍ ‍ ‍ ‍ ‍ ‍ ,　 　　　　　　　　　　　　　　* .　　　　　 　　　　　　　　　　　　　　.　　　　　　　　　　 ✦ 　　　　   　 　　　˚　　　　　　　　　　　　　　*　　　　　　   　　　　　　　　　　　　　　　.　　　　　　　　　　　　　　.")
+        await ctx.send(".　　　　　　　　　　 ✦ 　　　　   　 　　　˚　　　　　　　　　　　　　　*　　　　　　   　　　　　　　　　　　　　　　.　　　　　　　　　　　　　　. 　　 　　　　　　　 ✦ 　　　　　　　　　　 　 ‍ ‍ ‍ ‍ 　　　　 　　　　　　　　　　　　,　　   　\n\n.　　　　　　　　　　　　　.　　　ﾟ　  　　　.　　　　　　　　　　　　　.\n\n　　　　　　,　　　　　　　.　　　　　　    　　　　 　　　　　　　　　　　　　　　　　　 ☀️ 　　　　　　　　　　　　　　　　　　    　      　　　　　        　　　　　　　　　　　　　. 　　　　　　　　　　.　　　　　　　　　　　　　. 　　　　　　　　　　　　　　　　       　   　　　　 　　　　　　　　　　　　　　　　       　   　　　　　　　　　　　　　　　　       　    ✦ 　   　　　,　　　　　　　　　　　    🚀 　　　　 　　,　　　 ‍ ‍ ‍ ‍ 　 　　　　　　　　　　　　.　　　　　 　　 　　　.　　　　　　　　　　　　　 　           　　　　　　　　　　　　　　　　　　　˚　　　 　   　　　　,　　　　　　　　　　　       　    　　　　　　　　　　　　　　　　.　　　  　　    　　　　　 　　　　　.　　　　　　　　　　　　　.　　　　　　　　　　　　　　　* 　　   　　　　　 ✦ 　　　　　　　         　        　　　　 　　 　　　　　　　 　　　　　.　　　　　　　　　　　　　　　　　　.　　　　　    　　. 　 　　　　　.　　　　 🌑 　　　　　   　　　　　.　　　　　　　　　　　.　　　　　　　　　　   　\n\n　˚　　　　　　　　　　　　　　　　　　　　　ﾟ　　　　　.　　　　　　　　　　　　　　　. 　　 　 🌎 ‍ ‍ ‍ ‍ ‍ ‍ ‍ ‍ ‍ ‍ ,　 　　　　　　　　　　　　　　* .　　　　　 　　　　　　　　　　　　　　.　　　　　　　　　　 ✦ 　　　　   　 　　　˚　　　　　　　　　　　　　　*　　　　　　   　　　　　　　　　　　　　　　.　　　　　　　　　　　　　　.\n*(not to scale)")
     
     @commands.command()
     @commands.check(isnotThreat)

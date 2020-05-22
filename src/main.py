@@ -63,10 +63,6 @@ cogs = [
 
 for c in cogs: client.add_cog(c(client))
 
-print("Loading Modules:")
-for c in client.cogs:
-    print("\t", c)
-
 print("Bot components initialized, awaiting login.")
 
 @client.event
@@ -75,7 +71,7 @@ async def on_ready():
     On successful login
     '''
     await client.change_presence(status=discord.Status.online,
-                                 activity=discord.Game("Testing Communism"))
+                                 activity=discord.Game("[{}] Testing Communism".format(BOT_PREFIX)))
     print("{} is online, logged into {} server(s).".format(
         client.user, len(client.guilds)))
 
