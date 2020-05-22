@@ -50,7 +50,7 @@ class Setup(commands.Cog):
             d = getUser(user.id, ctx.guild.id)
 
             try:
-                d[fieldname] = eval(str(value))
+                d[fieldname] = int(value)
             except:
                 d[fieldname] = value
 
@@ -76,7 +76,7 @@ class Setup(commands.Cog):
 
         else:
             try:
-                u[cfgitem] = eval(str(value))
+                u[cfgitem] = int(value)
             except:
                 u[cfgitem] = value
             updateUser(u)
@@ -101,7 +101,7 @@ class Setup(commands.Cog):
 
         else:
             try:
-                c[cfgitem] = eval(str(value))
+                c[cfgitem] = int(value)
             except:
                 c[cfgitem] = value
             updateCFG(c)

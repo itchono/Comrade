@@ -1,35 +1,93 @@
 from utils.utilities import *
 from utils.mongo_interface import *
 from utils.emoji_converter import *
+
 import urllib.request
 from bs4 import BeautifulSoup
 
+import numpy as np
+from numpy import *
+import matplotlib.pyplot as plt
+import parser
+import io
+
 class Fun(commands.Cog):
     '''
-    Extensive work by Kevinozoid
+    Fun stuff.
     '''
     def __init__(self, bot):
         self.bot = bot
         self.activetrivia = {}
         self._last_member = None
 
-    # TODO: add moderation checks
+    @commands.command()
+    async def graph(self, ctx: commands.Context, function: str, xstart: int = -10, xend: int = 10):
+        '''
+        Graphs a single variable algebraic function in some domain.
+        '''
 
+        # TODO filter the function input
+        function = function.replace("^", "**") # exponentiation
+
+        stepsize = 500
+        '''try:'''
+        D = xend-xstart
+        x = np.arange(xstart, xend, D/stepsize)
+
+        fnc = parser.expr(function).compile()
+        
+        arr = eval(fnc)
+
+        plt.plot(x, arr, label=function)
+
+        plt.title("Plot Requested by {}".format(ctx.author.name))
+        plt.ylabel("y")
+        plt.xlabel("x")
+        plt.legend()
+        plt.axhline(y=0, color='k')
+        plt.axvline(x=0, color='k')
+        plt.grid()
+        f = io.BytesIO()
+        plt.savefig(f, format="png")
+        f.seek(0)
+        plt.clf()
+
+        await ctx.send(file=discord.File(f, "graph.png"))
+
+        '''except:
+            await ctx.send("Something went wrong with parsing. Try again.")'''
+
+
+    @commands.command()
+    @commands.cooldown(1, 10, commands.BucketType.channel)
+    async def space(self, ctx):
+        '''
+        Posts text with stars and space. Best used on dark theme.
+        '''
+
+        await ctx.send(".　　　　　　　　　　 ✦ 　　　　   　 　　　˚　　　　　　　　　　　　　　*　　　　　　   　　　　　　　　　　　　　　　.　　　　　　　　　　　　　　. 　　 　　　　　　　 ✦ 　　　　　　　　　　 　 ‍ ‍ ‍ ‍ 　　　　 　　　　　　　　　　　　,　　   　\n\n.　　　　　　　　　　　　　.　　　ﾟ　  　　　.　　　　　　　　　　　　　.\n\n　　　　　　,　　　　　　　.　　　　　　    　　　　 　　　　　　　　　　　　　　　　　　 ☀️ 　　　　　　　　　　　　　　　　　　    　      　　　　　        　　　　　　　　　　　　　. 　　　　　　　　　　.　　　　　　　　　　　　　. 　　　　　　　　　　　　　　　　       　   　　　　 　　　　　　　　　　　　　　　　       　   　　　　　　　　　　　　　　　　       　    ✦ 　   　　　,　　　　　　　　　　　    🚀 　　　　 　　,　　　 ‍ ‍ ‍ ‍ 　 　　　　　　　　　　　　.　　　　　 　　 　　　.　　　　　　　　　　　　　 　           　　　　　　　　　　　　　　　　　　　˚　　　 　   　　　　,　　　　　　　　　　　       　    　　　　　　　　　　　　　　　　.　　　  　　    　　　　　 　　　　　.　　　　　　　　　　　　　.　　　　　　　　　　　　　　　* 　　   　　　　　 ✦ 　　　　　　　         　        　　　　 　　 　　　　　　　 　　　　　.　　　　　　　　　　　　　　　　　　.　　　　　    　　. 　 　　　　　.　　　　 🌑 　　　　　   　　　　　.　　　　　　　　　　　.　　　　　　　　　　   　\n\n　˚　　　　　　　　　　　　　　　　　　　　　ﾟ　　　　　.　　　　　　　　　　　　　　　. 　　 　 🌎 ‍ ‍ ‍ ‍ ‍ ‍ ‍ ‍ ‍ ‍ ,　 　　　　　　　　　　　　　　* .　　　　　 　　　　　　　　　　　　　　.　　　　　　　　　　 ✦ 　　　　   　 　　　˚　　　　　　　　　　　　　　*　　　　　　   　　　　　　　　　　　　　　　.　　　　　　　　　　　　　　.")
+    
     @commands.command()
     @commands.check(isnotThreat)
     async def textToEmoji(self, ctx, *, text):
+        '''
+        Converts text to emoji
+        '''
         await ctx.send(textToEmoji(text))
 
     @commands.command()
     @commands.check(isnotThreat)
     async def emojiToText(self, ctx, *, text):
+        '''
+        Converts emoji to text
+        '''
         await ctx.send(emojiToText(text))
 
     @commands.command()
     @commands.check(isnotThreat)
     async def surprise(self, ctx: commands.Context):
         '''
-        nuke
+        Originally by Kevinozoid
         '''
         await ctx.send("nuke deploying in")
         await ctx.send("5")
@@ -43,6 +101,7 @@ class Fun(commands.Cog):
     async def fanfic(self,ctx: commands.Context, site):
         '''
         initiate fanfiction
+        by Kevinozoid.
         '''
         req = urllib.request.urlopen(site, timeout=10)
         html = req.read()
@@ -72,7 +131,8 @@ class Fun(commands.Cog):
     @commands.check(isnotThreat)
     async def detectBad(self, ctx: commands.Context):
         '''
-        nuke
+        Detects bad.
+        By Kevinozoid
         '''
         if (ctx.author== await (extractUser(ctx,"itchono"))):
             await ctx.send("you are in fact bad")
@@ -83,7 +143,8 @@ class Fun(commands.Cog):
     @commands.check(isnotThreat)
     async def quiz(self, ctx: commands.Context):
         '''
-        quiz
+        Reaction based trivia.
+        By Kevinozoid.
         '''
         check = True
         req = urllib.request.urlopen("https://pastebin.com/raw/2PjhRjtn", timeout = 10)
@@ -143,10 +204,11 @@ class Fun(commands.Cog):
         '''
         Emoji call listener
         '''
-        if message.content.lower()[0:3] == "tte":
-            await self.textToEmoji(await self.bot.get_context(message), text=message.content.lower().lstrip("tte "))
-        elif message.content.lower()[0:3] == "ett":
-            await self.emojiToText(await self.bot.get_context(message), text=message.content.lower().lstrip("ett "))
+        if isnotThreat(await self.bot.get_context(message)):
+            if message.content.lower()[0:3] == "tte":
+                await self.textToEmoji(await self.bot.get_context(message), text=message.content.lower().lstrip("tte "))
+            elif message.content.lower()[0:3] == "ett":
+                await self.emojiToText(await self.bot.get_context(message), text=message.content.lower().lstrip("ett "))
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction:discord.Reaction, user:discord.User):

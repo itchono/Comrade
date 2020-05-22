@@ -31,7 +31,6 @@ Checks
 
 # Checks
 
-
 def isOwner(ctx: commands.Context):
     '''
     Determines whether message author is server owner
@@ -72,6 +71,8 @@ def isnotThreat(ctx: commands.Context):
     '''
     Determines whether message author is a threat
     '''
+    if not ctx.guild: return True
+
     OPS = userQuery({"threat level": {"$gt": 0}, "server": ctx.guild.id})
 
     for op in OPS:
@@ -83,6 +84,8 @@ def isnotSuperThreat(ctx: commands.Context):
     '''
     Determines whether message author is threat level 2 or higher
     '''
+    if not ctx.guild: return True
+
     OPS = userQuery({"threat level": {"$gte": 2}, "server": ctx.guild.id})
 
     for op in OPS:
@@ -94,6 +97,8 @@ def isnotUltraThreat(ctx: commands.Context):
     '''
     Determines whether message author is threat level 3 or higher
     '''
+    if not ctx.guild: return True
+
     OPS = userQuery({"threat level": {"$gte": 3}, "server": ctx.guild.id})
 
     for op in OPS:
@@ -129,7 +134,7 @@ def isCommand(message: discord.Message):
     '''
     Check's if it's a Comrade Command
     '''
-    return "$c" in message.content.lower()
+    return BOT_PREFIX in message.content.lower()
 
 
 '''

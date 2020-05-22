@@ -36,7 +36,7 @@ class Vault(commands.Cog):
         if len(ctx.message.attachments) > 0:
             u = ctx.message.attachments[0].url
         elif tgt and tgt.isnumeric():
-            u = await ctx.fetch_message(eval(tgt))
+            u = await ctx.fetch_message(int(tgt))
             IDmode = True
         else:
             u = tgt  # URL directly
