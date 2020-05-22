@@ -22,7 +22,7 @@ class Polymorph(commands.Cog):
         self.models = {}
 
         self.localcache = None
-        self.cachedchannel = None
+        self.cachedchannel = 419214713252216848 # tentatively load locally cached channel
 
         self.defaultload = "the-soviet-union"
 
