@@ -11,7 +11,7 @@ POLYMORPH
 N-gram based user mimicry tool developed for use with Comrade
 '''
 
-class General(commands.Cog):
+class Polymorph(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     
@@ -35,7 +35,7 @@ class General(commands.Cog):
         '''
         if number > 100 or number < 0:
             await ctx.send("No")
-        elif user := await extractUser(self.bot, ctx, tgt):
+        elif user := await extractUser(ctx, tgt):
             c = self.bot.get_cog("Echo")
 
             if (user.id, ctx.guild.id) in self.models:
@@ -79,7 +79,7 @@ class General(commands.Cog):
         await ctx.trigger_typing()
 
         if cache := getcache(ctx.channel.id) if not self.localcache else self.localcache:
-            if user := await extractUser(self.bot, ctx, tgt):
+            if user := await extractUser(ctx, tgt):
                 t_start = time.perf_counter()
 
                 msgs = [m["content"] for m in cache["cache"] if m["author"] == user.id]

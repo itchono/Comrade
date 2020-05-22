@@ -6,13 +6,12 @@ class General(commands.Cog):
         self.bot = bot
         self._last_member = None
 
-
     @commands.command()
     async def version(self, ctx:commands.Context):
         '''
         Logs version of the bot.
         '''
-        await ctx.send("Comrade is running version: 3.0alpha build May 17")
+        await ctx.send("Comrade is running version: 3.0 alpha build May 21")
 
     @commands.command()
     async def host(self, ctx: commands.Context):
@@ -45,7 +44,7 @@ class General(commands.Cog):
         '''
         await ctx.trigger_typing()
         
-        if u := await extractUser(self.bot, ctx, target):
+        if u := await extractUser(ctx, target):
 
             e = discord.Embed(title="", description = "Sent by {}".format(ctx.author))
             

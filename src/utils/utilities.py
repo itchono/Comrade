@@ -9,6 +9,8 @@ import random
 import datetime
 import pytz
 
+import string
+
 import socket
 
 DEVELOPMENT_MODE = False
@@ -198,27 +200,30 @@ Converters and Stuff
 '''
 
 
-async def extractUser(bot: commands.Bot, ctx: commands.Context, tgt: str):
+async def extractUser(ctx: commands.Context, tgt: str):
     '''
     Returns a server member or user; based on display name in server, user ID, or by mention.
     '''
     if not tgt:
         return None
-
-    u = getUserfromNick(tgt, ctx.guild.id)
-    if tgt.isnumeric():
-        # if user ID
-        u = {"user": int(tgt)}
-    elif not u:
-        # if mention
-        u = {"user": int(tgt[3:-1])} if tgt[3:-1].isnumeric() else None
-
-    if u:
-        return ctx.guild.get_member(u["user"]) if ctx.guild else bot.get_user(
-            u["user"])
+    elif ctx.guild:
+        try:
+            return await commands.MemberConverter().convert(ctx, tgt)
+        except:
+            try:
+                return await commands.MemberConverter().convert(ctx, string.capwords(tgt))
+            except:
+                await ctx.send("Member with input '{}' could not be found.".format(tgt))
+                return None
     else:
-        await ctx.send("User with input '{}' could not be found.".format(tgt))
-        return None
+        try:
+            return await commands.UserConverter().convert(ctx, tgt)
+        except:
+            try:
+                return await commands.UserConverter().convert(ctx, string.capwords(tgt))
+            except:
+                await ctx.send("User with input '{}' could not be found.".format(tgt))
+                return None
 
 
 async def getChannel(guild: discord.Guild, name: str):

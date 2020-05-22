@@ -8,13 +8,15 @@ class Users(commands.Cog):
         self._last_member = None
 
     @commands.command()
-    @commands.check(isServer)
-    async def avatar(self, ctx:commands.Context, target):
+    async def avatar(self, ctx:commands.Context, *, target=None):
         '''
-        Displays the avatar of a target user.
+        Displays the avatar of a target user, self by default
         Made by Slyflare, PhtephenLuu, itchono
         '''
-        if u := await extractUser(self.bot, ctx, target):
+        if not target:
+            target = ctx.author.mention
+
+        if u := await extractUser(ctx, target):
             if ctx.guild:
                 # server environment
                 a = discord.Embed(color=discord.Color.dark_blue(), 
@@ -31,14 +33,15 @@ class Users(commands.Cog):
         # error case triggers automatically.
 
     @commands.command()
-    @commands.check(isServer)
-    async def userinfo(self, ctx, target):
+    async def userinfo(self, ctx, *, target=None):
         '''
         Displays User Information of said person
         Made by Slyflare, upgraded by itchono
         '''
+        if not target:
+            target = ctx.author.mention
 
-        if custom := getCustomUser(target, ctx.guild.id):
+        if ctx.guild and (custom := getCustomUser(target, ctx.guild.id)):
             e = discord.Embed(title="{} (Custom User)".format(target))
             e.set_author(name=f"User Info - {target}")
             e.set_thumbnail(url=custom["url"])
@@ -46,9 +49,8 @@ class Users(commands.Cog):
 
             await ctx.send(embed=e)
  
-        elif member := await extractUser(self.bot, ctx, target):
+        elif member := await extractUser(ctx, target):
             if ctx.guild:
-
                 e = discord.Embed(title="{}".format(member.display_name), colour=member.colour)
                 e.set_author(name=f"User Info - {member}")
                 e.set_thumbnail(url=member.avatar_url)
@@ -69,10 +71,8 @@ class Users(commands.Cog):
                 e.set_author(name=f"User Info - {member}")
                 e.set_thumbnail(url=member.avatar_url)
                 e.set_footer(icon_url=ctx.author.avatar_url)
-                u = getUser(member.id, ctx.guild.id)
-                for c in u:
-                    if c != "_id":
-                        e.add_field(name=c, value=u[c], inline=True)
+                
+                e.add_field(name="No info available", value="Comrade is in a DM environment, and therefore has no information stored. Try calling this in a server with Comrade set up.", inline=True)
 
                 await ctx.send(embed=e)
 

@@ -51,15 +51,20 @@ TOKEN = os.environ.get('TOKEN')  # bot token; kept private
 INIT
 '''
 
+
 client = commands.Bot(command_prefix=BOT_PREFIX,
                       case_insensitive=True)
 
 cogs = [
     AuxilliaryListener, MessageHandler, General, Setup, NSFW, Vault, Echo,
-    Users, Prime, Fun, TimeWizard, Emotes
+    Users, Prime, Fun, TimeWizard, Emotes, Polymorph
 ]
 
 for c in cogs: client.add_cog(c(client))
+
+print("Loading Modules:")
+for c in client.cogs:
+    print("\t", c)
 
 print("Bot components initialized, awaiting login.")
 
