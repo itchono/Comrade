@@ -10,6 +10,8 @@ POLYMORPH
 
 N-gram based user mimicry tool developed for use with Comrade
 '''
+RAM_LIMIT = 10 # max # of active models
+
 
 class Polymorph(commands.Cog):
     def __init__(self, bot):
@@ -31,7 +33,7 @@ class Polymorph(commands.Cog):
     @commands.command(aliases = ["gen"])
     async def polymorph(self, ctx, tgt, number: int = 15):
         '''
-        Generates text from model
+        Generates text from model of a user and outputs it to a channel.
         '''
         if number > 100 or number < 0:
             await ctx.send("No")
@@ -48,6 +50,7 @@ class Polymorph(commands.Cog):
                 await c.echo(ctx, text(model, number), str(user.id), deleteMsg=False)
 
     @commands.command()
+    @commands.check(isOwner)
     async def extractChannel(self, ctx):
         '''
         Extracts all channel data to a list and stores it as a pickle
@@ -80,6 +83,11 @@ class Polymorph(commands.Cog):
 
         if cache := getcache(ctx.channel.id) if not self.localcache else self.localcache:
             if user := await extractUser(ctx, tgt):
+                if len(self.models) > RAM_LIMIT:
+                    self.models.pop(list(self.models.keys()).pop())
+                    await ctx.send("Model cache full. Freeing up cache...")
+                    await ctx.trigger_typing()
+
                 t_start = time.perf_counter()
 
                 msgs = [m["content"] for m in cache["cache"] if m["author"] == user.id]
@@ -97,7 +105,11 @@ class Polymorph(commands.Cog):
             await ctx.send("Please extract the channel first using $c extractChannel.")
 
     @commands.command()
+    @commands.check(isOwner)
     async def buildallmodels(self, ctx):
+        '''
+        Builds all models in a server. DO NOT USE in a RAM-limited environment.
+        '''
         await ctx.send("Building all models. This will take a WHILE.")
         await ctx.trigger_typing()
     
@@ -110,9 +122,10 @@ class Polymorph(commands.Cog):
         await ctx.send("DONE!")
         
     @commands.command()
+    @commands.check(isOwner)
     async def injectcache(self, ctx, filename=None):
         '''
-        Injects dat file into active cache
+        Injects dat file into active cache. Use only if you know what you're doing
         '''
         if not filename:
             self.localcache = None
