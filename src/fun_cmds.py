@@ -14,11 +14,14 @@ class Fun(commands.Cog):
         self._last_member = None
 
     # TODO: add moderation checks
+
     @commands.command()
+    @commands.check(isnotThreat)
     async def textToEmoji(self, ctx, *, text):
         await ctx.send(textToEmoji(text))
 
     @commands.command()
+    @commands.check(isnotThreat)
     async def emojiToText(self, ctx, *, text):
         await ctx.send(emojiToText(text))
 
@@ -71,7 +74,7 @@ class Fun(commands.Cog):
         '''
         nuke
         '''
-        if (ctx.author== await (extractUser(self.bot,ctx,"itchono"))):
+        if (ctx.author== await (extractUser(ctx,"itchono"))):
             await ctx.send("you are in fact bad")
         else:
             await ctx.send("you are in fact non-bad")
@@ -135,14 +138,15 @@ class Fun(commands.Cog):
                 await ctx.send("Nobody said anything so you all get chlamydia!")
 
     @commands.Cog.listener()
+    @commands.cooldown(2, 3, type=commands.BucketType.user)
     async def on_message(self, message: discord.Message):
         '''
         Emoji call listener
         '''
         if message.content.lower()[0:3] == "tte":
-            await self.textToEmoji(await self.bot.get_context(message), text=message.content.lower().strip("tte "))
+            await self.textToEmoji(await self.bot.get_context(message), text=message.content.lower().lstrip("tte "))
         elif message.content.lower()[0:3] == "ett":
-            await self.emojiToText(await self.bot.get_context(message), text=message.content.lower().strip("ett "))
+            await self.emojiToText(await self.bot.get_context(message), text=message.content.lower().lstrip("ett "))
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction:discord.Reaction, user:discord.User):
