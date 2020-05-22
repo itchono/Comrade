@@ -22,7 +22,6 @@ class Polymorph(commands.Cog):
         self.models = {}
 
         self.localcache = None
-        self.cachedchannel = 419214713252216848 # tentatively load locally cached channel
 
         self.defaultload = "the-soviet-union"
 
@@ -30,6 +29,7 @@ class Polymorph(commands.Cog):
 
         with open("polymorph/{}.dat".format(self.defaultload), "rb") as f:
             self.localcache = pickle.load(f)
+            print(self.localcache)
             print("Cache loaded.")
 
     @commands.command(aliases = ["gen"])
@@ -89,10 +89,6 @@ class Polymorph(commands.Cog):
     @commands.command()
     async def modelCacheSize(self, ctx):
         await ctx.send("Current caching {} models locally.".format(len(self.models)))
-
-    @commands.command()
-    async def channelCache(self, ctx):
-        await ctx.send("Current caching channel with ID {}.".format(self.cachedchannel))
     
     @commands.command()
     async def buildmodel(self, ctx, tgt):
@@ -100,12 +96,8 @@ class Polymorph(commands.Cog):
 
         t_start = time.perf_counter()
 
-        if cache := getcache(ctx.channel.id) if not (self.localcache and self.cachedchannel == ctx.channel.id) else self.localcache:
-            self.localcache = cache
-            self.cachedchannel = ctx.channel.id
-
+        if cache := self.localcache:
             if user := await extractUser(ctx, tgt):
-                
                 if len(self.models) >= RAM_LIMIT:
                     self.models.pop(list(self.models.keys()).pop())
                     await ctx.send("Model cache full. Freeing up cache...")
@@ -138,6 +130,13 @@ class Polymorph(commands.Cog):
             await reactX(ctx)
             await ctx.send("Please extract the channel first using $c extractChannel.")
         await ctx.send("DONE!")
+
+    @commands.command()
+    async def recache(self, ctx, channel: discord.TextChannel):
+        '''
+        Changes gen cache to the current channel
+        '''
+        self.localcache = getcache(ctx.channel.id)
         
     @commands.command()
     @commands.check(isOwner)
