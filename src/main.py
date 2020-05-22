@@ -1,10 +1,10 @@
 '''
-Comrade Bot - Serenity-Osprey Branch
+Comrade Bot - Interim Branch
 
-Full Rewrite of functional components of Comrade to be more robust
-Mingde Yin
-
-December 2019 - 2020
+Developed for use while V3 is in development
+Core modules:
+- Daily announcement
+- Moderation
 
 '''
 
@@ -69,58 +69,12 @@ WHITELISTED_CHANNELS = [558408620476203021,
                         522428899184082945]  # TODO Command-ify
 # exempt from filter
 
-VERSION = "Comrade 2.2.1 Build K"
+VERSION = "Comrade v2.3 Interim Patch"
 
 # Temporary Variables
-vaultCandidates = {}
-handoList = {}
 infractions = {}
 
 wholesomebuffer = []
-
-
-# set of valid emotes
-DEFINED_EMOTES = {
-    'angery',
-    'bruh',
-    'chinothink',
-    'choke',
-    'comradelogo',
-    'deskslam',
-    'dummy',
-    'feelsmodsman',
-    'feelssurrenderman',
-    'goldexperience',
-    'hahaa',
-    'hope',
-    'htfu',
-    'jotarogun',
-    'killerqueen',
-    'kilogram2002',
-    'kinthonk',
-    'mald',
-    'mingoggles',
-    'mrping',
-    'nani',
-    'no',
-    'pepeclown',
-    'pepecucumber',
-    'pepegun',
-    'pepeheh',
-    'poggershd',
-    'serverlogo',
-    'smuguca',
-    'spung',
-    'starplatinum',
-    'stickyfingers',
-    'stupid',
-    'truth',
-    'ultrathonk',
-    'ymleayauosi',
-    'zahando'
-}
-
-EMOTE_INDEX = {}
 
 print('All variables loaded.')
 
@@ -155,7 +109,6 @@ async def writeInfo():
         await log("Data Written Successfully.")
     else:
         await log("Data could not be written.")
-
 
 async def reloadVars():
     '''
@@ -222,21 +175,10 @@ async def dailyMSG(force=False):
 
     while not client.is_closed():
         if (datetime.utcnow().date() > lastDaily().date() and datetime.utcnow().hour == 12 and datetime.utcnow().minute <= 5) or force:
-            '''
-            await cleanMSG()
-            asyncio.sleep(30)
-            # allow 30 seconds for script to run to clean messages
-            '''
-            global infractions
-            infractions = {}  # reset infractions
-
-            await client.get_guild(419214713252216848).get_channel(419214713755402262).send('Good morning everyone!\nToday is {}. Have a prosperous day! <:FeelsProsperousMan:419256328465285131>'.format(datetime.utcnow().date()))
             cfg["LAST_DAILY"] = str(datetime.utcnow().date())
             await writeInfo()
             await log("Daily Announcement Made. Current LAST_DAILY = {}".format(cfg["LAST_DAILY"]))
             # make announcement
-            force = False
-
             await dailyRole()  # do daily role
         await asyncio.sleep(60)
 
@@ -486,62 +428,6 @@ async def callQuarantine(ctx):
     user = ctx.message.mentions[0]
     await ctx.send(await quarantine(user))
 
-
-@client.command(name="ZAHANDO")
-@commands.check(isOP)
-async def ZAHANDO(ctx, num):
-    '''
-    Calls on the ZA_HANDO method in command form.
-    '''
-    if len(ctx.message.mentions) > 0:
-        await ZA_HANDO(ctx.message, num=int(num), user=ctx.message.mentions[0])
-    else:
-        await ZA_HANDO(ctx.message, num=int(num))
-
-# Dire moderation methods
-@client.command()
-@commands.check(isOP)
-async def SCRAM(ctx):
-    '''
-    Puts server into lockdown mode. Quite Dangerous.
-    '''
-    cfg["LETHALITY"] = 4
-    await writeInfo()
-    await ctx.send("Global Lethality has been set to {}.".format(cfg["LETHALITY"]))
-    for i in cfg["THREATS"]:
-        quarantine(client.get_guild(419214713252216848).get_member(i))
-    await ctx.send("LOCKDOWN SUCCESSFUL. PROCEED WITH CONTINGENCY OPERATIONS.")
-
-
-@client.command()
-@commands.check(isOwner)
-async def requiem(ctx, mode):
-    '''
-    Generates list of people for a server-wide purge.
-    '''
-    cfg["PURGE"] = [m.id for m in await utilitymodules.generateRequiem(ctx.message, mode)]
-    await writeInfo()
-
-
-@client.command()
-@commands.check(isOwner)
-async def executePurge(ctx):
-    '''
-    Removes all people from PURGE list.
-    '''
-    if cfg["LETHALITY"] >= 4:
-        await ctx.send("Purge started. {} members will be kicked.".format(len(cfg["PURGE"])))
-
-        for i in cfg["PURGE"]:
-            await ctx.guild.kick(ctx.guild.get_member(i))
-
-        await genKick()
-
-        await ctx.send("Purge complete.")
-    else:
-        await ctx.send("Please set global lethality to level 4 or higher. {} members will be kicked.".format(len(cfg["PURGE"])))
-
-
 @client.command()
 @commands.check(isOP)
 async def timeStop(ctx, time):
@@ -649,44 +535,11 @@ async def callreloadVars(ctx):
     await reloadVars()
     await ctx.send("Variables reloaded from file.")
 
-
-@client.command()
-@commands.check(isOwner)
-async def shutdown(ctx):
-    '''
-    Shuts down the bot.
-    '''
-    await client.logout()
-    await client.close()
-    keep_alive.shutdown()
-
-
-@client.command()
-@commands.check(isOwner)
-async def dailyAnnounce(ctx):
-    '''
-    Forces the daily announcement to occur.
-    '''
-    await dailyMSG(force=True)
-
-
-@client.command()
-@commands.check(isOwner)
-async def updateDaily(ctx):
-    '''
-    Force refresh of last_daily variable
-    '''
-    if datetime.utcnow().date() > lastDaily().date() and datetime.utcnow().hour >= 12:
-        cfg["LAST_DAILY"] = str(datetime.utcnow().date())
-        await writeInfo()
-        await log("Force Refreshed Daily. Current LAST_DAILY = {}".format(cfg["LAST_DAILY"]))
-
 '''
 Generalized list functions
 Allows creation of **USER** collections on the fly with custom names
 Will not work with other datatypes for now.
 '''
-
 
 async def addToList(ListName, user, SUDO=False):
     '''
@@ -892,40 +745,6 @@ async def lethalityhelp(ctx):
     '''
     await ctx.send("LETHALITY SYSTEM\nWorks under 2 regimes - Global and Per User.\nGlobal: Enables and disables features at various levels\n0: None\n1: Kicking enabled\n2: Message Filtering for threats enabled\n3: Message filtering for all users enabled\n4: Purge enabled\n\nPer user: Subjects users in THREATS list to stricter conditions; subject to limitation by global lethality\n0: No restrictions\n1: No voting of any form\n2: Messages filtered (relaxed)\n3: Messages filtered strictly\n4: Loss of ability to ping")
 
-# TODO Tomato function refinements
-@client.command(name=u"\U0001F345")
-@commands.check(notThreat)
-async def tomato(ctx, *args):
-    '''
-    System for putting a post into a designated Hall of Fame channel.
-    '''
-    # Mode 1: candidate
-    if (len(args) == 0 or not str(args[0]).isnumeric()):
-        # Determine URL of object
-        u = ''
-        if len(ctx.message.attachments) > 0:
-            u = ctx.message.attachments[0].url
-        else:
-            u = args[0]
-        vaultCandidates[ctx.message.id] = {
-            "Author": ctx.author, "URL": u, "Channel": ctx.channel.name}
-        await ctx.send("Candidate created. One more person must confirm, using $comrade <:tomato:644700384291586059> {}".format(ctx.message.id))
-
-    # Mode 2: vote
-    elif str(args[0]).isnumeric() and int(args[0]) in vaultCandidates and vaultCandidates[int(args[0])]["Author"] != ctx.author:
-        # check if another unique author confirms
-        embed = discord.Embed(
-            title=u"\U0001F345" + ' Vault Entry',
-            description='Sent by ' +
-            vaultCandidates[int(args[0])]["Author"].name +
-            ' in ' + vaultCandidates[int(args[0])]["Channel"],
-            colour=discord.Colour.from_rgb(r=215, g=52, b=42)
-        )
-
-        embed.set_image(url=vaultCandidates[int(args[0])]["URL"])
-
-        await client.get_guild(419214713252216848).get_channel(587743411499565067).send(embed=embed)
-        await ctx.send("Vault operation for message {} successful.".format(int(args[0])))
 # Fun stuff
 @client.command()
 @commands.check(notThreat)
@@ -946,48 +765,11 @@ async def emojiToText(ctx, s):
 
 
 @client.command()
-async def yes(ctx):
-    '''
-    Posts protegent guy saying "Yes"
-    '''
-
-    embed = discord.Embed(
-        title='Yes',
-        colour=discord.Colour.from_rgb(r=215, g=52, b=42)
-    )
-
-    embed.set_image(
-        url="https://i.kym-cdn.com/photos/images/original/001/628/719/085.jpg")
-
-    await ctx.send(embed=embed)
-
-
-@client.command()
 async def version(ctx):
     '''
     Indicates version
     '''
     await ctx.send("Comrade is currently running on version: {}".format(VERSION))
-
-
-async def emoteInterpreter(channel, name):
-    '''
-    Sends custom emote to a channel
-    '''
-    if name.lower() in DEFINED_EMOTES:
-
-        emoteURL = "https://raw.githubusercontent.com/itchono/Comrade/master/CustomEmotes/{}.png".format(
-            name.lower()) if not name.lower() in EMOTE_INDEX else EMOTE_INDEX[name.lower()]
-        # choose between default and custom list of emotes
-
-        embed = discord.Embed()
-        embed.set_image(url=emoteURL)
-
-        await channel.send(embed=embed)
-    else:
-        msg = await channel.send('Invalid Emote. Here is a valid list of emotes: ```{}```'.format(DEFINED_EMOTES))
-        await asyncio.sleep(10)
-        await msg.delete()
 
 
 @client.command()
@@ -1020,15 +802,6 @@ async def constructWBuffer():
     return buffer
 
 
-@client.command()
-@commands.check(isOP)
-async def reloadEmotes(ctx, name):
-    '''
-    Reloads Emotes Database.
-    '''
-    EMOTE_INDEX.clear()
-    await refreshEmotes()
-
 
 @client.command()
 @commands.check(isOP)
@@ -1036,45 +809,6 @@ async def reloadWholesome(ctx, name):
     global wholesomebuffer
     wholesomebuffer = await constructWBuffer()
     await ctx.send("Buffer reconstructed with {} images".format(len(wholesomebuffer)))
-
-
-@client.command()
-async def emote(ctx, name):
-    '''
-    Sends a custom emote. Shorthand --> :emote:
-    '''
-    await emoteInterpreter(ctx.channel, name)
-
-
-@client.command()
-@commands.check(notThreat)
-async def addEmote(ctx, *args):
-    '''
-    Adds a custom emote to the directory of emotes. Provide a NAME and a URL linking directly to a picture, or provide NAME and file
-    '''
-    if len(ctx.message.attachments) > 0:
-        u = ctx.message.attachments[0].url
-    else:
-        u = args[1]  # url term
-
-    await client.get_guild(419214713252216848).get_channel(669353887735611430).send("{}\n{}".format(args[0], u))
-    await refreshEmotes()
-    await ctx.send("Emote {} has been added. You can call it using :{}:".format(args[0], args[0].lower()))
-
-
-@client.command()
-@commands.check(isOP)
-async def removeEmote(ctx, name):
-    '''
-    Removes an emote from the list.
-    '''
-    async for m in client.get_guild(419214713252216848).get_channel(669353887735611430).history(limit=None):
-        if name.lower() in m.content:
-            await m.delete()
-            DEFINED_EMOTES.remove(name.lower())
-            EMOTE_INDEX.pop(name.lower())
-            await ctx.send("Emote {} was removed.".format(name.lower()))
-            continue
 
 
 '''
@@ -1146,38 +880,10 @@ async def STAR_PLATINUM(message, time, DIO=False):
         await asyncio.sleep(5)
         await m2.delete()
 
-
 purge_tgt = None
-
 
 def is_user(m):
     return m.author == purge_tgt
-
-
-async def ZA_HANDO(message, num=20, user=None):
-    '''
-    Purges messages en masse.
-    '''
-    PURGE_REQ = 3  # Tunable
-
-    if message.author.id in cfg["OPS"]:
-        if user is None:
-            await message.channel.purge(limit=num)
-        else:
-            global purge_tgt
-            purge_tgt = user
-            await message.channel.purge(limit=num, check=is_user)
-    else:
-        if not message.channel.id in handoList:
-            handoList[message.channel.id] = [message.author.id]
-            await message.channel.send("Message purge initiated. {0} Votes are needed. ({1}/{2})".format(PURGE_REQ, len(handoList[message.channel.id]), PURGE_REQ))
-        elif not message.author.id in handoList[message.channel.id]:
-            handoList[message.channel.id].append(message.author.id)
-            await message.channel.send("Message purge vote registered. {0}/{1}".format(len(handoList[message.channel.id]), PURGE_REQ))
-            if len(handoList[message.channel.id]) >= PURGE_REQ:
-                await message.channel.purge(limit=num)
-                del handoList[message.channel.id]  # reset list
-
 
 @client.event
 async def on_message(message: discord.message):
@@ -1204,8 +910,6 @@ async def on_message(message: discord.message):
             await STAR_PLATINUM(message, 5)
         elif message.content == "ZA WARUDO":
             await STAR_PLATINUM(message, 10, DIO=True)
-        elif message.content == "ZA HANDO":
-            await ZA_HANDO(message)
 
         # wholesome
         if message.content == ";td":
@@ -1221,11 +925,6 @@ async def on_message(message: discord.message):
             await message.add_reaction(await client.get_guild(419214713252216848).fetch_emoji(609216526666432534))
             668273444684693516
 
-        '''if message.author.id == 545672836124246024 and len(message.mentions) > 0:
-            # react, specifically to raf
-            await message.add_reaction(await client.get_guild(419214713252216848).fetch_emoji(609216526666432534))
-            await message.add_reaction(await client.get_guild(419214713252216848).fetch_emoji(471877591557734401))'''
-
         if message.author in getListUsers("ANTIPING", SUDO=True) and len(message.mentions) > 0:
             # react, specifically to raf
             l = message.content
@@ -1240,10 +939,6 @@ async def on_message(message: discord.message):
 
             await m.delete()
 
-        # emote system
-        if len(message.content) > 0 and message.content[0] == ':' and message.content[-1] == ':':
-            await emoteInterpreter(message.channel, message.content.strip(':'))
-
         await client.process_commands(message)  # interpret commands
 
 
@@ -1255,24 +950,6 @@ async def on_message_edit(OG: discord.message, message: discord.message):
     # Filter message
     if cfg["LETHALITY"] >= 4 or (cfg["LETHALITY"] >= 2 and message.author.id in cfg["THREATS"] and cfg["THREATS"][message.author.id]["LETHALITY"] >= 2):
         await sentinelFilter(message)
-
-
-async def refreshEmotes():
-    emcounter = 0
-
-    async for m in client.get_guild(419214713252216848).get_channel(669353887735611430).history(limit=None):
-        # import custom emotes
-        arr = str(m.content).split("\n")
-
-        DEFINED_EMOTES.add(arr[0].lower())
-
-        EMOTE_INDEX[arr[0].lower()] = arr[1]
-
-        # insert image url
-
-        emcounter += 1
-
-    await log("{} custom emotes loaded".format(emcounter))
 
 '''
 CLIENT INIT Cont'
