@@ -1,4 +1,3 @@
-
 from utils.utilities import *
 from utils.mongo_interface import *
 
@@ -12,13 +11,29 @@ Timed announcements
 class TimeWizard(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.message_buffer = []
+        self.announcements = {"16:57":"Congratulations! Your appendix has ruptured."}
         self._last_member = None
 
         self.dailyannounce.start()
+        self.timedannounce.start()
 
     def cog_unload(self):
         self.dailyannounce.cancel()
+        self.timedannounce.cancel()
+
+    @tasks.loop(minutes=1.0)
+    async def timedannounce(self):
+        '''
+        Makes an announcement
+        '''
+        servers = list(cfgQuery(None))
+
+        for s in servers:
+            now = localTime()
+            for a in self.announcements:
+                if (now.strftime("%H:%M") == a):
+                    c = self.bot.get_channel(s["announcements channel"])
+                    await c.send(self.announcements[a])
 
     @tasks.loop(minutes=5.0)
     async def dailyannounce(self):
@@ -63,6 +78,10 @@ class TimeWizard(commands.Cog):
     
     @dailyannounce.before_loop
     async def before_dailyannounce(self):
+        await self.bot.wait_until_ready()
+
+    @timedannounce.before_loop
+    async def before_timedannounce(self):
         await self.bot.wait_until_ready()
 
     @commands.command()
