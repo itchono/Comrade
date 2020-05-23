@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comrade-deploy
+  namespace: comrade-v3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: comrade-app
+  template:
+    metadata:
+      labels:
+        app: comrade-app
+    spec:
+      containers:
+       - image: itchono/comrade:sha-COMMIT
+         name: comrade-container
+         imagePullPolicy: Always
+      
+         envFrom:
+           - configMapRef:
+               name: comrade-configs
