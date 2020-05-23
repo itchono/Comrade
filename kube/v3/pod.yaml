@@ -7,7 +7,7 @@ metadata:
     app: comrade-app
 spec:
   containers:
-   - image: itchono/comrade:COMMIT
+   - image: itchono/comrade:sha-COMMIT
      name: comrade-container
      imagePullPolicy: Always
   
