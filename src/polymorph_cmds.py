@@ -23,13 +23,22 @@ class Polymorph(commands.Cog):
 
         self.localcache = None
 
-        self.defaultload = "the-soviet-union"
+        self.defaultload = 667245433063735316 # default to channel in my server
 
         self._last_member = None
 
-        with open("polymorph/{}.dat".format(self.defaultload), "rb") as f:
+    @commands.Cog.listener()
+    async def on_ready(self):
+        '''
+        When bot is loaded
+        '''
+        self.localcache = getcache(self.defaultload)
+        print("Message Cache loaded.")
+
+        # wait nvm we have to do it locally for now
+
+        with open("polymorph/the-soviet-union.dat".format(self.defaultload), "rb") as f:
             self.localcache = pickle.load(f)
-            print(self.localcache)
             print("Cache loaded.")
 
     @commands.command(aliases = ["gen"])
@@ -46,12 +55,13 @@ class Polymorph(commands.Cog):
 
             if (user.id, ctx.guild.id) in self.models:
                 model = self.models[(user.id, ctx.guild.id)]
+                await c.echo(ctx, text(model, number), str(user.id), deleteMsg=False)
             else:
                 await ctx.send("Model is not yet built, it will take a bit longer to produce this first iteration of text.")
                 await self.buildmodel(ctx, tgt)
-                model = self.models[(user.id, ctx.guild.id)]
-
-            await c.echo(ctx, text(model, number), str(user.id), deleteMsg=False)
+                if (user.id, ctx.guild.id) in self.models:
+                    model = self.models[(user.id, ctx.guild.id)]
+                    await c.echo(ctx, text(model, number), str(user.id), deleteMsg=False)
 
     @commands.command()
     @commands.check(isOwner)
@@ -60,8 +70,6 @@ class Polymorph(commands.Cog):
         Extracts all channel data to a list and stores it as a pickle
         '''
         msgs = []
-
-        count = 0
 
         await ctx.send("Collecting all info for {}. This will take some time.".format(ctx.channel.mention))
 
@@ -91,52 +99,39 @@ class Polymorph(commands.Cog):
         await ctx.send("Current caching {} models locally.".format(len(self.models)))
     
     @commands.command()
-    async def buildmodel(self, ctx, tgt):
+    async def buildmodel(self, ctx, tgt=None):
         await ctx.trigger_typing()
 
         t_start = time.perf_counter()
 
         if cache := self.localcache:
             if user := await extractUser(ctx, tgt):
+                
                 if len(self.models) >= RAM_LIMIT:
                     self.models.pop(list(self.models.keys()).pop())
                     await ctx.send("Model cache full. Freeing up cache...")
                     await ctx.trigger_typing()
-
                 msgs = [m["content"] for m in cache if m["author"] == user.id]
 
-                model = modelfrommsgs(msgs)
+                model = modelfrommsgs(msgs, n=2)
 
                 self.models[(user.id, ctx.guild.id)] = model
 
                 await ctx.send("Model for {} built in {:.3f}s.".format(user.display_name, time.perf_counter()-t_start))
         else:
             await reactX(ctx)
-            await ctx.send("Please extract the channel first using $c extractChannel.")
-
+            
     @commands.command()
-    @commands.check(isOwner)
-    async def buildallmodels(self, ctx: commands.Context):
-        '''
-        Builds all models in a server. DO NOT USE in a RAM-limited environment.
-        '''
-        await ctx.send("Building all models. This will take a WHILE.")
-        await ctx.trigger_typing()
-    
-        if cache := getcache(ctx.channel.id) if not (self.localcache and self.cachedchannel == ctx.channel.id) else self.localcache:
-            for u in ctx.channel.members:
-                await self.buildmodel(ctx, u.mention)
-        else:
-            await reactX(ctx)
-            await ctx.send("Please extract the channel first using $c extractChannel.")
-        await ctx.send("DONE!")
-
-    @commands.command()
+    @commands.check(isOwner) # temporarily; this will work later
     async def recache(self, ctx, channel: discord.TextChannel):
         '''
         Changes gen cache to the current channel
         '''
-        self.localcache = getcache(ctx.channel.id)
+        self.localcache = getcache(channel.id)
+        if self.localcache:
+            await reactOK(ctx)
+        else:
+            await ctx.send("Please extract the channel first using $c extractChannel.")
         
     @commands.command()
     @commands.check(isOwner)

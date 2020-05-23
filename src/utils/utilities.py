@@ -209,26 +209,21 @@ async def extractUser(ctx: commands.Context, tgt: str):
     '''
     Returns a server member or user; based on display name in server, user ID, or by mention.
     '''
-    if not tgt:
-        return None
-    elif ctx.guild:
-        try:
-            return await commands.MemberConverter().convert(ctx, tgt)
-        except:
-            try:
-                return await commands.MemberConverter().convert(ctx, string.capwords(tgt))
+    try:
+        tgt = tgt.strip("\"")
+        
+        if ctx.guild:
+            try: return await commands.MemberConverter().convert(ctx, tgt)
             except:
-                await ctx.send("Member with input '{}' could not be found.".format(tgt))
-                return None
-    else:
-        try:
-            return await commands.UserConverter().convert(ctx, tgt)
-        except:
-            try:
-                return await commands.UserConverter().convert(ctx, string.capwords(tgt))
+                try: return await commands.MemberConverter().convert(ctx, string.capwords(tgt))
+                except: await ctx.send("Member with input '{}' could not be found.".format(tgt))
+        else:
+            try: return await commands.UserConverter().convert(ctx, tgt)
             except:
-                await ctx.send("User with input '{}' could not be found.".format(tgt))
-                return None
+                try: return await commands.UserConverter().convert(ctx, string.capwords(tgt))
+                except: await ctx.send("User with input '{}' could not be found.".format(tgt))
+    except:
+        pass
 
 
 async def getChannel(guild: discord.Guild, name: str):
@@ -248,7 +243,6 @@ async def getChannel(guild: discord.Guild, name: str):
 '''
 logger
 '''
-
 
 async def log(guild, m: str, embed=None):
     '''
