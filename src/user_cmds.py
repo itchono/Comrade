@@ -16,8 +16,6 @@ class Users(commands.Cog):
         if not target:
             target = ctx.author.mention
 
-        target = target.strip("\"")
-
         if u := await extractUser(ctx, target):
             if ctx.guild:
                 # server environment
@@ -42,8 +40,6 @@ class Users(commands.Cog):
         '''
         if not target:
             target = ctx.author.mention
-
-        target = target.strip("\"")
 
         if ctx.guild and (custom := getCustomUser(target, ctx.guild.id)):
             e = discord.Embed(title="{} (Custom User)".format(target))
