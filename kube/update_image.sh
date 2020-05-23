@@ -8,29 +8,34 @@ update_deploy () {
   
   # status completed and conclusion success and right branch
   local COMMIT=`echo $QUERY | jq --arg branch "$BRANCH" -r '[.workflow_runs[] | select((.status == "completed") and (.conclusion == "success") and (.head_branch == $branch)).head_sha][0]'`
-
-  local TAG="sha-${COMMIT:0:7}"
-  echo "Tag: $TAG"
-
-  local DIR="$(cd "$(dirname "$0")" && pwd)"
-  local FILE="$DIR/${BRANCH}_COMMIT"
-
-  if [ ! -f $FILE ]
+  if [ ${#COMMIT} == 40 ]
   then
-    echo "default" > $FILE
-  fi
-
-  local COMRADE_COMMIT=$(cat "$FILE")
   
-  if [ "$COMMIT" != "$COMRADE_COMMIT" ]
-  then
-    echo "Updating $BRANCH image."
-    echo $COMMIT > $FILE
+    local TAG="sha-${COMMIT:0:7}"
+    echo "Tag: $TAG"
   
-    local KUBE_FILE=$DIR/$UPDATE_FILE
+    local DIR="$(cd "$(dirname "$0")" && pwd)"
+    local FILE="$DIR/${BRANCH}_COMMIT"
   
-    sed -i "s/\\(itchono\/comrade:\\).*/\\1$TAG/" "$KUBE_FILE"
-    #kubectl apply -f $KUBE_FILE
+    if [ ! -f $FILE ]
+    then
+      echo "default" > $FILE
+    fi
+  
+    local COMRADE_COMMIT=$(cat "$FILE")
+    
+    if [ "$COMMIT" != "$COMRADE_COMMIT" ]
+    then
+      echo "Updating $BRANCH image."
+      echo $COMMIT > $FILE
+    
+      local KUBE_FILE=$DIR/$UPDATE_FILE
+    
+      sed -i "s/\\(itchono\/comrade:\\).*/\\1$TAG/" "$KUBE_FILE"
+      kubectl apply -f $KUBE_FILE
+    fi
+  else
+    echo "Query error"
   fi
 }
 
