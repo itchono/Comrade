@@ -18,7 +18,6 @@ import time
 from utils.utilities import *
 from utils.msg_handler import *
 from utils.aux_listeners import *
-from utils.keep_alive import *
 from utils.optimus_prime import *
 from utils.mongo_interface import *
 from utils.time_wizard import *
@@ -52,7 +51,6 @@ INIT
 '''
 
 
-
 client = commands.Bot(command_prefix=BOT_PREFIX,
                       case_insensitive=True,
                       help_command=commands.MinimalHelpCommand())
@@ -62,9 +60,11 @@ cogs = [
     Users, Prime, Fun, TimeWizard, Emotes, Polymorph
 ]
 
-for c in cogs: client.add_cog(c(client))
+for c in cogs:
+    client.add_cog(c(client))
 
 print("Bot components initialized, awaiting login.")
+
 
 @client.event
 async def on_ready():
@@ -79,13 +79,13 @@ async def on_ready():
     print("Server List:")
     for server in client.guilds:
         print("\t{} ({} members)".format(server.name, len(server.members)))
-    
+
     print("Startup completed in {:.2f} seconds.".format(time.perf_counter() -
                                                         start_time))
-    print("Current Local Time: {}".format(localTime().strftime("%I:%M:%S %p %Z")))
+    print("Current Local Time: {}".format(
+        localTime().strftime("%I:%M:%S %p %Z")))
 
     for server in client.guilds:
         await log(server, "Comrade is online, logged in from {}.".format(getHost()))
 
-keep_alive()
 client.run(TOKEN)
