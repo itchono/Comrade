@@ -1,8 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: comrade-deploy
-  namespace: comrade-v3
+  name: comrade-pod
+  namespace: comrade-v2
 spec:
   replicas: 1
   revisionHistoryLimit: 1
@@ -14,11 +14,19 @@ spec:
       labels:
         app: comrade-app
     spec:
+      volumes:
+        - name: comrade-vol
+          persistentVolumeClaim:
+            claimName: comrade-pvc
       containers:
-       - image: itchono/comrade:sha-COMMIT
+       - image: itchono/comrade:sha-75060f5
          name: comrade-container
          imagePullPolicy: Always
       
          envFrom:
            - configMapRef:
                name: comrade-configs
+    
+         volumeMounts:
+           - name: comrade-vol
+             mountPath: /app/data
