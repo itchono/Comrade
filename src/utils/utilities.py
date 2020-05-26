@@ -24,6 +24,10 @@ BOT_PREFIX = "$c "
 DEFAULT_DAILY_COUNT = 2
 # amount of daily member counts everyone starts with
 
+RAM_LIMIT = 10 # max # of active models
+
+MSG_BUFFER_LIMIT = 10 # number of messages to be stored per user in buffer
+
 
 '''
 Checks

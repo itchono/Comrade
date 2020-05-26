@@ -12,8 +12,6 @@ POLYMORPH
 
 N-gram based user mimicry tool developed for use with Comrade
 '''
-RAM_LIMIT = 10 # max # of active models
-
 
 class Polymorph(commands.Cog):
     def __init__(self, bot):

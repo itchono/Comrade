@@ -76,7 +76,7 @@ class Setup(commands.Cog):
 
         else:
             try:
-                u[cfgitem] = int(value)
+                u[cfgitem] = eval(value)
             except:
                 u[cfgitem] = value
             updateUser(u)
@@ -101,7 +101,7 @@ class Setup(commands.Cog):
 
         else:
             try:
-                c[cfgitem] = int(value)
+                c[cfgitem] = eval(value)
             except:
                 c[cfgitem] = value
             updateCFG(c)
