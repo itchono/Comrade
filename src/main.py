@@ -35,6 +35,7 @@ from user_cmds import *
 from fun_cmds import *
 from emote_cmds import *
 from polymorph_cmds import *
+from mod_cmds import *
 '''
 
 VARIABLES
@@ -57,7 +58,7 @@ client = commands.Bot(command_prefix=BOT_PREFIX,
 
 cogs = [
     AuxilliaryListener, MessageHandler, General, Setup, NSFW, Vault, Echo,
-    Users, Prime, Fun, TimeWizard, Emotes, Polymorph
+    Users, Prime, Fun, TimeWizard, Emotes, Polymorph, Moderation
 ]
 
 for c in cogs:

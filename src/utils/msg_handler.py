@@ -28,7 +28,8 @@ class MessageHandler(commands.Cog):
                 await delSend("{}".format(unlucky.mention), message.channel)
 
             if message.author.id == 545672836124246024 and len(
-                    message.attachments) > 0:
+                    message.attachments) + len(
+                    message.embeds) > 0:
                 e = discord.Embed(title="You just posted cringe")
                 e.set_image(
                     url=
