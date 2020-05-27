@@ -20,6 +20,8 @@ class Setup(commands.Cog):
         d["server"] = user.guild.id
         d["muted"] = False
         d["OP"] = False
+        d["stop pings"] = False
+        d["stop images"] = False
         d["daily weight"] = DEFAULT_DAILY_COUNT if not user.bot else 0
         d["bot"] = user.bot
 
