@@ -41,9 +41,17 @@ class Prime(commands.Cog):
             await log(ctx.guild, "ZA HANDO in {}".format(ctx.channel.name))
             await asyncio.sleep(10)
             await m.delete()
-                
+
+    def additionalChecks(self, message: discord.Message):
+        '''
+        Checks a message for additional offending characteristics based on user
+        '''
+        
+        u = getUser(message.author.id, message.guild.id)
+
+        return (u["stop pings"] and len(message.mentions) > 0) or (u["stop images"] and (len(message.attachments) > 0 or len(message.embeds) > 0)) or u["muted"]
             
-    def filter(self, ctx: commands.Context, content: str, msg = None):
+    def filter(self, ctx: commands.Context, content: str):
         '''
         Detects if the string violates the moderation guidelines for a given context.
         Optionally takes in message as filter parameter to stop images and pings
@@ -59,8 +67,6 @@ class Prime(commands.Cog):
         for w in words:
             if (len(query) > 2 and fuzz.partial_ratio(query, w) >= 70) or fuzz.ratio(query, w) >= 70:
                 return True
-        if msg and (len(msg.attachments) > 0 or len(msg.embeds) > 0 or len(msg.mentions) > 0):
-            return True
 
         return False
         
@@ -92,7 +98,7 @@ class Prime(commands.Cog):
             # moderation system
             ctx = await self.bot.get_context(message)
 
-            if self.filter(ctx, message.content, msg=message):
+            if self.filter(ctx, message.content) or self.additionalChecks(message):
                 await message.delete()
             else:
                 try:
@@ -106,7 +112,7 @@ class Prime(commands.Cog):
                 
                 joined = "".join([m.content for m in self.bucket[message.guild.id][message.author.id]])
 
-                if self.filter(ctx, joined, msg=message):
+                if self.filter(ctx, joined):
                     for m in self.bucket[message.guild.id][message.author.id]:
                         try:
                             await m.delete()
