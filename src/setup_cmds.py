@@ -16,9 +16,11 @@ class Setup(commands.Cog):
         d["threat level"] = 0
         d["banned words"] = []
         d["kick votes"] = []
+        d["mute votes"] = []
         d["server"] = user.guild.id
+        d["muted"] = False
         d["OP"] = False
-        d["daily weight"] = 2
+        d["daily weight"] = DEFAULT_DAILY_COUNT if not user.bot else 0
         d["bot"] = user.bot
 
         return d
@@ -141,6 +143,7 @@ class Setup(commands.Cog):
         d["kick requirement"] = 6
         d["lethality override"] = 0
         d["zahando threshold"] = 3
+        d["banned words"] = []
         d["announcements channel"] = -1
         d["meme channel"] = -1
         d["bot channel"] = -1
