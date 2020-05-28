@@ -33,7 +33,7 @@ class Users(commands.Cog):
         # error case triggers automatically.
 
     @commands.command()
-    async def userinfo(self, ctx, *, target=None):
+    async def userinfo(self, ctx: commands.Context, *, target=None):
         '''
         Displays User Information of said person
         Made by Slyflare, upgraded by itchono
@@ -117,7 +117,7 @@ class Users(commands.Cog):
 
     @commands.command()
     @commands.check(isServer)
-    async def addCustomUser(self, ctx, username, avatar_url):
+    async def addCustomUser(self, ctx: commands.Context, username, avatar_url):
         '''
         Adds custom user to database, which can be mentioned.
         '''
@@ -130,7 +130,7 @@ class Users(commands.Cog):
     @commands.command()
     @commands.check(isServer)
     @commands.check(isOP)
-    async def editCustomUser(self, ctx, username, field, value):
+    async def editCustomUser(self, ctx: commands.Context, username, field, value):
         '''
         Edits a custom user's fields
         '''
@@ -152,7 +152,7 @@ class Users(commands.Cog):
     @commands.command()
     @commands.check(isServer)
     @commands.check(isOP)
-    async def removeCustomUser(self, ctx, username):
+    async def removeCustomUser(self, ctx: commands.Context, username):
         '''
         Edits a custom user's fields
         '''

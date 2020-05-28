@@ -53,7 +53,7 @@ class General(commands.Cog):
             await timedSend("DM sent to {}".format(target), ctx.channel)
 
     @commands.command()
-    async def msgInfo(self, ctx, msgid):
+    async def msgInfo(self, ctx: commands.Context, msgid):
         '''
         Gets information about a specific message given an ID.
         '''

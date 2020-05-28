@@ -42,14 +42,21 @@ class Prime(commands.Cog):
             await asyncio.sleep(10)
             await m.delete()
 
-    def additionalChecks(self, message: discord.Message):
+    async def additionalChecks(self, message: discord.Message):
         '''
         Checks a message for additional offending characteristics based on user
         '''
+        try:
+            u = getUser(message.author.id, message.guild.id)
+            if (u["stop pings"] and len(message.mentions) > 0) or (u["stop images"] and (len(message.attachments) > 0 or len(message.embeds) > 0)):
+                c = self.bot.get_cog("Echo")
+                await c.echo(await self.bot.get_context(message), "```" + message.content + "```", str(message.author.id), deleteMsg=False)
+                return True
+            return u["muted"]
         
-        u = getUser(message.author.id, message.guild.id)
-
-        return (u["stop pings"] and len(message.mentions) > 0) or (u["stop images"] and (len(message.attachments) > 0 or len(message.embeds) > 0)) or u["muted"]
+        finally:
+            # if it's not in a server
+            return False
             
     def filter(self, ctx: commands.Context, content: str):
         '''
@@ -98,7 +105,7 @@ class Prime(commands.Cog):
             # moderation system
             ctx = await self.bot.get_context(message)
 
-            if self.filter(ctx, message.content) or self.additionalChecks(message):
+            if self.filter(ctx, message.content) or await self.additionalChecks(message):
                 await message.delete()
             else:
                 try:

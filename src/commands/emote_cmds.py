@@ -30,7 +30,7 @@ class Emotes(commands.Cog):
         print("Emote Cache Built Successfully.")
 
     @commands.command()
-    async def addEmote(self, ctx, name, *args):
+    async def addEmote(self, ctx: commands.Context, name, *args):
         '''
         Adds a custom emote to the Comrade Emote System
         '''

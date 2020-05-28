@@ -65,7 +65,7 @@ class Fun(commands.Cog):
 
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.channel)
-    async def space(self, ctx):
+    async def space(self, ctx: commands.Context):
         '''
         Posts text with stars and space. Best used on dark theme.
         '''
@@ -74,7 +74,7 @@ class Fun(commands.Cog):
     
     @commands.command()
     @commands.check(isnotThreat)
-    async def textToEmoji(self, ctx, *, text):
+    async def textToEmoji(self, ctx: commands.Context, *, text):
         '''
         Converts text to emoji
         '''
@@ -82,7 +82,7 @@ class Fun(commands.Cog):
 
     @commands.command()
     @commands.check(isnotThreat)
-    async def emojiToText(self, ctx, *, text):
+    async def emojiToText(self, ctx: commands.Context, *, text):
         '''
         Converts emoji to text
         '''

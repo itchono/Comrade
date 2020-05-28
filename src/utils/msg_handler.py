@@ -68,12 +68,6 @@ class MessageHandler(commands.Cog):
                     with open("vid/{}".format(fn), "rb") as f:
                         await message.channel.send(file=discord.File(f, fn))
 
-                elif "http" in message.content.lower():
-                    fn = Knuckles_VD[hash(message.content.lower()) %
-                                     len(Knuckles_VD)]
-                    with open("vid/{}".format(fn), "rb") as f:
-                        await message.channel.send(file=discord.File(f, fn))
-
             if "cesb" in message.content.lower():
                 await delSend("https://www.youtube.com/watch?v=ON-7v4qnHP8",
                               message.channel)
