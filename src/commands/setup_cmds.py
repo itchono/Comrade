@@ -9,6 +9,9 @@ class Setup(commands.Cog):
 
     
     def setupuser(self, user: discord.Member):
+        '''
+        Configures a new user for use
+        '''
 
         d = {"user": user.id}
         d["name"] = user.name

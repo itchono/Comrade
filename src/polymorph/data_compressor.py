@@ -1,27 +1,30 @@
-import zlib, base64, ast, pickle
+import zlib, base64, json, pickle
 
 '''
 Comrade - object compressor
 Written for compressing message cache list
 '''
 
-def compressObj(d, level):
+def compressCache(cache, level):
     '''
-    turns {dictionary, list} object into compressed text.
+    turns tuple-less dictionary [JSON] into text
     '''
-    text = str(d)
+    d = {"cache":cache}
+
+    text = json.dumps(d)
+    
     code =  base64.b64encode(
         zlib.compress(
             text.encode("utf-8"), level)
         ).decode("utf-8")
     return code
 
-def decompressObj(code):
+def decompressCache(code):
     '''
-    Decompresses an object
+    Decompresses a json
     '''
     data = zlib.decompress(base64.b64decode(code)).decode("utf-8")
-    d = ast.literal_eval(data)
-    return d
+    d = json.loads(data)
+    return d["cache"]
 
 

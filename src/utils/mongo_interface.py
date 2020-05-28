@@ -114,7 +114,7 @@ def getcache(channelID):
     '''
     channels = client.Comrade.ChannelCache
     d = channels.find_one({"_id": channelID})
-    if d: return decompressObj(d["cache"])
+    if d: return decompressCache(d["cache"])
     return None
 
 

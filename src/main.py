@@ -6,7 +6,7 @@ Mingde Yin
 
 April - May 2020
 
-CONFIGURE LOCAL VARIABLES IN utils.utilities.py
+CONFIGURE LOCAL VARIABLES IN cfg.py
 
 '''
 import os
@@ -26,16 +26,19 @@ from polymorph.text_gen import *
 from polymorph.model_gen import *
 
 # command modules
-from general_cmds import *
-from setup_cmds import *
-from nsfw_cmds import *
-from vault_cmds import *
-from echo_cmds import *
-from user_cmds import *
-from fun_cmds import *
-from emote_cmds import *
-from polymorph_cmds import *
-from mod_cmds import *
+from commands.general_cmds import *
+from commands.setup_cmds import *
+from commands.nsfw_cmds import *
+from commands.vault_cmds import *
+from commands.echo_cmds import *
+from commands.user_cmds import *
+from commands.fun_cmds import *
+from commands.emote_cmds import *
+from commands.polymorph_cmds import *
+from commands.mod_cmds import *
+
+from cfg import *
+
 '''
 
 VARIABLES
