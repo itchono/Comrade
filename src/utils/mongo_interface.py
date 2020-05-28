@@ -117,4 +117,13 @@ def getcache(channelID):
     if d: return decompressCache(d["cache"])
     return None
 
+'''
+Specific I/O
+'''
 
+def userList(username, listname, value):
+    pass
+    #writes to user list
+
+def togglebool(username, valuename):
+    return "new value"

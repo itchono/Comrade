@@ -92,4 +92,11 @@ async def on_ready():
     for server in client.guilds:
         await log(server, "Comrade is online, logged in from {}.".format(getHost()))
 
+@client.check
+async def notUltraThreat(ctx):
+    '''
+    Users with threat level 3 or higher cannot use Comrade's features.
+    '''
+    return isnotUltraThreat(ctx)
+
 client.run(TOKEN)
