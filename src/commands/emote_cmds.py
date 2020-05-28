@@ -27,7 +27,7 @@ class Emotes(commands.Cog):
             async for e in directory.history(limit=None):
                 self.EMOTE_CACHE[g.id][e.content.lower().split("\n")[0]] = e.content.split("\n")[1]
         
-        print("Emote Cache Built Successfully.")
+            await log(g, "Emote Cache Built Successfully.")
 
     @commands.command()
     async def addEmote(self, ctx: commands.Context, name, *args):
@@ -70,7 +70,7 @@ class Emotes(commands.Cog):
                 await message.channel.send(embed=embed)
             except:
                 await reactX(await self.bot.get_context(message))
-                similar = [i for i in self.EMOTE_CACHE[message.guild.id] if fuzz.ratio(i, e) > 60]
+                similar = [i for i in self.EMOTE_CACHE[message.guild.id] if fuzz.partial_ratio(i, e) > 60]
 
                 embed = discord.Embed(description="Emote not found. Did you mean one of the following?")
 

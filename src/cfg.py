@@ -12,4 +12,4 @@ MSG_BUFFER_LIMIT = 10 # number of messages to be stored per user in buffer
 
 DEFAULT_CACHE_LOAD = 667245433063735316 # default to channel in my server
 
-DAILY_MEMBER_COLOUR = "#f1c40f" # colour for daily member
+DAILY_MEMBER_COLOUR = (241, 196, 15) # colour for daily member (RGB)
