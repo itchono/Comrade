@@ -60,9 +60,11 @@ client = commands.Bot(command_prefix=BOT_PREFIX,
                       help_command=commands.MinimalHelpCommand())
 
 cogs = [
-    AuxilliaryListener, MessageHandler, General, Setup, NSFW, Vault, Echo,
+    AuxilliaryListener, MessageHandler, General, Setup, Vault, Echo,
     Users, Prime, Fun, TimeWizard, Emotes, Polymorph, Moderation
 ]
+
+# NOTE: NSFW is temporarily unloaded for hosting purposes.
 
 for c in cogs:
     client.add_cog(c(client))

@@ -50,11 +50,11 @@ class Prime(commands.Cog):
             u = getUser(message.author.id, message.guild.id)
             if (u["stop pings"] and len(message.mentions) > 0) or (u["stop images"] and (len(message.attachments) > 0 or len(message.embeds) > 0)):
                 c = self.bot.get_cog("Echo")
-                await c.echo(await self.bot.get_context(message), "```" + message.content + "```", str(message.author.id), deleteMsg=False)
+                await c.echo(await self.bot.get_context(message), "```I sent a bad message: " + message.content + "```", str(message.author.id), deleteMsg=False)
                 return True
             return u["muted"]
         
-        finally:
+        except:
             # if it's not in a server
             return False
             
