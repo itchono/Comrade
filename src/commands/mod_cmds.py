@@ -68,3 +68,12 @@ class Moderation(commands.Cog):
         usr["kick votes"] = vk
 
         updateUser(usr)
+
+    @commands.check(isOP)
+    async def mod(self, ctx: commands.Context, *, args):
+        '''
+        Moderation interface for Comrade
+        '''
+        args = args.split()
+
+        pass

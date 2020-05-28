@@ -63,7 +63,7 @@ class Polymorph(commands.Cog):
                     pass
     
     @commands.command()
-    async def buildmodel(self, ctx: commands.Context, target=None, recache=True):
+    async def buildmodel(self, ctx: commands.Context, target: str, recache=True):
         '''
         Builds the n-gram model for a user.
         '''
@@ -107,11 +107,12 @@ class Polymorph(commands.Cog):
         self.localcache = getcache(channel.id)
         
         if self.localcache:
-            await delSend("Cache for {} is ready to use.".format(channel.mention), ctx.channel)
             self.localcacheID = channel.id
+            await ctx.send("Cache for {} is ready to use.".format(channel.mention))
+            
         else:
-            await delSend("Please extract the channel first using `{}extractChannel` in {}".format(BOT_PREFIX, channel.mention), ctx.channel)
             self.localcacheID = None
+            await ctx.send("Please extract the channel first using `{}extractChannel` in {}".format(BOT_PREFIX, channel.mention))
 
     @commands.command()
     async def extractChannel(self, ctx: commands.Context):
@@ -129,10 +130,9 @@ class Polymorph(commands.Cog):
         self.localcache = ex
         self.localcacheID = ctx.channel.id
 
-        await ctx.send("Successfully collected all info for {}.".format(ctx.channel.mention))
-
         tx = compressCache(ex, 3)
         fillcache(ctx.channel.id, tx)
+        await ctx.send("{} successfully cached and uploaded.".format(ctx.channel.mention))
         await log(ctx.guild, "Channel extracted: {}".format(ctx.channel.mention))
         await reactOK(ctx)
 

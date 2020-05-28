@@ -179,7 +179,6 @@ async def DM(s: str, member: discord.Member, embed=None):
 Image Extractor
 '''
 
-
 async def getavatar(member: discord.Member):
     '''
     Returns file bytes of avatar
@@ -191,7 +190,6 @@ async def getavatar(member: discord.Member):
 '''
 Converters and Stuff
 '''
-
 
 async def extractUser(ctx: commands.Context, tgt: str):
     '''
