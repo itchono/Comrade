@@ -130,6 +130,39 @@ class Prime(commands.Cog):
                 elif len(self.bucket[message.guild.id][message.author.id]) > MSG_BUFFER_LIMIT:
                     self.bucket[message.guild.id][message.author.id].pop(0)
 
+    @commands.Cog.listener()
+    async def on_message_edit(self, before: discord.message, message: discord.message):
+        '''
+        Catch people trying to edit messages
+        '''
+        # moderation system
+        ctx = await self.bot.get_context(message)
+
+        if self.filter(ctx, message.content) or await self.additionalChecks(message):
+            await message.delete()
+        else:
+            try:
+                self.bucket[message.guild.id][message.author.id] += [message]
+            except:
+                try:
+                    self.bucket[message.guild.id] = {}
+                    self.bucket[message.guild.id][message.author.id] = [message]
+                except:
+                    pass
+            
+            joined = "".join([m.content for m in self.bucket[message.guild.id][message.author.id]])
+
+            if self.filter(ctx, joined):
+                for m in self.bucket[message.guild.id][message.author.id]:
+                    try:
+                        await m.delete()
+                    except:
+                        print("Cannot delete message {}".format(m.content))
+                self.bucket[message.guild.id][message.author.id] = []
+            
+            elif len(self.bucket[message.guild.id][message.author.id]) > MSG_BUFFER_LIMIT:
+                self.bucket[message.guild.id][message.author.id].pop(0)
+
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction,

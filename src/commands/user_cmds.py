@@ -79,7 +79,7 @@ class Users(commands.Cog):
     '''
     Random User Functions
     '''
-    def rebuildUserCache(self):
+    async def rebuildUserCache(self):
         '''
         Rebuilds the random user cache for all servers.
         '''
@@ -98,7 +98,8 @@ class Users(commands.Cog):
                     d["daily weight"] = 2
                     updateUser(d)
                 print("Refilled daily count for {}".format(g))
-        print("User Cache Built Successfully.")
+            
+            await log(g, "User Cache Built Successfully.")
 
     @commands.command()
     @commands.check(isServer)
@@ -181,6 +182,6 @@ class Users(commands.Cog):
         '''
         When bot is loaded, rebuild the cache.
         '''
-        self.rebuildUserCache()
+        await self.rebuildUserCache()
 
     

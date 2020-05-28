@@ -19,9 +19,7 @@ class TimeWizard(commands.Cog):
     def cog_unload(self):
         self.timedannounce.cancel()
 
-    async def dailyRole(self, guild: discord.Guild):
-
-
+    
     async def dailyannounce(self, channel: discord.TextChannel, serverDB: dict):
         '''
         Daily announcement
@@ -52,8 +50,20 @@ class TimeWizard(commands.Cog):
 
         await channel.send("Today's Bonus Daily Member is {}".format(luckyperson.display_name))
         await cog.userinfo(ctx, target=luckyperson.mention)
+
+        dailyrole = await dailyRole(channel.guild)
+
+        for m in dailyrole.members:
+            # remove bearer of previous daily role
+            roles = m.roles
+            roles.remove(dailyrole)
+            await m.edit(roles=roles)
         
-        cog.rebuildUserCache()
+        roles = luckyperson.roles
+        roles.append(dailyrole)
+        await luckyperson.edit(roles=roles)
+        
+        await cog.rebuildUserCache()
 
     @tasks.loop(minutes=1.0)
     async def timedannounce(self):
@@ -74,8 +84,8 @@ class TimeWizard(commands.Cog):
     async def before_timedannounce(self):
         await self.bot.wait_until_ready()
 
-    @commands.check(isOwner)
     @commands.command()
+    @commands.check(isOwner)
     async def testannounce(self, ctx: commands.Context):
         '''
         Tests making an announcement

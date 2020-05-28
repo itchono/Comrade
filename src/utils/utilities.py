@@ -10,9 +10,7 @@ import requests
 import random
 import datetime
 import pytz
-
 import string
-
 import socket
 
 '''
@@ -239,6 +237,7 @@ async def log(guild, m: str, embed=None):
     Logs a message in the server's log channel in a clean embed form, or sends a pre-made embed.
     '''
     lgc = await getChannel(guild, "log channel")
+    #print("LOG [{}] {} -- {}".format(guild.name, localTime().strftime("%I:%M:%S %p %Z"), m)) # for testing
     if not embed:
         embed = discord.Embed(title="Log Entry", description=m)
         embed.add_field(name="Time", value=(localTime().strftime("%I:%M:%S %p %Z")))
@@ -253,6 +252,30 @@ def getHost():
         return "{}".format(host_name)
     except: 
         return "IP could not be determined."
+
+'''
+Roles
+'''
+
+async def dailyRole(guild: discord.Guild):
+    '''
+    Returns the Comrade "Member of the Day" role for a guild, if it exists, or creates it
+    '''
+    for role in guild.roles:
+        if role.name == "Member of the Day":
+            return role
+    
+    return await guild.create_role(name="Member of the Day", colour=discord.Colour.from_rgb(*DAILY_MEMBER_COLOUR), mentionable=True)
+
+async def mutedRole(guild: discord.Guild):
+    '''
+    Returns the Comrade "Comrade-Mute" role for a guild, if it exists, or creates it
+    '''
+    for role in guild.roles:
+        if role.name == "Comrade-Mute":
+            return role
+    
+    return await guild.create_role(name="Comrade-Mute")
 
 '''
 Misc
