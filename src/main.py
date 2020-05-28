@@ -3,7 +3,7 @@ Comrade Bot - Interim Branch
 
 Developed for use while V3 is in development
 Core modules:
-- Moderation
+- User lists
 
 '''
 
@@ -64,9 +64,6 @@ except:
 PROTECTED_NAMES = ["LETHALITY", "THREATS", "kickVotes", "OPS",
                    "GLOBAL_BANNED_WORDS", "PURGE", "LAST_DAILY", "KICK_REQ", "KICK_SAFE", "ANTIPING"]
 # Protected dictionary elements in cfg file
-WHITELISTED_CHANNELS = [558408620476203021,
-                        522428899184082945]  # TODO Command-ify
-# exempt from filter
 
 VERSION = "Comrade v2.3.1 Interim Patch 2"
 
@@ -90,9 +87,6 @@ async def log(msg):
     Logs stuff into preferred log channel and keeps server-side log.
     '''
     await client.get_guild(419214713252216848).get_channel(446457522862161920).send(msg)
-    with open("log.txt", "a") as f:
-        f.write("{0} UTC: {1}\n".format(datetime.utcnow(), msg))
-
 
 async def writeInfo():
     '''
@@ -116,13 +110,6 @@ async def reloadVars():
     reload(comrade_cfg)
     cfg = comrade_cfg.data
     await log("Variables Successfully Reloaded From File.")
-
-
-def lastDaily():
-    '''
-    returns last_daily in more compact syntax
-    '''
-    return datetime.strptime(cfg["LAST_DAILY"], "%Y-%m-%d")
 
 
 async def cleanMSG():
@@ -490,15 +477,6 @@ async def checkList(ctx, ListName):
         await ctx.send("List \"{}\" consists of the following:{}".format(ListName, getListUserNames(ListName)))
     else:
         await ctx.send("That list does not exist!")
-
-# Bot cleaning
-@client.command()
-async def clear(ctx):
-    '''
-    Clears all messages, callable from bot.
-    '''
-    await cleanMSG()
-    await ctx.message.delete()
 
 # *STATUS OF BOT TODO
 @client.command()
