@@ -3,9 +3,7 @@ Comrade Bot - Interim Branch
 
 Developed for use while V3 is in development
 Core modules:
-- Daily announcement
 - Moderation
-- text-to-emoji conversion
 
 '''
 
@@ -70,10 +68,9 @@ WHITELISTED_CHANNELS = [558408620476203021,
                         522428899184082945]  # TODO Command-ify
 # exempt from filter
 
-VERSION = "Comrade v2.3 Interim Patch"
+VERSION = "Comrade v2.3.1 Interim Patch 2"
 
 # Temporary Variables
-infractions = {}
 
 wholesomebuffer = []
 
@@ -141,49 +138,6 @@ async def cleanMSG():
                 except:
                     await log("Some messages could not be deleted.")
 
-
-async def dailyRole():
-    '''
-    Sets new daily member, removing all previous daily member roles
-    '''
-    members = list(filter(lambda member: (not member.bot),
-                          client.get_guild(419214713252216848).members))
-    random.seed()  # important to seed random user
-    chosenone = random.randint(0, len(members)-1)
-
-    s = members[chosenone].name
-
-    for member in client.get_guild(419214713252216848).members:
-        currRoles = member.roles
-        for r in currRoles:
-            if r.id == 655670092679479296:  # Daily
-                currRoles.remove(r)
-                await member.edit(roles=currRoles)
-                # remove the role if Daily'd
-        if member == members[chosenone]:
-            currRoles.append(client.get_guild(
-                419214713252216848).get_role(655670092679479296))
-            await member.edit(roles=currRoles)
-            await client.get_guild(419214713252216848).get_channel(419214713755402262).send('Today\'s daily member is {}'.format(s))
-
-
-async def dailyMSG(force=False):
-    '''
-    Daily routine at 7 AM EST. Used to make announcement and some others.
-    Can be force called.
-    '''
-    await client.wait_until_ready()
-
-    while not client.is_closed():
-        if (datetime.utcnow().date() > lastDaily().date() and datetime.utcnow().hour == 12 and datetime.utcnow().minute <= 5) or force:
-            cfg["LAST_DAILY"] = str(datetime.utcnow().date())
-            await writeInfo()
-            await log("Daily Announcement Made. Current LAST_DAILY = {}".format(cfg["LAST_DAILY"]))
-            # make announcement
-            await dailyRole()  # do daily role
-        await asyncio.sleep(60)
-
-
 async def genKick():
     '''
     Generates/Regenerates kicklist for all members on server
@@ -195,96 +149,6 @@ async def genKick():
 
     await writeInfo()
     await log("Kicklist regenerated - {} members loaded.".format(len(cfg["kickVotes"])))
-
-
-async def quarantine(user: discord.user):
-    '''
-    (user object)
-
-    Quarantines or unquarantines a user.
-    '''
-    currRoles = user.roles
-    isQ = False
-    for r in currRoles:
-        if r.id == 613106246874038274:  # quarantine role
-            isQ = True
-            currRoles.remove(r)
-            # remove the role if quarantined
-        elif r.id == 419215295232868361:  # regular role
-            currRoles.remove(r)
-    if isQ:
-        currRoles.append(client.get_guild(
-            419214713252216848).get_role(419215295232868361))
-        await log("User Released: {}".format(user.name))
-        await user.edit(roles=currRoles)
-        return '{} has been returned to society.'.format(user.name)
-    else:
-        currRoles.append(client.get_guild(
-            419214713252216848).get_role(613106246874038274))
-        await log("User Quarantined: {}".format(user.name))
-        await user.edit(roles=currRoles)
-        return '{} has been quarantined.'.format(user.name)
-
-
-async def sentinelFilter(message: discord.message):
-    '''
-    Sentinel message filtering system, allows for multivalent toggles
-    '''
-    THRESHOLD = 70
-
-    if not message.channel.id in WHITELISTED_CHANNELS:
-        # Stage 1: text detection
-        # clean message content down to text
-        query = re.sub("\W+", '', unidecode.unidecode(message.content.lower()))
-
-        # 3 Stages of filtering: 1) Emoji pass through 2) Eliminating nonstandard unicode chars 3) Regex Substitutions to eliminate non word characters
-
-        # determines whether message filtering should be relaxed (needs exact content) or strict (75% match)
-        strict = (message.author.id in cfg["THREATS"] and cfg["THREATS"]
-                  [message.author.id]["LETHALITY"] >= 3) or cfg["LETHALITY"] >= 3
-        superStrict = (message.author.id in cfg["THREATS"] and cfg["THREATS"][message.author.id]
-                       ["LETHALITY"] >= 4) or cfg["LETHALITY"] >= 3  # even more strict filtering when needed
-
-        for word in set(cfg["GLOBAL_BANNED_WORDS"]).union(set(cfg["THREATS"][message.author.id]["BANNED_WORDS"] if message.author.id in cfg["THREATS"] else set())):
-            # checks every banned word for that user
-            if (word in query or (len(query) > 2 and strict and fuzz.partial_ratio(word, query) > THRESHOLD)) or (word in utilitymodules.emojiToText(message.content.lower()) or (strict and fuzz.partial_ratio(word, utilitymodules.emojiToText(message.content.lower())) > THRESHOLD)):
-                # passes query through fuzzy filtering system IF length of word is long enough and author is subhect to strict filtering
-                await message.delete()
-                await log('Message purged for bad word:\n' + str(message.content) + "\nSent By " + str(message.author.name) + "\nTrigger:" + str(word) + "\nMatch %:" + str(max([fuzz.partial_ratio(word, query), fuzz.partial_ratio(word, utilitymodules.emojiToText(message.content.lower()))])))
-                await infraction(message, message.author, int(cfg["THREATS"][message.author.id]["LETHALITY"]/4))
-
-        # Stage 2: Attachment Filtering
-        if strict and (len(message.attachments) > 0 or len(message.embeds) > 0):
-            await message.delete()
-            await log('Message purged for embed; sent by ' + str(message.author.name))
-            await infraction(message, message.author, int(cfg["THREATS"][message.author.id]["LETHALITY"]/4)*2)
-
-        # Stage 3: Ping Filtering
-        if superStrict and len(message.mentions) > 0:
-            await message.delete()
-            await message.channel.send("USELESS PING DETECTED SENT BY {}".format(message.author.mention))
-            await infraction(message, message.author, int(cfg["THREATS"][message.author.id]["LETHALITY"]/4)*4)
-
-
-async def infraction(msg, user, weight):
-    '''
-    Social credit-esque score used to punish users.
-    '''
-    LIMIT = 10
-
-    if (weight > 0):
-        if not user.id in infractions:
-            infractions[user.id] = weight
-        else:
-            infractions[user.id] += weight
-        m = await msg.channel.send("{3} demerit points added to {0}. ({1}/{2})".format(user.mention, infractions[user.id], LIMIT, weight))
-        await log("{3} demerit points added to {0}. ({1}/{2})".format(user.mention, infractions[user.id], LIMIT, weight))
-        await asyncio.sleep(10)
-        await m.delete()
-
-        if infractions[user.id] >= LIMIT:
-            await msg.channel.send("Kicking {}...".format(user.name))
-            await msg.guild.kick(user)
 
 '''
 COMMANDS
@@ -419,16 +283,6 @@ async def setKickReq(ctx, Knew):
     else:
         await ctx.send("Invalid input.")
 
-
-@client.command(name="quarantine")
-@commands.check(isOP)
-async def callQuarantine(ctx):
-    '''
-    Quarantines mentioned user
-    '''
-    user = ctx.message.mentions[0]
-    await ctx.send(await quarantine(user))
-
 @client.command()
 @commands.check(isOP)
 async def timeStop(ctx, time):
@@ -465,47 +319,6 @@ async def removeThreat(ctx):
         await writeInfo()
         await ctx.send("Threat removed.")
 
-
-@client.command()
-@commands.check(isOP)
-async def addBanWord(ctx, word):
-    '''
-    Adds a banned word, either to the global set or to a particular user.
-    Use "" Quotes to enclose larger phrases
-    '''
-    if len(ctx.message.mentions) == 0 and not word.lower() in cfg["GLOBAL_BANNED_WORDS"]:
-        # global
-        cfg["GLOBAL_BANNED_WORDS"].add(word.lower())
-        await writeInfo()
-        await ctx.send("{} Has been added to the global blacklist.".format(word.lower()))
-    else:
-        user = ctx.message.mentions[0]
-        if user.id in cfg["THREATS"] and not word.lower() in cfg["THREATS"][user.id]["BANNED_WORDS"]:
-            # per user
-            cfg["THREATS"][user.id]["BANNED_WORDS"].add(word.lower())
-            await writeInfo()
-            await ctx.send("{} Has been added to the blacklist for {}.".format(word.lower(), user.name))
-
-
-@client.command()
-@commands.check(isOP)
-async def removeBanWord(ctx, word):
-    '''
-    Remove a word from eithe the global or a particular blacklist.
-    '''
-    if len(ctx.message.mentions) == 0 and word.lower() in cfg["GLOBAL_BANNED_WORDS"]:
-        # global
-        cfg["GLOBAL_BANNED_WORDS"].remove(word.lower())
-        await writeInfo()
-        await ctx.send("{} Has been removed from the global blacklist.".format(word.lower()))
-    else:
-        user = ctx.message.mentions[0]
-        if user.id in cfg["THREATS"] and word.lower() in cfg["THREATS"][user.id]["BANNED_WORDS"]:
-            # per user
-            cfg["THREATS"][user.id]["BANNED_WORDS"].remove(word.lower())
-            await writeInfo()
-            await ctx.send("{} Has been removed from the blacklist for {}.".format(word.lower(), user.name))
-
 # Maintainence methods
 @client.command()
 @commands.check(isOP)
@@ -515,16 +328,6 @@ async def resetKick(ctx):
     '''
     await genKick()
     await ctx.send("Kick Votes list has been successfully generated.")
-
-
-@client.command()
-@commands.check(isOP)
-async def resetInfractions(ctx):
-    '''
-    Resets demerit points
-    '''
-    global infractions
-    infractions = {}
 
 
 @client.command(name="reloadVars")
@@ -634,19 +437,6 @@ async def removeKickSafe(ctx):
     user = ctx.message.mentions[0]
     await removeFromList("KICK_SAFE", user, SUDO=True)
 
-
-@client.command()
-@commands.check(isOP)
-async def antiping(ctx):
-    '''
-    Prevents user from pinging
-    '''
-    user = ctx.message.mentions[0]
-    if user in getListUsers("ANTIPING", SUDO=True):
-        await removeFromList("ANTIPING", user, SUDO=True)
-    else:
-        await addToList("ANTIPING", user, SUDO=True)
-
 # Custom list additions
 @client.command()
 async def helpList(ctx):
@@ -745,24 +535,6 @@ async def lethalityhelp(ctx):
     Gives a quick guide on lethality.
     '''
     await ctx.send("LETHALITY SYSTEM\nWorks under 2 regimes - Global and Per User.\nGlobal: Enables and disables features at various levels\n0: None\n1: Kicking enabled\n2: Message Filtering for threats enabled\n3: Message filtering for all users enabled\n4: Purge enabled\n\nPer user: Subjects users in THREATS list to stricter conditions; subject to limitation by global lethality\n0: No restrictions\n1: No voting of any form\n2: Messages filtered (relaxed)\n3: Messages filtered strictly\n4: Loss of ability to ping")
-
-# Fun stuff
-@client.command()
-@commands.check(notThreat)
-async def textToEmoji(ctx, s):
-    '''
-    Uses the emoji converter in utilities to convert a string of text to emoji.
-    '''
-    await ctx.send(utilitymodules.textToEmoji(s))
-
-
-@client.command()
-@commands.check(notThreat)
-async def emojiToText(ctx, s):
-    '''
-    Uses the emoji converter in utilities to convert some emojis to plaintext.
-    '''
-    await ctx.send(utilitymodules.emojiToText(s))
 
 
 @client.command()
@@ -893,18 +665,11 @@ async def on_message(message: discord.message):
     '''
     if message.author != client.user:
         # Check to prevent feedback loop
-
-        # Filter messages
-        if cfg["LETHALITY"] >= 4 or (cfg["LETHALITY"] >= 2 and message.author.id in cfg["THREATS"] and cfg["THREATS"][message.author.id]["LETHALITY"] >= 2):
-            await sentinelFilter(message)
-
         # Greeting function (one of the earliest functions that Comrade had)
         if 'hello comrade' in message.content.lower():
             await message.channel.send('Henlo')
         elif 'henlo comrade' in message.content.lower():
             await message.channel.send('Hello')
-        elif 'comrade' in message.content.lower() and fuzz.partial_ratio('hello', message.content.lower()) > 50 and not '$' in message.content.lower():
-            await message.channel.send('Good day!')
 
         # fun stuff
         if message.content == "STAR PLATINUM":
@@ -926,31 +691,7 @@ async def on_message(message: discord.message):
             await message.add_reaction(await client.get_guild(419214713252216848).fetch_emoji(609216526666432534))
             668273444684693516
 
-        if message.author in getListUsers("ANTIPING", SUDO=True) and len(message.mentions) > 0:
-            # react, specifically to raf
-            l = message.content
-
-            await message.delete()
-
-            m = await message.channel.send("Message deleted due to useless ping mentioning {}".format(message.mentions[0].name))
-
-            await message.channel.send("```" + l + "```")
-
-            await asyncio.sleep(5)
-
-            await m.delete()
-
         await client.process_commands(message)  # interpret commands
-
-
-@client.event
-async def on_message_edit(OG: discord.message, message: discord.message):
-    '''
-    Triggers when message is edited.
-    '''
-    # Filter message
-    if cfg["LETHALITY"] >= 4 or (cfg["LETHALITY"] >= 2 and message.author.id in cfg["THREATS"] and cfg["THREATS"][message.author.id]["LETHALITY"] >= 2):
-        await sentinelFilter(message)
 
 '''
 CLIENT INIT Cont'
@@ -983,12 +724,6 @@ async def on_ready():
     # DONE
     print("Done! Time taken: {}".format(datetime.utcnow() - t_start))
 
-# Client startup PT 2
-print('Starting Internal Server...')
-# Create webserver to keep bot running on Repl.it
-#keep_alive.keep_alive()
-# Create loop task to perform timed actions
-client.loop.create_task(dailyMSG())
 # Finally, start the bot
 client.run(TOKEN)
 
