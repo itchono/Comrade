@@ -1,4 +1,4 @@
-#import interface
+#import comrade_interface
 
 def interp(AST, env):
     AST_type = AST["type"]
@@ -36,6 +36,14 @@ def interp_struct(AST, env):
 
         if already_exists == True:
             env[var] = temp
+    elif stype == "While":
+        loop_bool = interp_bool(AST["cond"], env)
+
+        while loop_bool:
+            for element in AST["while"]:
+                interp(element, env)
+
+            loop_bool = interp_bool(AST["cond"], env)
 
     else:
         raise SyntaxError("Invalid struct type in interp_struct: " + stype)
@@ -49,6 +57,8 @@ def interp_action(action, env):
         env[action["args"][0]] = interp_atom(action["args"][1], env)
     elif atype == "Add" or atype == "Sub" or atype == "Mul" or atype == "Div":
         env[action["args"][0]] = bin_op(interp_atom(action["args"][1], env), interp_atom(action["args"][2], env), atype)
+    elif atype == "Call":
+        interp_call(action["args"], env)
     else: 
         raise SyntaxError("Invalid action type in interp_action: " + atype)
 
@@ -78,3 +88,30 @@ def bin_op(a, b, op):
         return str(int(a) * int(b))
     elif op == "Div":
         return str(int(a) / int(b))
+
+def interp_bool(bool_stmt, env):
+    if len(bool_stmt) == 3:
+        a = bool_stmt[0]
+        b = bool_stmt[2]
+        c = bool_stmt[1]
+
+        if c == "==":
+            return interp_atom(a, env) == interp_atom(b, env)
+        elif c == "!=":
+            return interp_atom(a, env) != interp_atom(b, env)
+        elif c == ">":
+            return interp_atom(a, env) > interp_atom(b, env)
+        elif c == "<":
+            return interp_atom(a, env) < interp_atom(b, env)
+        elif c == ">=":
+            return interp_atom(a, env) >= interp_atom(b, env)
+        elif c == "<=":
+            return interp_atom(a, env) >= interp_atom(b, env)
+
+def interp_call(d_call, env):
+    out_str = ""
+    for arg in d_call:
+        out_str = out_str + interp_atom(arg, env) + " "
+
+    print(out_str)
+    #print to discord

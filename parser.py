@@ -40,6 +40,13 @@ def parse_struct(program):
             loop["iter"].append(parse_struct(program))
         program.pop(0)
         return loop
+    elif line[0] == "WHILE":
+        loop = {"type": "Struct", "stype": "While", "while": [], "cond": line[1:]}
+
+        while program[0].split()[0] != "WHILEEND":
+            loop["while"].append(parse_struct(program))
+        program.pop(0)
+        return loop
     else:
         return parse_action(line[0], line[1:])
 
@@ -64,7 +71,7 @@ def parse_action(cmd, line):
 
 if __name__ == "__main__":
     #take in input as string
-    input_str = "[stylem, things]\nPRINT 3\nPRINT 4\nITER abba [one,two,three]\nCALL $c avatar itchono\nITER beta [cool,when]\nPRINT heyo\nITEREND hehe\nITEREND stuff\nPRINT hi"
+    input_str = "[style, them]\nSET test 4\nPRINT &test\nWHILE test > 1\nCALL $c avatar itchono\nITER beta [cool,when]\nPRINT heyo\nITEREND hehe\nSUB test &test 1\nWHILEEND\nPRINT hi"
 
     #seperate program into individual lines
     splt_line_lst = token_list(input_str)
