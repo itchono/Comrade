@@ -55,7 +55,7 @@ def parse_struct(program):
         program.pop(0)
         return cond
     elif line[0] == "CASE":
-        case = {"type": "Struct", "stype": "Case", "case": []}
+        case = {"type": "Struct", "stype": "Case", "case": [], "cond": line[1:]}
 
         cmd = program[0].split()[0]
         while cmd != "CASE" and cmd != "CONDEND":
