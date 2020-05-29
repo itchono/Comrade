@@ -9,10 +9,10 @@ def token_line(input_str):
 def get_env(splt_line_lst):
     first_line = splt_line_lst.pop(0)
 
-    if re.search(r"\[((([a-zA-Z])+\,\s)+(([a-zA-Z])+)|([a-zA-Z]+))\]", first_line) is None:
+    if re.search(r"\[((([a-zA-Z])+\,)+(([a-zA-Z])+)|([a-zA-Z]+))\]", first_line) is None:
         raise SyntaxError("Missing or incorrect function parameters")
 
-    env_list = first_line.replace("[", "").replace("]", "").replace(",", "").split()
+    env_list = first_line.replace("[", "").replace("]", "").replace(",", " ").split()
 
     env_dict = {}
 

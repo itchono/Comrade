@@ -3,7 +3,7 @@ from interp import interp
 
 if __name__ == "__main__":
     #take in input as string
-    input_str = "[hello, there]\nITER val [1,2,3]\nPRINT &val\nITEREND"
+    input_str = "[hello,there]\nITER val [1,2,3]\nPRINT &val\nITEREND"
 
     #seperate program into individual lines
     splt_line_lst = token_list(input_str)
