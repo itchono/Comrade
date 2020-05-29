@@ -1,39 +1,5 @@
 #import interface
 
-"""
-def interp_AST(AST, env):
-    atype = AST["type"]
-
-    if atype == "Sequence":
-        interp_seq(AST["seq"], env)
-    else:
-        raise SyntaxError("Invalid AST Type in interp_AST: " + atype)
-
-def interp_seq(seq, env):
-    for stmt in seq:
-        interp_stmt(stmt, env)
-
-def interp_stmt(stmt, env):
-    stype = stmt["type"]
-
-    if stype == "Action":
-        interp_action(stmt["action"], env)
-    else:
-        raise SyntaxError("Invalid AST Type in interp_stmt: " + stype)
-
-def interp_action(action, env):
-    atype = action["type"]
-
-    if atype == "Print":
-        print(interp_atom(action["args"], env))
-    elif atype == "Set":
-        env[action["args"][0]] = interp_atom(action["args"][1], env)
-    elif atype == "Add" or atype == "Sub" or atype == "Mul" or atype == "Div":
-        env[action["args"][0]] = bin_op(interp_atom(action["args"][1], env), interp_atom(action["args"][2], env), atype)
-    else: 
-        raise SyntaxError("Invalid AST Type in interp_action: " + atype)
-"""
-
 def interp(AST, env):
     AST_type = AST["type"]
 
@@ -50,8 +16,27 @@ def interp_struct(AST, env):
     if stype == "Main":
         for element in AST["seq"]:
             interp(element, env)
-    elif stype == "Loop":
-        print("looped")
+    elif stype == "Iter":
+        items = AST["items"]
+        var = AST["var"]
+
+        already_exists = False
+
+        if var in env:
+            already_exists = True
+            temp = env[var]
+
+        env.update({var: None})
+
+        for item in items:
+            env[var] = item
+            
+            for element in AST["iter"]:
+                interp(element, env)
+
+        if already_exists == True:
+            env[var] = temp
+
     else:
         raise SyntaxError("Invalid struct type in interp_struct: " + stype)
 

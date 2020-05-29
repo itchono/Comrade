@@ -33,11 +33,11 @@ def parse(program):
 def parse_struct(program):
     line = program.pop(0).split()
 
-    if line[0] == "LOOP":
-        loop = {"type": "Struct", "stype": "Loop", "loop": []}
+    if line[0] == "ITER":
+        loop = {"type": "Struct", "stype": "Iter", "iter": [], "var": line[1], "items": line[2].replace("[", "").replace("]", "").split(",")}
 
-        while program[0].split()[0] != "LOOPEND":
-            loop["loop"].append(parse_struct(program))
+        while program[0].split()[0] != "ITEREND":
+            loop["iter"].append(parse_struct(program))
         program.pop(0)
         return loop
     else:
@@ -64,7 +64,7 @@ def parse_action(cmd, line):
 
 if __name__ == "__main__":
     #take in input as string
-    input_str = "[stylem, things]\nPRINT 3\nPRINT 4\nLOOP stuff\nCALL $c avatar itchono\nLOOP cool \nPRINT heyo\nLOOPEND hehe\nLOOPEND stuff\nPRINT hi"
+    input_str = "[stylem, things]\nPRINT 3\nPRINT 4\nITER abba [one,two,three]\nCALL $c avatar itchono\nITER beta [cool,when]\nPRINT heyo\nITEREND hehe\nITEREND stuff\nPRINT hi"
 
     #seperate program into individual lines
     splt_line_lst = token_list(input_str)
