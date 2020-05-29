@@ -1,5 +1,5 @@
-from parser import token_list, get_env, parse_program
-from interp import interp_AST
+from parser import token_list, get_env, parse
+from interp import interp
 
 if __name__ == "__main__":
     #take in input as string
@@ -12,7 +12,7 @@ if __name__ == "__main__":
     env = get_env(splt_line_lst)
 
     #parse program
-    ast = parse_program(splt_line_lst)
+    ast = parse(splt_line_lst)
 
     #interp ast with given env
-    interp_AST(ast, env)
+    interp(ast, env)

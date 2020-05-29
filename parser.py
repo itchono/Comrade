@@ -1,5 +1,4 @@
 import re
-#import comrade_interface from interface
 
 def token_list(input_str):
     return input_str.splitlines()
@@ -22,48 +21,50 @@ def get_env(splt_line_lst):
 
     return env_dict
 
-def parse_program(program):
-    ast = {"type": "Sequence", "seq": []}
 
-    for i in range(len(program)):
-        line = program.pop(0)
-        parse_line(line, program, ast["seq"])
+def parse(program):
+    seq = {"type": "Struct", "stype": "Main", "seq": []}
 
-    return ast
+    while len(program) > 0:
+        seq["seq"].append(parse_struct(program))
 
-def parse_line(line, program, seq):
-    splt_line = token_line(line)
-    
-    cmd = splt_line.pop(0)
+    return seq;
 
-    if cmd == "LOOP":
-        print("looping???")
-        raise SyntaxError("loop?")
+def parse_struct(program):
+    line = program.pop(0).split()
+
+    if line[0] == "LOOP":
+        loop = {"type": "Struct", "stype": "Loop", "loop": []}
+
+        while program[0].split()[0] != "LOOPEND":
+            loop["loop"].append(parse_struct(program))
+        program.pop(0)
+        return loop
     else:
-        seq.append({"type": "Action", "action": parse_action(cmd, splt_line)})
+        return parse_action(line[0], line[1:])
 
 def parse_action(cmd, line):
     if cmd == "CALL":
-        return {"type": "Call", "args": line}
+        return {"type": "Action", "atype": "Call", "args": line}
     elif cmd == "PRINT":
-        return {"type": "Print", "args": line.pop(0)}
+        return {"type": "Action", "atype": "Print", "args": line.pop(0)}
     elif cmd == "SET":
-        return {"type": "Set", "args": line}
+        return {"type": "Action", "atype": "Set", "args": line}
     elif cmd == "ADD":
-        return {"type": "Add", "args": line}
+        return {"type": "Action", "atype": "Add", "args": line}
     elif cmd == "SUB":
-        return {"type": "Add", "args": line}
+        return {"type": "Action", "atype": "Sub", "args": line}
     elif cmd == "MUL":
-        return {"type": "Add", "args": line}
+        return {"type": "Action", "atype": "Mul", "args": line}
     elif cmd == "DIV":
-        return {"type": "Add", "args": line}
+        return {"type": "Action", "atype": "Div", "args": line}
     else:
         errorStr = "Unknown action: " + cmd + " with args: " + "".join(line)
         raise SyntaxError(errorStr)
 
 if __name__ == "__main__":
     #take in input as string
-    input_str = "[stylem, things]\nPRINT 3\nPRINT 4\nCALL $c avatar itchono"
+    input_str = "[stylem, things]\nPRINT 3\nPRINT 4\nLOOP stuff\nCALL $c avatar itchono\nLOOP cool \nPRINT heyo\nLOOPEND hehe\nLOOPEND stuff\nPRINT hi"
 
     #seperate program into individual lines
     splt_line_lst = token_list(input_str)
@@ -72,6 +73,6 @@ if __name__ == "__main__":
     env = get_env(splt_line_lst)
     
     #parse program
-    ast = parse_program(splt_line_lst)
+    ast = parse(splt_line_lst)
 
     print("ast:", ast)
