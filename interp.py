@@ -44,7 +44,12 @@ def interp_struct(AST, env):
                 interp(element, env)
 
             loop_bool = interp_bool(AST["cond"], env)
-
+    elif stype == "Cond":
+        for case in AST["case"]:
+            if interp_bool(case["cond"], env):
+                for element in case["case"]:
+                    interp(element, env)
+                break
     else:
         raise SyntaxError("Invalid struct type in interp_struct: " + stype)
 
@@ -107,6 +112,19 @@ def interp_bool(bool_stmt, env):
             return interp_atom(a, env) >= interp_atom(b, env)
         elif c == "<=":
             return interp_atom(a, env) >= interp_atom(b, env)
+        else:
+            raise SyntaxError("not a valid boolean comparison in interp_bool: " + c)
+    elif len(bool_stmt) == 1:
+        bool_val = interp_atom(bool_stmt[0], env)
+
+        if bool_val == "true":
+            return True
+        elif bool_val == "false":
+            return False
+        else:
+            raise SyntaxError("Not a valid boolean value in interp_bool: " + bool_val)
+    else:
+        raise SyntaxError("Not a valid set of boolean arguments in interp_bool: " + str(bool_stmt))
 
 def interp_call(d_call, env):
     out_str = ""

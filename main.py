@@ -3,7 +3,7 @@ from interp import interp
 
 if __name__ == "__main__":
     #take in input as string
-    input_str = "[hello,there]\nSET test 5\nWHILE &test > 1\nSUB test &test 1\nPRINT &test\nWHILEEND"
+    input_str = "[hello,there]\nCOND\nCASE 0 > 1\nPRINT yes\nCASE 0 < 1\nPRINT no\nCONDEND"
 
     #seperate program into individual lines
     splt_line_lst = token_list(input_str)
