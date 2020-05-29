@@ -47,6 +47,21 @@ def parse_struct(program):
             loop["while"].append(parse_struct(program))
         program.pop(0)
         return loop
+    elif line[0] == "COND":
+        cond = {"type": "Struct", "stype": "Cond", "case": []}
+        
+        while program[0].split()[0] != "CONDEND":
+            cond["case"].append(parse_struct(program))
+        program.pop(0)
+        return cond
+    elif line[0] == "CASE":
+        case = {"type": "Struct", "stype": "Case", "case": []}
+
+        cmd = program[0].split()[0]
+        while cmd != "CASE" and cmd != "CONDEND":
+            case["case"].append(parse_struct(program))
+            cmd = program[0].split()[0]
+        return case
     else:
         return parse_action(line[0], line[1:])
 
@@ -71,7 +86,7 @@ def parse_action(cmd, line):
 
 if __name__ == "__main__":
     #take in input as string
-    input_str = "[style, them]\nSET test 4\nPRINT &test\nWHILE test > 1\nCALL $c avatar itchono\nITER beta [cool,when]\nPRINT heyo\nITEREND hehe\nSUB test &test 1\nWHILEEND\nPRINT hi"
+    input_str = "[style,them]\nCOND\nCASE x > 3\nPRINT 3\nCASE x > 2\nPRINT 2\nCASE x == 1\nPRINT 1\nCONDEND\nPRINT done"
 
     #seperate program into individual lines
     splt_line_lst = token_list(input_str)
