@@ -1,5 +1,9 @@
 #import comrade_interface
 
+def fill_env(env):
+    for var in env:
+        env[var] = input()
+
 def interp(AST, env):
     AST_type = AST["type"]
 

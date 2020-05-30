@@ -10,6 +10,7 @@ if __name__ == "__main__":
 
     #get env from first line
     env = get_env(splt_line_lst)
+    #fill_env(env)
 
     #parse program
     ast = parse(splt_line_lst)
