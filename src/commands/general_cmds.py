@@ -11,7 +11,7 @@ class General(commands.Cog):
         '''
         Logs version of the bot.
         '''
-        await ctx.send("Comrade is running version: 3.0 alpha build May 30 v1")
+        await ctx.send("Comrade is running version: 3.0 alpha build May 30 v2")
 
     @commands.command()
     async def host(self, ctx: commands.Context):
