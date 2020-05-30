@@ -8,6 +8,11 @@ Currently implemented features:
  - Setting and Reading Variables
  - Printing
  - Iter loop
+ - While loop
+ - Conditionals
+ - Boolean Statement
+ - Calling discord functions
+
 
 ## Function Parameters
 Every program needs to start with a list of function parameters
@@ -17,6 +22,7 @@ Every program needs to start with a list of function parameters
 Make sure there are no spaces the between the values. All lists in Cosmo do not have spaces seperating the values. Cosmo is very space sensitive.
 
 Important: All Cosmo scripts must include this section and will not run without it. In subsequent examples, _we will however omit this for the sake of simplicity_.
+
 
 ## Basic Math
 
@@ -51,6 +57,7 @@ e.g.
 DIV x 4 2 //sets x to 2
 ```
 
+
 ## Setting and Reading Variables
 
 **Setting vars**
@@ -74,6 +81,7 @@ SET y 5
 ADD z &x &y //set z equal to the sum of the values at x and y
 ```
 
+
 ## Printing
 **Printing**
 PRINT x
@@ -92,6 +100,7 @@ SET x 2
 PRINT x //prints x
 ```
 
+
 ## Looping
 **Start Iter**
 ITER i [x,y,z...]
@@ -107,5 +116,68 @@ outlines the end of the section that needs to be looped with the iterator
 ITER x [1,2,3,4,5,6,7] //this loop prints out all the numbers in the list: all the numbers from 1 to 7
 PRINT x 
 ITEREND
+```
+
+**Start While**
+WHILE <bool-stmt>
+denotes the start of a while loop. It requires a boolean statement as an argument which evaluates to either true or false. Boolean statements will be covered further on in the documentation.
+
+**WHILEEND**
+denotes the end of the while loop
+
+```
+SET x 5
+WHILE x > 0 //counts down from 5 until it hits 0
+PRINT &x
+SUB x &x 1
+WHILEEND
+```
+
+
+## Conditionals
+**Start of Conditional**
+COND
+A series of conditionals must first be prefaced with the keyword COND
+
+**End of Conditional**
+CONDEND
+denotes the end of a series of conditionals
+
+**Cases**
+CASE <bool-stmt>
+if the boolean statement is satisfied, the lines following this will be executed
+
+```
+SET x 5
+COND
+CASE x > 5
+PRINT higher
+CASE x < 5
+PRINT lower
+CASE x == 5
+PRINT equal //this series of conditional cases will print "equal"
+CONDEND
+```
+
+
+## Boolean Statements
+**Boolean Literal**
+literal = true | false
+for any boolean statement, you can put directly either true or false
+
+**Boolean Expression**
+you can use any of your standard comparisons to compare two numbers or two strings
+cmp = > | >= | < | <= | == | !=
+
+Important: make sure you seperate the individual arguments with spaces
+
+
+## Calling Discord Functions
+**Call**
+CALL <discord-function>
+allows you to call a discord function with arguments from within the script
+
+```
+CALL $c avatar vdoubleu
 ```
 
