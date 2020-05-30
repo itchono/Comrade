@@ -62,6 +62,14 @@ def parse_struct(program):
             case["case"].append(parse_struct(program))
             cmd = program[0].split()[0]
         return case
+    elif line[0] == "ELSE":
+        case = {"type": "Struct", "stype": "Case", "case": [], "cond": ["true"]}
+
+        cmd = program[0].split()[0]
+        while cmd != "CASE" and cmd != "CONDEND":
+            case["case"].append(parse_struct(program))
+            cmd = program[0].split()[0]
+        return case
     else:
         return parse_action(line[0], line[1:])
 
