@@ -48,9 +48,6 @@ class TimeWizard(commands.Cog):
         updateUser(d)
         # self regulating; once probability drops to zero, we just need to refill.
 
-        await channel.send("Today's Bonus Daily Member is {}".format(luckyperson.display_name))
-        await cog.userinfo(ctx, target=luckyperson.mention)
-
         dailyrole = await dailyRole(channel.guild)
 
         for m in dailyrole.members:
@@ -62,6 +59,9 @@ class TimeWizard(commands.Cog):
         roles = luckyperson.roles
         roles.append(dailyrole)
         await luckyperson.edit(roles=roles)
+
+        await channel.send("Today's Bonus Daily Member is {}".format(luckyperson.display_name))
+        await cog.userinfo(ctx, target=luckyperson.mention)
         
         await cog.rebuildUserCache()
 
