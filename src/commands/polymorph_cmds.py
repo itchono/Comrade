@@ -32,7 +32,7 @@ class Polymorph(commands.Cog):
 
         if self.localcache:
             print("Message Cache loaded.")
-            self.localcacheID = self.defaultload
+            self.localcacheID = DEFAULT_CACHE_LOAD
         else:
             print("WARN: Error loading message cache.")
 
