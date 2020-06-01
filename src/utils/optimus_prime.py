@@ -88,19 +88,22 @@ class Prime(commands.Cog):
                 if len(args) > 2 and args[2].isnumeric():
                     amount = int(args[2])
 
-                m = await message.channel.send(
-                    "React with '✋' to purge the channel of {} messages {}".
-                    format(
-                        amount,
-                        ("from " +
-                         str(message.mentions[0])) if message.mentions else "")
-                )
-                self.activepurge[m.id] = {
-                    "amount": amount,
-                    "user": message.mentions[0] if message.mentions else None
-                }
+                if amount > 200 and not isUserOP(message.author):
+                    await message.channel.send("No")
+                else:
+                    m = await message.channel.send(
+                        "React with '✋' to purge the channel of {} messages {}".
+                        format(
+                            amount,
+                            ("from " +
+                            str(message.mentions[0])) if message.mentions else "")
+                    )
+                    self.activepurge[m.id] = {
+                        "amount": amount,
+                        "user": message.mentions[0] if message.mentions else None
+                    }
 
-                await m.add_reaction("✋")
+                    await m.add_reaction("✋")
 
             # moderation system
             ctx = await self.bot.get_context(message)
