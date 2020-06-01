@@ -24,6 +24,30 @@ class NSFW(commands.Cog):
         if "next" in message.content.lower() and message.channel.id == getCFG(message.guild.id)["hentai channel"]:
             await self.hentai(ctx = await self.bot.get_context(message), args = self.last_search)
 
+
+    @commands.command()
+    async def favourite(self, ctx: commands.Context, imageID: int, url: str):
+        '''
+        Adds an image to the favourites list
+        '''
+        updateFavourite(int(imageID), url, ctx.guild.id)
+        await reactOK(ctx)
+
+    @commands.command()
+    async def listfavourites(self, ctx:commands.Context):
+        '''
+        Lists all favourited images
+        '''
+
+        favs = allFavourites(ctx.guild.id)
+
+        e = discord.Embed(title="All Favourites for {}".format(ctx.guild.name))
+
+        for entry in favs:
+            e.add_field(name=str(entry["imageID"]), value=str(entry["URL"]))
+
+        await ctx.send(embed=e)
+
     @commands.command()
     async def hentai(self, ctx: commands.Context, *, args:str = ""):
         '''

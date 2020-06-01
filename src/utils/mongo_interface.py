@@ -118,6 +118,27 @@ def getcache(channelID):
     return None
 
 '''
+Favourites Interface
+'''
+
+def updateFavourite(imageID:int, imgurl:str, serverID):
+    favourites = client.Comrade.favourites
+
+    thingy = {"imageID":imageID, "URL":imgurl, "server":serverID}
+
+    favourites.update({"imageID":imageID}, thingy, True)
+    # (search target, info to put in, should we INSERT if no matching records are found?)
+
+def allFavourites(serverID):
+    '''
+    Returns a list of all favourited hentai images in given server
+    '''
+    favourites = client.Comrade.favourites
+
+    return list(favourites.find({"server":serverID}))
+
+
+'''
 Specific I/O
 '''
 
