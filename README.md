@@ -181,3 +181,80 @@ allows you to call a discord function with arguments from within the script
 CALL $c avatar vdoubleu
 ```
 
+# Implementation
+
+This section gives some details into how the interpreter was constructed. 
+
+This interpreter works in two parts, it first parses the program into an AST and then this AST is interpreted. 
+
+## Parsing
+
+Parsing this language is relatively easy as it relies on the fact that each line will have one command or statement. This means we can reliably just first split the language into lines for parsing. After this, we can begin to formally parse the language into an AST.
+
+The AST is constructed via a combination of numerous nodes where each node contains all the information necessary to interpret it. Nodes in this language are modeled using python dictionaries.
+
+Nodes in this AST are divided into two main types based on their function. Each of these are directly related to a line. Every line or node can be either a structural command or an action command. Structural commands are things like markers for loops, conditionals, etc. whereas actions are things like print, call, set, add etc. 
+
+To determine their type, each node has the value 'type' which can either be 'Struct' or 'Action'.
+```
+type = Struct | Action
+```
+
+Struct or structural components are then further divided into different types of structural components using the value 'stype' which can a multitude of values. Most of the names should be self explanetory and should reference the keyword in the actual language. The only case to be aware of is 'Main' which denotes the main body of the program. It can be assumed that the entire program is wrapped within main.
+```
+stype = Main | Iter | While | Cond | Case 
+``` 
+Depending on the structural component, there will probably also be additional key value pairs which contain additional information about the structural component. 
+
+**Iter**:
+The Iter struct should look like the following:
+`{"type": "Struct", "stype": "Iter", "iter": [], "var": _, "items": _}`
+The 'iter' item should contain a list of the commands that need to be interpreted.
+The 'var' item should contain the newly defined variable that acts as a place holder for items within the list of the iter loop.
+The 'items' item should contain a list of the items that need to be iterated through.
+
+**While**:
+The While struct should look like the following:
+`{"type": "Struct", "stype": "While", "while": [], "cond": _}`
+The 'while' item should contain a list of the commands that need to be interpreted.
+The 'cond' item should contain a boolean statement that needs to be interpreted.
+
+**Cond**:
+The cond struct should look like the following:
+`{"type": "Struct", "stype": "Cond", "case": []}`
+The 'case' item should contain a list of case structs that need to be interpreted.
+
+**Case**:
+The case struct should look like the following:
+`{"type": "Struct", "stype": "Case", "case": [], "cond": _}`
+The 'case' item should contain a list of commands that need to be interpreted.
+The 'cond' item should contain a boolean statement that needs to be interpreted to determine whether the case needs to be interpreted.
+
+
+Action components are also further divided into various different types of action components using the value 'atype'. These should also all be self explanetory as they correlate directly with the the command they represent in the actual language.
+```
+atype = Call | Print | Set | Add | Sub | Mul | Div
+```
+
+Action components all look the same:
+`{"type": "Action", "atype": _, "args": []}`
+Where 'atype' is one of the possible atypes and 'args' is the arguments fed into that action.
+
+
+## Interpreting
+
+The interpreter first creates a dictionary to simulate an environment where variables and their values are stored. 
+
+The current interpreter works by recursively calling itself on its components. It first splits the main interp function into two different interp functions depending on whether it is an action or a structural component. 
+
+The interp\_struct function is where the structural components are interpreted based on their stype.
+
+The interp\_action function is where the action components are interpreted based on their atype.
+
+To differentiate variables from string and the like, the ampersand symbol(&) is used. To interpret this, an interp\_atom function is called on every single value to determine if it is a variable or just a value.
+
+The bin\_op functions is used to interpret binary operations. 
+
+The interp\_bool function is used to interpret boolean statements.
+
+A final interp\_call function is used to interpret any call statements that then need to be forwarded to Discord.
