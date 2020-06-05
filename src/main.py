@@ -25,6 +25,8 @@ from utils.time_wizard import *
 from polymorph.text_gen import *
 from polymorph.model_gen import *
 
+from crimson.command_assembler import *
+
 # command modules
 from commands.general_cmds import *
 from commands.setup_cmds import *
@@ -61,7 +63,7 @@ client = commands.Bot(command_prefix=BOT_PREFIX,
 
 cogs = [
     AuxilliaryListener, MessageHandler, General, Setup, Vault, Echo,
-    Users, Prime, Fun, TimeWizard, Emotes, Polymorph, Moderation
+    Users, Prime, Fun, TimeWizard, Emotes, Polymorph, Moderation, CustomCommands
 ]
 
 # NOTE: NSFW is temporarily unloaded for hosting purposes.

@@ -36,7 +36,6 @@ class Setup(commands.Cog):
         '''
         POTENTIALLY DESTRUCTIVE. repopulates the UserData collection on Atlas with default values.
         '''
-        await ctx.channel.trigger_typing()
         for user in ctx.guild.members:
             # each user is stored, themselves each as a dictionary
             updateUser(self.setupuser(user))
