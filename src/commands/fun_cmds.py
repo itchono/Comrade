@@ -108,7 +108,8 @@ class Fun(commands.Cog):
         initiate fanfiction
         by Kevinozoid.
         '''
-        req = urllib.request.urlopen(site, timeout=10)
+        await ctx.send("No")
+        """req = urllib.request.urlopen(site, timeout=10)
         html = req.read()
         soup = BeautifulSoup(html)
 
@@ -130,7 +131,7 @@ class Fun(commands.Cog):
 
         for s in string:
             if not s=='' and not s==' ' and not s== '  ' and len(s)>20:
-                await ctx.send(s)
+                await ctx.send(s)"""
 
     @commands.command()
     @commands.check(isnotThreat)
