@@ -137,6 +137,31 @@ def allFavourites(serverID):
 
     return list(favourites.find({"server":serverID}))
 
+'''
+Commands
+'''
+
+def updateCmd(serverID:int, name:str, cmdText:str):
+    '''
+    Updates a custom commands
+    '''
+    cfg = client.Comrade.CustomCommands
+
+    thingy = {"server": serverID, "name":name, "cmd":cmdText}
+
+    cfg.update({"server": serverID, "name":name}, thingy, True)
+    # (search target, info to put in, should we INSERT if no matching records are found?)
+
+def getCmd(serverID: int, name : str):
+    '''
+    Gets a custom command.
+    '''
+    cfg = client.Comrade.CustomCommands
+
+    if c := cfg.find_one({"server": serverID, "name":name}):
+        return c["cmd"]
+    return None
+
 
 '''
 Specific I/O
