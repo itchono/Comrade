@@ -25,6 +25,7 @@ class NSFW(commands.Cog):
         self.cur_page = 0
         self.prev_search = None
         self.extensions = None
+        self.prev_tag = ""
 
     @commands.command()
     async def nsearch(self, ctx: commands.Context, *, args:str = "big breasts"):
@@ -35,19 +36,27 @@ class NSFW(commands.Cog):
         url = 'https://nhentai.net/search/?q='
         for i in range(len(tags)):
             url += (tags[i] + '+')
+        request = urllib.request.Request(url,None,headers)
         try:
-            request = urllib.request.Request(url,None,headers)
+            response = urllib.request.urlopen(request)
         except ValueError:
             await ctx.send(
                 "No results found. Please try another tag.")
             return
         
-        response = urllib.request.urlopen(request)
+        
         data = response.read()
         soup = BeautifulSoup(data, 'html.parser')
         x = soup.h2.string
         num_results = re.split('\s', x)[0]
         num_results = re.split('\,', num_results)
+        if 'No' in (num_results):
+            await ctx.send(
+                "No results found. Please try another tag.")
+            return
+        
+        self.prev_tag = args
+
         num = ""
         for k in range(len(num_results)):
             num += num_results[k]
@@ -57,9 +66,7 @@ class NSFW(commands.Cog):
         else:
             num_pages = num//25
         page = randrange(1, num_pages + 1)
-        print(page)
         url2 = url + '&page={page}'.format(page=page)
-        print(url2)
         request = urllib.request.Request(url2,None,headers)
         response = urllib.request.urlopen(request)
         data = response.read()
@@ -74,27 +81,28 @@ class NSFW(commands.Cog):
             if re.search("^/g/\d+", thing2):
                 search_number = int(re.findall(r"g/(\d+)/", thing2)[0])
                 list_nums.append(search_number)
-                print(list_nums)
+   
         search = list_nums[randrange(len(list_nums))]
-        print(search)
+      
         await self.nhentai(ctx = ctx, args = search)
 
 
 
     @commands.command()
-    async def nhentai(self, ctx: commands.Context, args:int = 222222):
+    async def nhentai(self, ctx: commands.Context, args:int = 295198):
         self.cur_page = 0
         user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
         headers={'User-Agent':user_agent,}
         url = 'https://nhentai.net/g/{num}/'.format(num=args)
+        request = urllib.request.Request(url,None,headers)
         try:
-            request = urllib.request.Request(url,None,headers)
-        except ValueError:
+            response = urllib.request.urlopen(request)
+        except:
             await ctx.send(
                 "No results found. Please try another entry.")
             return
         
-        response = urllib.request.urlopen(request)
+        
         data = response.read()
         soup = BeautifulSoup(data, 'html.parser')
         thing = soup.find_all('meta')[3]
@@ -103,36 +111,47 @@ class NSFW(commands.Cog):
         title = str(title)
         title = re.findall(r'(?<=").*?(?=")', title)[0]
 
-        # wot = str(soup.find_all('section')[1])
-        # wot = BeautifulSoup(wot)
-        # hi = BeautifulSoup(str(wot.find_all('a')[12]))
-        # gyuh = str(hi.a['href'])
-        # araragi_san = re.findall(r'(?<=/).*?(?=/)', gyuh)
-        #cararagi_san.pop(0)
-        
+        araragi_san = []
 
+        wot = str(soup.find_all('section')[1])
+        wot = BeautifulSoup(wot)
+        hi = wot.find_all('a')
+        for k in range(len(hi)):
+	        penis_birth = hi[k]
+	        nipple_birth = BeautifulSoup(str(penis_birth))
+	        ntr = nipple_birth.a['href']
+	        if re.search('/artist/', ntr):
+		        araragi_san = re.findall(r'(?<=/).*?(?=/)', ntr)
+        
+        gallerynumber = int(re.findall(r"galleries/(\d+)/cover.", thing)[0])
 
         imgs = []
-        for i in range(len(soup.find_all('noscript')) - 11):
+        for i in range(len(soup.find_all('noscript'))):
             s = soup.find_all('noscript')[i]
             s = str(s)
             new_soup = BeautifulSoup(s)
             x = new_soup.img['src']
-            y = re.split("\.", x)
+            if re.search('/{}/'.format(gallerynumber), s):
+                y = re.split("\.", x)
             imgs.append(y[len(y) - 1])
         self.extensions = imgs
 
+        if araragi_san:
+            araragi_san.pop(0)
+            value = araragi_san[0]
+        else:
+            value = "N/A"
 
-        gallerynumber = int(re.findall(r"galleries/(\d+)/cover.", thing)[0])
+        
         img_url = 'https://t.nhentai.net/galleries/{gallerynumber}/cover.'.format(gallerynumber = gallerynumber) + imgs[0]
         e = discord.Embed(
                             title=title,
                             description='ID: {postid}'.format(postid=args),
                             url=url,
                             color=0xfecbed)
-        # e.add_field(name='artists',
-        #                             value=araragi_san,
-        #                             inline=True)
+        e.add_field(name='artist',
+                                     value=value,
+                                     inline=True)
         e.set_image(url=img_url)
         await ctx.send(embed=e)
         self.prev_search = gallerynumber
@@ -141,6 +160,8 @@ class NSFW(commands.Cog):
     async def on_message(self, message: discord.message):
         if "next" in message.content.lower() and message.channel.id == getCFG(message.guild.id)["hentai channel"]:
             await self.hentai(ctx = await self.bot.get_context(message), args = self.last_search)
+        if "retry" in message.content.lower() and message.channel.id == getCFG(message.guild.id)["hentai channel"]:
+            await self.nsearch(ctx = await self.bot.get_context(message), args = self.prev_tag)
         if "np" in message.content.lower() and message.channel.id == getCFG(message.guild.id)["hentai channel"]:
             ctx = await self.bot.get_context(message)
             self.cur_page += 1
