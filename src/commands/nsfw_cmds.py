@@ -7,22 +7,154 @@ import json
 import string
 import io
 import aiohttp
+import re
+import urllib.request
+from bs4 import BeautifulSoup
+from random import randrange
 
 
 class NSFW(commands.Cog):
     '''
     Hentai.
-    Credits to Sunekku.
+    Credits to Sunekku (Nuha Sahraoui).
     '''
     def __init__(self, bot):
         self.bot = bot
         self._last_member = None
         self.last_search = ""
+        self.cur_page = 0
+        self.prev_search = None
+        self.extensions = None
+
+    @commands.command()
+    async def nsearch(self, ctx: commands.Context, *, args:str = "big breasts"):
+        
+        user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
+        headers={'User-Agent':user_agent,}
+        tags = re.split("\s", args)
+        url = 'https://nhentai.net/search/?q='
+        for i in range(len(tags)):
+            url += (tags[i] + '+')
+        try:
+            request = urllib.request.Request(url,None,headers)
+        except ValueError:
+            await ctx.send(
+                "No results found. Please try another tag.")
+            return
+        
+        response = urllib.request.urlopen(request)
+        data = response.read()
+        soup = BeautifulSoup(data, 'html.parser')
+        x = soup.h2.string
+        num_results = re.split('\s', x)[0]
+        num_results = re.split('\,', num_results)
+        num = ""
+        for k in range(len(num_results)):
+            num += num_results[k]
+        num = int(num)
+        if num % 25 != 0:
+	        num_pages = num//25 + 1
+        else:
+            num_pages = num//25
+        page = randrange(1, num_pages + 1)
+        print(page)
+        url2 = url + '&page={page}'.format(page=page)
+        print(url2)
+        request = urllib.request.Request(url2,None,headers)
+        response = urllib.request.urlopen(request)
+        data = response.read()
+        soup = BeautifulSoup(data, 'html.parser')
+
+        list_nums = []
+        for j in range(len(soup.find_all('a'))):
+            entry = soup.find_all('a')[j]
+            thing = BeautifulSoup(str(entry))
+         
+            thing2 = thing.a['href']
+            if re.search("^/g/\d+", thing2):
+                search_number = int(re.findall(r"g/(\d+)/", thing2)[0])
+                list_nums.append(search_number)
+                print(list_nums)
+        search = list_nums[randrange(len(list_nums))]
+        print(search)
+        await self.nhentai(ctx = ctx, args = search)
+
+
+
+    @commands.command()
+    async def nhentai(self, ctx: commands.Context, args:int = 222222):
+        self.cur_page = 0
+        user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
+        headers={'User-Agent':user_agent,}
+        url = 'https://nhentai.net/g/{num}/'.format(num=args)
+        try:
+            request = urllib.request.Request(url,None,headers)
+        except ValueError:
+            await ctx.send(
+                "No results found. Please try another entry.")
+            return
+        
+        response = urllib.request.urlopen(request)
+        data = response.read()
+        soup = BeautifulSoup(data, 'html.parser')
+        thing = soup.find_all('meta')[3]
+        thing = str(thing)
+        title = soup.find_all('meta')[2]
+        title = str(title)
+        title = re.findall(r'(?<=").*?(?=")', title)[0]
+
+        # wot = str(soup.find_all('section')[1])
+        # wot = BeautifulSoup(wot)
+        # hi = BeautifulSoup(str(wot.find_all('a')[12]))
+        # gyuh = str(hi.a['href'])
+        # araragi_san = re.findall(r'(?<=/).*?(?=/)', gyuh)
+        #cararagi_san.pop(0)
+        
+
+
+        imgs = []
+        for i in range(len(soup.find_all('noscript')) - 11):
+            s = soup.find_all('noscript')[i]
+            s = str(s)
+            new_soup = BeautifulSoup(s)
+            x = new_soup.img['src']
+            y = re.split("\.", x)
+            imgs.append(y[len(y) - 1])
+        self.extensions = imgs
+
+
+        gallerynumber = int(re.findall(r"galleries/(\d+)/cover.", thing)[0])
+        img_url = 'https://t.nhentai.net/galleries/{gallerynumber}/cover.'.format(gallerynumber = gallerynumber) + imgs[0]
+        e = discord.Embed(
+                            title=title,
+                            description='ID: {postid}'.format(postid=args),
+                            url=url,
+                            color=0xfecbed)
+        # e.add_field(name='artists',
+        #                             value=araragi_san,
+        #                             inline=True)
+        e.set_image(url=img_url)
+        await ctx.send(embed=e)
+        self.prev_search = gallerynumber
     
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
         if "next" in message.content.lower() and message.channel.id == getCFG(message.guild.id)["hentai channel"]:
             await self.hentai(ctx = await self.bot.get_context(message), args = self.last_search)
+        if "np" in message.content.lower() and message.channel.id == getCFG(message.guild.id)["hentai channel"]:
+            ctx = await self.bot.get_context(message)
+            self.cur_page += 1
+            img_url = 'https://i.nhentai.net/galleries/{gallerynumber}/{page}.'.format(gallerynumber=self.prev_search, page=self.cur_page) + self.extensions[self.cur_page]
+            async with aiohttp.ClientSession() as session:
+                async with session.get(img_url) as resp:
+                    if resp.status != 200:
+                        await ctx.send(
+                            'You have reached the end of this work.')
+                    else:
+                        data = io.BytesIO(await resp.read())
+                        await ctx.send(
+                            file=discord.File(data, img_url))
+
 
 
     @commands.command()
@@ -60,6 +192,9 @@ class NSFW(commands.Cog):
         '''
 
         # Made by Sunekku
+        # Nuha Sahraoui
+        # I'm not a hentai addict
+
 
         args = args.split()
 
@@ -141,7 +276,7 @@ class NSFW(commands.Cog):
                             async with aiohttp.ClientSession() as session:
                                 async with session.get(img_url) as resp:
                                     if resp.status != 200:
-                                        await channel.send(
+                                        await ctx.send(
                                             'Could not download file.')
                                     else:
                                         data = io.BytesIO(await resp.read())
