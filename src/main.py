@@ -4,10 +4,21 @@ Comrade Bot - V3.0 Tritium
 More versatile and Adaptable Version of Comrade, Rewritten from the ground up
 Mingde Yin
 
-April - May 2020
+With Help from
+- Sean D'Souza
+- Nuha Sahraoui
+- Victor Wang
+- Vimal Gunasegaran
+- Kevin Zhao
+- Nick Hewko
+- Anthony Luo
+
+April - June 2020
 
 CONFIGURE LOCAL VARIABLES IN cfg.py
 
+For inviting the bot to your server,
+Note: Perms integer 536083799
 '''
 import os
 import dotenv
@@ -42,9 +53,9 @@ from commands.mod_cmds import *
 from cfg import *
 
 '''
+For Repl.it hosted version:
+from utils.keep_alive import *
 
-VARIABLES
-Note: Perms integer 536083799
 '''
 
 start_time = time.perf_counter()
@@ -55,8 +66,6 @@ TOKEN = os.environ.get('TOKEN')  # bot token; kept private
 '''
 INIT
 '''
-
-
 client = commands.Bot(command_prefix=BOT_PREFIX,
                       case_insensitive=True,
                       help_command=commands.MinimalHelpCommand())
@@ -102,5 +111,10 @@ async def notUltraThreat(ctx):
     Users with threat level 3 or higher cannot use Comrade's features.
     '''
     return isnotUltraThreat(ctx) """ # defuncted for now
+
+'''
+For Repl.it hosted version:
+keep_alive()
+'''
 
 client.run(TOKEN)
