@@ -60,7 +60,7 @@ class TimeWizard(commands.Cog):
         roles.append(dailyrole)
         await luckyperson.edit(roles=roles)
 
-        await channel.send("Today's Bonus Daily Member is {}".format(luckyperson.display_name))
+        await channel.send("Today's Daily Member is {}".format(luckyperson.display_name))
         await cog.userinfo(ctx, target=luckyperson.mention)
         
         await cog.rebuildUserCache()
