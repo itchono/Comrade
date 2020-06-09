@@ -38,12 +38,18 @@ class Moderation(commands.Cog):
             usr = getUser(u.id, ctx.guild.id)
             vm = usr["mute votes"]
 
+            kickreq = getCFG(ctx.guild.id)["kick requirement"] # TODO make separate mute threshold
+
             if not ctx.author.id in vm:
                 vm.append(ctx.author.id)
-                await ctx.send("Vote to mute {} added. ({} votes)".format(u.display_name, len(vm)))
+                await ctx.send("Vote to mute {} added. ({}/{} votes)".format(u.display_name, len(vm), kickreq))
+
+                if len(vm) >= kickreq:
+                    await ctx.guild.kick(usr)
+                    await ctx.send("{} was kicked.".format(u))
             else:
                 vm.remove(ctx.author.id)
-                await ctx.send("Vote to mute {} removed. ({} votes)".format(u.display_name, len(vm)))
+                await ctx.send("Vote to mute {} removed.({}/{} votes)".format(u.display_name, len(vm), kickreq))
 
             usr["mute votes"] = vm
 
@@ -58,12 +64,18 @@ class Moderation(commands.Cog):
         usr = getUser(u.id, ctx.guild.id)
         vk = usr["kick votes"]
 
+        kickreq = getCFG(ctx.guild.id)["kick requirement"]
+
         if not ctx.author.id in vk:
             vk.append(ctx.author.id)
-            await ctx.send("Vote to kick {} added. ({} votes)".format(u.display_name, len(vk)))
+            await ctx.send("Vote to kick {} added. ({}/{} votes)".format(u.display_name, len(vk), kickreq))
+
+            if len(vk) >= kickreq:
+                await ctx.guild.kick(usr)
+                await ctx.send("{} was kicked.".format(u))
         else:
             vk.remove(ctx.author.id)
-            await ctx.send("Vote to kick {} removed. ({} votes)".format(u.display_name, len(vk)))
+            await ctx.send("Vote to kick {} removed. ({}/{} votes)".format(u.display_name, len(vk), kickreq))
 
         usr["kick votes"] = vk
 
