@@ -48,7 +48,7 @@ class MessageHandler(commands.Cog):
                 "no_meme_no_meme_no_meme.mp4", "meme_no.mp4",
                 "meme_already_approved.mp4", "meme_wait.mp4",
                 "meme_purple.mp4", "meme_eggman_steal.mp4", "Meme_failed.mp4",
-                "meme.mp4", "meme_rick_roll.mov"
+                "meme.mp4", "meme_rick_roll.mov", "Memes"
             ]
 
             if message.guild and message.channel.id == getCFG(

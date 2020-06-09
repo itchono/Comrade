@@ -11,7 +11,7 @@ class General(commands.Cog):
         '''
         Logs version of the bot.
         '''
-        await ctx.send("Comrade is running version: 3.0 alpha build June 7 v1")
+        await ctx.send("Comrade is running version: 3.0 alpha build June 9 v1")
 
     @commands.command()
     async def host(self, ctx: commands.Context):
@@ -60,7 +60,54 @@ class General(commands.Cog):
         msg = await ctx.channel.fetch_message(msgid)
         await ctx.send("Author: {}".format(msg.author))
 
-    
+    @commands.command()
+    async def makelist(self, ctx, title):
+        '''
+        Makes a custom list
+        '''
+
+        
+
+    @commands.command(name = "list")
+    async def customlist(self, ctx, operation, title=None, value=None):
+        '''
+        Displays a lists, or adds
+        '''
+        if operation in {"make", "add", "remove", "show", "all"}:
+
+            if operation == "make":
+                l = []
+                updatecustomList(ctx.guild.id, title, l)
+                await reactOK(ctx)
+
+            elif operation == "show":
+                if l := getcustomList(ctx.guild.id, title):
+                    await ctx.send("{}:\n{}".format(title, l))
+                else:
+                    await delSend("List not found.", ctx.channel)
+            elif operation == "add":
+                if l := getcustomList(ctx.guild.id, title):
+                    l.append(value)
+                    updatecustomList(ctx.guild.id, title, l)
+                    await reactOK(ctx)
+                else:
+                    await delSend("List not found.", ctx.channel)
+
+            elif operation == "remove":
+                if l := getcustomList(ctx.guild.id, title):
+                    try:
+                        l.remove(value)
+                        updatecustomList(ctx.guild.id, title, l)
+                        await reactOK(ctx)
+                    except:
+                        await delSend("Element {} not found.".format(value), ctx.channel)
+                else:
+                    await delSend("List not found.", ctx.channel)
+
+            elif operation == "all":
+                await ctx.send("{}".format([i["name"] for i in listcustomLists(ctx.guild.id)]))
+
+
 
     
 

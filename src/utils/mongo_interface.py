@@ -87,7 +87,7 @@ def removeCustomUser(name, server):
     Removes a user from the collection
     '''
     customs = client.Comrade.CustomUsers
-    return customs.find_one({"name": name, "server": server})
+    customs.delete_one({"name": name, "server": server})
 
 
 def getCustomUser(name, server):
@@ -164,12 +164,85 @@ def getCmd(serverID: int, name : str):
 
 
 '''
-Specific I/O
+Specific I/O for lists and vars
 '''
 
-def userList(username, listname, value):
-    pass
-    #writes to user list
+def getcustomList(serverID:int, listname):
+    '''
+    Reads a certain named list from the custom lists
+    '''
+    lists = client.Comrade.CustomLists
 
-def togglebool(username, valuename):
-    return "new value"
+    try:
+        lists.find_one({"server": serverID, "name":listname})["list"]
+    except:
+        return None
+    
+
+def updatecustomList(serverID:int, listname, value):
+    '''
+    Writes to a certain named list from the custom lists
+    '''
+    lists = client.Comrade.CustomLists
+    
+    try:
+        lists.update({"server": serverID, "name":listname}, {"server": serverID, "name":listname, "list":value}, True)
+    except:
+        pass
+    
+    return None
+
+def listcustomLists(serverID: int):
+    lists = client.Comrade.CustomLists
+    return list(lists.find({"server": serverID}))
+
+def removecustomList(serverID:int, listname):
+    '''
+    Removed a certain named list from the custom lists
+    '''
+    lists = client.Comrade.CustomLists
+    
+    try:
+        lists.delete_one({"server": serverID, "name":listname})
+    except:
+        pass
+
+
+def getuserList(userID: int, serverID:int, listname):
+    '''
+    Reads a certain named list from a user in the database
+    '''
+    try:
+        u = getUser(userID, serverID)[listname]
+        return u if type(u) == list else None
+    except:
+        return None
+    
+
+def updateuserList(userID: int, serverID:int, listname, value):
+    '''
+    Writes to a certain named list from a user in the database
+    '''
+    if u := getUser(userID, serverID):
+        try:
+            u[listname] = value
+            updateUser(u)
+            return 1
+        except:
+            pass
+    
+    return None
+
+
+def togglebool(userID: int, serverID:int, valuename):
+    '''
+    Toggles a boolean for a user in the database
+    '''
+    if u := getUser(userID, serverID):
+        try:
+            if type(u[valuename]) == bool:
+                u[valuename] = not u[valuename] 
+                updateUser(u)
+                return u[valuename]
+        except:
+            pass

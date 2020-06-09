@@ -88,7 +88,16 @@ class Users(commands.Cog):
         for g in self.bot.guilds:
             self.RND_USER[g.id] = []
             for member in g.members:
-                weight = getUser(member.id, g.id)["daily weight"]
+
+                if u := getUser(member.id, g.id):
+                    pass
+                else:
+                    # account for new users
+                    stp = self.bot.get_cog("Setup")
+                    updateUser(stp.setupuser(member))
+                    u = getUser(member.id, g.id)
+
+                weight = u["daily weight"]
                 if not member.bot: self.RND_USER[g.id] += [member for i in range(weight)]
             
             # special case: list is empty
@@ -122,11 +131,15 @@ class Users(commands.Cog):
         '''
         Adds custom user to database, which can be mentioned.
         '''
-        u = ({"name": username, "url": avatar_url, "server": ctx.guild.id})
-        updateCustomUser(u)
-
         e =  self.bot.get_cog('Echo')
-        await e.echo(ctx, "I have been added.", username)    
+
+        if u := getCustomUser(username, ctx.guild.id):
+            await e.echo(ctx, "oh hey I'm already here!", username)
+
+        else:
+            u = ({"name": username, "url": avatar_url, "server": ctx.guild.id})
+            updateCustomUser(u)
+            await e.echo(ctx, "I have been added.", username)
 
     @commands.command()
     @commands.check(isServer)

@@ -90,6 +90,39 @@ class Setup(commands.Cog):
             await reactOK(ctx)
 
     @commands.command()
+    @commands.check(isOP)
+    async def mod(self, ctx: commands.Context, target, listname, operation=None, value=None):
+        '''
+        Adds, removes, or pops an element from a given user list OR Toggles a boolean in a user list given some name
+        '''
+        if u := await extractUser(ctx, target):
+
+            if l := getuserList(u.id, ctx.guild.id, listname) and operation in {"add", "remove", "pop"}:
+                print(l)
+                if operation == "add": 
+                    l.append(value)
+                    await reactOK(ctx)
+                
+                elif operation == "remove":
+                    try: 
+                        l.remove(value)
+                        await reactOK(ctx)
+                    except: await delSend("Could not find element {} in list.".format(value), ctx.channel)
+                else:
+                    ret = l.pop()
+                    await delSend("Popped element {}".format(ret))
+
+                updateuserList(u.id, ctx.guild.id, listname, l)
+
+            else:
+                try:
+                    result = togglebool(u.id, ctx.guild.id, listname)
+                    await reactOK(ctx)
+                    await ctx.send("{} is now set to {}".format(listname, result))
+                except:
+                    await delSend("Invalid operation.", ctx.channel)
+
+    @commands.command()
     @commands.check(isOwner)
     async def cfg(self, ctx: commands.Context, cfgitem, value=None):
         '''
