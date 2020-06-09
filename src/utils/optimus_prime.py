@@ -73,7 +73,6 @@ class Prime(commands.Cog):
 
         for w in words:
             if (len(query) > 3 and fuzz.partial_ratio(query, w) >= 80) or fuzz.ratio(query, w) >= 70:
-                await log(ctx.guild, "Message sent by {} deleted for bad word: {} => {}".format(ctx.author, query, w))
                 return True
 
         return False
