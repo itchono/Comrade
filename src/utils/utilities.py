@@ -1,5 +1,3 @@
-import asyncio
-
 import discord  # core to bot
 from discord.ext import commands, tasks
 
@@ -7,8 +5,10 @@ from utils.mongo_interface import *
 from cfg import *
 
 import requests
+import asyncio
 import random
 import datetime
+import time
 import pytz
 import string
 import socket
@@ -17,7 +17,7 @@ import socket
 Checks
 '''
 
-# Checks
+# TODO cache OPs, Threats, etc
 
 def isOwner(ctx: commands.Context):
     '''
@@ -53,7 +53,6 @@ def isUserOP(user: discord.User):
         if user.id == op["user"]:
             return True
     return False
-
 
 def isnotThreat(ctx: commands.Context):
     '''
