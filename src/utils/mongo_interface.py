@@ -174,7 +174,7 @@ def getcustomList(serverID:int, listname):
     lists = client.Comrade.CustomLists
 
     try:
-        lists.find_one({"server": serverID, "name":listname})["list"]
+        return lists.find_one({"server": serverID, "name":listname})["list"]
     except:
         return None
     
