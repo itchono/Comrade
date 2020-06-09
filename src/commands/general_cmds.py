@@ -81,12 +81,14 @@ class General(commands.Cog):
                 await reactOK(ctx)
 
             elif operation == "show":
-                if l := getcustomList(ctx.guild.id, title):
+                l = getcustomList(ctx.guild.id, title)
+                if l is not None:
                     await ctx.send("{}:\n{}".format(title, l))
                 else:
                     await delSend("List not found.", ctx.channel)
             elif operation == "add":
-                if l := getcustomList(ctx.guild.id, title):
+                l = getcustomList(ctx.guild.id, title)
+                if l is not None:
                     l.append(value)
                     updatecustomList(ctx.guild.id, title, l)
                     await reactOK(ctx)
@@ -94,7 +96,8 @@ class General(commands.Cog):
                     await delSend("List not found.", ctx.channel)
 
             elif operation == "remove":
-                if l := getcustomList(ctx.guild.id, title):
+                l = getcustomList(ctx.guild.id, title)
+                if l is not None:
                     try:
                         l.remove(value)
                         updatecustomList(ctx.guild.id, title, l)
