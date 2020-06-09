@@ -65,7 +65,7 @@ PROTECTED_NAMES = ["LETHALITY", "THREATS", "kickVotes", "OPS",
                    "GLOBAL_BANNED_WORDS", "PURGE", "LAST_DAILY", "KICK_REQ", "KICK_SAFE", "ANTIPING"]
 # Protected dictionary elements in cfg file
 
-VERSION = "Comrade v2.3.1 Interim Patch 2"
+VERSION = "Comrade v2.3.1 Interim Patch 3"
 
 # Temporary Variables
 
@@ -125,18 +125,6 @@ async def cleanMSG():
                 except:
                     await log("Some messages could not be deleted.")
 
-async def genKick():
-    '''
-    Generates/Regenerates kicklist for all members on server
-    '''
-    cfg["kickVotes"] = {}  # refresh
-
-    for member in client.get_guild(419214713252216848).members:
-        cfg["kickVotes"][member.id] = []
-
-    await writeInfo()
-    await log("Kicklist regenerated - {} members loaded.".format(len(cfg["kickVotes"])))
-
 '''
 COMMANDS
 '''
@@ -164,58 +152,6 @@ def notThreat(ctx):
     (Either not a threat or at threat level zero)
     '''
     return (not ctx.author.id in cfg["THREATS"] or cfg["THREATS"][ctx.author.id]["LETHALITY"] == 0)
-
-
-async def addKick(ctx, user):
-    '''
-    Generalized manner of adding a voteKick to a user. Helper function for voteKick command.
-    '''
-    cfg["kickVotes"][user.id].append(ctx.author.id)  # Add vote
-    num_votes = len(cfg["kickVotes"][user.id])
-    await writeInfo()
-    await ctx.send("Vote added for {0} ({1}/{2}).".format(user.name, num_votes, cfg["KICK_REQ"]))
-
-    # Check if threshold is met
-    if num_votes >= cfg["KICK_REQ"]:
-        if cfg["LETHALITY"] >= 1:
-            await ctx.send("Kicking {}...".format(user.name))
-            await ctx.guild.kick(user)
-            genKick()  # regen list
-        else:
-            await ctx.send("Kicking has been disabled. Lethality must be at least 1 to continue (current = {}).".format(cfg["LETHALITY"]))
-
-# Kick System
-@client.command()
-@commands.check(notThreat)
-async def voteKick(ctx):
-    '''
-    Checks to see whether to add vote to kick a user.
-    '''
-    user = ctx.message.mentions[0]
-    if ctx.author.id in cfg["kickVotes"][user.id]:
-        await ctx.send("You have already voted!")
-    elif user.id in cfg["KICK_SAFE"]:
-        await ctx.send("Target is in Kick Safe list!")
-    elif ctx.author.id in cfg["THREATS"] and cfg["THREATS"][ctx.author.id]["LETHALITY"] >= 1:
-        await ctx.send("Due to you being a threat, you are not allowed to vote!")
-    else:
-        await addKick(ctx, user)
-
-
-@client.command()
-@commands.check(notThreat)
-async def unKick(ctx):
-    '''
-    Removes vote from user.
-    '''
-    user = ctx.message.mentions[0]
-    if ctx.author.id in cfg["kickVotes"][user.id]:
-        cfg["kickVotes"][user.id].remove(ctx.author.id)
-        num_votes = len(cfg["kickVotes"][user.id])
-        await writeInfo()
-        await ctx.send("Vote removed for {0} ({1}/{2}).".format(user.name, num_votes, cfg["KICK_REQ"]))
-    else:
-        await ctx.send("You have not voted to kick {}.".format(user.name))
 
 '''
 LETHALITY SYSTEM
@@ -260,16 +196,6 @@ async def setLethality(ctx, Lnew):
         await ctx.send("Invalid Input.")
 
 
-@client.command(name="kickReq")
-@commands.check(isOP)
-async def setKickReq(ctx, Knew):
-    if int(Knew) >= 1:
-        cfg["KICK_REQ"] = int(Knew)
-        await writeInfo()
-        await ctx.send("Kick Requirement Set to {} votes.".format(cfg["KICK_REQ"]))
-    else:
-        await ctx.send("Invalid input.")
-
 @client.command()
 @commands.check(isOP)
 async def timeStop(ctx, time):
@@ -277,44 +203,6 @@ async def timeStop(ctx, time):
     More potent version of time stop with variable lockdown timer
     '''
     await STAR_PLATINUM(ctx.message, time)
-
-# Threat dictionary methods
-@client.command()
-@commands.check(isOP)
-async def addThreat(ctx, *args):
-    '''
-    Adds user to threats list with or without a preset lethality level (default: 3)
-    '''
-    level = int(args[0]) if len(
-        args) > 0 else 3  # ternary assignment to use as default parameter
-    user = ctx.message.mentions[0]
-    if not user.id in cfg["THREATS"]:
-        cfg["THREATS"][user.id] = {"LETHALITY": level, "BANNED_WORDS": set()}
-        await writeInfo()
-        await ctx.send("Threat Added with Lethality = {}".format(cfg["THREATS"][user.id]["LETHALITY"]))
-
-
-@client.command()
-@commands.check(isOP)
-async def removeThreat(ctx):
-    '''
-    Removes target user from threats list.
-    '''
-    user = ctx.message.mentions[0]
-    if user.id in cfg["THREATS"]:
-        del cfg["THREATS"][user.id]
-        await writeInfo()
-        await ctx.send("Threat removed.")
-
-# Maintainence methods
-@client.command()
-@commands.check(isOP)
-async def resetKick(ctx):
-    '''
-    Allows user to call genKick from bot.
-    '''
-    await genKick()
-    await ctx.send("Kick Votes list has been successfully generated.")
 
 
 @client.command(name="reloadVars")
@@ -404,80 +292,6 @@ async def deop(ctx):
     user = ctx.message.mentions[0]
     await removeFromList("OPS", user, SUDO=True)
 
-
-@client.command()
-@commands.check(isOP)
-async def addKickSafe(ctx):
-    '''
-    Adds user to Kick Safe list.
-    '''
-    user = ctx.message.mentions[0]
-    await addToList("KICK_SAFE", user, SUDO=True)
-
-
-@client.command()
-@commands.check(isOP)
-async def removeKickSafe(ctx):
-    '''
-    Removes user from Kick Safe list.
-    '''
-    user = ctx.message.mentions[0]
-    await removeFromList("KICK_SAFE", user, SUDO=True)
-
-# Custom list additions
-@client.command()
-async def helpList(ctx):
-    '''
-    Shows help for lists
-    '''
-    await ctx.send("```CUSTOM LISTS:\n- Show lists using $comrade showLists\n- Add a member to a new OR existing list using $comrade addList <List Name> <@mention>\n- Remove a member from a list using $comrade removeList <List Name> <@mention>\n- Check list members using $comrade checkList <List Name>\n- See this info again using $comrade helpList```")
-
-
-@client.command()
-@commands.check(notThreat)
-async def showLists(ctx):
-    '''
-    Lists the custom lists.
-    '''
-    names = ''
-    for s in cfg:
-        if not s in PROTECTED_NAMES:
-            names += s + '\n'
-    if names == '':
-        names = 'None'
-    await ctx.send("```Custom Lists:\n" + names + "```")
-
-
-@client.command()
-@commands.check(notThreat)
-async def addList(ctx, ListName):
-    '''
-    Adds a user to a custom list.
-    '''
-    await addToList(ListName, ctx.message.mentions[0])
-    await ctx.send("List \"{}\" consists of the following:{}".format(ListName, getListUserNames(ListName)))
-
-
-@client.command(name="removeList")
-@commands.check(notThreat)
-async def removeFList(ctx, ListName):
-    '''
-    Removes a user from a custom list.
-    '''
-    await removeFromList(ListName, ctx.message.mentions[0])
-    await ctx.send("Removal Successful.")
-
-
-@client.command()
-async def checkList(ctx, ListName):
-    '''
-    Shows members of list
-    '''
-    if ListName in cfg and not ListName in PROTECTED_NAMES:
-        await ctx.send("List \"{}\" consists of the following:{}".format(ListName, getListUserNames(ListName)))
-    else:
-        await ctx.send("That list does not exist!")
-
 # *STATUS OF BOT TODO
 @client.command()
 @commands.check(notThreat)
@@ -496,23 +310,7 @@ async def status(ctx, *args):
     KICK_SAFE = [str(ctx.guild.get_member(i)) for i in cfg["KICK_SAFE"]]
     GLOBAL_WDS = str(cfg["GLOBAL_BANNED_WORDS"])
 
-    uptime = datetime.utcnow() - t_start
-    if len(args) > 0 and args[0] == "full":
-        msg = await ctx.send("```Uptime: {0}\nGlobal Lethality: {1}\nKick Votes: {2}\nKick Requirement: {3}\nOPS: {4}\nThreats: {5}\nKick Safe: {6}\n Global Banned Words: {7}```".format(uptime, LETHALITY, kickList, KICK_REQ, OPS, THREATS, KICK_SAFE, GLOBAL_WDS))
-        await asyncio.sleep(10)
-        await msg.delete()
-    else:
-        msg = await ctx.send("```Uptime: {0}\nGlobal Lethality: {1}\nKick Votes: {2}\nKick Requirement: {3}```".format(uptime, LETHALITY, kickList, KICK_REQ))
-        await asyncio.sleep(10)
-        await msg.delete()
-
-
-@client.command()
-async def lethalityhelp(ctx):
-    '''
-    Gives a quick guide on lethality.
-    '''
-    await ctx.send("LETHALITY SYSTEM\nWorks under 2 regimes - Global and Per User.\nGlobal: Enables and disables features at various levels\n0: None\n1: Kicking enabled\n2: Message Filtering for threats enabled\n3: Message filtering for all users enabled\n4: Purge enabled\n\nPer user: Subjects users in THREATS list to stricter conditions; subject to limitation by global lethality\n0: No restrictions\n1: No voting of any form\n2: Messages filtered (relaxed)\n3: Messages filtered strictly\n4: Loss of ability to ping")
+    await ctx.send("```Uptime: {0}\nGlobal Lethality: {1}\nKick Votes: {2}\nKick Requirement: {3}```".format(uptime, LETHALITY, kickList, KICK_REQ))
 
 
 @client.command()
@@ -551,7 +349,6 @@ async def constructWBuffer():
     await log("Wholesome buffer of {} images.".format(len(buffer)))
 
     return buffer
-
 
 
 @client.command()
@@ -681,13 +478,6 @@ async def on_ready():
         if guild.id == 419214713252216848:
             print("Connected successfully to {} (id = {})".format(
                 guild.name, guild.id))
-
-            if len(cfg["kickVotes"]) != len(guild.members):
-                # regenerate kickList if number of members has changed
-                await genKick()
-                print(
-                    "ATTN: kickVotes was updated due to a change in the number of members")
-            print("{} members detected.".format(len(guild.members)))
 
     global wholesomebuffer
 
