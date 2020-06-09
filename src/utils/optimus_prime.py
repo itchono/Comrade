@@ -72,7 +72,8 @@ class Prime(commands.Cog):
         words = u["banned words"] + c["banned words"]
 
         for w in words:
-            if (len(query) > 2 and fuzz.partial_ratio(query, w) >= 70) or fuzz.ratio(query, w) >= 70:
+            if (len(query) > 3 and fuzz.partial_ratio(query, w) >= 80) or fuzz.ratio(query, w) >= 70:
+                await log(ctx.guild, "Message sent by {} deleted for bad word: {} => {}".format(ctx.author, query, w))
                 return True
 
         return False
