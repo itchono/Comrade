@@ -47,8 +47,7 @@ class NSFW(commands.Cog):
         
         data = response.read()
         soup = BeautifulSoup(data, 'html.parser')
-        x = soup.h2.string
-        num_results = re.split('\s', x)[0]
+        num_results = re.findall(r'(?<=/i> ).*?(?= r)', str(soup.h1))[0]
         num_results = re.split('\,', num_results)
         if 'No' in (num_results):
             await ctx.send(
