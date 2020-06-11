@@ -12,11 +12,12 @@ class Vault(commands.Cog):
     @commands.check(isServer)
     async def randomvaultpost(self, ctx: commands.Context):
         '''
-        Returns a random post from the vault.
+        Returns a random post from the vault. TODO
         '''
-        vault = getChannel(ctx.guild, "vault channel")
-
-        msgs = vault.messages
+        await ctx.trigger_typing()
+        vault = await getChannel(ctx.guild, "vault channel")
+        msgs = await vault.history(limit=None).flatten()
+        await ctx.send(random.choice(msgs).jump_url)
 
     @commands.command(name=u"\U0001F345", aliases = ["vault"])
     @commands.check(isServer)
