@@ -9,7 +9,7 @@ class Vault(commands.Cog):
         self._last_member = None
 
     @commands.command()
-    @commands.check(isServer)
+    @commands.guild_only()
     async def randomvaultpost(self, ctx: commands.Context):
         '''
         Returns a random post from the vault. TODO
@@ -20,7 +20,7 @@ class Vault(commands.Cog):
         await ctx.send(random.choice(msgs).jump_url)
 
     @commands.command(name=u"\U0001F345", aliases = ["vault"])
-    @commands.check(isServer)
+    @commands.guild_only()
     async def tomato(self, ctx: commands.Context, tgt=None):
         '''
         Vaults a post. Operates in 3 modes
@@ -31,7 +31,6 @@ class Vault(commands.Cog):
         3. Vault a message with an image url
         ex. $c 🍅 https://cdn.discordapp.com/attachments/419214713755402262/697604506975993896/2Q.png
         '''
-
         IDmode = False
 
         if len(ctx.message.attachments) > 0:

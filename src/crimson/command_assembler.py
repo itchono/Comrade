@@ -51,7 +51,7 @@ class CustomCommands(commands.Cog):
         return content
 
     @commands.command()
-    @commands.check(isServer)
+    @commands.guild_only()
     async def runcmd(self, ctx, name):
         '''
         Runs a command.
@@ -59,7 +59,7 @@ class CustomCommands(commands.Cog):
         await self.execute_command(ctx, getCmd(ctx.guild.id, name))
 
     @commands.command()
-    @commands.check(isServer)
+    @commands.guild_only()
     async def createcmd(self, ctx, *, args):
         '''
         Creates a command using a simplified Cosmo script.

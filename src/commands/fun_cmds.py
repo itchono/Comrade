@@ -131,9 +131,10 @@ class Fun(commands.Cog):
         By Kevinozoid
         '''
         if (ctx.author== await (extractUser(ctx,"itchono"))): await ctx.send("you are in fact bad")
-        await ctx.send("you are in fact non-bad")
+        else: await ctx.send("you are in fact non-bad")
 
     @commands.command()
+    @commands.guild_only()
     async def random(self, ctx : commands.Context, channel : discord.TextChannel):
         '''
         Gets a random image from the last 1000 messages in a channel

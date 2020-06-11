@@ -112,6 +112,7 @@ class Setup(commands.Cog):
             await reactOK(ctx)
 
     @commands.command()
+    @commands.guild_only()
     async def cfgstatus(self, ctx: commands.Context):
         '''
         Sends an embed providing a dump of all Comrade configuration data for this server.
@@ -149,7 +150,6 @@ class Setup(commands.Cog):
         d["meme channel"] = -1
         d["bot channel"] = -1
         d["log channel"] = -1
-        d["hentai channel"] = -1
         d["emote directory"] = -1
         updateCFG(d)
 

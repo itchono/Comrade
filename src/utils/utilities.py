@@ -23,13 +23,7 @@ def isOwner(ctx: commands.Context):
     '''
     Determines whether message author is server owner
     '''
-    return ctx.author.id == ctx.guild.owner.id or DEVELOPMENT_MODE
-
-def isServer(ctx: commands.Context):
-    '''
-    Determines whether message was called in a server
-    '''
-    return (ctx.guild is not None)
+    return ctx.guild and (ctx.author.id == ctx.guild.owner.id or DEVELOPMENT_MODE) # TODO check owner-only cmds for DMs
 
 def isOP(ctx: commands.Context):
     '''
@@ -116,12 +110,12 @@ async def reactQuestion(ctx: commands.Context):
     '''
     await ctx.message.add_reaction("❓")
 
-async def DM(s: str, member: discord.Member, embed=None):
+async def DM(s: str, user: discord.User, embed=None):
     '''
     DMs a person
     '''
-    memberChannel = await member.create_dm()
-    await memberChannel.send(content=s, embed=embed)
+    userChannel = await user.create_dm()
+    await userChannel.send(content=s, embed=embed)
 
 '''
 Image Extractor

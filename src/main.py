@@ -20,9 +20,6 @@ CONFIGURE LOCAL VARIABLES IN cfg.py
 For inviting the bot to your server,
 Note: Perms integer 536083799
 '''
-import os
-import dotenv
-import time
 
 # internal imports
 from utils.utilities import *
@@ -91,14 +88,14 @@ async def on_ready():
     print("Startup completed in {:.2f} seconds.\nCurrent Local Time: {}".format(time.perf_counter() - start_time, 
                                                                     localTime().strftime("%I:%M:%S %p %Z")))
 
-    for server in client.guilds: await log(server, "Comrade is online, logged in from {}.".format(getHost()))
+    for server in client.guilds: 
+        await log(server, "Comrade is online, logged in from {}.\nStartup done in {:.2f} seconds".format(getHost(), time.perf_counter() - start_time))
 
+'''
+Users with threat level >2 cannot use Comrade's features.
+'''
 @client.check
-async def notUltraThreat(ctx):
-    '''
-    Users with threat level >2 cannot use Comrade's features.
-    '''
-    return isnotUltraThreat(ctx)
+async def globalcheck(ctx): return isnotUltraThreat(ctx)
 
 '''
 For Repl.it hosted version:

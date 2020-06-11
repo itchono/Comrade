@@ -79,7 +79,7 @@ class Prime(commands.Cog):
         
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
-        if not message.author.bot:
+        if not message.author.bot and message.guild:
             if message.content.lower() == "za hando":
 
                 args = (message.content.lower()).split()
