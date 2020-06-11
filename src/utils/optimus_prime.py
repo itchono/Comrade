@@ -80,7 +80,7 @@ class Prime(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
         if not message.author.bot:
-            if "za hando" in message.content.lower():
+            if message.content.lower() == "za hando":
 
                 args = (message.content.lower()).split()
                 amount = 20
@@ -88,15 +88,15 @@ class Prime(commands.Cog):
                 if len(args) > 2 and args[2].isnumeric():
                     amount = int(args[2])
 
-                if amount > 200 and not isUserOP(message.author):
+                if amount > 200 and not isOP(await self.bot.get_context(message)):
                     await message.channel.send("No")
                 else:
                     m = await message.channel.send(
-                        "React with '✋' to purge the channel of {} messages {}".
+                        "React with '✋' to purge the channel of {} messages {}. You have **{} seconds** to vote.".
                         format(
                             amount,
                             ("from " +
-                            str(message.mentions[0])) if message.mentions else "")
+                            str(message.mentions[0])) if message.mentions else "", ZA_HANDO_VOTE_DURATION), delete_after=ZA_HANDO_VOTE_DURATION
                     )
                     self.activepurge[m.id] = {
                         "amount": amount,
@@ -111,8 +111,7 @@ class Prime(commands.Cog):
             if self.filter(ctx, message.content) or await self.additionalChecks(message):
                 await message.delete()
             else:
-                try:
-                    self.bucket[message.guild.id][message.author.id] += [message]
+                try: self.bucket[message.guild.id][message.author.id] += [message]
                 except:
                     try:
                         self.bucket[message.guild.id] = {}
@@ -144,8 +143,7 @@ class Prime(commands.Cog):
         if self.filter(ctx, message.content) or await self.additionalChecks(message):
             await message.delete()
         else:
-            try:
-                self.bucket[message.guild.id][message.author.id] += [message]
+            try: self.bucket[message.guild.id][message.author.id] += [message]
             except:
                 try:
                     self.bucket[message.guild.id] = {}
@@ -173,7 +171,7 @@ class Prime(commands.Cog):
         if reaction.emoji == "✋":
             if (reaction.count > getCFG(
                     reaction.message.guild.id)["zahando threshold"]
-                    or isUserOP(user)
+                    or isOP(await self.bot.get_context(reaction.message))
                 ) and reaction.message.id in self.activepurge:
                 await self.zahando(
                     await self.bot.get_context(reaction.message),

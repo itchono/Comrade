@@ -32,7 +32,7 @@ class Moderation(commands.Cog):
                 await ctx.send("{} was muted.".format(u.display_name))
 
                 for channel in ctx.guild.channels:
-                    await channel.set_permissions(mutedrole, send_messages=False)
+                    await channel.set_permissions(mutedrole, send_messages=False, add_reactions=False)
 
         else:
             usr = getUser(u.id, ctx.guild.id)
@@ -81,11 +81,51 @@ class Moderation(commands.Cog):
 
         updateUser(usr)
 
+    @commands.command()
     @commands.check(isOP)
-    async def mod(self, ctx: commands.Context, *, args):
+    async def mod(self, ctx: commands.Context, target, listname, operation=None, value=None):
         '''
-        Moderation interface for Comrade
+        Changes a value in a user's configuration. Various possible operations
+        add: Add element to list
+        remove: Remove an element from list (specify value)
+        pop: Remove last element from list (no value specification needed)
+        set: Set numerical type
+        toggle: Switch a boolean
         '''
-        args = args.split()
+        if u := await extractUser(ctx, target):
 
-        pass
+            if operation in {"add", "remove", "pop"}:
+                if l := getuserList(u.id, ctx.guild.id, listname):
+                    if operation == "add": 
+                        l.append(value)
+                        await reactOK(ctx)
+                    
+                    elif operation == "remove":
+                        try: 
+                            l.remove(value)
+                            await reactOK(ctx)
+                        except: await delSend("Could not find element {} in list.".format(value), ctx.channel)
+                    else:
+                        ret = l.pop()
+                        await delSend("Popped element {}".format(ret), ctx.channel)
+
+                    updateuserList(u.id, ctx.guild.id, listname, l)
+
+            elif operation == "set":
+                try:
+                    result = setnum(u.id, ctx.guild.id, listname, value)
+                    await reactOK(ctx)
+                    await ctx.send("{} is now set to {}".format(listname, result))
+                except:
+                    await delSend("Invalid operation.", ctx.channel)
+
+            elif operation == "toggle":
+                try:
+                    result = togglebool(u.id, ctx.guild.id, listname)
+                    await reactOK(ctx)
+                    await ctx.send("{} is now set to {}".format(listname, result))
+                except:
+                    await delSend("Invalid operation.", ctx.channel)
+            else:
+                await reactQuestion(ctx)
+                await delSend("Unrecognizer operation: {}".format(operation), ctx.channel)

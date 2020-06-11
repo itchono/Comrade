@@ -22,7 +22,6 @@ Note: Perms integer 536083799
 '''
 import os
 import dotenv
-
 import time
 
 # internal imports
@@ -55,33 +54,27 @@ from cfg import *
 '''
 For Repl.it hosted version:
 from utils.keep_alive import *
-
 '''
-
 start_time = time.perf_counter()
 
-# private variable loading
+# Private Variable Loading
 dotenv.load_dotenv()
 TOKEN = os.environ.get('TOKEN')  # bot token; kept private
-'''
-INIT
-'''
-client = commands.Bot(command_prefix=BOT_PREFIX,
-                      case_insensitive=True,
-                      help_command=commands.MinimalHelpCommand())
+
+# Bot initialization
+client = commands.Bot(command_prefix=BOT_PREFIX, case_insensitive=True,
+                      help_command=commands.MinimalHelpCommand(
+                          no_category="Other"
+                      ))
 
 cogs = [
     AuxilliaryListener, MessageHandler, General, Setup, Vault, Echo,
     Users, Prime, Fun, TimeWizard, Emotes, Polymorph, Moderation, CustomCommands
 ]
-
 # NOTE: NSFW is temporarily unloaded for hosting purposes.
 
-for c in cogs:
-    client.add_cog(c(client))
-
+for c in cogs: client.add_cog(c(client))
 print("Bot components initialized, awaiting login.")
-
 
 @client.event
 async def on_ready():
@@ -90,31 +83,25 @@ async def on_ready():
     '''
     await client.change_presence(status=discord.Status.online,
                                  activity=discord.Game("[{}] Testing Communism".format(BOT_PREFIX)))
-    print("{} is online, logged into {} server(s).".format(
-        client.user, len(client.guilds)))
+    
+    print("{} is online, logged into {} server(s).\nServer List:".format(client.user, len(client.guilds)))
 
-    print("Server List:")
-    for server in client.guilds:
-        print("\t{} ({} members)".format(server.name, len(server.members)))
+    for server in client.guilds: print("\t{} ({} members)".format(server.name, len(server.members)))
 
-    print("Startup completed in {:.2f} seconds.".format(time.perf_counter() -
-                                                        start_time))
-    print("Current Local Time: {}".format(
-        localTime().strftime("%I:%M:%S %p %Z")))
+    print("Startup completed in {:.2f} seconds.\nCurrent Local Time: {}".format(time.perf_counter() - start_time, 
+                                                                    localTime().strftime("%I:%M:%S %p %Z")))
 
-    for server in client.guilds:
-        await log(server, "Comrade is online, logged in from {}.".format(getHost()))
+    for server in client.guilds: await log(server, "Comrade is online, logged in from {}.".format(getHost()))
 
-""" @client.check
+@client.check
 async def notUltraThreat(ctx):
     '''
-    Users with threat level 3 or higher cannot use Comrade's features.
+    Users with threat level >2 cannot use Comrade's features.
     '''
-    return isnotUltraThreat(ctx) """ # defuncted for now
+    return isnotUltraThreat(ctx)
 
 '''
 For Repl.it hosted version:
 keep_alive()
 '''
-
 client.run(TOKEN)

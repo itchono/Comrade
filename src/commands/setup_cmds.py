@@ -1,18 +1,15 @@
 from utils.utilities import *
 from utils.mongo_interface import *
 
-
 class Setup(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self._last_member = None
-
     
     def setupuser(self, user: discord.Member):
         '''
         Configures a new user for use
         '''
-
         d = {"user": user.id}
         d["name"] = user.name
         d["nickname"] = user.nick if user.nick else user.name
@@ -88,39 +85,6 @@ class Setup(commands.Cog):
             updateUser(u)
 
             await reactOK(ctx)
-
-    @commands.command()
-    @commands.check(isOP)
-    async def mod(self, ctx: commands.Context, target, listname, operation=None, value=None):
-        '''
-        Adds, removes, or pops an element from a given user list OR Toggles a boolean in a user list given some name
-        '''
-        if u := await extractUser(ctx, target):
-
-            if l := getuserList(u.id, ctx.guild.id, listname) and operation in {"add", "remove", "pop"}:
-                print(l)
-                if operation == "add": 
-                    l.append(value)
-                    await reactOK(ctx)
-                
-                elif operation == "remove":
-                    try: 
-                        l.remove(value)
-                        await reactOK(ctx)
-                    except: await delSend("Could not find element {} in list.".format(value), ctx.channel)
-                else:
-                    ret = l.pop()
-                    await delSend("Popped element {}".format(ret))
-
-                updateuserList(u.id, ctx.guild.id, listname, l)
-
-            else:
-                try:
-                    result = togglebool(u.id, ctx.guild.id, listname)
-                    await reactOK(ctx)
-                    await ctx.send("{} is now set to {}".format(listname, result))
-                except:
-                    await delSend("Invalid operation.", ctx.channel)
 
     @commands.command()
     @commands.check(isOwner)

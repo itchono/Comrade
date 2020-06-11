@@ -11,7 +11,7 @@ class General(commands.Cog):
         '''
         Logs version of the bot.
         '''
-        await ctx.send("Comrade is running version: 3.0 alpha build June 9 v1")
+        await ctx.send("Comrade is running version: 3.0 alpha build June 11 v1")
 
     @commands.command()
     async def host(self, ctx: commands.Context):
@@ -50,7 +50,7 @@ class General(commands.Cog):
             
             await DM(message, u, e)
             await reactOK(ctx)
-            await timedSend("DM sent to {}".format(target), ctx.channel)
+            await ctx.send("DM sent to {}".format(target), delete_after=10)
 
     @commands.command()
     async def msgInfo(self, ctx: commands.Context, msgid):
@@ -61,12 +61,9 @@ class General(commands.Cog):
         await ctx.send("Author: {}".format(msg.author))
 
     @commands.command()
-    async def makelist(self, ctx, title):
-        '''
-        Makes a custom list
-        '''
-
-        
+    async def cmdtest(self, ctx):
+        m = await ctx.send("$c help")
+        await self.bot.invoke()
 
     @commands.command(name = "list")
     async def customlist(self, ctx, operation, title=None, value=None):

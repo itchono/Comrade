@@ -35,64 +35,30 @@ def isOP(ctx: commands.Context):
     '''
     Determines whether message author is an OP
     '''
-    OPS = userQuery({"OP": True})
-
-    for op in OPS:
-        if ctx.author.id == op["user"]:
-            return True
-    return False
-
-
-def isUserOP(user: discord.User):
-    '''
-    Determines whether message author is an OP
-    '''
-    OPS = userQuery({"OP": True})
-
-    for op in OPS:
-        if user.id == op["user"]:
-            return True
-    return False
+    if not ctx.guild: return True
+    return ctx.author.id in [i["user"] for i in getOPS(ctx.guild.id)]
 
 def isnotThreat(ctx: commands.Context):
     '''
     Determines whether message author is a threat
     '''
     if not ctx.guild: return True
-
-    OPS = userQuery({"threat level": {"$gt": 0}, "server": ctx.guild.id})
-
-    for op in OPS:
-        if ctx.author.id == op["user"]:
-            return False
-    return True
+    return not ctx.author.id in [i["user"] for i in getThreats(ctx.guild.id) if i["threat level"] > 0]
 
 def isnotSuperThreat(ctx: commands.Context):
     '''
-    Determines whether message author is threat level 2 or higher
+    Determines whether message author is threat level >1
     '''
     if not ctx.guild: return True
+    return not ctx.author.id in [i["user"] for i in getThreats(ctx.guild.id) if i["threat level"] > 1]
 
-    OPS = userQuery({"threat level": {"$gte": 2}, "server": ctx.guild.id})
-
-    for op in OPS:
-        if ctx.author.id == op["user"]:
-            return False
-    return True
 
 def isnotUltraThreat(ctx: commands.Context):
     '''
-    Determines whether message author is threat level 3 or higher
+    Determines whether message author is threat level >2
     '''
     if not ctx.guild: return True
-
-    OPS = userQuery({"threat level": {"$gte": 3}, "server": ctx.guild.id})
-
-    for op in OPS:
-        if ctx.author.id == op["user"]:
-            return False
-    return True
-
+    return not ctx.author.id in [i["user"] for i in getThreats(ctx.guild.id) if i["threat level"] > 2]
 
 purgeTGT = None
 def setTGT(tgt):
@@ -102,13 +68,11 @@ def setTGT(tgt):
     global purgeTGT
     purgeTGT = tgt
 
-
 def purgeCheck(message: discord.Message):
     '''
     Checks whether or not to delete the message
     '''
     return message.author == purgeTGT
-
 
 def isWebhook(message: discord.Message):
     '''
@@ -116,13 +80,11 @@ def isWebhook(message: discord.Message):
     '''
     return message.author.discriminator == "0000"
 
-
 def isCommand(message: discord.Message):
     '''
     Check's if it's a Comrade Command
     '''
     return BOT_PREFIX in message.content.lower()
-
 
 '''
 Message Helpers
@@ -136,16 +98,6 @@ async def delSend(s: str, channel: discord.TextChannel, time: int = 5):
     await asyncio.sleep(time)
     await msg.add_reaction("🗑️")
 
-
-async def timedSend(s: str, channel: discord.TextChannel, time: int = 10):
-    '''
-    Sends a message to the desired channel, with deletion after a fixed time, default 10 seconds.
-    '''
-    msg = await channel.send(s)
-    await asyncio.sleep(time)
-    await msg.delete()
-
-
 async def reactOK(ctx: commands.Context):
     '''
     Adds reaction to show that task was completed successfully.
@@ -158,13 +110,11 @@ async def reactX(ctx: commands.Context):
     '''
     await ctx.message.add_reaction("❌")
 
-
 async def reactQuestion(ctx: commands.Context):
     '''
     Adds reaction to show that something went wrong
     '''
     await ctx.message.add_reaction("❓")
-
 
 async def DM(s: str, member: discord.Member, embed=None):
     '''
@@ -172,7 +122,6 @@ async def DM(s: str, member: discord.Member, embed=None):
     '''
     memberChannel = await member.create_dm()
     await memberChannel.send(content=s, embed=embed)
-
 
 '''
 Image Extractor
@@ -185,11 +134,9 @@ async def getavatar(member: discord.Member):
     r = requests.get(member.avatar_url)
     return r.content
 
-
 '''
 Converters and Stuff
 '''
-
 async def extractUser(ctx: commands.Context, tgt: str):
     '''
     Returns a server member or user; based on display name in server, user ID, or by mention.
@@ -207,9 +154,7 @@ async def extractUser(ctx: commands.Context, tgt: str):
             except:
                 try: return await commands.UserConverter().convert(ctx, string.capwords(tgt))
                 except: await ctx.send("User with input '{}' could not be found.".format(tgt))
-    except:
-        pass
-
+    except: pass
 
 async def getChannel(guild: discord.Guild, name: str):
     '''
