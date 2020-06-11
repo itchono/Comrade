@@ -87,19 +87,6 @@ class Fun(commands.Cog):
         Converts emoji to text
         '''
         await ctx.send(emojiToText(text))
-
-    @commands.command()
-    @commands.check(isnotThreat)
-    async def surprise(self, ctx: commands.Context):
-        '''
-        Originally by Kevinozoid
-        '''
-        await ctx.send("nuke deploying in")
-        await ctx.send("5")
-        await ctx.send("4")
-        await ctx.send("3")
-        await ctx.send("2")
-        await ctx.send("no")
            
     @commands.command()
     @commands.check(isnotThreat)
@@ -108,8 +95,7 @@ class Fun(commands.Cog):
         initiate fanfiction
         by Kevinozoid.
         '''
-        await ctx.send("No")
-        """req = urllib.request.urlopen(site, timeout=10)
+        req = urllib.request.urlopen(site, timeout=10)
         html = req.read()
         soup = BeautifulSoup(html)
 
@@ -117,6 +103,10 @@ class Fun(commands.Cog):
             script.extract() 
 
         holyText = soup.get_text()
+
+        if len(holyText > 10000):
+            holyText = holyText[0:10000]
+            await ctx.send("Text was trimmed to first 10000 characters for being too long.")
 
         lines = (line.strip() for line in holyText.splitlines())
         chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
@@ -131,7 +121,7 @@ class Fun(commands.Cog):
 
         for s in string:
             if not s=='' and not s==' ' and not s== '  ' and len(s)>20:
-                await ctx.send(s)"""
+                await ctx.send(s)
 
     @commands.command()
     @commands.check(isnotThreat)
@@ -140,10 +130,22 @@ class Fun(commands.Cog):
         Detects bad.
         By Kevinozoid
         '''
-        if (ctx.author== await (extractUser(ctx,"itchono"))):
-            await ctx.send("you are in fact bad")
+        if (ctx.author== await (extractUser(ctx,"itchono"))): await ctx.send("you are in fact bad")
+        await ctx.send("you are in fact non-bad")
+
+    @commands.command()
+    async def random(self, ctx : commands.Context, channel : discord.TextChannel):
+        '''
+        Gets a random image from the last 1000 messages in a channel
+        '''
+        await ctx.trigger_typing()
+        messages = [i.attachments[0].url for i in await channel.history(limit=2000).flatten() if len(i.attachments) > 0]
+        if len(messages) > 0:
+            embed = discord.Embed()
+            embed.set_image(url=random.choice(messages))
+            await ctx.send(embed=embed)
         else:
-            await ctx.send("you are in fact non-bad")
+            await ctx.send("No suitable images were found : (")
 
     @commands.command()
     @commands.check(isnotThreat)
@@ -210,6 +212,7 @@ class Fun(commands.Cog):
         Emoji call listener
         '''
         if isnotThreat(await self.bot.get_context(message)):
+            # Emoji converters
             if message.content.lower()[0:3] == "tte":
                 await self.textToEmoji(await self.bot.get_context(message), text=message.content.lower().lstrip("tte "))
             elif message.content.lower()[0:3] == "ett":
