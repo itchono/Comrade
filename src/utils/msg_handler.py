@@ -10,7 +10,7 @@ class MessageHandler(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
         if not message.author.bot:
-            if "hello" in message.content.lower():
+            if "hello comrade" in message.content.lower():
                 await delSend("Henlo", message.channel)
 
             if "wait" in message.content.lower() and (
@@ -20,6 +20,7 @@ class MessageHandler(commands.Cog):
                               message.channel)
 
             if "@someone" in message.content.lower():
+                # TODO refactor into independent code
                 mems = list(message.guild.members)
                 random.shuffle(mems)
 
@@ -27,7 +28,7 @@ class MessageHandler(commands.Cog):
 
                 await delSend("{}".format(unlucky.mention), message.channel)
 
-            if message.author.id == 545672836124246024 and len(
+            if not isnotSuperThreat(await self.bot.get_context(message)) and len(
                     message.attachments) + len(
                     message.embeds) > 0:
                 e = discord.Embed(title="You just posted cringe")
@@ -41,6 +42,10 @@ class MessageHandler(commands.Cog):
                 with open("vid/meme_approved.mp4", "rb") as f:
                     await message.channel.send(
                         file=discord.File(f, "meme_approved.mp4"))
+            if message.content.lower() == "i dunno":
+                with open("vid/meme_what.mp4", "rb") as f:
+                    await message.channel.send(
+                        file=discord.File(f, "i_dunno.mp4"))
 
             Knuckles_VD = [
                 "meme_approved.mp4", "meme_what.mp4", "meme_denied.mp4",

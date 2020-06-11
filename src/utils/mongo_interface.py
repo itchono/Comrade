@@ -8,6 +8,9 @@ from polymorph.data_compressor import *
 Comrade - Python-MongoDB Interfacer
 '''
 
+THREAT_CACHE = {}
+OP_CACHE = {}
+
 dotenv.load_dotenv()
 client = MongoClient(os.environ.get('MONGOKEY'))
 print("Atlas Cluster Connected, Running Version {}.".format(
@@ -33,6 +36,27 @@ def userQuery(query: dict):
     '''
     users = client['Comrade']['UserData']
     return users.find(query)
+
+def getOPS(server):
+    '''
+    Gets the ops in a server
+    '''
+    try:
+        return OP_CACHE[server]
+    except:
+        OP_CACHE[server] = list(userQuery({"OP": True, "server": server}))
+        return OP_CACHE[server]
+
+def getThreats(server):
+    '''
+    Gets the threats in server using memoization system
+    '''
+    try:
+        return THREAT_CACHE[server]
+    except:
+        THREAT_CACHE[server] = list(userQuery({"threat level": {"$gt": 0}, "server": server}))
+        return THREAT_CACHE[server]
+
 
 def cfgQuery(query:dict):
     '''
@@ -71,6 +95,10 @@ def updateUser(userData: dict):
         "user": userData["user"],
         "server": userData["server"]
     }, userData, True)  # upsert
+
+    # Update caches
+    OP_CACHE[userData["server"]] = list(userQuery({"OP": True, "server": userData["server"]}))
+    THREAT_CACHE[userData["server"]] = list(userQuery({"threat level": {"$gt": 0}, "server": userData["server"]}))
 
 def updateCustomUser(userData:dict):
     '''
@@ -232,6 +260,23 @@ def updateuserList(userID: int, serverID:int, listname, value):
             pass
     
     return None
+
+def setnum(userID: int, serverID:int, valuename, value):
+    '''
+    sets a numerical value for a user
+    '''
+    if u := getUser(userID, serverID):
+        try:
+            if type(u[valuename]) == float: 
+                u[valuename] = float(value)
+                updateUser(u)
+                return u[valuename]
+            elif type(u[valuename]) == int:
+                u[valuename] = int(value)
+                updateUser(u)
+                return u[valuename]
+        except:
+            pass
 
 
 def togglebool(userID: int, serverID:int, valuename):

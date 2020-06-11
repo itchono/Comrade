@@ -205,7 +205,6 @@ class Fun(commands.Cog):
                 await ctx.send("Nobody said anything so you all get chlamydia!")
 
     @commands.Cog.listener()
-    @commands.cooldown(2, 3, type=commands.BucketType.user)
     async def on_message(self, message: discord.Message):
         '''
         Emoji call listener
@@ -215,6 +214,42 @@ class Fun(commands.Cog):
                 await self.textToEmoji(await self.bot.get_context(message), text=message.content.lower().lstrip("tte "))
             elif message.content.lower()[0:3] == "ett":
                 await self.emojiToText(await self.bot.get_context(message), text=message.content.lower().lstrip("ett "))
+
+        if message.author != self.bot.user:
+            if message.content == "STAR PLATINUM" and isnotSuperThreat(await self.bot.get_context(message)):
+
+                time = 5
+
+                embed = discord.Embed(title="ZA WARUDO", colour=discord.Colour.from_rgb(r=102, g=0, b=204))
+                embed.set_image(url=("https://media1.tenor.com/images/4b953bf5b5ba531099a823944a5626c2/tenor.gif"))
+
+                await message.channel.send(embed=embed, delete_after=1.95)
+
+                permsOG = message.channel.overwrites_for(message.guild.default_role)
+
+                permsNEW = discord.PermissionOverwrite.from_pair(*permsOG.pair())
+                permsNEW.send_messages = False
+
+                await message.channel.set_permissions(message.guild.default_role, overwrite=permsNEW)
+                
+                mt = await message.channel.send("*Time is frozen*")
+
+                # fun counter thing
+                if int(time) <= 20:
+                    for i in range(int(time)):
+                        await asyncio.sleep(1)
+                        t = i+1
+                        if t == 1: await mt.edit(content="1 second has passed", suppress=False)
+                        else: await mt.edit(content="{} seconds have passed".format(t), suppress=False)
+
+                else: await asyncio.sleep(int(time)-2 if int(time) >= 2 else 0)
+
+                await message.channel.set_permissions(message.guild.default_role, overwrite=permsOG)
+                await mt.edit(content="*Time has begun to move again.*", suppress=False)
+                await log(message.guild, "Time stop of duration {} by {}".format(time, message.author))
+        
+            elif message.content == "STAR PLATINUM":
+                await message.channel.send("You are unworthy to use the power of a stand!")
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction:discord.Reaction, user:discord.User):

@@ -88,17 +88,15 @@ class AuxilliaryListener(commands.Cog):
             
         elif type(exception) == commands.CheckFailure:
             await reactX(ctx)
-            await timedSend(
-                "You have insufficient permission to use this command {}".
-                format(ctx.author.mention), ctx.channel)
+            await ctx.send("You have insufficient permission to use this command {}".
+                format(ctx.author.mention), delete_after=10)
             
         elif type(exception) == commands.CommandNotFound:
             await reactQuestion(ctx)
-            await timedSend(
-                "'{}' is not a valid command.".format(ctx.message.content),
-                ctx.channel)
+            await ctx.send("'{}' is not a valid command.".format(ctx.message.content), delete_after=10)
+
         else:
             await reactQuestion(ctx)
-            await timedSend("Failure: {}".format(exception), ctx.channel)
+            await ctx.send("Failure: {}".format(exception), delete_after=10)
 
         
