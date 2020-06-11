@@ -19,7 +19,6 @@ class TimeWizard(commands.Cog):
     def cog_unload(self):
         self.timedannounce.cancel()
 
-    
     async def dailyannounce(self, channel: discord.TextChannel, serverDB: dict):
         '''
         Daily announcement
@@ -63,7 +62,7 @@ class TimeWizard(commands.Cog):
         await channel.send("Today's Daily Member is {}".format(luckyperson.display_name))
         await cog.userinfo(ctx, target=luckyperson.mention)
         
-        await cog.rebuildUserCache()
+        await cog.rebuildUserCache(channel.guild)
 
     @tasks.loop(minutes=1.0)
     async def timedannounce(self):

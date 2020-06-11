@@ -11,7 +11,7 @@ class General(commands.Cog):
         '''
         Logs version of the bot.
         '''
-        await ctx.send("Comrade is running version: 3.0 alpha build June 11 v2")
+        await ctx.send("Comrade is running version: 3.0 Beta build June 11")
 
     @commands.command()
     async def host(self, ctx: commands.Context):
@@ -21,6 +21,7 @@ class General(commands.Cog):
         await ctx.send("Comrade is currently hosted from: {}. Local time: {}".format(getHost(), localTime().strftime("%I:%M:%S %p %Z")))
 
     @commands.command()
+    @commands.guild_only()
     async def clearcommands(self, ctx:commands.Context):
         '''
         Cleans up commands from sent from users in a channel.
@@ -37,7 +38,7 @@ class General(commands.Cog):
 
     @commands.command()
     @commands.check(isnotThreat)
-    async def dmUser(self, ctx: commands.Context, target, message:str):
+    async def dmUser(self, ctx: commands.Context, target, * , message:str):
         '''
         DM given user
         Made by vdoubleu
@@ -62,10 +63,14 @@ class General(commands.Cog):
 
     @commands.command()
     async def cmdtest(self, ctx):
+        '''
+        Quick test for commands
+        '''
         m = await ctx.send("$c help")
         await self.bot.invoke()
 
     @commands.command(name = "list")
+    @commands.guild_only()
     async def customlist(self, ctx, operation, title=None, value=None):
         '''
         Displays a lists, or adds

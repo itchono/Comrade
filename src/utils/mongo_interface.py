@@ -91,14 +91,24 @@ def updateUser(userData: dict):
     Upserts user into userData collection
     '''
     users = client.Comrade.UserData
+
+    if u := users.find_one({"user": userData["user"], "server": userData["server"]}):
+        oldOP = u["OP"]
+        oldTHREAT = u["threat level"]
+
     users.update({
         "user": userData["user"],
         "server": userData["server"]
     }, userData, True)  # upsert
 
+
     # Update caches
-    OP_CACHE[userData["server"]] = list(userQuery({"OP": True, "server": userData["server"]}))
-    THREAT_CACHE[userData["server"]] = list(userQuery({"threat level": {"$gt": 0}, "server": userData["server"]}))
+    if oldOP and oldOP != userData["OP"]: 
+        OP_CACHE[userData["server"]] = list(userQuery({"OP": True, "server": userData["server"]}))
+        print("Rebuild OP Cache")
+    if oldTHREAT and oldTHREAT != userData["threat level"]: 
+        THREAT_CACHE[userData["server"]] = list(userQuery({"threat level": {"$gt": 0}, "server": userData["server"]}))
+        print("Rebuild Threat Cache")
 
 def updateCustomUser(userData:dict):
     '''

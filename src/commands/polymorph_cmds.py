@@ -37,6 +37,7 @@ class Polymorph(commands.Cog):
             print("WARN: Error loading message cache.")
 
     @commands.command(aliases = ["gen"])
+    @commands.guild_only()
     async def polymorph(self, ctx: commands.Context, target: str, number: int = 15):
         '''
         Generates text from model of a user and outputs it to a channel.
@@ -54,7 +55,7 @@ class Polymorph(commands.Cog):
 
             except:
                 await ctx.send("Model is not yet built, it will take a bit longer to produce this first iteration of text.")
-                await self.buildmodel(ctx, target, recache=False)
+                await self.buildmodel(ctx, target, switchchannel=False)
                 
                 try:
                     model = self.models[(user.id, ctx.guild.id)]
@@ -63,7 +64,8 @@ class Polymorph(commands.Cog):
                     pass
     
     @commands.command()
-    async def buildmodel(self, ctx: commands.Context, target: str, recache=True):
+    @commands.guild_only()
+    async def buildmodel(self, ctx: commands.Context, target: str, switchchannel=True):
         '''
         Builds the n-gram model for a user.
         '''
@@ -71,9 +73,9 @@ class Polymorph(commands.Cog):
 
         t_start = time.perf_counter()
 
-        if recache and self.localcacheID != ctx.channel.id:
-            # if we need to recache the channel
-            await self.recache(ctx, ctx.channel)
+        if switchchannel and self.localcacheID != ctx.channel.id:
+            # if we need to switchchannel the channel
+            await self.switchchannel(ctx, ctx.channel)
 
         if self.localcache:
             if user := await extractUser(ctx, target):
@@ -93,11 +95,12 @@ class Polymorph(commands.Cog):
                 await ctx.send("Model for {} built in {:.3f}s.".format(user.display_name, time.perf_counter()-t_start))
         else:
             await reactX(ctx)
-            if not recache: await ctx.send("Model could not be built - no message cache has been loaded. \nUse `{}recache <channel>` to load a channel".format(BOT_PREFIX))
+            if not switchchannel: await ctx.send("Model could not be built - no message cache has been loaded. \nUse `{}switchchannel <channel>` to load a channel".format(BOT_PREFIX))
             
             
     @commands.command()
-    async def recache(self, ctx: commands.Context, channel: discord.TextChannel = None):
+    @commands.guild_only()
+    async def switchchannel(self, ctx: commands.Context, channel: discord.TextChannel = None):
         '''
         Changes message cache to the specified channel (current channel by default).
         '''
@@ -115,6 +118,7 @@ class Polymorph(commands.Cog):
             await ctx.send("Please extract the channel first using `{}extractChannel` in {}".format(BOT_PREFIX, channel.mention))
 
     @commands.command()
+    @commands.guild_only()
     async def extractChannel(self, ctx: commands.Context):
         '''
         Extracts messages in channel and uploads it to MongoDB for use with text generation.
@@ -137,6 +141,7 @@ class Polymorph(commands.Cog):
         await reactOK(ctx)
 
     @commands.command()
+    @commands.guild_only()
     async def modelSize(self, ctx: commands.Context):
         '''
         Returns the size of the current model store.
@@ -144,15 +149,17 @@ class Polymorph(commands.Cog):
         await ctx.send("Current storing {} models locally.".format(len(self.models)))
 
     @commands.command()
+    @commands.guild_only()
     async def channelCacheStatus(self, ctx: commands.Context):
         '''
         Returns information about the currently cached channel
         '''
-        await ctx.send("Currently loaded cache: {}".format(self.bot.get_channel(self.localcacheID)))
+        await ctx.send("Currently loaded cache: {}".format(self.bot.get_channel(self.localcacheID).mention))
 
     # Taken out of service    
     # @commands.command()
     # @commands.check(isOwner)
+    # @commands.guild_only()
     # async def injectcache(self, ctx: commands.Context, filename=None):
     #     '''
     #     Injects .dat file into active cache. Use only if you know what you're doing.

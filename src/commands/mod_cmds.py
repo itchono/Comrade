@@ -8,7 +8,7 @@ class Moderation(commands.Cog):
         self._last_member = None
 
     @commands.command()
-    @commands.check(isServer)
+    @commands.guild_only()
     async def mute(self, ctx: commands.Context, target):
         '''
         Votes to mute a selected user.
@@ -57,7 +57,7 @@ class Moderation(commands.Cog):
             
 
     @commands.command()
-    @commands.check(isServer)
+    @commands.guild_only()
     async def kick(self, ctx: commands.Context, target):
         u = await extractUser(ctx, target)
 
@@ -83,6 +83,7 @@ class Moderation(commands.Cog):
 
     @commands.command()
     @commands.check(isOP)
+    @commands.guild_only()
     async def mod(self, ctx: commands.Context, target, listname, operation=None, value=None):
         '''
         Changes a value in a user's configuration. Various possible operations

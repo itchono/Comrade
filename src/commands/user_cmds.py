@@ -79,43 +79,36 @@ class Users(commands.Cog):
     '''
     Random User Functions
     '''
-    async def rebuildUserCache(self):
+    async def rebuildUserCache(self, g):
         '''
-        Rebuilds the random user cache for all servers.
+        Rebuilds the random user cache for a given server.
         '''
-        self.RND_USER = {}
+        self.RND_USER[g.id] = []
+        for member in g.members:
+            if u := getUser(member.id, g.id): pass
+            else:
+                # account for new users
+                stp = self.bot.get_cog("Setup")
+                updateUser(stp.setupuser(member))
+                u = getUser(member.id, g.id)
 
-        for g in self.bot.guilds:
-            self.RND_USER[g.id] = []
+            weight = u["daily weight"]
+            if not member.bot: self.RND_USER[g.id] += [member for i in range(weight)]
+        
+        # special case: list is empty
+        if self.RND_USER[g.id] == []:
             for member in g.members:
-
-                if u := getUser(member.id, g.id):
-                    pass
-                else:
-                    # account for new users
-                    stp = self.bot.get_cog("Setup")
-                    updateUser(stp.setupuser(member))
-                    u = getUser(member.id, g.id)
-
-                weight = u["daily weight"]
-                if not member.bot: self.RND_USER[g.id] += [member for i in range(weight)]
-            
-            # special case: list is empty
-            if self.RND_USER[g.id] == []:
-                for member in g.members:
-                    d = getUser(member.id, g.id)
-                    d["daily weight"] = 2
-                    updateUser(d)
-                print("Refilled daily count for {}".format(g))
-            
-            await log(g, "User Cache Built Successfully.")
+                d = getUser(member.id, g.id)
+                d["daily weight"] = 2
+                updateUser(d)
+            print("Refilled daily count for {}".format(g))
+        await log(g, "User Cache Built Successfully.")
 
     @commands.command()
-    @commands.check(isServer)
+    @commands.guild_only()
     async def rollUser(self, ctx: commands.Context):
         '''
         Roles a random ulcer, based on relative weights stored in user configuration file.
-
         '''
         await ctx.channel.trigger_typing()
 
@@ -126,15 +119,14 @@ class Users(commands.Cog):
         await self.userinfo(ctx, target=getUser(luckyperson.id, ctx.guild.id)["nickname"])
 
     @commands.command()
-    @commands.check(isServer)
+    @commands.guild_only()
     async def addCustomUser(self, ctx: commands.Context, username, avatar_url):
         '''
         Adds custom user to database, which can be mentioned.
         '''
         e =  self.bot.get_cog('Echo')
 
-        if u := getCustomUser(username, ctx.guild.id):
-            await e.echo(ctx, "oh hey I'm already here!", username)
+        if u := getCustomUser(username, ctx.guild.id): await e.echo(ctx, "Oh hey I'm already here!", username)
 
         else:
             u = ({"name": username, "url": avatar_url, "server": ctx.guild.id})
@@ -142,7 +134,7 @@ class Users(commands.Cog):
             await e.echo(ctx, "I have been added.", username)
 
     @commands.command()
-    @commands.check(isServer)
+    @commands.guild_only()
     @commands.check(isOP)
     async def editCustomUser(self, ctx: commands.Context, username, field, value):
         '''
@@ -164,7 +156,7 @@ class Users(commands.Cog):
             await reactOK(ctx)
     
     @commands.command()
-    @commands.check(isServer)
+    @commands.guild_only()
     @commands.check(isOP)
     async def removeCustomUser(self, ctx: commands.Context, username):
         '''
@@ -174,7 +166,7 @@ class Users(commands.Cog):
         await reactOK(ctx)
 
     @commands.command()
-    @commands.check(isServer)
+    @commands.guild_only()
     async def listCustomUsers(self, ctx: commands.Context):
         '''
         Lists all custom users
@@ -195,6 +187,7 @@ class Users(commands.Cog):
         '''
         When bot is loaded, rebuild the cache.
         '''
-        await self.rebuildUserCache()
+        for g in self.bot.guilds:
+            await self.rebuildUserCache(g)
 
     

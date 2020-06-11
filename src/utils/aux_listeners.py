@@ -78,11 +78,10 @@ class AuxilliaryListener(commands.Cog):
             print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
             traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
         
-        if ctx.guild:
-            await log(ctx.guild,
-                  "Failure: {}\nType: {}\nTraceback:{}".format(exception, type(exception), exception.__traceback__))
+        if ctx.guild: await log(ctx.guild, "Failure: {}\nType: {}\nTraceback:{}".format(exception, type(exception), exception.__traceback__))
+        else: await ctx.send("```Failure: {}\nType: {}\nTraceback:{}```".format(exception, type(exception), exception.__traceback__))
 
-        if not ctx.guild:
+        if type(exception) == commands.NoPrivateMessage:
             await reactX(ctx)
             await delSend("This command can only be used in a server.", ctx.channel)
             
@@ -90,6 +89,10 @@ class AuxilliaryListener(commands.Cog):
             await reactX(ctx)
             await ctx.send("You have insufficient permission to use this command {}".
                 format(ctx.author.mention), delete_after=10)
+        
+        elif type(exception) == commands.NSFWChannelRequired:
+            await reactX(ctx)
+            await delSend("This command can only be used in a NSFW channel.", ctx.channel)
             
         elif type(exception) == commands.CommandNotFound:
             await reactQuestion(ctx)
