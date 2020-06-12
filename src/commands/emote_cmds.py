@@ -59,6 +59,8 @@ class Emotes(commands.Cog):
         '''
         e = discord.Embed(title = "Custom Emotes for {} ({})".format(ctx.guild.name, len(self.EMOTE_CACHE[ctx.guild.id])))
 
+        # emotes = self.EMOTE_CACHE[ctx.guild.id].keys() TODO pagify
+
         for k in self.EMOTE_CACHE[ctx.guild.id]:
             e.add_field(name=k, value="[Link]({})".format(self.EMOTE_CACHE[ctx.guild.id][k]))
 
