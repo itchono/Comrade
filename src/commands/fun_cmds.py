@@ -177,13 +177,13 @@ class Fun(commands.Cog):
             await ctx.send(questions[element+counter])
 
             if " A" in questions[element+counter+1] or " A" in questions[element+counter+2]:
-                self.activetrivia[m.id] = 1
+                self.activetrivia[m.id] = "1️⃣"
             elif " B" in questions[element+counter+1] or " B" in questions[element+counter+2]:
-                self.activetrivia[m.id] = 2
+                self.activetrivia[m.id] = "2️⃣"
             elif " C" in questions[element+counter+1] or " C" in questions[element+counter+2]:
-                self.activetrivia[m.id] = 3
+                self.activetrivia[m.id] = "3️⃣"
             elif " D" in questions[element+counter+1] or " D" in questions[element+counter+2]:
-               self.activetrivia[m.id] = 4
+               self.activetrivia[m.id] = "4️⃣"
             else:
                 await(ctx.send("SOMETHING BROKE"))
 
@@ -205,7 +205,7 @@ class Fun(commands.Cog):
                         check = True
 
             if not check:
-                await ctx.send("Nobody said anything so you all get chlamydia!")
+                await ctx.send("Quiz ended because no one answered.")
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -260,26 +260,13 @@ class Fun(commands.Cog):
         '''
         When a user adds a reaction to a message.
         '''
-        m=reaction.message
-        checker = False
-        async for u in reaction.users():
-            if(u==self.bot.user): 
-                checker = True
+        m = reaction.message
 
-        if reaction.message.author == self.bot.user and ((reaction.emoji == "4️⃣" and self.activetrivia[m.id] == 4) or (reaction.emoji == "3️⃣" and self.activetrivia[m.id] == 3) or (reaction.emoji == "2️⃣" and self.activetrivia[m.id] == 2) or (reaction.emoji == "1️⃣" and self.activetrivia[m.id] == 1)) and checker and user != self.bot.user:
-            await reaction.message.add_reaction("☑")
-            await reaction.message.channel.send(user.mention + " you have some brain")
-        elif reaction.message.author == self.bot.user and reaction.emoji == "1️⃣" and checker and user != self.bot.user:
-            await reaction.message.add_reaction("🅱")
-            await reaction.message.channel.send(user.mention + " you're a twat.")
-        elif reaction.message.author == self.bot.user and reaction.emoji == "2️⃣" and checker and user != self.bot.user:
-            await reaction.message.add_reaction("🅱")
-            await reaction.message.channel.send(user.mention + " you're a twoat.")
-        elif reaction.message.author == self.bot.user and reaction.emoji == "3️⃣" and checker and user != self.bot.user:
-            await reaction.message.add_reaction("🅱")
-            await reaction.message.channel.send(user.mention + " you're a twat.")
-        elif reaction.message.author == self.bot.user and reaction.emoji == "4️⃣" and checker and user != self.bot.user:
-            await reaction.message.add_reaction("🅱")
-            await reaction.message.channel.send(user.mention + " you're a twat.")
+        checker = self.bot.user in await reaction.users().flatten() # validates that the reponse comes from the bot
+
+        if reaction.message.author == self.bot.user and checker and user != self.bot.user and reaction.emoji in {"1️⃣", "2️⃣", "3️⃣", "4️⃣"}:
+            await reaction.message.add_reaction({True:"☑", False:"🅱"}[reaction.emoji ==  self.activetrivia[m.id]])
+            await reaction.message.channel.send(user.mention + {True:" CORRECT", False:" WRONG"}[reaction.emoji ==  self.activetrivia[m.id]])
+                
 
 
