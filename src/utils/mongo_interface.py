@@ -159,7 +159,7 @@ def getcache(channelID):
 Favourites Interface
 '''
 
-def updateFavourite(imageID:int, imgurl:str, serverID):
+def updateFavourite(imageID:str, imgurl:str, serverID):
     favourites = client.Comrade.favourites
 
     thingy = {"imageID":imageID, "URL":imgurl, "server":serverID}

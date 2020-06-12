@@ -180,15 +180,17 @@ class NSFW(commands.Cog):
                                 file=discord.File(data, img_url))
 
     @commands.command()
+    @commands.guild_only()
     @commands.is_nsfw()
-    async def favourite(self, ctx: commands.Context, imageID: int, url: str):
+    async def favourite(self, ctx: commands.Context, imageName: str, url: str):
         '''
         Adds an image to the favourites list
         '''
-        updateFavourite(int(imageID), url, ctx.guild.id)
+        updateFavourite(imageName, url, ctx.guild.id)
         await reactOK(ctx)
 
     @commands.command()
+    @commands.guild_only()
     @commands.is_nsfw()
     async def listfavourites(self, ctx:commands.Context):
         '''
