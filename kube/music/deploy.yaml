@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: music-bot-deployment
+  namespace: music-bot
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app: music-bot-app
+  template:
+    metadata:
+      labels:
+        app: music-bot-app
+    spec:
+      volumes:
+        - name: music-bot-vol
+          persistentVolumeClaim:
+            claimName: music-bot-pvc
+      containers:
+       - image: seendsouza/music-bot:latest
+         name: music-bot-container
+         imagePullPolicy: Always
+      
+         volumeMounts:
+           - name: music-bot-vol
+             mountPath: /app/config

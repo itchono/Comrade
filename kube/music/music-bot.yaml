@@ -1,0 +1,6 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+    name: music-bot
+    labels:
+        name: music-bot
