@@ -15,3 +15,5 @@ DEFAULT_CACHE_LOAD = 419214713755402262 # default channel to load for user gener
 DAILY_MEMBER_COLOUR = (241, 196, 15) # colour for daily member (RGB)
 
 ZA_HANDO_VOTE_DURATION = 120 # time to vote for ZA HANDO, in seconds
+
+VAULT_VOTE_DURATION = 180 # time to vote for Vault post, in seconds

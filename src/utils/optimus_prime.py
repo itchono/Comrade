@@ -170,7 +170,7 @@ class Prime(commands.Cog):
         if reaction.emoji == "✋":
             if (reaction.count > getCFG(
                     reaction.message.guild.id)["zahando threshold"]
-                    or isOP(await self.bot.get_context(reaction.message))
+                    or user.id in [i["user"] for i in getOPS(reaction.message.guild.id)]
                 ) and reaction.message.id in self.activepurge:
                 await self.zahando(
                     await self.bot.get_context(reaction.message),
