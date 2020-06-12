@@ -42,8 +42,8 @@ class Vault(commands.Cog):
             u = tgt  # URL directly
 
         m = await ctx.send(
-            "React to this message with 🍅 to vault the post {}".format(
-                ctx.message.jump_url if not IDmode else u.jump_url))
+            "React to this message with 🍅 to vault the post {}. You have **{} seconds** to vote.".format(
+                ctx.message.jump_url if not IDmode else u.jump_url, VAULT_VOTE_DURATION), delete_after=VAULT_VOTE_DURATION)
 
         self.activeposts[m.id] = {
             "Message": ctx.message if not IDmode else u,
