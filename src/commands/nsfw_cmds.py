@@ -28,6 +28,7 @@ class NSFW(commands.Cog):
 
     @commands.command()
     @commands.is_nsfw()
+    @commands.check(isHChannel)
     async def nsearch(self, ctx: commands.Context, *, args:str = "small breasts"):
         '''
         Searches for a hentai on nhentai.net
@@ -88,6 +89,7 @@ class NSFW(commands.Cog):
 
     @commands.command()
     @commands.is_nsfw()
+    @commands.check(isHChannel)
     async def nhentai(self, ctx: commands.Context, args:int = 185217):
         '''
         Fetches a hentai from nhentai.net, by ID.
@@ -160,7 +162,7 @@ class NSFW(commands.Cog):
     
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
-        if message.channel.is_nsfw():
+        if message.channel.is_nsfw() and isHChannel(await self.bot.get_context(message)):
             if message.content.lower() == "next":
                 await self.hentai(ctx = await self.bot.get_context(message), args = self.last_search)
             if message.content.lower() == "retry":
@@ -182,6 +184,7 @@ class NSFW(commands.Cog):
     @commands.command()
     @commands.guild_only()
     @commands.is_nsfw()
+    @commands.check(isHChannel)
     async def favourite(self, ctx: commands.Context, imageName: str, url: str):
         '''
         Adds an image to the favourites list
@@ -192,6 +195,7 @@ class NSFW(commands.Cog):
     @commands.command()
     @commands.guild_only()
     @commands.is_nsfw()
+    @commands.check(isHChannel)
     async def listfavourites(self, ctx:commands.Context):
         '''
         Lists all favourited images
@@ -207,6 +211,7 @@ class NSFW(commands.Cog):
 
     @commands.command()
     @commands.is_nsfw()
+    @commands.check(isHChannel)
     async def hentai(self, ctx: commands.Context, *, args:str = ""):
         '''
         Fetches a number of posts from Danbooru given a series of tags.

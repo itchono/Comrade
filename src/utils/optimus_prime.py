@@ -80,8 +80,7 @@ class Prime(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
         if not message.author.bot and message.guild:
-            if message.content.lower() == "za hando":
-
+            if "ZA HANDO" in message.content:
                 args = (message.content.lower()).split()
                 amount = 20
 
