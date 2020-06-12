@@ -16,9 +16,6 @@ import socket
 '''
 Checks
 '''
-
-# TODO cache OPs, Threats, etc
-
 def isOwner(ctx: commands.Context):
     '''
     Determines whether message author is server owner
@@ -31,6 +28,13 @@ def isOP(ctx: commands.Context):
     '''
     if not ctx.guild: return True
     return ctx.author.id in [i["user"] for i in getOPS(ctx.guild.id)]
+
+def isHChannel(ctx: commands.Context):
+    '''
+    Determines whether or not this is the server's designated hentai channel
+    '''
+    if not ctx.guild: return True
+    return ctx.channel.id == getCFG(ctx.guild.id)["hentai channel"]
 
 def isnotThreat(ctx: commands.Context):
     '''
