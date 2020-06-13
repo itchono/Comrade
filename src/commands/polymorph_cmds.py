@@ -65,7 +65,7 @@ class Polymorph(commands.Cog):
     
     @commands.command()
     @commands.guild_only()
-    async def buildmodel(self, ctx: commands.Context, target: str, switchchannel=True):
+    async def buildmodel(self, ctx: commands.Context, target: str, switchchannel=True, silent=False):
         '''
         Builds the n-gram model for a user.
         '''
@@ -92,7 +92,7 @@ class Polymorph(commands.Cog):
                 self.models[(user.id, ctx.guild.id)] = model
                 # load model into user cache
 
-                await ctx.send("Model for {} built in {:.3f}s.".format(user.display_name, time.perf_counter()-t_start))
+                if not silent: await ctx.send("Model for {} built in {:.3f}s.".format(user.display_name, time.perf_counter()-t_start))
         else:
             await reactX(ctx)
             if not switchchannel: await ctx.send("Model could not be built - no message cache has been loaded. \nUse `{}switchchannel <channel>` to load a channel".format(BOT_PREFIX))

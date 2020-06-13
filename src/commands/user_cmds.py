@@ -114,8 +114,7 @@ class Users(commands.Cog):
 
         pool = self.RND_USER[ctx.guild.id][:]
 
-        random.shuffle(pool)
-        luckyperson = pool.pop()
+        luckyperson = random.choice(pool)
         await self.userinfo(ctx, target=getUser(luckyperson.id, ctx.guild.id)["nickname"])
 
     @commands.command()
