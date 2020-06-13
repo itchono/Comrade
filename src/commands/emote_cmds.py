@@ -59,7 +59,7 @@ class Emotes(commands.Cog):
         '''
         emotes = list(self.EMOTE_CACHE[ctx.guild.id].keys())
 
-        break_lim = 20
+        break_lim = 30
 
         for i in range(0, len(emotes), break_lim): # break into chunks
             e = discord.Embed(title = "Custom Emotes for {} ({} to {})".format(ctx.guild.name, i+1, (i+1+break_lim if i+1+break_lim < len(emotes) else len(emotes))))
@@ -93,40 +93,37 @@ class Emotes(commands.Cog):
         '''
         await self.rebuildcache()
 
-    async def emote(self, channel : discord.TextChannel, e:str):
+    async def emote(self, ctx : commands.Context, e:str):
         '''
-        Sends an emote into a channel. TODO
+        Sends an emote into a context.
         '''
+        try:
+            embed = discord.Embed()
+            embed.set_image(url=self.EMOTE_CACHE[ctx.guild.id][e])
+            await ctx.send(embed=embed)
+        except:
+            await reactX(ctx)
+            similar = [i for i in self.EMOTE_CACHE[ctx.guild.id] if fuzz.partial_ratio(i, e) > 60]
+
+            embed = discord.Embed(description="Emote `{}` not found. Did you mean one of the following?".format(e))
+
+            if similar != []:
+                for k in similar: embed.add_field(name="Suggestion", value=":{}:".format(k))
+            else:
+                directory = await getChannel(ctx.guild, 'emote directory')
+                embed.add_field(name="Sorry, no similar results were found.", value="See {}, or type `{}listemotes` for a list of all emotes.".format(directory.mention, BOT_PREFIX))
+
+            await ctx.send(embed=embed)
     
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
         '''
-        Emote listener
+        Emote listener [works with bots too]
         '''
-        if message.content and message.content[0] == ':' and message.content[-1] == ':':
-            # TEST: Tried removing self-check
+        if message.content and message.guild and message.content[0] == ':' and message.content[-1] == ':':
+            await self.emote(await self.bot.get_context(message), message.content.lower().strip(':'))
 
-            s = message.content.lower()
-            e = s.strip(':')
-
-            try:
-                embed = discord.Embed()
-                embed.set_image(url=self.EMOTE_CACHE[message.guild.id][e])
-                await message.channel.send(embed=embed)
-            except:
-                await reactX(await self.bot.get_context(message))
-                similar = [i for i in self.EMOTE_CACHE[message.guild.id] if fuzz.partial_ratio(i, e) > 60]
-
-                embed = discord.Embed(description="Emote `{}` not found. Did you mean one of the following?".format(e))
-
-                if similar != []:
-                    for k in similar:
-                        embed.add_field(name="Suggestion", value=":{}:".format(k))
-                else:
-                    directory = await getChannel(message.guild, 'emote directory')
-                    embed.add_field(name="Sorry, no similar results were found.", value="See {} for a list of all emotes.".format(directory.mention))
-
-                await message.channel.send(embed=embed)
+            
                     
 
 

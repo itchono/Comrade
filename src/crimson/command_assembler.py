@@ -4,7 +4,7 @@ from utils.mongo_interface import *
 from importlib import reload
 import parser
 
-class CustomCommands(commands.Cog):
+class Crimson(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot

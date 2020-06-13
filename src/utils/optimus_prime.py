@@ -7,7 +7,7 @@ import unidecode
 # ALSO: need python-levenshtein ==> needs C++ build tools installed
 from fuzzywuzzy import fuzz
 
-class Prime(commands.Cog):
+class TextFilter(commands.Cog):
     '''
     Comrade moderation module
     '''

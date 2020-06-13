@@ -15,10 +15,10 @@ class Moderation(commands.Cog):
         As OP: Mute the user
         '''
         u = await extractUser(ctx, target)
+        mutedrole = await mutedRole(ctx.guild)
 
         if isOP(ctx):
             # direct mute
-            mutedrole = await mutedRole(ctx.guild)
 
             if mutedrole in u.roles:
                 roles = u.roles
@@ -42,23 +42,37 @@ class Moderation(commands.Cog):
 
             if not ctx.author.id in vm:
                 vm.append(ctx.author.id)
-                await ctx.send("Vote to mute {} added. ({}/{} votes)".format(u.display_name, len(vm), kickreq))
+                await ctx.send("Vote to {} {} added. ({}/{} votes)".format("unmute" if mutedrole in u.roles else "mute", u.display_name, len(vm), kickreq))
 
                 if len(vm) >= kickreq:
-                    await ctx.guild.kick(usr)
-                    await ctx.send("{} was kicked.".format(u))
+                    if mutedrole in u.roles:
+                        roles = u.roles
+                        roles.remove(mutedrole)
+                        await u.edit(roles=roles)
+                        await ctx.send("{} was unmuted.".format(u.display_name))
+                    else:
+                        roles = u.roles
+                        roles.append(mutedrole)
+                        await u.edit(roles=roles)
+                        await ctx.send("{} was muted.".format(u.display_name))
+
+                        for channel in ctx.guild.channels:
+                            await channel.set_permissions(mutedrole, send_messages=False, add_reactions=False)
+                    vm = []
             else:
                 vm.remove(ctx.author.id)
-                await ctx.send("Vote to mute {} removed.({}/{} votes)".format(u.display_name, len(vm), kickreq))
+                await ctx.send("Vote to {} {} removed. ({}/{} votes)".format("unmute" if mutedrole in u.roles else "mute", u.display_name, len(vm), kickreq))
 
             usr["mute votes"] = vm
-
             updateUser(usr)
             
 
     @commands.command()
     @commands.guild_only()
     async def kick(self, ctx: commands.Context, target):
+        '''
+        Votes to kick a user from the server.
+        '''
         u = await extractUser(ctx, target)
 
         usr = getUser(u.id, ctx.guild.id)
@@ -71,14 +85,14 @@ class Moderation(commands.Cog):
             await ctx.send("Vote to kick {} added. ({}/{} votes)".format(u.display_name, len(vk), kickreq))
 
             if len(vk) >= kickreq:
-                await ctx.guild.kick(usr)
+                await ctx.guild.kick(u)
                 await ctx.send("{} was kicked.".format(u))
+                vk = []
         else:
             vk.remove(ctx.author.id)
             await ctx.send("Vote to kick {} removed. ({}/{} votes)".format(u.display_name, len(vk), kickreq))
 
         usr["kick votes"] = vk
-
         updateUser(usr)
 
     @commands.command()

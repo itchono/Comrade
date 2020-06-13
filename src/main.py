@@ -20,7 +20,6 @@ Requires MongoDB Set Up, with Database called Comrade, and Collections:
 [ChannelCache, CustomCommands, CustomLists, CustomUsers, UserData, announcements, cfg, favourites]
 '''
 
-# Internal Imports
 from utils import *
 from polymorph import *
 from crimson import *
@@ -35,11 +34,11 @@ TOKEN = os.environ.get('TOKEN')  # bot token; kept private
 # Bot initialization
 client = commands.Bot(command_prefix=BOT_PREFIX, case_insensitive=True,
                       help_command=commands.MinimalHelpCommand(
-                          no_category="Other"))
+                          no_category="Help Command"))
 
 cogs = [
     AuxilliaryListener, MessageHandler, General, Setup, Vault, Echo,
-    Users, Prime, Fun, TimeWizard, Emotes, Polymorph, Moderation, CustomCommands
+    Users, TextFilter, Fun, TimeWizard, Emotes, Polymorph, Moderation, Crimson
 ]
 
 '''
@@ -56,18 +55,15 @@ async def on_ready():
     '''
     On successful login
     '''
-    await client.change_presence(status=discord.Status.online,
-                                 activity=discord.Game("[{}] Testing Communism".format(BOT_PREFIX)))
+    await client.change_presence(status=discord.Status.online, activity=discord.Game(DEFAULT_STATUS))
     
     print("{} is online, logged into {} server(s).\nServer List:".format(client.user, len(client.guilds)))
 
     for server in client.guilds: print("\t{} ({} members)".format(server.name, len(server.members)))
 
-    print("Startup completed in {:.2f} seconds.\nCurrent Local Time: {}".format(time.perf_counter() - start_time, 
-                                                                    localTime().strftime("%I:%M:%S %p %Z")))
+    print("Startup completed in {:.2f} seconds.\nCurrent Local Time: {}".format(time.perf_counter() - start_time, localTime().strftime("%I:%M:%S %p %Z")))
 
-    for server in client.guilds: 
-        await log(server, "Comrade {} is online, logged in from {}.\nStartup done in {:.2f} seconds".format(VERSION, getHost(), time.perf_counter() - start_time))
+    for server in client.guilds: await log(server, "Comrade {} is online.\nLogged in from {}.\nStartup done in {:.2f} seconds".format(VERSION, getHost(), time.perf_counter() - start_time))
 
 '''
 Users with threat level >2 cannot use Comrade's features.

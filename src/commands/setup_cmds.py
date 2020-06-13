@@ -29,7 +29,8 @@ class Setup(commands.Cog):
         return d
 
     @commands.command()
-    @commands.check(isOwner)
+    @commands.check_any(commands.is_owner(), isServerOwner())
+    @commands.guild_only()
     async def reloadusers(self, ctx: commands.Context):
         '''
         POTENTIALLY DESTRUCTIVE. repopulates the UserData collection on Atlas with default values.
@@ -40,7 +41,8 @@ class Setup(commands.Cog):
         await reactOK(ctx)
 
     @commands.command()
-    @commands.check(isOwner)
+    @commands.check_any(commands.is_owner(), isServerOwner())
+    @commands.guild_only()
     async def updatealluserfields(self, ctx: commands.Context, fieldname,
                                   value):
         '''
@@ -63,7 +65,8 @@ class Setup(commands.Cog):
         await reactOK(ctx)
 
     @commands.command()
-    @commands.check(isOwner)
+    @commands.check_any(commands.is_owner(), isServerOwner())
+    @commands.guild_only()
     async def user(self, ctx: commands.Context, tgt, cfgitem, value=None):
         '''
         Configures a user, mentioned by ping, id, or nickname. Leave value as none to delete field.
@@ -88,7 +91,8 @@ class Setup(commands.Cog):
             await reactOK(ctx)
 
     @commands.command()
-    @commands.check(isOwner)
+    @commands.check_any(commands.is_owner(), isServerOwner())
+    @commands.guild_only()
     async def cfg(self, ctx: commands.Context, cfgitem, value=None):
         '''
         Modifies a value in Comrade's configuration. Leave value blank to delete the field.
@@ -135,7 +139,8 @@ class Setup(commands.Cog):
         await ctx.send(embed=e)
 
     @commands.command()
-    @commands.check(isOwner)
+    @commands.check_any(commands.is_owner(), isServerOwner())
+    @commands.guild_only()
     async def resetcfg(self, ctx: commands.Context):
         '''
         POTENTIALLY DESTRUCTIVE. Resets the configuration file for a server back to a default state. 
@@ -158,7 +163,8 @@ class Setup(commands.Cog):
         await reactOK(ctx)
 
     @commands.command()
-    @commands.check(isOwner)
+    @commands.check_any(commands.is_owner(), isServerOwner())
+    @commands.guild_only()
     async def injectEmotes(self, ctx: commands.Context):
         '''
         Inserts each image located inside the a folder called emotes and uploads it to the custom emotes channel in the server.

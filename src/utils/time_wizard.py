@@ -84,7 +84,8 @@ class TimeWizard(commands.Cog):
         await self.bot.wait_until_ready()
 
     @commands.command()
-    @commands.check(isOwner)
+    @commands.check_any(commands.is_owner(), isServerOwner())
+    @commands.guild_only()
     async def testannounce(self, ctx: commands.Context):
         '''
         Tests making an announcement

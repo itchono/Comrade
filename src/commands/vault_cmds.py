@@ -12,7 +12,7 @@ class Vault(commands.Cog):
     @commands.guild_only()
     async def randomvaultpost(self, ctx: commands.Context):
         '''
-        Returns a random post from the vault. TODO
+        Returns a random post from the vault. TODO improved
         '''
         await ctx.trigger_typing()
         vault = await getChannel(ctx.guild, "vault channel")
