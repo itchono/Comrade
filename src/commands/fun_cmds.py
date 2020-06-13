@@ -1,6 +1,9 @@
 from utils.utilities import *
 from utils.mongo_interface import *
 from utils.emoji_converter import *
+from polymorph.text_gen import *
+from polymorph.model_gen import *
+from polymorph.data_compressor import *
 
 import urllib.request
 from bs4 import BeautifulSoup
@@ -20,6 +23,9 @@ class Fun(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.activetrivia = {}
+
+        self.activeguess = "Nathan etc or some user id"
+
         self._last_member = None
 
     @commands.command()
@@ -269,4 +275,43 @@ class Fun(commands.Cog):
             await reaction.message.channel.send(user.mention + {True:" CORRECT", False:" WRONG"}[reaction.emoji ==  self.activetrivia[m.id]])
                 
 
+    @commands.command()
+    async def guess(self, ctx: commands.Context, ):
+        '''
+        Guessing game
+        '''
+
+        '''
+        - Generate a random user
+        - Generate some text
+        '''
+
+        NUMBER = 20 # number of tokens to make
+
+        text_gen_module = self.bot.get_cog("Polymorph")
+
+        user_cmds = self.bot.gen_cog("Users")
+
+        pool = user_cmds.RND_USER[ctx.guild.id][:]
+
+        luckyperson = random.choice(pool) # user object that we can directly call upon for all Discord functions
+
+        try:
+            model = text_gen_module.models[(luckyperson.id, ctx.guild.id)]
+            txt = text(model, NUMBER)
+
+        except:
+            await ctx.send("Model is not yet built, it will take a bit longer to produce this first iteration of text.")
+            await text_gen_module.buildmodel(ctx, luckyperson.id, switchchannel=False, silent=True)
+            
+            try:
+                model = text_gen_module.models[(luckyperson.id, ctx.guild.id)]
+                txt = text(model, NUMBER)
+            except:
+                pass
+        try:
+            await ctx.send(txt)
+
+        except:
+            await ctx.send("Bruh idk")
 
