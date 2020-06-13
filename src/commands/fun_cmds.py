@@ -276,7 +276,7 @@ class Fun(commands.Cog):
                 
 
     @commands.command()
-    async def guess(self, ctx: commands.Context, ):
+    async def guess(self, ctx: commands.Context):
         '''
         Guessing game
         '''
@@ -290,7 +290,7 @@ class Fun(commands.Cog):
 
         text_gen_module = self.bot.get_cog("Polymorph")
 
-        user_cmds = self.bot.gen_cog("Users")
+        user_cmds = self.bot.get_cog("Users")
 
         pool = user_cmds.RND_USER[ctx.guild.id][:]
 
@@ -301,8 +301,7 @@ class Fun(commands.Cog):
             txt = text(model, NUMBER)
 
         except:
-            await ctx.send("Model is not yet built, it will take a bit longer to produce this first iteration of text.")
-            await text_gen_module.buildmodel(ctx, luckyperson.id, switchchannel=False, silent=True)
+            await text_gen_module.buildmodel(ctx, luckyperson.mention, switchchannel=False, silent=True)
             
             try:
                 model = text_gen_module.models[(luckyperson.id, ctx.guild.id)]
