@@ -155,18 +155,19 @@ class Polymorph(commands.Cog):
         Returns information about the currently cached channel
         '''
         await ctx.send("Currently loaded cache: {}".format(self.bot.get_channel(self.localcacheID).mention))
-
-    # Taken out of service    
-    # @commands.command()
-    # @commands.check(isOwner)
-    # @commands.guild_only()
-    # async def injectcache(self, ctx: commands.Context, filename=None):
-    #     '''
-    #     Injects .dat file into active cache. Use only if you know what you're doing.
-    #     '''
-    #     if not filename:
-    #         self.localcache = None
-    #     else:
-    #         with open("polymorph/{}.dat".format(filename), "rb") as f:
-    #             self.localcache = pickle.load(f)
-    #             await reactOK(ctx)
+  
+    @commands.command()
+    @commands.check_any(commands.is_owner(), isServerOwner())
+    @commands.guild_only()
+    async def injectcache(self, ctx: commands.Context, filename=None):
+        '''
+        Injects .dat file into active cache from local file (in /polymorph directory), or clears it.
+        '''
+        if not filename:
+            self.localcache = None
+            await ctx.send("Cache purged.")
+        else:
+            with open("polymorph/{}.dat".format(filename), "rb") as f:
+                self.localcache = pickle.load(f)
+                self.localcacheID = "TEST"
+            await reactOK(ctx)

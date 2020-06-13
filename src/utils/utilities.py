@@ -16,11 +16,13 @@ import socket
 '''
 Checks
 '''
-def isOwner(ctx: commands.Context):
-    '''
-    Determines whether message author is server owner
-    '''
-    return ctx.guild and (ctx.author.id == ctx.guild.owner.id or DEVELOPMENT_MODE) # TODO check owner-only cmds for DMs
+def isServerOwner():
+    def predicate(ctx: commands.Context):
+        '''
+        Determines whether message author is server owner
+        '''
+        return ctx.guild and (ctx.author.id == ctx.guild.owner.id or DEVELOPMENT_MODE)
+    return commands.check(predicate)
 
 def isOP(ctx: commands.Context):
     '''

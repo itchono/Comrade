@@ -41,7 +41,7 @@ class General(commands.Cog):
         await ctx.channel.purge(check=isCommand, bulk=True)
 
     @commands.command()
-    @commands.check(isOwner)
+    @commands.check_any(commands.is_owner(), isServerOwner())
     async def shutdown(self, ctx:commands.Context):
         '''
         Logs out the user.
