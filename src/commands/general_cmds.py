@@ -7,11 +7,23 @@ class General(commands.Cog):
         self._last_member = None
 
     @commands.command()
-    async def version(self, ctx:commands.Context):
+    async def version(self, ctx: commands.Context):
         '''
         Logs version of the bot.
         '''
-        await ctx.send("Comrade is running version: 3.0 Beta build June 11")
+        await ctx.send("Comrade is running version: {}".format(VERSION))
+
+    @commands.command()
+    async def status(self, ctx: commands.Context):
+        '''
+        Shows the current status of the bot
+        '''
+        s = "Uptime: {:.2f} s\n".format(time.perf_counter())
+        s += "Version: {}\n".format(VERSION)
+        s += "Currently connected to {} server(s)\n".format(len(self.bot.guilds))
+        s += "Comrade is currently hosted from: {}. Local time: {}".format(getHost(), localTime().strftime("%I:%M:%S %p %Z"))
+        
+        await ctx.send(s)
 
     @commands.command()
     async def host(self, ctx: commands.Context):

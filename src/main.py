@@ -1,75 +1,53 @@
 '''
-Comrade Bot - V3.0 Tritium
+Comrade Bot - V3.0
 
-More versatile and Adaptable Version of Comrade, Rewritten from the ground up
-Mingde Yin
+Versatile and Adaptable Version of Comrade, Rewritten from the ground up
+Created by Mingde Yin
 
-With Help from
-- Sean D'Souza
-- Nuha Sahraoui
-- Victor Wang
-- Vimal Gunasegaran
-- Kevin Zhao
-- Nick Hewko
-- Anthony Luo
+With Help from:
+Sean D'Souza, Nuha Sahraoui, Victor Wang, Vimal Gunasegaran
+Kevin Zhao, Nick Hewko, Stephen Luu, Anthony Luo
 
-April - June 2020
+Developed from April - June 2020
+Originally started in October 2019
 
 CONFIGURE LOCAL VARIABLES IN cfg.py
 
-For inviting the bot to your server,
-Note: Perms integer 536083799
+For inviting the bot to your server complete set up shown below and use the link:
+https://discord.com/api/oauth2/authorize?client_id=707042278132154408&permissions=536083799&scope=bot
+
+Requires MongoDB Set Up, with Database called Comrade, and Collections: 
+[ChannelCache, CustomCommands, CustomLists, CustomUsers, UserData, announcements, cfg, favourites]
 '''
 
-# internal imports
-from utils.utilities import *
-from utils.msg_handler import *
-from utils.aux_listeners import *
-from utils.optimus_prime import *
-from utils.mongo_interface import *
-from utils.time_wizard import *
-
-from polymorph.text_gen import *
-from polymorph.model_gen import *
-
-from crimson.command_assembler import *
-
-# command modules
-from commands.general_cmds import *
-from commands.setup_cmds import *
-from commands.nsfw_cmds import *
-from commands.vault_cmds import *
-from commands.echo_cmds import *
-from commands.user_cmds import *
-from commands.fun_cmds import *
-from commands.emote_cmds import *
-from commands.polymorph_cmds import *
-from commands.mod_cmds import *
-
+# Internal Imports
+from utils import *
+from polymorph import *
+from crimson import *
+from commands import *
 from cfg import *
 
-'''
-For Repl.it hosted version:
-from utils.keep_alive import *
-'''
 start_time = time.perf_counter()
 
-# Private Variable Loading
 dotenv.load_dotenv()
 TOKEN = os.environ.get('TOKEN')  # bot token; kept private
 
 # Bot initialization
 client = commands.Bot(command_prefix=BOT_PREFIX, case_insensitive=True,
                       help_command=commands.MinimalHelpCommand(
-                          no_category="Other"
-                      ))
+                          no_category="Other"))
 
 cogs = [
     AuxilliaryListener, MessageHandler, General, Setup, Vault, Echo,
     Users, Prime, Fun, TimeWizard, Emotes, Polymorph, Moderation, CustomCommands
 ]
-# NOTE: NSFW is temporarily unloaded for hosting purposes.
 
+'''
+For Repl.it hosted version:
+cogs = [NSFW, SelfPing]
+
+On fully hosted version, add NSFW module
+'''
 for c in cogs: client.add_cog(c(client))
 print("Bot components initialized, awaiting login.")
 
@@ -89,7 +67,7 @@ async def on_ready():
                                                                     localTime().strftime("%I:%M:%S %p %Z")))
 
     for server in client.guilds: 
-        await log(server, "Comrade is online, logged in from {}.\nStartup done in {:.2f} seconds".format(getHost(), time.perf_counter() - start_time))
+        await log(server, "Comrade {} is online, logged in from {}.\nStartup done in {:.2f} seconds".format(VERSION, getHost(), time.perf_counter() - start_time))
 
 '''
 Users with threat level >2 cannot use Comrade's features.

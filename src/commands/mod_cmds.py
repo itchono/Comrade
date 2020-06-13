@@ -38,7 +38,7 @@ class Moderation(commands.Cog):
             usr = getUser(u.id, ctx.guild.id)
             vm = usr["mute votes"]
 
-            kickreq = getCFG(ctx.guild.id)["kick requirement"] # TODO make separate mute threshold
+            kickreq = getCFG(ctx.guild.id)["mute requirement"]
 
             if not ctx.author.id in vm:
                 vm.append(ctx.author.id)

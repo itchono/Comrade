@@ -24,6 +24,7 @@ class Setup(commands.Cog):
         d["stop images"] = False
         d["daily weight"] = DEFAULT_DAILY_COUNT if not user.bot else 0
         d["bot"] = user.bot
+        d["last online"] = "Now" if str(user.status) == "online" else "Never"
 
         return d
 
@@ -143,6 +144,7 @@ class Setup(commands.Cog):
         d["last daily"] = "2020-05-04"  # default "time = 0" for comrade
         d["joke mode"] = True
         d["kick requirement"] = 6
+        d["mute requirement"] = 4
         d["lethality override"] = 0
         d["zahando threshold"] = 3
         d["banned words"] = []

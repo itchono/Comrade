@@ -1,3 +1,5 @@
+VERSION = "3.0 [Build June 12 v1]"
+
 DEVELOPMENT_MODE = False # set to true for pre-testing.
 
 LOCAL_TIMEZONE = 'Canada/Eastern' # change depending on host.

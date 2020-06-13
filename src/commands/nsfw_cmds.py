@@ -162,7 +162,7 @@ class NSFW(commands.Cog):
     
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
-        if message.channel.is_nsfw() and isHChannel(await self.bot.get_context(message)):
+        if (not message.guild or message.channel.is_nsfw()) and isHChannel(await self.bot.get_context(message)):
             if message.content.lower() == "next":
                 await self.hentai(ctx = await self.bot.get_context(message), args = self.last_search)
             if message.content.lower() == "retry":
@@ -185,12 +185,21 @@ class NSFW(commands.Cog):
     @commands.guild_only()
     @commands.is_nsfw()
     @commands.check(isHChannel)
-    async def favourite(self, ctx: commands.Context, imageName: str, url: str):
+    async def favourite(self, ctx: commands.Context, imageName: str, url: str = None):
         '''
-        Adds an image to the favourites list
+        Adds an image to the favourites list, or retrieves a favourite based on ID
         '''
-        updateFavourite(imageName, url, ctx.guild.id)
-        await reactOK(ctx)
+        if url:
+            updateFavourite(imageName, url, ctx.guild.id)
+            await reactOK(ctx)
+        else:
+            try:
+                fav = getFavourite(ctx.guild.id, imageName)
+                e = discord.Embed()
+                e.set_image(url=fav["URL"])
+                await ctx.send(embed=e)
+            except:
+                await delSend("Image not found.", ctx.channel)
 
     @commands.command()
     @commands.guild_only()
