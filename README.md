@@ -10,7 +10,7 @@ Thanks to https://github.com/seendsouza for hosting and deployment.
 
 ## STAGE 1: Comrade Source Code
 
-Clone the repo at https://github.com/itchono/Comrade/tree/Comrade-V3-dev
+Clone the repo at https://github.com/itchono/Comrade/
 
 ## STAGE 2: Install Requirements On Your Computer
 
