@@ -175,6 +175,14 @@ def allFavourites(serverID):
 
     return list(favourites.find({"server":serverID}))
 
+def getFavourite(serverID, imageID):
+    '''
+    Returns a given favourite image
+    '''
+    favourites = client.Comrade.favourites
+
+    return favourites.find_one({"server":serverID, "imageID":imageID})
+
 '''
 Commands
 '''

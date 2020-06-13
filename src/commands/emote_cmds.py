@@ -57,14 +57,16 @@ class Emotes(commands.Cog):
         '''
         Lists all emotes in the server, sent to DMs
         '''
-        e = discord.Embed(title = "Custom Emotes for {} ({})".format(ctx.guild.name, len(self.EMOTE_CACHE[ctx.guild.id])))
+        emotes = list(self.EMOTE_CACHE[ctx.guild.id].keys())
 
-        # emotes = self.EMOTE_CACHE[ctx.guild.id].keys() TODO pagify
+        break_lim = 20
 
-        for k in self.EMOTE_CACHE[ctx.guild.id]:
-            e.add_field(name=k, value="[Link]({})".format(self.EMOTE_CACHE[ctx.guild.id][k]))
-
-        await DM(s="", user=ctx.author, embed=e)
+        for i in range(0, len(emotes), break_lim): # break into chunks
+            e = discord.Embed(title = "Custom Emotes for {} ({} to {})".format(ctx.guild.name, i+1, (i+1+break_lim if i+1+break_lim < len(emotes) else len(emotes))))
+            
+            for k in emotes[i:i + break_lim]: e.add_field(name=k, value="[Link]({})".format(self.EMOTE_CACHE[ctx.guild.id][k]))
+            
+            await DM(s="", user=ctx.author, embed=e)
         await delSend("Check your DMs {}".format(ctx.author.mention), ctx.channel)
 
     @commands.command()
