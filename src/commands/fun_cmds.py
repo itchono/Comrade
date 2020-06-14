@@ -342,7 +342,7 @@ class Fun(commands.Cog):
                 
 
     @commands.command()
-    async def guess(self, ctx: commands.Context, ):
+    async def guess(self, ctx: commands.Context):
         '''
         Guessing game
         By Phtephen99 with help from Itchono, with the power of friendship and other ppl's funtions

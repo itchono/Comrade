@@ -26,6 +26,8 @@ class NSFW(commands.Cog):
         self.extensions = None
         self.prev_tag = ""
 
+        self.last_image = None
+
     @commands.command()
     @commands.is_nsfw()
     @commands.check(isHChannel)
@@ -148,6 +150,7 @@ class NSFW(commands.Cog):
 
         
         img_url = 'https://t.nhentai.net/galleries/{gallerynumber}/cover.'.format(gallerynumber = gallerynumber) + imgs[0]
+        self.last_image = img_url
         e = discord.Embed(
                             title=title,
                             description='ID: {postid}'.format(postid=args),
@@ -162,11 +165,16 @@ class NSFW(commands.Cog):
     
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
-        if (not message.guild or message.channel.is_nsfw()) and isHChannel(await self.bot.get_context(message)):
+        if (not message.guild or message.channel.is_nsfw()) and isHChannel(await self.bot.get_context(message)) and not message.author.bot:
             if message.content.lower() == "next":
                 await self.hentai(ctx = await self.bot.get_context(message), args = self.last_search)
             if message.content.lower() == "retry":
                 await self.nsearch(ctx = await self.bot.get_context(message), args = self.prev_tag)
+            if message.content.split()[0] == "favourite" and len(message.content.split()) > 1 and self.last_image:
+                await self.favourite(ctx = await self.bot.get_context(message), imageName="".join(message.content.split()[1:]), url=self.last_image)
+            elif message.content.split()[0] == "favourite" and len(message.content.split()) > 1:
+                await message.channel.send("No previous picture was sent!")
+            
             if message.content.lower() == "np":
                 ctx = await self.bot.get_context(message)
                 self.cur_page += 1
@@ -177,6 +185,7 @@ class NSFW(commands.Cog):
                             await ctx.send(
                                 'You have reached the end of this work.')
                         else:
+                            self.last_image = img_url
                             data = io.BytesIO(await resp.read())
                             await ctx.send(
                                 file=discord.File(data, img_url))
@@ -192,6 +201,7 @@ class NSFW(commands.Cog):
         if url:
             updateFavourite(imageName, url, ctx.guild.id)
             await reactOK(ctx)
+            await ctx.send("Image favourited as `{}`.".format(imageName), delete_after=10)
         else:
             try:
                 fav = getFavourite(ctx.guild.id, imageName)
@@ -308,6 +318,8 @@ class NSFW(commands.Cog):
                     e.add_field(name='hit count', value=count, inline=True)
                     e.set_footer(text=tag_string)
                     e.set_image(url=img_url)
+
+                    self.last_image = img_url
 
                     if img_url.endswith(".webm"):
                         async with aiohttp.ClientSession() as session:
