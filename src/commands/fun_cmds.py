@@ -25,7 +25,8 @@ class Fun(commands.Cog):
         self.activetrivia = {}
 
         self.activeGuess = "Nathan etc or some user id"
-        self.guessState = 0 
+        self.guessState = 0
+        self.streak = 3  #set to 3 for dev purposes
         self._last_member = None
 
     @commands.command()
@@ -264,21 +265,32 @@ class Fun(commands.Cog):
 
             #Guess checker for the guessing minigame
             elif "guessing" in message.content.lower() and self.guessState == 1:
+                streakPrompts = {
+                    3 : "Insane",
+                    4 : "Rampage",
+                    5 : "Unstoppable",
+                    6 : "Godlike",
+                    7 : "Legendary"
+                }
+
                 try:
-                    guess = message.content.split()[1]
+                    guess = message.content.split()[1].strip()
                 except:
-                    await message.channel.send("M8 that guess ain't gunna cut it chief. Try again.")
+                    await message.channel.send("Hmm idk but it looks like a pretty shitty guess to me. Try again.")
                     return
                 
                 
                 if guess == self.activeGuess:
-                    await message.channel.send("Congratulations you gave guessed right!")
+                    out = "Congratulations you gave guessed right!"
                     self.guessState = 0 
-                elif guess == " ":
-                    await message.channel.send("SPACE SPACE SPACE SPACE SPACE. Guess again")
+                    self.streak += 1
+                    if self.streak >= 3:
+                        out += f"\n{message.author.display_name} is {streakPrompts[self.streak]}"
+                    await message.channel.send(out)
                 else:
-                    await message.channel.send(f"Are u fucking retarded m8, it was {self.activeGuess}.")
+                    await message.channel.send(f"\nAre u fucking retarded m8, it was {self.activeGuess}.")
                     self.guessState = 0
+                    self.streak = 0
             elif "guessing" in message.content.lower() and self.guessState == 0:
                 await message.channel.send("No prompt, try ```$p guess```")
  
@@ -302,6 +314,7 @@ class Fun(commands.Cog):
     async def guess(self, ctx: commands.Context, ):
         '''
         Guessing game
+        By Phtephen99 with the help of Itchono
         '''
 
         #TODO
@@ -314,6 +327,7 @@ class Fun(commands.Cog):
 
 
         if self.guessState == 1:
+            await ctx.send("There's already a prompt, try guessing for that one b4 asking for another prompt.")
             return
 
 
@@ -326,7 +340,8 @@ class Fun(commands.Cog):
         pool = user_cmds.RND_USER[ctx.guild.id][:]
 
         luckyperson = random.choice(pool) # user object that we can directly call upon for all Discord functions
-    
+        print(luckyperson.display_name.encode("utf-8"))
+
         try:
             model = text_gen_module.models[(luckyperson.id, ctx.guild.id)]
             txt = text(model, NUMBER)
