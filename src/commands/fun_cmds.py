@@ -24,8 +24,8 @@ class Fun(commands.Cog):
         self.bot = bot
         self.activetrivia = {}
 
-        self.activeguess = "Nathan etc or some user id"
-
+        self.activeGuess = "Nathan etc or some user id"
+        self.guessState = 0 
         self._last_member = None
 
     @commands.command()
@@ -217,6 +217,7 @@ class Fun(commands.Cog):
     async def on_message(self, message: discord.Message):
         '''
         Emoji call listener
+        Also guess checker implemented for use in the guessing minigame
         '''
         if isnotThreat(await self.bot.get_context(message)):
             # Emoji converters
@@ -261,6 +262,28 @@ class Fun(commands.Cog):
             elif message.content == "STAR PLATINUM":
                 await message.channel.send("You are unworthy to use the power of a stand!")
 
+            #Guess checker for the guessing minigame
+            elif "guessing" in message.content.lower() and self.guessState == 1:
+                try:
+                    guess = message.content.split()[1]
+                except:
+                    await message.channel.send("M8 that guess ain't gunna cut it chief. Try again.")
+                    return
+                
+                
+                if guess == self.activeGuess:
+                    await message.channel.send("Congratulations you gave guessed right!")
+                    self.guessState = 0 
+                elif guess == " ":
+                    await message.channel.send("SPACE SPACE SPACE SPACE SPACE. Guess again")
+                else:
+                    await message.channel.send(f"Are u fucking retarded m8, it was {self.activeGuess}.")
+                    self.guessState = 0
+            elif "guessing" in message.content.lower() and self.guessState == 0:
+                await message.channel.send("No prompt, try ```$p guess```")
+ 
+
+
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction:discord.Reaction, user:discord.User):
         '''
@@ -281,37 +304,47 @@ class Fun(commands.Cog):
         Guessing game
         '''
 
+        #TODO
         '''
-        - Generate a random user
-        - Generate some text
+        - Generate a random user (done)
+        - Generate some text (done)
+        - Expand game (in progress)
         '''
+        await ctx.trigger_typing()
+
+
+        if self.guessState == 1:
+            return
+
 
         NUMBER = 20 # number of tokens to make
 
         text_gen_module = self.bot.get_cog("Polymorph")
 
-        user_cmds = self.bot.gen_cog("Users")
+        user_cmds = self.bot.get_cog("Users")
 
         pool = user_cmds.RND_USER[ctx.guild.id][:]
 
         luckyperson = random.choice(pool) # user object that we can directly call upon for all Discord functions
-
+    
         try:
             model = text_gen_module.models[(luckyperson.id, ctx.guild.id)]
             txt = text(model, NUMBER)
 
         except:
-            await ctx.send("Model is not yet built, it will take a bit longer to produce this first iteration of text.")
-            await text_gen_module.buildmodel(ctx, luckyperson.id, switchchannel=False, silent=True)
-            
+            await text_gen_module.buildmodel(ctx, luckyperson.mention, switchchannel=False, silent=True)
             try:
                 model = text_gen_module.models[(luckyperson.id, ctx.guild.id)]
                 txt = text(model, NUMBER)
             except:
                 pass
         try:
+            self.activeGuess = luckyperson.display_name
             await ctx.send(txt)
-
+            self.guessState = 1
         except:
             await ctx.send("Bruh idk")
+
+
+
 
