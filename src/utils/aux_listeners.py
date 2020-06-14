@@ -83,7 +83,7 @@ class AuxilliaryListener(commands.Cog):
 
         if type(exception) == commands.NoPrivateMessage:
             await reactX(ctx)
-            await delSend("This command can only be used in a server.", ctx.channel)
+            await delSend(ctx, "This command can only be used in a server.")
             
         elif type(exception) == commands.CheckFailure:
             await reactX(ctx)
@@ -92,7 +92,7 @@ class AuxilliaryListener(commands.Cog):
         
         elif type(exception) == commands.NSFWChannelRequired:
             await reactX(ctx)
-            await delSend("This command can only be used in a NSFW channel.", ctx.channel)
+            await delSend(ctx, "This command can only be used in a NSFW channel.")
             
         elif type(exception) == commands.CommandNotFound:
             await reactQuestion(ctx)

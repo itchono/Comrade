@@ -11,13 +11,12 @@ class MessageHandler(commands.Cog):
     async def on_message(self, message: discord.message):
         if not message.author.bot:
             if "hello comrade" in message.content.lower():
-                await delSend("Henlo", message.channel)
+                await delSend(await self.bot.get_context(message), "Henlo")
 
             if "wait" in message.content.lower() and (
                 (message.guild and getCFG(message.guild.id)["joke mode"])
                     or not message.guild):
-                await delSend("https://www.youtube.com/watch?v=sBl9qcaQos4",
-                              message.channel)
+                await delSend(await self.bot.get_context(message), "https://www.youtube.com/watch?v=sBl9qcaQos4")
 
             if "@someone" in message.content.lower():
                 # TODO refactor into independent code
@@ -26,7 +25,8 @@ class MessageHandler(commands.Cog):
 
                 unlucky = mems.pop()
 
-                await delSend("{}".format(unlucky.mention), message.channel)
+                c = self.bot.get_cog("Echo")
+                await c.echo(await self.bot.get_context(message), unlucky.mention, str(message.author.id), deleteMsg=False)
 
             if not isnotSuperThreat(await self.bot.get_context(message)) and len(
                     message.attachments) + len(
@@ -81,5 +81,4 @@ class MessageHandler(commands.Cog):
                         await message.channel.send(file=discord.File(f, fn))
 
             if "cesb" in message.content.lower():
-                await delSend("https://www.youtube.com/watch?v=ON-7v4qnHP8",
-                              message.channel)
+                await delSend(await self.bot.get_context(message), "https://www.youtube.com/watch?v=ON-7v4qnHP8")

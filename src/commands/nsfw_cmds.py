@@ -2,9 +2,7 @@ from __future__ import unicode_literals
 from utils.utilities import *
 from utils.mongo_interface import *
 
-import requests
 import json
-import string
 import io
 import aiohttp
 import re
@@ -209,7 +207,7 @@ class NSFW(commands.Cog):
                 e.set_image(url=fav["URL"])
                 await ctx.send(embed=e)
             except:
-                await delSend("Image not found.", ctx.channel)
+                await delSend(ctx, "Image not found.")
 
     @commands.command()
     @commands.guild_only()

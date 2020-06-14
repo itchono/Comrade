@@ -119,10 +119,10 @@ class Moderation(commands.Cog):
                         try: 
                             l.remove(value)
                             await reactOK(ctx)
-                        except: await delSend("Could not find element {} in list.".format(value), ctx.channel)
+                        except: await delSend(ctx, "Could not find element {} in list.".format(value))
                     else:
                         ret = l.pop()
-                        await delSend("Popped element {}".format(ret), ctx.channel)
+                        await delSend(ctx, "Popped element {}".format(ret))
 
                     updateuserList(u.id, ctx.guild.id, listname, l)
 
@@ -132,7 +132,7 @@ class Moderation(commands.Cog):
                     await reactOK(ctx)
                     await ctx.send("{} is now set to {}".format(listname, result))
                 except:
-                    await delSend("Invalid operation.", ctx.channel)
+                    await delSend(ctx, "Invalid operation.")
 
             elif operation == "toggle":
                 try:
@@ -140,7 +140,7 @@ class Moderation(commands.Cog):
                     await reactOK(ctx)
                     await ctx.send("{} is now set to {}".format(listname, result))
                 except:
-                    await delSend("Invalid operation.", ctx.channel)
+                    await delSend(ctx, "Invalid operation.")
             else:
                 await reactQuestion(ctx)
-                await delSend("Unrecognizer operation: {}".format(operation), ctx.channel)
+                await delSend(ctx, "Unrecognized operation: {}".format(operation))

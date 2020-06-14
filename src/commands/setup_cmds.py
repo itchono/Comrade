@@ -77,9 +77,9 @@ class Setup(commands.Cog):
             try:
                 del u[cfgitem]
                 updateUser(u)
-                await delSend("User config value deleted.", ctx.channel)
+                await delSend(ctx, "User config value deleted.")
             except:
-                await delSend("Value was not found.", ctx.channel)
+                await delSend(ctx, "Value was not found.")
 
         else:
             try:
@@ -103,9 +103,9 @@ class Setup(commands.Cog):
             try:
                 del c[cfgitem]
                 updateCFG(c)
-                await delSend("Config value deleted.", ctx.channel)
+                await delSend(ctx, "Config value deleted.")
             except:
-                await delSend("Value was not found.", ctx.channel)
+                await delSend(ctx, "Value was not found.")
 
         else:
             try:

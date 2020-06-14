@@ -67,7 +67,7 @@ class Emotes(commands.Cog):
             for k in emotes[i:i + break_lim]: e.add_field(name=k, value="[Link]({})".format(self.EMOTE_CACHE[ctx.guild.id][k]))
             
             await DM(s="", user=ctx.author, embed=e)
-        await delSend("Check your DMs {}".format(ctx.author.mention), ctx.channel)
+        await delSend(ctx, "Check your DMs {}".format(ctx.author.mention))
 
     @commands.command()
     @commands.guild_only()
