@@ -24,8 +24,9 @@ class Fun(commands.Cog):
         self.bot = bot
         self.activetrivia = {}
 
-        self.activeguess = "Nathan etc or some user id"
-
+        self.activeGuess = "Nathan etc or some user id"
+        self.guessState = False
+        self.streak = 2  #set to 3 for dev purposes
         self._last_member = None
 
     @commands.command()
@@ -217,6 +218,7 @@ class Fun(commands.Cog):
     async def on_message(self, message: discord.Message):
         '''
         Emoji call listener
+        Also guess checker implemented for use in the guessing minigame
         '''
         if isnotThreat(await self.bot.get_context(message)):
             # Emoji converters
@@ -261,6 +263,70 @@ class Fun(commands.Cog):
             elif message.content == "STAR PLATINUM":
                 await message.channel.send("You are unworthy to use the power of a stand!")
 
+ 
+            '''
+            To guess after being given a prompt the you first type $guessing followed by the discord nickname in the channel
+            ex: $guessing Itchono 
+            '''
+            if "$set" in message.content.lower():
+                try:
+                    val = int(message.content.split()[1].strip())
+                except:
+                    await message.channel.send("Streak must be a valid integer!")
+                    return
+
+                self.streak = val
+                await message.channel.send(f"Streak is now {self.streak}")
+                return
+
+            if "$guessing" in message.content.lower() and self.guessState:
+                streakPrompts = {
+                    3 : "guessing spree!",
+                    4 : "rampage!",
+                    5 : "unstoppable!",
+                    6 : "godlike!",
+                    7 : "legendary!",
+                    8 : "umm Insane?",
+                    9 : "... how?",
+                    10: "this is getting kinda creepy ngl.",
+                    11: "reaching the current max for normal streak prompts, continue to accumulate your streak to unlock bonus prompts!",
+                    69: "has just won at life!",
+                    420: "suuuuuuuhhhhhh *puffs out giant cloud of smoke.",
+                    9999: "\nIf someone reaches this, good job, you have earned my respect - Stephen Luu June 13, 2020."
+                }
+                
+                try:
+                    guess = " ".join(message.content.split()[1:])
+                    print(guess)
+                except:
+                    await message.channel.send("Hmm idk but this looks like a pretty shitty guess to me. Try again.")
+                    return
+                
+                if guess.strip() == self.activeGuess:
+                    out = "Congratulations you gave guessed right!"
+                    self.guessState = False 
+                    self.streak += 1
+                    if self.streak >= 3:
+                        if self.streak <= 4:
+                            out += f"\n**{message.author.display_name} is on a {streakPrompts[self.streak]} Streak: {self.streak}**"
+                        elif self.streak in streakPrompts:
+                            out += f"\n**{message.author.display_name} is {streakPrompts[self.streak]} Streak: {self.streak}**"
+                    await message.channel.send(out)
+                else:
+                    self.guessState = False
+                    out = f"\nYikes that was incorrect, it was {self.activeGuess}."
+                    if self.streak >= 3:
+                        out += f"\n**OOOOOF {message.author.display_name}'s streak got reset back to 0 from {self.streak}**"
+                    self.streak = 0
+                    await message.channel.send(out)
+
+            elif "$guessing" in message.content.lower() and not self.guessState:
+                await message.channel.send("No prompt, try entering```$<bot prefix> guess``` to generate a prompt")
+
+            
+            
+
+
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction:discord.Reaction, user:discord.User):
         '''
@@ -279,38 +345,58 @@ class Fun(commands.Cog):
     async def guess(self, ctx: commands.Context):
         '''
         Guessing game
+        By Phtephen99 with help from Itchono, with the power of friendship and other ppl's funtions
+        we created a minigame which uses the n-gram model built by Itchono where users guess who the generated
+        text was based off of. 
         '''
 
+        #TODO
         '''
-        - Generate a random user
-        - Generate some text
+        - Generate a random user (done)
+        - Generate some text (done)
+        - Expand game (in progress)
+            - Streaks(in progress)
+                - Make the framework(done)
+                - Integrate streaks into mongoDb database as a field for the user(in progress)
+            - Powerups(in progress)
+            - Better UX and UI(future plans)
+            - Leaderboards(future plans)
+        - Optimize code(In progress)
         '''
+        await ctx.trigger_typing()
 
+
+        if self.guessState:
+            await ctx.send("There's already a prompt, try guessing for that one before asking for another prompt.")
+            return
+
+        
         NUMBER = 20 # number of tokens to make
-
         text_gen_module = self.bot.get_cog("Polymorph")
-
         user_cmds = self.bot.get_cog("Users")
-
         pool = user_cmds.RND_USER[ctx.guild.id][:]
-
         luckyperson = random.choice(pool) # user object that we can directly call upon for all Discord functions
+        
+        print(luckyperson.display_name.encode("UTF-8")) #Debugging print, TODO get rid when fully deployed
+
 
         try:
             model = text_gen_module.models[(luckyperson.id, ctx.guild.id)]
             txt = text(model, NUMBER)
-
         except:
             await text_gen_module.buildmodel(ctx, luckyperson.mention, switchchannel=False, silent=True)
-            
             try:
                 model = text_gen_module.models[(luckyperson.id, ctx.guild.id)]
                 txt = text(model, NUMBER)
             except:
                 pass
         try:
+            self.activeGuess = luckyperson.display_name
             await ctx.send(txt)
-
+            self.guessState = True
         except:
-            await ctx.send("Bruh idk")
+            await ctx.send(f"This dude ain't typed yet @{luckyperson.display_name}")
+
+
+
 
