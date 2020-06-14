@@ -1,17 +1,10 @@
-import discord  # core to bot
+import discord
 from discord.ext import commands, tasks
 
-from utils.mongo_interface import *
+from utils.mongo_interface import getOPS, getThreats, getCFG
 from cfg import *
 
-import requests
-import asyncio
-import random
-import datetime
-import time
-import pytz
-import string
-import socket
+import requests, asyncio, random, datetime, time, pytz, string, socket, typing
 
 '''
 Checks
@@ -89,12 +82,12 @@ def isCommand(message: discord.Message):
 '''
 Message Helpers
 '''
-async def delSend(s: str, channel: discord.TextChannel, time: int = 5):
+async def delSend(ctx : commands.Context, text: str, embed : discord.Embed = None, time: int = 5):
     '''
     Sends a message to the desired channel, with a deletion option after a fixed time, default 5 seconds.
     Standard sending module for Comrade
     '''
-    msg = await channel.send(s)
+    msg = await ctx.send(content=text, embed=embed)
     await asyncio.sleep(time)
     await msg.add_reaction("🗑️")
 

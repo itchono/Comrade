@@ -99,7 +99,7 @@ class General(commands.Cog):
                 if l is not None:
                     await ctx.send("{}:\n{}".format(title, l))
                 else:
-                    await delSend("List not found.", ctx.channel)
+                    await delSend(ctx, "List not found.")
             elif operation == "add":
                 l = getcustomList(ctx.guild.id, title)
                 if l is not None:
@@ -107,7 +107,7 @@ class General(commands.Cog):
                     updatecustomList(ctx.guild.id, title, l)
                     await reactOK(ctx)
                 else:
-                    await delSend("List not found.", ctx.channel)
+                    await delSend(ctx, "List not found.")
 
             elif operation == "remove":
                 l = getcustomList(ctx.guild.id, title)
@@ -117,9 +117,9 @@ class General(commands.Cog):
                         updatecustomList(ctx.guild.id, title, l)
                         await reactOK(ctx)
                     except:
-                        await delSend("Element {} not found.".format(value), ctx.channel)
+                        await delSend(ctx, "Element {} not found.".format(value))
                 else:
-                    await delSend("List not found.", ctx.channel)
+                    await delSend(ctx, "List not found.")
 
             elif operation == "all":
                 await ctx.send("{}".format([i["name"] for i in listcustomLists(ctx.guild.id)]))

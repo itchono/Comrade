@@ -26,7 +26,7 @@ class Fun(commands.Cog):
 
         self.activeGuess = "Nathan etc or some user id"
         self.guessState = False
-        self.streak = 2  #set to 3 for dev purposes
+        self.streak = 0  #set to 3 for dev purposes
         self._last_member = None
 
     @commands.command()
@@ -268,7 +268,7 @@ class Fun(commands.Cog):
             To guess after being given a prompt the you first type $guessing followed by the discord nickname in the channel
             ex: $guessing Itchono 
             '''
-            if "$set" in message.content.lower():
+            '''if "$set" in message.content.lower():
                 try:
                     val = int(message.content.split()[1].strip())
                 except:
@@ -277,7 +277,8 @@ class Fun(commands.Cog):
 
                 self.streak = val
                 await message.channel.send(f"Streak is now {self.streak}")
-                return
+                return'''
+            # dev stuff
 
             if "$guessing" in message.content.lower() and self.guessState:
                 streakPrompts = {
@@ -297,12 +298,14 @@ class Fun(commands.Cog):
                 
                 try:
                     guess = " ".join(message.content.split()[1:])
-                    print(guess)
+                    u = await extractUser(self.bot.get_context(message), guess)
+                    _ = u.id
+                    #print(guess)
                 except:
                     await message.channel.send("Hmm idk but this looks like a pretty shitty guess to me. Try again.")
                     return
                 
-                if guess.strip() == self.activeGuess:
+                if u.display_name == self.activeGuess:
                     out = "Congratulations you gave guessed right!"
                     self.guessState = False 
                     self.streak += 1
@@ -365,37 +368,32 @@ class Fun(commands.Cog):
         '''
         await ctx.trigger_typing()
 
-
         if self.guessState:
             await ctx.send("There's already a prompt, try guessing for that one before asking for another prompt.")
             return
 
-        
         NUMBER = 20 # number of tokens to make
         text_gen_module = self.bot.get_cog("Polymorph")
         user_cmds = self.bot.get_cog("Users")
-        pool = user_cmds.RND_USER[ctx.guild.id][:]
-        luckyperson = random.choice(pool) # user object that we can directly call upon for all Discord functions
-        
-        print(luckyperson.display_name.encode("UTF-8")) #Debugging print, TODO get rid when fully deployed
+        pool = user_cmds.RND_USER[ctx.guild.id]
 
-
-        try:
-            model = text_gen_module.models[(luckyperson.id, ctx.guild.id)]
-            txt = text(model, NUMBER)
-        except:
-            await text_gen_module.buildmodel(ctx, luckyperson.mention, switchchannel=False, silent=True)
+        while not text:
+            luckyperson = random.choice(pool) # user object that we can directly call upon for all Discord functions
+            #print(luckyperson.display_name.encode("UTF-8")) #Debugging print, TODO get rid when fully deployed
             try:
                 model = text_gen_module.models[(luckyperson.id, ctx.guild.id)]
                 txt = text(model, NUMBER)
             except:
-                pass
-        try:
-            self.activeGuess = luckyperson.display_name
-            await ctx.send(txt)
-            self.guessState = True
-        except:
-            await ctx.send(f"This dude ain't typed yet @{luckyperson.display_name}")
+                await text_gen_module.buildmodel(ctx, luckyperson.mention, silent=True)
+                try:
+                    model = text_gen_module.models[(luckyperson.id, ctx.guild.id)]
+                    txt = text(model, NUMBER)
+                except:
+                    pass
+
+        self.activeGuess = luckyperson.display_name
+        await ctx.send(f'Who sent this?:\n```{txt}```')
+        self.guessState = True
 
 
 

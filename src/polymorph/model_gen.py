@@ -14,10 +14,10 @@ def parse_text(text, reverse=False):
     with open("remainder.txt", "w", encoding="utf-8") as f:
         for t in arr:
 
-            if re.search("\$[a-zA-z]|<*>|[0-9]{6,}|http", t) or t.encode("ascii", "ignore").decode() != t:
+            if re.search("<*>|[0-9]{6,}|http", t) or t.encode("ascii", "ignore").decode() != t:
                 f.write(str(t+"\n"))
             else:
-                arrclean.append(t.translate(str.maketrans("", "", "#!$%&:\"\'()*+,-./;<=>?@[\\]^_`{|}~")).lower())
+                arrclean.append(t.translate(str.maketrans("", "", "#!$%&:\"()*+,-./;<=>?@[\\]^_`{|}~")).lower())
 
     # arrclean is now a bunch of lines
 
@@ -43,7 +43,10 @@ def parse_arr(arr, reverse=False):
     # arrclean is now a bunch of lines
     arrsuperclean = []
     for line in reversed(arrclean) if reverse else arrclean:
-        arrsuperclean.extend(line.split(" "))
+        '''arrsuperclean.extend(line.split(" "))'''
+        arrsuperclean.extend(line.strip("\n").split(" "))
+        arrsuperclean += ["\n"]
+        # experimental stop token changes?
 
     return arrsuperclean
 
@@ -98,31 +101,6 @@ def build_ngram_counts(words, n):
 
     return result
 
-def prune_ngram_counts(counts, prune_len):
-    '''
-    (dict, int) -> dict
-
-    prune_ngram_counts takes in a n-grams-with-counts dict with the same format as build_ngram_counts, 
-    and removes entries in counts with low frequency. it will keep the prune_len highest frequency words. 
-    If there is a tie, it will keep all tied words.
-    '''
-    result = {} # new empty dict for output
-
-    for k in counts.keys():
-        # init new array of survivors that will replace current counts
-        
-        # get list of frequencies from max to min using reverse sort
-        freqs = sorted(counts[k][1], reverse=True)
-
-        n = len(counts[k][1]) if (len(counts[k][1]) < prune_len) else prune_len
-        # adjust prune length to fit array
-
-        result[k] = [[counts[k][0][i] for i in range(0, len(counts[k][1])) if counts[k][1][i] >= freqs[n-1]], 
-                    [counts[k][1][i] for i in range(0, len(counts[k][1])) if counts[k][1][i] >= freqs[n-1]]]
-        # add only surviving elements to the dictionary
-
-    return result 
-
 def probify_ngram_counts(counts):
     '''
     (dict) -> dict
@@ -144,14 +122,12 @@ def build_ngram_model(words, n):
     build_ngram_model returns a dict representing an n-gram-count model, given a size of n-gram (n) and an input set of words (words).
     This will take the 10 most common words, and show each count as a probability.
     '''
-    return probify_ngram_counts(prune_ngram_counts(build_ngram_counts(words, n), 10)) # combine functions
+    return probify_ngram_counts(build_ngram_counts(words, n)) # combine functions
 
 
 def modelfrommsgs(msgs, n=3, reverse=True):
     t = parse_arr(msgs, reverse=reverse)
     m = build_ngram_model(t, n)
-    '''with open("polymorph/{}.mdl".format(msgs[0].translate(str.maketrans("", "", "#!$%&:\"\'()*+,-./;<=>?@[\\]^_`{|}~"))), "wb") as f:
-          pickle.dump(m, f)'''
     return m
 
 if __name__ == "__main__":

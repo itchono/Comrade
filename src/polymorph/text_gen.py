@@ -100,7 +100,12 @@ def gen_bot_text(token_list):
     '''
     turns list into printable string
     '''
-    return ' '.join(token_list).translate(str.maketrans("", "", "\n"))
+    s = ' '.join(token_list)
+    s2 = ""
+
+    for i in range(len(s)):
+        if not (s[i] == " " and s[i-1] == "\n"): s2 += s[i]
+    return s2
 
 def text(model, maxlength):
     '''

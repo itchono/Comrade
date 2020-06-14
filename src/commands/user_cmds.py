@@ -145,9 +145,9 @@ class Users(commands.Cog):
             try:
                 del u[field]
                 updateCustomUser(u)
-                await delSend("User config value deleted.", ctx.channel)
+                await delSend(ctx, "User config value deleted.")
             except:
-                await delSend("Value was not found.", ctx.channel)
+                await delSend(ctx, "Value was not found.")
         
         else:
             u[field] = value

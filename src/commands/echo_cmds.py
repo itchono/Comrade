@@ -56,7 +56,7 @@ class Echo(commands.Cog):
                 onlinecount += 1
 
         if count > onlinecount:
-            await delSend("Are you fucking serious", ctx.channel)
+            await delSend(ctx, "Are you fucking serious")
         else:
             mems = list(ctx.guild.members)
             random.shuffle(mems)
