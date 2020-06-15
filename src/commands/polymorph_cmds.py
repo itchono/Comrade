@@ -131,7 +131,7 @@ class Polymorph(commands.Cog):
         '''
         Returns information about the cache for the Polymorph module
         '''
-        await ctx.send(("Message cache: loaded with {} messages.".format(len(self.localcache[ctx.guild.id])) if self.localcache[ctx.guild.id] else "No message cache loaded for this server!") + "N-Gram Models: storing {} models locally.".format(len(self.models)))
+        await ctx.send(("Message cache: loaded with {} messages.".format(len(self.localcache[ctx.guild.id])) if self.localcache[ctx.guild.id] else "No message cache loaded for this server!") + "\nN-Gram Models: storing {} models locally.".format(len(self.models)))
     
     @commands.command()
     @commands.check_any(commands.is_owner(), isServerOwner())
