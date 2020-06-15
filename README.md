@@ -31,7 +31,11 @@ The contents of .env should look like:
 TOKEN = yourbottoken
 MONGOKEY = yourmongoconnectionstring
 ```
+# Adding/Updating Packages
 
+1. Ensure the `pip-compile` package is installed on your system. If not, install it with `pip install pip-compile`.
+2. Update the `requirements.in` with the names of the new packages you want to add. (optional)
+3. Run `pip-compile requirements.in > requirements.txt`, or run `pip-compile requirements.in` and copy the output to replace the contents of `requirements.txt`.
 
 # Bot Setup
 
