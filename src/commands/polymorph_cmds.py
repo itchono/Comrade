@@ -29,17 +29,24 @@ class Polymorph(commands.Cog):
         # load all messages from servers
         for g in self.bot.guilds:
 
-            s = ""
-            self.localcache[g.id] = []
-            for c in g.channels:
-                if cache := getcache(c.id): 
-                    self.localcache[g.id] += cache
-                    s += f"\t#{c.name} -- {len(cache)} messages\n"
+            self.load_messages(g)
 
-            if self.localcache[g.id]:
-                await log(g, "Message cache loaded with {} messages.\nChannels:\n{}".format(len(self.localcache[g.id]), s))
-            else:
-                await log(g, "No message cache loaded for this server!")
+    async def load_messages(self, g):
+        '''
+        Loads the local message cache
+        '''
+        s = ""
+        self.localcache[g.id] = []
+        for c in g.channels:
+            if cache := getcache(c.id): 
+                self.localcache[g.id] += cache
+                s += f"\t#{c.name} -- {len(cache)} messages\n"
+
+        if self.localcache[g.id]:
+            await log(g, "Message cache loaded with {} messages.\nChannels:\n{}".format(len(self.localcache[g.id]), s))
+        else:
+            await log(g, "No message cache loaded for this server!")
+
 
     @commands.command(aliases = ["gen"])
     @commands.guild_only()
@@ -116,10 +123,11 @@ class Polymorph(commands.Cog):
 
         ex = [{"author":m.author.id, "content":m.content} for m in msgs]
 
-        self.localcache[ctx.guild.id] += ex
-
         tx = compressCache(ex, 3)
-        fillcache(ctx.channel.id, tx)
+        fillcache(channel.id, tx)
+
+        self.load_messages(ctx.guild)
+
         await ctx.send("{} successfully cached and uploaded.".format(channel.mention))
         await log(ctx.guild, "Channel extracted: {}".format(channel.mention))
         await reactOK(ctx)
@@ -147,14 +155,4 @@ class Polymorph(commands.Cog):
             except:
                 await ctx.send("Error loading local cache.")
         else:
-            self.localcache[ctx.guild.id] = []
-            successcount = 0
-            for c in ctx.guild.channels:
-                if cache := getcache(c.id): 
-                    self.localcache[ctx.guild.id] += cache
-                    successcount += 1
-
-            if self.localcache[ctx.guild.id]:
-                await log(ctx.guild, "Message cache loaded with {} messages".format(len(self.localcache[ctx.guild.id])))
-            else:
-                await log(ctx.guild, "No message cache loaded for this server!")
+            self.load_messages(ctx.guild)
