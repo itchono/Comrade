@@ -28,19 +28,18 @@ class Polymorph(commands.Cog):
         '''
         # load all messages from servers
         for g in self.bot.guilds:
+
+            s = ""
             self.localcache[g.id] = []
-            successcount = 0
             for c in g.channels:
                 if cache := getcache(c.id): 
                     self.localcache[g.id] += cache
-                    successcount += 1
+                    s += f"\t#{c.name} -- {len(cache)} messages\n"
 
             if self.localcache[g.id]:
-                await log(g, "Message cache loaded with {} messages".format(len(self.localcache[g.id])))
+                await log(g, "Message cache loaded with {} messages.\nChannels:\n{}".format(len(self.localcache[g.id]), s))
             else:
                 await log(g, "No message cache loaded for this server!")
-
-            print(f"\t{g.name}: {successcount} channels loaded")
 
     @commands.command(aliases = ["gen"])
     @commands.guild_only()

@@ -1,5 +1,5 @@
 # version of the bot
-VERSION = "3.0 [Build June 14 v2]" 
+VERSION = "3.0 [Build June 15 v1]" 
 
 # set to True if you are testing the bot in a development environment, False otherwise
 DEVELOPMENT_MODE = False 
