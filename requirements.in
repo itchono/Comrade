@@ -1,0 +1,14 @@
+discord
+discord.py
+fuzzywuzzy
+python-dotenv
+python-Levenshtein
+requests
+unidecode
+dnspython
+pymongo
+pybooru
+bs4
+pytz
+matplotlib
+numpy
