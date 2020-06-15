@@ -44,6 +44,7 @@ class SelfPing(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.lastping = None
+        self.response = None
         self._last_member = None
 
         self.selfping.start()
@@ -61,16 +62,14 @@ class SelfPing(commands.Cog):
             request = urllib.request.Request(url,None,headers)
 
             response = urllib.request.urlopen(request)
-            data = response.read()
-            print(data)
-
+            self.response = response.read().decode("utf-8")
             self.lastping = localTime()
         except:
             print("ERROR pinging self!")
 
-    @commands.command(name="lastping")
-    async def callping(self, ctx : commands.Context):
-        await ctx.send("Last ping was at {}".format(self.lastping))
+    @commands.command(name="ping")
+    async def ping(self, ctx : commands.Context):
+        await ctx.send("Last ping was at {}\nResponse:`{}`".format(self.lastping.strftime("%I:%M:%S %p %Z"), self.response))
 
 
     @selfping.before_loop

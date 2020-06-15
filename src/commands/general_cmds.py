@@ -21,7 +21,7 @@ class General(commands.Cog):
         s = "Uptime: {:.2f} s\n".format(time.perf_counter())
         s += "Version: {}\n".format(VERSION)
         s += "Currently connected to {} server(s)\n".format(len(self.bot.guilds))
-        s += "Comrade is currently hosted from: {}. Local time: {}".format(getHost(), localTime().strftime("%I:%M:%S %p %Z"))
+        s += "Latency: {:.4f}s\n".format(self.bot.latency)
         
         await ctx.send(s)
 

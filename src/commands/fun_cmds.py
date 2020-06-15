@@ -278,57 +278,6 @@ class Fun(commands.Cog):
                 self.streak = val
                 await message.channel.send(f"Streak is now {self.streak}")
                 return'''
-            # dev stuff
-
-            if "$guessing" in message.content.lower() and self.guessState:
-                streakPrompts = {
-                    3 : "guessing spree!",
-                    4 : "rampage!",
-                    5 : "unstoppable!",
-                    6 : "godlike!",
-                    7 : "legendary!",
-                    8 : "umm Insane?",
-                    9 : "... how?",
-                    10: "this is getting kinda creepy ngl.",
-                    11: "reaching the current max for normal streak prompts, continue to accumulate your streak to unlock bonus prompts!",
-                    69: "has just won at life!",
-                    420: "suuuuuuuhhhhhh *puffs out giant cloud of smoke.",
-                    9999: "\nIf someone reaches this, good job, you have earned my respect - Stephen Luu June 13, 2020."
-                }
-                
-                try:
-                    guess = " ".join(message.content.split()[1:])
-                    u = await extractUser(self.bot.get_context(message), guess)
-                    _ = u.id
-                    #print(guess)
-                except:
-                    await message.channel.send("Hmm idk but this looks like a pretty shitty guess to me. Try again.")
-                    return
-                
-                if u.display_name == self.activeGuess:
-                    out = "Congratulations you gave guessed right!"
-                    self.guessState = False 
-                    self.streak += 1
-                    if self.streak >= 3:
-                        if self.streak <= 4:
-                            out += f"\n**{message.author.display_name} is on a {streakPrompts[self.streak]} Streak: {self.streak}**"
-                        elif self.streak in streakPrompts:
-                            out += f"\n**{message.author.display_name} is {streakPrompts[self.streak]} Streak: {self.streak}**"
-                    await message.channel.send(out)
-                else:
-                    self.guessState = False
-                    out = f"\nYikes that was incorrect, it was {self.activeGuess}."
-                    if self.streak >= 3:
-                        out += f"\n**OOOOOF {message.author.display_name}'s streak got reset back to 0 from {self.streak}**"
-                    self.streak = 0
-                    await message.channel.send(out)
-
-            elif "$guessing" in message.content.lower() and not self.guessState:
-                await message.channel.send("No prompt, try entering```$<bot prefix> guess``` to generate a prompt")
-
-            
-            
-
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction:discord.Reaction, user:discord.User):
@@ -345,7 +294,7 @@ class Fun(commands.Cog):
                 
 
     @commands.command()
-    async def guess(self, ctx: commands.Context):
+    async def guess(self, ctx: commands.Context, *, guess=None):
         '''
         Guessing game
         By Phtephen99 with help from Itchono, with the power of friendship and other ppl's funtions
@@ -366,34 +315,79 @@ class Fun(commands.Cog):
             - Leaderboards(future plans)
         - Optimize code(In progress)
         '''
-        await ctx.trigger_typing()
 
-        if self.guessState:
+        if guess and self.guessState:
+            streakPrompts = {
+                3 : "guessing spree!",
+                4 : "rampage!",
+                5 : "unstoppable!",
+                6 : "godlike!",
+                7 : "legendary!",
+                8 : "umm Insane?",
+                9 : "... how?",
+                10: "this is getting kinda creepy ngl.",
+                11: "reaching the current max for normal streak prompts, continue to accumulate your streak to unlock bonus prompts!",
+                69: "has just won at life!",
+                420: "suuuuuuuhhhhhh *puffs out giant cloud of smoke.",
+                9999: "\nIf someone reaches this, good job, you have earned my respect - Stephen Luu June 13, 2020."
+            }
+
+            if u := await extractUser(ctx, guess):
+                if u.display_name == self.activeGuess:
+                    out = "Congratulations you gave guessed right!"
+                    self.guessState = False 
+                    self.streak += 1
+                    if self.streak >= 3:
+                        if self.streak <= 4:
+                            out += f"\n**{ctx.author.display_name} is on a {streakPrompts[self.streak]} Streak: {self.streak}**"
+                        elif self.streak in streakPrompts:
+                            out += f"\n**{ctx.author.display_name} is {streakPrompts[self.streak]} Streak: {self.streak}**"
+                    await ctx.send(out)
+                else:
+                    self.guessState = False
+                    out = f"\nYikes that was incorrect, it was {self.activeGuess}."
+                    if self.streak >= 3:
+                        out += f"\n**OOOOOF {ctx.author.display_name}'s streak got reset back to 0 from {self.streak}**"
+                    self.streak = 0
+                    await ctx.send(out)
+
+        elif not self.guessState and guess:
+            await ctx.send(f"No prompt, try entering `{BOT_PREFIX}guess` to generate a prompt")
+
+        elif self.guessState and not guess:
             await ctx.send("There's already a prompt, try guessing for that one before asking for another prompt.")
-            return
 
-        NUMBER = 20 # number of tokens to make
-        text_gen_module = self.bot.get_cog("Polymorph")
-        user_cmds = self.bot.get_cog("Users")
-        pool = user_cmds.RND_USER[ctx.guild.id]
+        elif not self.guessState and not guess:
+            await ctx.trigger_typing()
+            NUMBER = 20 # number of tokens to make
+            text_gen_module = self.bot.get_cog("Polymorph")
+            user_cmds = self.bot.get_cog("Users")
 
-        while not text:
-            luckyperson = random.choice(pool) # user object that we can directly call upon for all Discord functions
-            #print(luckyperson.display_name.encode("UTF-8")) #Debugging print, TODO get rid when fully deployed
-            try:
-                model = text_gen_module.models[(luckyperson.id, ctx.guild.id)]
-                txt = text(model, NUMBER)
-            except:
-                await text_gen_module.buildmodel(ctx, luckyperson.mention, silent=True)
-                try:
-                    model = text_gen_module.models[(luckyperson.id, ctx.guild.id)]
-                    txt = text(model, NUMBER)
-                except:
-                    pass
 
-        self.activeGuess = luckyperson.display_name
-        await ctx.send(f'Who sent this?:\n```{txt}```')
-        self.guessState = True
+            if ctx.guild.id in user_cmds.RND_USER:  
+                pool = user_cmds.RND_USER[ctx.guild.id]
+
+                txt = None
+
+                while not txt:
+                    luckyperson = random.choice(pool) # user object that we can directly call upon for all Discord functions
+                    #print(luckyperson.display_name.encode("UTF-8")) #Debugging print, TODO get rid when fully deployed
+                    try:
+                        model = text_gen_module.models[(luckyperson.id, ctx.guild.id)]
+                        txt = text(model, NUMBER)
+                    except:
+                        await text_gen_module.buildModel(ctx, luckyperson.mention, silent=True)
+                        try:
+                            model = text_gen_module.models[(luckyperson.id, ctx.guild.id)]
+                            txt = text(model, NUMBER)
+                        except:
+                            pass
+
+                self.activeGuess = luckyperson.display_name
+                await ctx.send(f'Who sent this? Submit your guess using `{BOT_PREFIX}guess <your guess>`\n```{txt}```')
+                self.guessState = True
+            else:
+                await ctx.send("The user cache is not loaded yet. Give it a few seconds and try again.")
 
 
 
