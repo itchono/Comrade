@@ -27,9 +27,6 @@ class Polymorph(commands.Cog):
         When bot is loaded
         '''
         # load all messages from servers
-
-        print("Loading message caches for all servers:")
-
         for g in self.bot.guilds:
             self.localcache[g.id] = []
             successcount = 0
@@ -64,7 +61,7 @@ class Polymorph(commands.Cog):
 
             except:
                 await ctx.send("Model is not yet built, it will take a bit longer to produce this first iteration of text.")
-                await self.buildmodel(ctx, target)
+                await self.buildModel(ctx, target)
                 
                 try:
                     model = self.models[(user.id, ctx.guild.id)]
@@ -74,7 +71,7 @@ class Polymorph(commands.Cog):
     
     @commands.command()
     @commands.guild_only()
-    async def buildmodel(self, ctx: commands.Context, target: str, n=2, silent=False):
+    async def buildModel(self, ctx: commands.Context, target: str, n=2, silent=False):
         '''
         Builds the n-gram model for a user based on all cached messages in a server.
         By default, n=2.
@@ -84,7 +81,7 @@ class Polymorph(commands.Cog):
 
         t_start = time.perf_counter()
 
-        if self.localcache[ctx.guild.id]:
+        if ctx.guild.id in self.localcache:
             if user := await extractUser(ctx, target):
                 
                 # check to see if we have too many models cached
@@ -94,12 +91,12 @@ class Polymorph(commands.Cog):
                     await ctx.trigger_typing()
 
                 msgs = [m["content"] for m in self.localcache[ctx.guild.id] if m["author"] == user.id]
-                model = modelfrommsgs(msgs, n=1) # construct 2-gram model
+                model = modelfrommsgs(msgs, n) # construct n-gram model
 
                 self.models[(user.id, ctx.guild.id)] = model
                 # load model into user cache
 
-                if not silent: await ctx.send("Model for {} built in {:.3f}s.".format(user.display_name, time.perf_counter()-t_start))
+                if not silent: await ctx.send("{}-Gram model for {} built in {:.3f}s.".format(n, user.display_name, time.perf_counter()-t_start))
         else:
             await reactX(ctx)
             await ctx.send("Model could not be built - no message cache has been loaded for this server. \nUse `{}extractChannel <channel>` to load a channel".format(BOT_PREFIX))
@@ -130,33 +127,35 @@ class Polymorph(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    async def modelSize(self, ctx: commands.Context):
+    async def cacheStatus(self, ctx: commands.Context):
         '''
-        Returns the size of the current model store.
+        Returns information about the cache for the Polymorph module
         '''
-        await ctx.send("Current storing {} models locally.".format(len(self.models)))
-
-    @commands.command()
-    @commands.guild_only()
-    async def channelCacheStatus(self, ctx: commands.Context):
-        '''
-        Returns information about the currently cached channel
-        '''
-        if self.localcache[ctx.guild.id]:
-            await ctx.send("Message cache loaded with {} messages.".format(len(self.localcache[ctx.guild.id])))
-        else:
-            await ctx.send("No message cache loaded for this server!")
-  
+        await ctx.send(("Message cache: loaded with {} messages.".format(len(self.localcache[ctx.guild.id])) if self.localcache[ctx.guild.id] else "No message cache loaded for this server!") + "N-Gram Models: storing {} models locally.".format(len(self.models)))
+    
     @commands.command()
     @commands.check_any(commands.is_owner(), isServerOwner())
     @commands.guild_only()
-    async def injectcache(self, ctx: commands.Context, filename=None):
+    async def injectCache(self, ctx: commands.Context, filename=None):
         '''
-        Injects .dat file into active cache from local file (in /polymorph directory), or clears it.
+        Injects .dat file into active cache from local file (in /polymorph directory), or resets it.
         '''
-        try:
-            with open("polymorph/{}.dat".format(filename), "rb") as f:
-                self.localcache[g.id] += pickle.load(f)
-            await reactOK(ctx)
-        except:
-            await ctx.send("Error loading local cache.")
+        if filename:
+            try:
+                with open("polymorph/{}.dat".format(filename), "rb") as f:
+                    self.localcache[ctx.guild.id] = pickle.load(f)
+                await reactOK(ctx)
+            except:
+                await ctx.send("Error loading local cache.")
+        else:
+            self.localcache[ctx.guild.id] = []
+            successcount = 0
+            for c in ctx.guild.channels:
+                if cache := getcache(c.id): 
+                    self.localcache[ctx.guild.id] += cache
+                    successcount += 1
+
+            if self.localcache[ctx.guild.id]:
+                await log(ctx.guild, "Message cache loaded with {} messages".format(len(self.localcache[ctx.guild.id])))
+            else:
+                await log(ctx.guild, "No message cache loaded for this server!")

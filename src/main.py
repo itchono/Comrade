@@ -19,7 +19,6 @@ https://discord.com/api/oauth2/authorize?client_id=707042278132154408&permission
 Requires MongoDB Set Up, with Database called Comrade, and Collections: 
 [ChannelCache, CustomCommands, CustomLists, CustomUsers, UserData, announcements, cfg, favourites]
 '''
-
 from utils import *
 from polymorph import *
 from crimson import *
