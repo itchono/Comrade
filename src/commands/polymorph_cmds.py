@@ -29,7 +29,7 @@ class Polymorph(commands.Cog):
         # load all messages from servers
         for g in self.bot.guilds:
 
-            self.load_messages(g)
+            await self.load_messages(g)
 
     async def load_messages(self, g):
         '''
@@ -126,7 +126,7 @@ class Polymorph(commands.Cog):
         tx = compressCache(ex, 3)
         fillcache(channel.id, tx)
 
-        self.load_messages(ctx.guild)
+        await self.load_messages(ctx.guild)
 
         await ctx.send("{} successfully cached and uploaded.".format(channel.mention))
         await log(ctx.guild, "Channel extracted: {}".format(channel.mention))
@@ -155,4 +155,4 @@ class Polymorph(commands.Cog):
             except:
                 await ctx.send("Error loading local cache.")
         else:
-            self.load_messages(ctx.guild)
+            await self.load_messages(ctx.guild)
