@@ -1,6 +1,8 @@
 from utils.utilities import *
 from utils.mongo_interface import *
 
+from discord.ext.commands.view import StringView
+
 class General(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -58,10 +60,7 @@ class General(commands.Cog):
         await ctx.trigger_typing()
         
         if u := await extractUser(ctx, target):
-
-            e = discord.Embed(title="", description = "Sent by {}".format(ctx.author))
-            
-            await DM(message, u, e)
+            await DM(message, u, discord.Embed(title="", description = "Sent by {}".format(ctx.author)))
             await reactOK(ctx)
             await ctx.send("DM sent to {}".format(target), delete_after=10)
 
@@ -74,12 +73,37 @@ class General(commands.Cog):
         await ctx.send("Author: {}".format(msg.author))
 
     @commands.command()
-    async def cmdtest(self, ctx):
+    @commands.check(isnotThreat)
+    async def macro(self, ctx, *, cmds):
         '''
-        Quick test for commands
+        Macro runner for Comrade.
+
+        Split command queries by comma
         '''
-        m = await ctx.send("$c help")
-        await self.bot.invoke()
+        for i in cmds.split(","):
+            i = i.strip(" ")
+            try:
+                view = StringView(i)
+
+                ctx2 = commands.Context(prefix=BOT_PREFIX, view=view, bot=self.bot, message=ctx.message)
+                view.skip_string(BOT_PREFIX)
+
+                invoker = view.get_word()
+                ctx2.invoked_with = invoker
+                ctx2.command = self.bot.all_commands.get(invoker)
+
+                await self.bot.invoke(ctx2)
+                
+            except:
+                await ctx.send(f"Input {i} could not be processed.")
+
+            await asyncio.sleep(1)
+
+
+
+
+
+        
 
     @commands.command(name = "list")
     @commands.guild_only()

@@ -4,7 +4,8 @@ from utils.mongo_interface import *
 class Users(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.RND_USER = {} # Cache of users for daily roll, per server
+        self.WEIGHTED_RND_USER = {} # Cache of users for daily roll, per server
+        self.UNWEIGHTED_RND_USER = {} # Cache of users for standard rolling
         self._last_member = None
 
     @commands.command()
@@ -83,7 +84,9 @@ class Users(commands.Cog):
         '''
         Rebuilds the random user cache for a given server.
         '''
-        self.RND_USER[g.id] = []
+        self.WEIGHTED_RND_USER[g.id] = []
+        self.UNWEIGHTED_RND_USER[g.id] = []
+        
         for member in g.members:
             if u := getUser(member.id, g.id): pass
             else:
@@ -93,10 +96,12 @@ class Users(commands.Cog):
                 u = getUser(member.id, g.id)
 
             weight = u["daily weight"]
-            if not member.bot: self.RND_USER[g.id] += [member for i in range(weight)]
+            if not member.bot: 
+                self.WEIGHTED_RND_USER[g.id] += [member for i in range(weight)]
+                self.UNWEIGHTED_RND_USER[g.id] += [member]
         
         # special case: list is empty
-        if self.RND_USER[g.id] == []:
+        if self.WEIGHTED_RND_USER[g.id] == []:
             for member in g.members:
                 d = getUser(member.id, g.id)
                 d["daily weight"] = 2
@@ -108,13 +113,10 @@ class Users(commands.Cog):
     @commands.guild_only()
     async def rollUser(self, ctx: commands.Context):
         '''
-        Roles a random ulcer, based on relative weights stored in user configuration file.
+        Rolls a random user in the server with equal weigh
         '''
         await ctx.channel.trigger_typing()
-
-        pool = self.RND_USER[ctx.guild.id][:]
-
-        luckyperson = random.choice(pool)
+        luckyperson = random.choice(self.UNWEIGHTED_RND_USER[ctx.guild.id])
         await self.userinfo(ctx, target=getUser(luckyperson.id, ctx.guild.id)["nickname"])
 
     @commands.command()

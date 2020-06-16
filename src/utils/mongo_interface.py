@@ -106,6 +106,7 @@ def updateUser(userData: dict):
     if oldOP and oldOP != userData["OP"]: 
         OP_CACHE[userData["server"]] = list(userQuery({"OP": True, "server": userData["server"]}))
         print("Rebuild OP Cache")
+
     if oldTHREAT and oldTHREAT != userData["threat level"]: 
         THREAT_CACHE[userData["server"]] = list(userQuery({"threat level": {"$gt": 0}, "server": userData["server"]}))
         print("Rebuild Threat Cache")
@@ -126,7 +127,6 @@ def removeCustomUser(name, server):
     '''
     customs = client.Comrade.CustomUsers
     customs.delete_one({"name": name, "server": server})
-
 
 def getCustomUser(name, server):
     '''
@@ -158,7 +158,6 @@ def getcache(channelID):
 '''
 Favourites Interface
 '''
-
 def updateFavourite(imageID:str, imgurl:str, serverID):
     favourites = client.Comrade.favourites
 
@@ -186,7 +185,6 @@ def getFavourite(serverID, imageID):
 '''
 Commands
 '''
-
 def updateCmd(serverID:int, name:str, cmdText:str):
     '''
     Updates a custom commands
@@ -212,7 +210,6 @@ def getCmd(serverID: int, name : str):
 '''
 Specific I/O for lists and vars
 '''
-
 def getcustomList(serverID:int, listname):
     '''
     Reads a certain named list from the custom lists
@@ -223,7 +220,6 @@ def getcustomList(serverID:int, listname):
         return lists.find_one({"server": serverID, "name":listname})["list"]
     except:
         return None
-    
 
 def updatecustomList(serverID:int, listname, value):
     '''
@@ -253,7 +249,6 @@ def removecustomList(serverID:int, listname):
     except:
         pass
 
-
 def getuserList(userID: int, serverID:int, listname):
     '''
     Reads a certain named list from a user in the database
@@ -263,7 +258,6 @@ def getuserList(userID: int, serverID:int, listname):
         return u if type(u) == list else None
     except:
         return None
-    
 
 def updateuserList(userID: int, serverID:int, listname, value):
     '''
@@ -295,7 +289,6 @@ def setnum(userID: int, serverID:int, valuename, value):
                 return u[valuename]
         except:
             pass
-
 
 def togglebool(userID: int, serverID:int, valuename):
     '''

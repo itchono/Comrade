@@ -67,7 +67,7 @@ async def on_ready():
 '''
 Users with threat level >2 cannot use Comrade's features.
 '''
-@client.check
+@client.check_once
 async def globalcheck(ctx): return isnotUltraThreat(ctx)
 
 '''
