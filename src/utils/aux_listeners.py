@@ -22,6 +22,19 @@ class AuxilliaryListener(commands.Cog):
 
         updateUser(stp.setupuser(user))
 
+        cog = self.bot.get_cog("Users")
+        await cog.rebuildUserCache(user.guild)
+
+    @commands.Cog.listener()
+    async def on_member_remove(self, user: discord.Member):
+        '''
+        When a member leaves the server
+        TODO reconfigure user DB
+        '''
+        await log(user.guild, "Left {}".format(user.name))
+        c = self.bot.get_channel(getCFG(user.guild.id)["announcements channel"])
+        await c.send(f":door: {user.display_name} has left.")
+
     @commands.Cog.listener()
     async def on_member_update(self, before, user):
         '''

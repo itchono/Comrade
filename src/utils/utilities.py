@@ -45,7 +45,6 @@ def isnotSuperThreat(ctx: commands.Context):
     if not ctx.guild: return True
     return not ctx.author.id in [i["user"] for i in getThreats(ctx.guild.id) if i["threat level"] > 1]
 
-
 def isnotUltraThreat(ctx: commands.Context):
     '''
     Determines whether message author is threat level >2

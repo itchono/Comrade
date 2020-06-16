@@ -24,9 +24,9 @@ class Fun(commands.Cog):
         self.bot = bot
         self.activetrivia = {}
 
-        self.activeGuess = "Nathan etc or some user id"
+        self.activeGuess = None
         self.guessState = False
-        self.streak = 0  #set to 3 for dev purposes
+        self.streak = {}  # NOTE: Changed to dictionary
         self._last_member = None
 
     @commands.command()
@@ -275,8 +275,8 @@ class Fun(commands.Cog):
                     await message.channel.send("Streak must be a valid integer!")
                     return
 
-                self.streak = val
-                await message.channel.send(f"Streak is now {self.streak}")
+                self.streak[ctx.author.id] = val
+                await message.channel.send(f"Streak is now {self.streak[ctx.author.id]}")
                 return'''
 
     @commands.Cog.listener()
@@ -292,8 +292,26 @@ class Fun(commands.Cog):
             await reaction.message.add_reaction({True:"☑", False:"🅱"}[reaction.emoji ==  self.activetrivia[m.id]])
             await reaction.message.channel.send(user.mention + {True:" CORRECT", False:" WRONG"}[reaction.emoji ==  self.activetrivia[m.id]])
                 
+    @commands.command()
+    @commands.guild_only()
+    async def guessStats(self, ctx: commands.Context):
+        '''
+        Stats for guess
+        '''
+
+        highscore = 0
+        currscore = 0
+
+        try: highscore = getUser(ctx.author.id, ctx.guild.id)["highest guess streak"]
+        except: pass
+
+        try: currscore = self.streak[ctx.author.id]
+        except: pass
+
+        await ctx.send(f"**Info for {ctx.author.display_name}**\nCurrent Streak: {currscore}\nHighest Streak: {highscore}")
 
     @commands.command()
+    @commands.guild_only()
     async def guess(self, ctx: commands.Context, *, guess=None):
         '''
         Guessing game
@@ -336,19 +354,40 @@ class Fun(commands.Cog):
                 if u.display_name == self.activeGuess:
                     out = "Congratulations you gave guessed right!"
                     self.guessState = False 
-                    self.streak += 1
-                    if self.streak >= 3:
-                        if self.streak <= 4:
-                            out += f"\n**{ctx.author.display_name} is on a {streakPrompts[self.streak]} Streak: {self.streak}**"
-                        elif self.streak in streakPrompts:
-                            out += f"\n**{ctx.author.display_name} is {streakPrompts[self.streak]} Streak: {self.streak}**"
+
+                    try:
+                        self.streak[ctx.author.id] += 1
+                        if self.streak[ctx.author.id] >= 3:
+                            if self.streak[ctx.author.id] <= 4:
+                                out += f"\n**{ctx.author.display_name} is on a {streakPrompts[self.streak[ctx.author.id]]} Streak: {self.streak[ctx.author.id]}**"
+                            elif self.streak[ctx.author.id] in streakPrompts:
+                                out += f"\n**{ctx.author.display_name} is {streakPrompts[self.streak[ctx.author.id]]} Streak: {self.streak[ctx.author.id]}**"
+                    except:
+                        self.streak[ctx.author.id] = 1
+
                     await ctx.send(out)
+
+                    udict = getUser(ctx.author.id, ctx.guild.id)
+                    try:
+                        if self.streak[ctx.author.id] > udict["highest guess streak"]:
+                            udict["highest guess streak"] = self.streak[ctx.author.id]
+                            
+                    except: 
+                        udict["highest guess streak"] = self.streak[ctx.author.id]
+
+                    updateUser(udict)
+
+                    await ctx.send(f"{ctx.author.mention} has achieved a new high score: {self.streak[ctx.author.id]}")
+
                 else:
                     self.guessState = False
                     out = f"\nYikes that was incorrect, it was {self.activeGuess}."
-                    if self.streak >= 3:
-                        out += f"\n**OOOOOF {ctx.author.display_name}'s streak got reset back to 0 from {self.streak}**"
-                    self.streak = 0
+
+                    try:
+                        if self.streak[ctx.author.id] >= 3:
+                            out += f"\n**OOOOOF {ctx.author.display_name}'s streak got reset back to 0 from {self.streak[ctx.author.id]}**"
+                    except: pass
+                    self.streak[ctx.author.id] = 0
                     await ctx.send(out)
 
         elif not self.guessState and guess:
@@ -364,8 +403,8 @@ class Fun(commands.Cog):
             user_cmds = self.bot.get_cog("Users")
 
 
-            if ctx.guild.id in user_cmds.RND_USER:  
-                pool = user_cmds.RND_USER[ctx.guild.id]
+            if ctx.guild.id in user_cmds.UNWEIGHTED_RND_USER:  
+                pool = user_cmds.UNWEIGHTED_RND_USER[ctx.guild.id]
 
                 txt = None
 
@@ -384,7 +423,7 @@ class Fun(commands.Cog):
                             pass
 
                 self.activeGuess = luckyperson.display_name
-                await ctx.send(f'Who sent this? Submit your guess using `{BOT_PREFIX}guess <your guess>`\n```{txt}```')
+                await ctx.send(f'Who could have typed this? Submit your guess using `{BOT_PREFIX}guess <your guess>`\n```{txt}```')
                 self.guessState = True
             else:
                 await ctx.send("The user cache is not loaded yet. Give it a few seconds and try again.")

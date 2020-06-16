@@ -25,6 +25,7 @@ class Setup(commands.Cog):
         d["daily weight"] = DEFAULT_DAILY_COUNT if not user.bot else 0
         d["bot"] = user.bot
         d["last online"] = "Now" if str(user.status) == "online" else "Never"
+        d["highest guess streak"] = 0
 
         return d
 

@@ -37,8 +37,7 @@ class TimeWizard(commands.Cog):
 
         ctx = await self.bot.get_context(m)
         
-        pool = cog.RND_USER[ctx.guild.id]
-        luckyperson = random.choice(pool)
+        luckyperson = random.choice(cog.WEIGHTED_RND_USER[ctx.guild.id])
 
         d = getUser(luckyperson.id, serverDB["_id"])
         d["daily weight"] -= 1
