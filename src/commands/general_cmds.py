@@ -99,12 +99,6 @@ class General(commands.Cog):
 
             await asyncio.sleep(1)
 
-
-
-
-
-        
-
     @commands.command(name = "list")
     @commands.guild_only()
     async def customlist(self, ctx, operation, title=None, value=None):
