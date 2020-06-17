@@ -94,6 +94,8 @@ class Emotes(commands.Cog):
         '''
         await self.rebuildcache()
 
+    @commands.command()
+    @commands.guild_only()
     async def emote(self, ctx : commands.Context, e:str):
         '''
         Sends an emote into a context.
