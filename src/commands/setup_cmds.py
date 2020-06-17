@@ -134,7 +134,7 @@ class Setup(commands.Cog):
         e = discord.Embed(title="Comrade Configuration for {}".format(
             ctx.guild.name),
                           description=s,
-                          colour=discord.Colour.from_rgb(r=215, g=52, b=42))
+                          colour=discord.Colour.from_rgb(*THEME_COLOUR))
         e.set_thumbnail(url=ctx.guild.icon_url)
 
         await ctx.send(embed=e)

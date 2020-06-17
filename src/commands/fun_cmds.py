@@ -232,7 +232,7 @@ class Fun(commands.Cog):
 
                 time = 5
 
-                embed = discord.Embed(title="ZA WARUDO", colour=discord.Colour.from_rgb(r=102, g=0, b=204))
+                embed = discord.Embed(title="ZA WARUDO", colour=discord.Colour.from_rgb(*THEME_COLOUR))
                 embed.set_image(url=("https://media1.tenor.com/images/4b953bf5b5ba531099a823944a5626c2/tenor.gif"))
 
                 await message.channel.send(embed=embed, delete_after=1.95)

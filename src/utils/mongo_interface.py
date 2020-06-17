@@ -185,13 +185,13 @@ def getFavourite(serverID, imageID):
 '''
 Commands
 '''
-def updateCmd(serverID:int, name:str, cmdText:str):
+def updateCmd(serverID:int, name:str, cmdText:str, cmdType:str):
     '''
     Updates a custom commands
     '''
     cfg = client.Comrade.CustomCommands
 
-    thingy = {"server": serverID, "name":name, "cmd":cmdText}
+    thingy = {"server": serverID, "name":name, "cmd":cmdText, "type":cmdType}
 
     cfg.update({"server": serverID, "name":name}, thingy, True)
     # (search target, info to put in, should we INSERT if no matching records are found?)
@@ -214,7 +214,7 @@ def getCmd(serverID: int, name : str):
     cfg = client.Comrade.CustomCommands
 
     if c := cfg.find_one({"server": serverID, "name":name}):
-        return c["cmd"]
+        return c["cmd"], c["type"]
     return None
 
 def allcmds(serverID):

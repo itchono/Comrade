@@ -2,6 +2,8 @@ from utils.utilities import *
 
 # MODIFIED SYSTEM to interpret Cosmo code, in a way that works with Comrade.
 
+INTERP_TIMEOUT = 1 # number of seconds allowed for parser to operate before terminating
+
 CMD_STACK = []
 
 def fill_env(env):
@@ -15,9 +17,9 @@ async def interp(AST, env, extCall = False):
     AST_type = AST["type"]
 
     if AST_type == "Struct":
-        await interp_struct(AST, env)
+        await asyncio.wait_for(interp_struct(AST, env), timeout=INTERP_TIMEOUT)
     elif AST_type == "Action":
-        await interp_action(AST, env)
+        await asyncio.wait_for(interp_action(AST, env), timeout=INTERP_TIMEOUT)
     else:
         raise SyntaxError("Invalid AST type in interp: " + AST_type)
 
@@ -28,7 +30,7 @@ async def interp_struct(AST, env):
 
     if stype == "Main":
         for element in AST["seq"]:
-            await interp(element, env)
+            await asyncio.wait_for(interp(element, env), timeout=INTERP_TIMEOUT)
     elif stype == "Iter":
         items = AST["items"]
         var = AST["var"]
@@ -45,7 +47,7 @@ async def interp_struct(AST, env):
             env[var] = item
             
             for element in AST["iter"]:
-                await interp(element, env)
+                await asyncio.wait_for(interp(element, env), timeout=INTERP_TIMEOUT)
 
         if already_exists == True:
             env[var] = temp
@@ -54,14 +56,14 @@ async def interp_struct(AST, env):
 
         while loop_bool:
             for element in AST["while"]:
-                await interp(element, env)
+                await asyncio.wait_for(interp(element, env), timeout=INTERP_TIMEOUT)
 
             loop_bool = interp_bool(AST["cond"], env)
     elif stype == "Cond":
         for case in AST["case"]:
             if interp_bool(case["cond"], env):
                 for element in case["case"]:
-                    await interp(element, env)
+                    await asyncio.wait_for(interp(element, env), timeout=INTERP_TIMEOUT)
                 break
     else:
         raise SyntaxError("Invalid struct type in interp_struct: " + stype)
@@ -77,7 +79,7 @@ async def interp_action(action, env):
     
     
     elif atype == "Call":
-        await interp_call(action["args"], env)
+        await asyncio.wait_for(interp_call(action["args"], env), timeout=INTERP_TIMEOUT)
     else: 
         raise SyntaxError("Invalid action type in interp_action: " + atype)
 

@@ -25,6 +25,9 @@ MSG_BUFFER_LIMIT = 10
 # default channel to load for Polymorph cache
 DEFAULT_CACHE_LOAD = 419214713755402262 
 
+# main colour for server; used in embeds
+THEME_COLOUR = (215, 52, 42)
+
 # colour for daily member (RGB)
 DAILY_MEMBER_COLOUR = (241, 196, 15) 
 
