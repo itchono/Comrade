@@ -196,6 +196,17 @@ def updateCmd(serverID:int, name:str, cmdText:str):
     cfg.update({"server": serverID, "name":name}, thingy, True)
     # (search target, info to put in, should we INSERT if no matching records are found?)
 
+def removeCmd(serverID:int, name:str):
+    '''
+    Removes a custom command
+    '''
+    cfg = client.Comrade.CustomCommands
+
+    try:
+        cfg.delete_one({"server": serverID, "name":name})
+    except:
+        pass
+
 def getCmd(serverID: int, name : str):
     '''
     Gets a custom command.
@@ -206,6 +217,12 @@ def getCmd(serverID: int, name : str):
         return c["cmd"]
     return None
 
+def allcmds(serverID):
+    '''
+    Returns a list of all Cosmo Scripts in given server
+    '''
+    favourites = client.Comrade.favourites
+    return list(favourites.find({"server":serverID}))
 
 '''
 Specific I/O for lists and vars

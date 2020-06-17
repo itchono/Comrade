@@ -21,7 +21,7 @@ Requires MongoDB Set Up, with Database called Comrade, and Collections:
 '''
 from utils import *
 from polymorph import *
-from crimson import *
+from cosmo import *
 from commands import *
 from cfg import *
 
@@ -37,7 +37,7 @@ client = commands.Bot(command_prefix=BOT_PREFIX, case_insensitive=True,
 
 cogs = [
     AuxilliaryListener, MessageHandler, General, Setup, Vault, Echo,
-    Users, TextFilter, Fun, TimeWizard, Emotes, Polymorph, Moderation, Crimson
+    Users, TextFilter, Fun, TimeWizard, Emotes, Polymorph, Moderation, Cosmo
 ]
 
 '''

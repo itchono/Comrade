@@ -15,13 +15,11 @@ Currently implemented features:
 
 
 ## Function Parameters
-Every program needs to start with a list of function parameters
+A Cosmo program can take in arguments, if the below header is provided at the start of the program.
 ```
-[x,y,z]
+[x, y, z]
 ```
-Make sure there are no spaces the between the values. All lists in Cosmo do not have spaces seperating the values. Cosmo is very space sensitive.
-
-Important: All Cosmo scripts must include this section and will not run without it. In subsequent examples, _we will however omit this for the sake of simplicity_.
+In subsequent examples, _we will however omit this for the sake of simplicity_.
 
 
 ## Basic Math
@@ -127,7 +125,7 @@ denotes the end of the while loop
 
 ```
 SET x 5
-WHILE x > 0 //counts down from 5 until it hits 0
+WHILE &x > 0 //counts down from 5 until it hits 0
 PRINT &x
 SUB x &x 1
 WHILEEND
