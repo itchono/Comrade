@@ -1,7 +1,6 @@
 from utils.utilities import *
 from utils.mongo_interface import *
 
-from discord.ext.commands.view import StringView
 
 class General(commands.Cog):
     def __init__(self, bot):
@@ -71,33 +70,6 @@ class General(commands.Cog):
         '''
         msg = await ctx.channel.fetch_message(msgid)
         await ctx.send("Author: {}".format(msg.author))
-
-    @commands.command()
-    @commands.check(isnotThreat)
-    async def macro(self, ctx, *, cmds):
-        '''
-        Macro runner for Comrade.
-
-        Split command queries by comma
-        '''
-        for i in cmds.split(","):
-            i = i.strip(" ")
-            try:
-                view = StringView(i)
-
-                ctx2 = commands.Context(prefix=BOT_PREFIX, view=view, bot=self.bot, message=ctx.message)
-                view.skip_string(BOT_PREFIX)
-
-                invoker = view.get_word()
-                ctx2.invoked_with = invoker
-                ctx2.command = self.bot.all_commands.get(invoker)
-
-                await self.bot.invoke(ctx2)
-                
-            except:
-                await ctx.send(f"Input {i} could not be processed.")
-
-            await asyncio.sleep(1)
 
     @commands.command(name = "list")
     @commands.guild_only()

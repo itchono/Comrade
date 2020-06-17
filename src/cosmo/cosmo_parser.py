@@ -1,4 +1,5 @@
 import re
+import ast
 
 def token_list(input_str):
     return input_str.splitlines()
@@ -7,20 +8,29 @@ def token_line(input_str):
     return input_str.split()
 
 def get_env(splt_line_lst):
-    first_line = splt_line_lst.pop(0)
+    first_line = splt_line_lst[0]
 
-    if re.search(r"\[((([a-zA-Z])+\,)+(([a-zA-Z])+)|([a-zA-Z]+))\]", first_line) is None:
-        raise SyntaxError("Missing or incorrect function parameters")
+    if first_line[-1] != "]" and first_line[0] != "[":
+        # empty params
+        #raise SyntaxError("Missing or incorrect function parameters")
+        return {}
 
-    env_list = first_line.replace("[", "").replace("]", "").replace(",", " ").split()
+    else:
+        splt_line_lst.pop(0)
+        env_list = first_line.replace("[", "").replace("]", "").split(",")
 
-    env_dict = {}
+        env_dict = {}
 
-    for var in env_list:
-        env_dict[var] = None
+        for var_pair in env_list:
+            var, val = var_pair.strip(" ").split(":")
+            """print(val)
+            try:
+                env_dict[var] = ast.literal_eval(val) # for any python parseable value
+                print(type(env_dict[var]))
+            except:"""
+            env_dict[var] = val # just a string
 
-    return env_dict
-
+        return env_dict
 
 def parse(program):
     seq = {"type": "Struct", "stype": "Main", "seq": []}
@@ -28,7 +38,7 @@ def parse(program):
     while len(program) > 0:
         seq["seq"].append(parse_struct(program))
 
-    return seq;
+    return seq
 
 def parse_struct(program):
     line = program.pop(0).split()
@@ -91,18 +101,3 @@ def parse_action(cmd, line):
     else:
         errorStr = "Unknown action: " + cmd + " with args: " + "".join(line)
         raise SyntaxError(errorStr)
-
-if __name__ == "__main__":
-    #take in input as string
-    input_str = "[style,them]\nCOND\nCASE x > 3\nPRINT 3\nCASE x > 2\nPRINT 2\nCASE x == 1\nPRINT 1\nCONDEND\nPRINT done"
-
-    #seperate program into individual lines
-    splt_line_lst = token_list(input_str)
-
-    #get env from first line
-    env = get_env(splt_line_lst)
-    
-    #parse program
-    ast = parse(splt_line_lst)
-
-    print("ast:", ast)

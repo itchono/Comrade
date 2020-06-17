@@ -1,25 +1,34 @@
-#import comrade_interface
+from utils.utilities import *
+
+# MODIFIED SYSTEM to interpret Cosmo code, in a way that works with Comrade.
+
+CMD_STACK = []
 
 def fill_env(env):
     for var in env:
         env[var] = input()
 
-def interp(AST, env):
+async def interp(AST, env, extCall = False):
+
+    if extCall: CMD_STACK.clear() # putput system
+
     AST_type = AST["type"]
 
     if AST_type == "Struct":
-        interp_struct(AST, env)
+        await interp_struct(AST, env)
     elif AST_type == "Action":
-        interp_action(AST, env)
+        await interp_action(AST, env)
     else:
         raise SyntaxError("Invalid AST type in interp: " + AST_type)
 
-def interp_struct(AST, env):
+    if extCall: return CMD_STACK
+
+async def interp_struct(AST, env):
     stype = AST["stype"]
 
     if stype == "Main":
         for element in AST["seq"]:
-            interp(element, env)
+            await interp(element, env)
     elif stype == "Iter":
         items = AST["items"]
         var = AST["var"]
@@ -36,7 +45,7 @@ def interp_struct(AST, env):
             env[var] = item
             
             for element in AST["iter"]:
-                interp(element, env)
+                await interp(element, env)
 
         if already_exists == True:
             env[var] = temp
@@ -45,43 +54,44 @@ def interp_struct(AST, env):
 
         while loop_bool:
             for element in AST["while"]:
-                interp(element, env)
+                await interp(element, env)
 
             loop_bool = interp_bool(AST["cond"], env)
     elif stype == "Cond":
         for case in AST["case"]:
             if interp_bool(case["cond"], env):
                 for element in case["case"]:
-                    interp(element, env)
+                    await interp(element, env)
                 break
     else:
         raise SyntaxError("Invalid struct type in interp_struct: " + stype)
 
-def interp_action(action, env):
+async def interp_action(action, env):
     atype = action["atype"]
-
     if atype == "Print":
         print(interp_atom(action["args"], env))
     elif atype == "Set":
         env[action["args"][0]] = interp_atom(action["args"][1], env)
     elif atype == "Add" or atype == "Sub" or atype == "Mul" or atype == "Div":
         env[action["args"][0]] = bin_op(interp_atom(action["args"][1], env), interp_atom(action["args"][2], env), atype)
+    
+    
     elif atype == "Call":
-        interp_call(action["args"], env)
+        await interp_call(action["args"], env)
     else: 
         raise SyntaxError("Invalid action type in interp_action: " + atype)
 
 def interp_atom(atom, env):
     if atom == "" or atom is None:
         raise SyntaxError("Missing arg or empty arg in interp_atom")
-    
-    DISCORD_INTERFACE = False
 
-    if atom[0] == "&":
+    # REQUIRED TO TREAT THE VARIABLE AS A VARIABLE INSTEAD OF A STRING LITERAL
+    if atom[0] == "&" and atom[1:] in env:
         return env[atom[1:]]
     else:
         return atom
     """
+    NOTE: This allows arbitrary code execution, don't do it
     elif atom[0] == "#":
         exec("global res; res = %s" % atom[1:])
         global res
@@ -100,6 +110,13 @@ def bin_op(a, b, op):
 
 def interp_bool(bool_stmt, env):
     if len(bool_stmt) == 3:
+
+        """try: a = ast.literal_eval(bool_stmt[0])
+        except: 
+
+        try: b = ast.literal_eval(bool_stmt[2])
+        except: """
+        
         a = bool_stmt[0]
         b = bool_stmt[2]
         c = bool_stmt[1]
@@ -130,10 +147,11 @@ def interp_bool(bool_stmt, env):
     else:
         raise SyntaxError("Not a valid set of boolean arguments in interp_bool: " + str(bool_stmt))
 
-def interp_call(d_call, env):
+async def interp_call(d_call, env):
+    '''
+    Adds to command stack
+    '''
     out_str = ""
     for arg in d_call:
         out_str = out_str + interp_atom(arg, env) + " "
-
-    print(out_str)
-    #print to discord
+    CMD_STACK.append(out_str)

@@ -47,6 +47,7 @@ class Emotes(commands.Cog):
             await self.rebuildcache() # refresh cache
 
             await ctx.send('Emote `{}` was added. you can call it using `:{}:`'.format(name.lower(), name.lower()))
+            await self.emote(ctx, name.lower())
         else:
             await reactX(ctx)
             await ctx.send('Emote `{}` already exists! Contact a mod to get this fixed.'.format(name.lower()))
@@ -118,9 +119,9 @@ class Emotes(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
         '''
-        Emote listener [works with bots too]
+        Emote listener
         '''
-        if message.content and message.guild and message.content[0] == ':' and message.content[-1] == ':':
+        if message.content and not message.author.bot and message.guild and message.content[0] == ':' and message.content[-1] == ':':
             await self.emote(await self.bot.get_context(message), message.content.lower().strip(':'))
 
             
