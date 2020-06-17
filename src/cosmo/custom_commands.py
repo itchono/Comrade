@@ -102,14 +102,16 @@ class Cosmo(commands.Cog):
             splt_line_lst = token_list(cmd)
 
             try:
-                params = [i.strip(" ") for i in splt_line_lst[0].strip("[").strip("]").split(",")]
-                # inject args
+                if splt_line_lst[0][-1] == "]" and splt_line_lst[0][0] == "[":
 
-                if len(args) == len(params):
-                    splt_line_lst[0] = str([f'{params[i]}:{args[i]}' for i in range(len(args))]).replace("'","")
-                else:
-                    await ctx.send(f"Not enough arguments for this script. Needs to be of form {BOT_PREFIX}run {name} {splt_line_lst[0]}")
-                    return
+                    params = [i.strip(" ") for i in splt_line_lst[0].strip("[").strip("]").split(",")]
+                    # inject args
+
+                    if len(args) == len(params):
+                        splt_line_lst[0] = str([f'{params[i]}:{args[i]}' for i in range(len(args))]).replace("'","")
+                    else:
+                        await ctx.send(f"Not enough arguments for this script. Needs to be of form `{BOT_PREFIX}run {name} {splt_line_lst[0]}`")
+                        return
 
             except:
                 pass
