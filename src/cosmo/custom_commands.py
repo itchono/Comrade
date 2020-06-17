@@ -32,7 +32,7 @@ class Cosmo(commands.Cog):
                     await asyncio.sleep(float(i.split(" ")[1]))
 
                 elif i.split(" ")[0].lower() == "say":
-                    await ctx.send(" ".join(i.split(" ")[1:]))
+                    await asyncio.wait_for(ctx.send(" ".join(i.split(" ")[1:])), timeout=5.0)
                 else:
                     try:
                         i = BOT_PREFIX + i
@@ -44,7 +44,7 @@ class Cosmo(commands.Cog):
                         ctx2.invoked_with = invoker
                         ctx2.command = self.bot.all_commands.get(invoker)
 
-                        await self.bot.invoke(ctx2)
+                        await asyncio.wait_for(self.bot.invoke(ctx2), timeout=5.0)
                         
                     except: await ctx.send(f"Input {i} could not be processed.")
             except: await ctx.send(f"Input {i} could not be processed.")
@@ -55,9 +55,14 @@ class Cosmo(commands.Cog):
     async def showscripts(self, ctx):
         '''
         Lists all Cosmo scripts in the server
-        TODO make it look good
         '''
-        await ctx.send([i["name"] for i in allcmds(ctx.guild.id)])
+        e = discord.Embed(title=f"Scripts for {ctx.guild.name}", colour=discord.Colour.from_rgb(*THEME_COLOUR))
+
+        scrs = allcmds(ctx.guild.id)
+
+        e.add_field(name="Cosmo Scripts", value=", ".join([i["name"] for i in scrs if i["type"] == "cosmo"]), inline=True)
+        e.add_field(name="Macros", value=", ".join([i["name"] for i in scrs if i["type"] == "macro"]), inline=True)
+        await ctx.send(embed=e)
 
     @commands.command()
     @commands.guild_only()
@@ -77,8 +82,14 @@ class Cosmo(commands.Cog):
         '''
         Shows a Cosmos script
         '''
-        if cmd := getCmd(ctx.guild.id, name):
-            await ctx.send(f"```{cmd}```")
+        if tup := getCmd(ctx.guild.id, name):
+
+            (cmd, cmdType) = tup
+            if cmdType == "cosmo":
+                await ctx.send(f"```{cmd}```") 
+            else:
+                # macro
+                await ctx.send(f"`{cmd}`")
 
         else:
             await reactX(ctx)
@@ -90,40 +101,53 @@ class Cosmo(commands.Cog):
     @commands.check(isnotThreat)
     async def run(self, ctx, *, args):
         '''
-        Runs a stored Cosmo script, with a given name, and optional arguments.
+        Runs a macro, or a stored Cosmo script, with a given name, and optional arguments [SPLIT BY COMMA].
 
         Built on Victor's Cosmo language and Comrade's macro system
         '''
-        args = args.split(" ")
+        args = args.split(",")
         name = args.pop(0)
 
-        if cmd := getCmd(ctx.guild.id, name):
+        if tup := getCmd(ctx.guild.id, name):
 
-            splt_line_lst = token_list(cmd)
+            (cmd, cmdType) = tup
 
-            try:
-                if splt_line_lst[0][-1] == "]" and splt_line_lst[0][0] == "[":
+            if cmdType == "cosmo":
 
-                    params = [i.strip(" ") for i in splt_line_lst[0].strip("[").strip("]").split(",")]
-                    # inject args
+                splt_line_lst = token_list(cmd)
 
-                    if len(args) == len(params):
-                        splt_line_lst[0] = str([f'{params[i]}:{args[i]}' for i in range(len(args))]).replace("'","")
-                    else:
-                        await ctx.send(f"Not enough arguments for this script. Needs to be of form `{BOT_PREFIX}run {name} {splt_line_lst[0]}`")
-                        return
+                try:
+                    if splt_line_lst[0][-1] == "]" and splt_line_lst[0][0] == "[":
 
-            except:
-                pass
+                        params = [i.strip(" ") for i in splt_line_lst[0].strip("[").strip("]").split(",")]
+                        # inject args
 
-            #get env from first line
-            env = get_env(splt_line_lst)
-            #parse program
-            ast = parse(splt_line_lst)
-            #interp ast with given env
+                        if len(args) == len(params):
+                            splt_line_lst[0] = str([f'{params[i]}:{args[i]}' for i in range(len(args))]).replace("'","")
+                        else:
+                            await ctx.send(f"Not enough arguments for this script. Needs to be of form `{BOT_PREFIX}run {name} {splt_line_lst[0].strip('[').strip(']')}`")
+                            return
 
-            cmds = await interp(ast, env, extCall=True)
-            await self.macro(ctx, cmds=",".join(cmds))
+                except:
+                    pass
+
+                #get env from first line
+                env = get_env(splt_line_lst)
+                #parse program
+                ast = parse(splt_line_lst)
+                #interp ast with given env
+
+                try:
+                    cmds = await asyncio.wait_for(interp(ast, env, extCall=True), timeout=INTERP_TIMEOUT)
+                    await self.macro(ctx, cmds=",".join(cmds))
+
+                except asyncio.TimeoutError:
+                    await ctx.send(f"Program interpretation failed after {INTERP_TIMEOUT} seconds. Check to see if you have any infinite loops running!")
+            else:
+                try:
+                    await asyncio.wait_for(self.macro(ctx, cmds=cmd), timeout=1.0)
+                except asyncio.TimeoutError:
+                    await ctx.send("Program execution terminated after 30 seconds.")
 
         else:
             await reactX(ctx)
@@ -133,11 +157,15 @@ class Cosmo(commands.Cog):
     @commands.guild_only()
     async def newscript(self, ctx, command_name, *, command):
         '''
-        Creates a command using a Cosmo script.
+        Creates a command using a Cosmo script or Comrade Macro
 
         INPUT FORMAT: <bot prefix> createcmd <command name> ```<CODE GOES HERE>```
         '''
-        updateCmd(ctx.guild.id, command_name, command.strip("```"))
+
+        if command[:3] == "```" and command[-3:] == "```":
+            updateCmd(ctx.guild.id, command_name, command.strip("```"), "cosmo")
+        else:
+            updateCmd(ctx.guild.id, command_name, command, "macro")
         await reactOK(ctx)
 
 

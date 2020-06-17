@@ -46,7 +46,9 @@ cogs = [NSFW, SelfPing]
 
 On fully hosted version, add NSFW module
 '''
-for c in cogs: client.add_cog(c(client))
+for c in cogs: 
+    client.add_cog(c(client))
+    print(f"Loaded: {c.__name__}")
 print("Bot components initialized, awaiting login.")
 
 @client.event
