@@ -69,6 +69,22 @@ class Cosmo(commands.Cog):
         removeCmd(ctx.guild.id, name)
         await reactOK(ctx)
 
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.check(isnotThreat)
+    async def showscript(self, ctx, name):
+        '''
+        Shows a Cosmos script
+        '''
+        if cmd := getCmd(ctx.guild.id, name):
+            await ctx.send(f"```{cmd}```")
+
+        else:
+            await reactX(ctx)
+            await ctx.send(f"No script with name {name} was found.", delete_after=10)
+
+
     @commands.command()
     @commands.guild_only()
     @commands.check(isnotThreat)

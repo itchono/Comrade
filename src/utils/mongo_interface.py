@@ -221,7 +221,7 @@ def allcmds(serverID):
     '''
     Returns a list of all Cosmo Scripts in given server
     '''
-    favourites = client.Comrade.favourites
+    favourites = client.Comrade.CustomCommands
     return list(favourites.find({"server":serverID}))
 
 '''
