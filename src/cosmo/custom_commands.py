@@ -105,8 +105,10 @@ class Cosmo(commands.Cog):
 
         Built on Victor's Cosmo language and Comrade's macro system
         '''
-        args = args.split(",")
+        args = args.split(" ")
         name = args.pop(0)
+
+        args = "".join(args).split(",") # strip spaces
 
         if tup := getCmd(ctx.guild.id, name):
 
