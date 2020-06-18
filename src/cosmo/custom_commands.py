@@ -6,6 +6,8 @@ from cosmo.cosmo_parser import *
 
 from discord.ext.commands.view import StringView
 
+MAX_STEP_TIME = 2
+
 class Cosmo(commands.Cog):
 
     def __init__(self, bot):
@@ -32,22 +34,24 @@ class Cosmo(commands.Cog):
                     await asyncio.sleep(float(i.split(" ")[1]))
 
                 elif i.split(" ")[0].lower() == "say":
-                    await asyncio.wait_for(ctx.send(" ".join(i.split(" ")[1:])), timeout=5.0)
+                    await asyncio.wait_for(ctx.send(" ".join(i.split(" ")[1:])), timeout=MAX_STEP_TIME)
                 else:
-                    try:
-                        i = BOT_PREFIX + i
-                        view = StringView(i)
-                        ctx2 = commands.Context(prefix=BOT_PREFIX, view=view, bot=self.bot, message=ctx.message)
-                        view.skip_string(BOT_PREFIX)
+                    i = BOT_PREFIX + i
+                    view = StringView(i)
+                    ctx2 = commands.Context(prefix=BOT_PREFIX, view=view, bot=self.bot, message=ctx.message)
+                    view.skip_string(BOT_PREFIX)
 
-                        invoker = view.get_word()
-                        ctx2.invoked_with = invoker
-                        ctx2.command = self.bot.all_commands.get(invoker)
+                    invoker = view.get_word()
+                    ctx2.invoked_with = invoker
+                    ctx2.command = self.bot.all_commands.get(invoker)
 
-                        await asyncio.wait_for(self.bot.invoke(ctx2), timeout=5.0)
-                        
-                    except: await ctx.send(f"Input {i} could not be processed.")
-            except: await ctx.send(f"Input {i} could not be processed.")
+                    await asyncio.wait_for(self.bot.invoke(ctx2), timeout=MAX_STEP_TIME)
+            except asyncio.TimeoutError:
+                await ctx.send(f"Maximum Program Execution time was exceeded.\nPlease write a more reasonable program {ctx.author.mention}")
+                break
+            except: 
+                await ctx.send(f"Input {i} could not be processed.")
+                break
 
     @commands.command()
     @commands.guild_only()
@@ -147,7 +151,7 @@ class Cosmo(commands.Cog):
                     await ctx.send(f"Program interpretation failed after {INTERP_TIMEOUT} seconds. Check to see if you have any infinite loops running!")
             else:
                 try:
-                    await asyncio.wait_for(self.macro(ctx, cmds=cmd), timeout=1.0)
+                    await asyncio.wait_for(self.macro(ctx, cmds=cmd), timeout=0.5)
                 except asyncio.TimeoutError:
                     await ctx.send("Program execution terminated after 30 seconds.")
 
