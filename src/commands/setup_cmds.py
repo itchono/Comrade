@@ -30,6 +30,14 @@ class Setup(commands.Cog):
         return d
 
     @commands.command()
+    async def createChannel(self, ctx: commands.Context, channelname: str):
+        '''
+        Creates a channel, and gives the user who created it full permissions over it.
+        '''
+        
+
+
+    @commands.command()
     @commands.check_any(commands.is_owner(), isServerOwner())
     @commands.guild_only()
     async def reloadusers(self, ctx: commands.Context):
