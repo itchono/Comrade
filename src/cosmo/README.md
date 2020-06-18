@@ -95,7 +95,7 @@ PRINT &x //prints 3
 be careful with `&` before variables, if you miss it, the variable will be treated as a string and printed as such
 ```
 SET x 2
-PRINT x //prints x
+PRINT x //prints x instead of the variable at x
 ```
 
 
@@ -112,7 +112,7 @@ outlines the end of the section that needs to be looped with the iterator
 
 ```
 ITER x [1,2,3,4,5,6,7] //this loop prints out all the numbers in the list: all the numbers from 1 to 7
-PRINT x 
+PRINT &x 
 ITEREND
 ```
 
@@ -148,11 +148,11 @@ if the boolean statement is satisfied, the lines following this will be executed
 ```
 SET x 5
 COND
-CASE x > 5
+CASE &x > 5
 PRINT higher
-CASE x < 5
+CASE &x < 5
 PRINT lower
-CASE x == 5
+CASE &x == 5
 PRINT equal //this series of conditional cases will print "equal"
 CONDEND
 ```
