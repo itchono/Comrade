@@ -72,7 +72,7 @@ class General(commands.Cog):
         await ctx.send("Author: {}".format(msg.author))
 
     @commands.command()
-    async def requiem(self, ctx: commands.Context, day: int = 30):
+    async def requiem(self, ctx: commands.Context, day: int = 30, trim = False):
         '''
         Generates a list of users who have not talked in the past x days
         '''
@@ -87,18 +87,26 @@ class General(commands.Cog):
             author_ids = set([i.author.id for i in await channel.history(limit=None,after=threshold).flatten()])
             member_ids -= author_ids
 
-            print(f"DONE #{channel.name}")
-
-        print(member_ids)
-
         await ctx.send(f"{len(member_ids)} members detected to have not posted in the past {day} days.")
 
         s = "```"
-
         for i in [await extractUser(ctx, str(j)) for j in member_ids]:
             s += i.display_name + "\n"
+            
+            if trim:
+                u = getUser(i.id, ctx.guild.id)
+                u["daily weight"] = 0
+                updateUser(u)
         s += "```"
         await ctx.send(s)
+
+        if trim:
+            cog = self.bot.get_cog("Users")
+            await cog.rebuildUserCache(ctx.guild)
+            await ctx.send("Users above have been removed from the daily member pool.")
+
+        
+
 
     @commands.command(name = "list")
     @commands.guild_only()

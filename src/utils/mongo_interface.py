@@ -101,15 +101,15 @@ def updateUser(userData: dict):
         "server": userData["server"]
     }, userData, True)  # upsert
 
+    if u:
+        # Update caches, if the user exists
+        if oldOP and oldOP != userData["OP"]: 
+            OP_CACHE[userData["server"]] = list(userQuery({"OP": True, "server": userData["server"]}))
+            print("Rebuild OP Cache")
 
-    # Update caches
-    if oldOP and oldOP != userData["OP"]: 
-        OP_CACHE[userData["server"]] = list(userQuery({"OP": True, "server": userData["server"]}))
-        print("Rebuild OP Cache")
-
-    if oldTHREAT and oldTHREAT != userData["threat level"]: 
-        THREAT_CACHE[userData["server"]] = list(userQuery({"threat level": {"$gt": 0}, "server": userData["server"]}))
-        print("Rebuild Threat Cache")
+        if oldTHREAT and oldTHREAT != userData["threat level"]: 
+            THREAT_CACHE[userData["server"]] = list(userQuery({"threat level": {"$gt": 0}, "server": userData["server"]}))
+            print("Rebuild Threat Cache")
 
 def updateCustomUser(userData:dict):
     '''
