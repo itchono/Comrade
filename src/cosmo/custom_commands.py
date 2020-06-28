@@ -15,7 +15,7 @@ class Cosmo(commands.Cog):
         self._last_member = None
 
     @commands.command()
-    @commands.check(isnotThreat)
+    @commands.check(isNotThreat())
     async def macro(self, ctx, *, cmds):
         '''
         Macro runner for Comrade.
@@ -55,7 +55,7 @@ class Cosmo(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    @commands.check(isnotThreat)
+    @commands.check(isNotThreat())
     async def showscripts(self, ctx):
         '''
         Lists all Cosmo scripts in the server
@@ -81,7 +81,7 @@ class Cosmo(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    @commands.check(isnotThreat)
+    @commands.check(isNotThreat())
     async def showscript(self, ctx, name):
         '''
         Shows a Cosmos script
@@ -102,7 +102,7 @@ class Cosmo(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    @commands.check(isnotThreat)
+    @commands.check(isNotThreat())
     async def run(self, ctx, *, args):
         '''
         Runs a macro, or a stored Cosmo script, with a given name, and optional arguments [SPLIT BY COMMA].

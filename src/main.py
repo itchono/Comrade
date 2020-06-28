@@ -64,11 +64,12 @@ async def on_ready():
 
     for server in client.guilds: await log(server, "Comrade {} is online.\nLogged in from {}.\nStartup done in {:.2f} seconds".format(VERSION, getHost(), time.perf_counter() - start_time))
 
+    await DM("Comrade {} is online.\nLogged in from {}.\nStartup done in {:.2f} seconds".format(VERSION, getHost(), time.perf_counter() - start_time), (await client.application_info()).owner)
 '''
 Users with threat level >2 cannot use Comrade's features.
 '''
 @client.check_once
-async def globalcheck(ctx): return isnotUltraThreat(ctx)
+async def globalcheck(ctx): return isNotThreat(2)(ctx)
 
 '''
 For Repl.it hosted version:
