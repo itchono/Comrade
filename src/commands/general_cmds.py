@@ -50,7 +50,7 @@ class General(commands.Cog):
         await self.bot.logout()
 
     @commands.command()
-    @commands.check(isnotThreat)
+    @commands.check(isNotThreat())
     async def dmUser(self, ctx: commands.Context, target, * , message:str):
         '''
         DM given user

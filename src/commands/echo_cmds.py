@@ -7,7 +7,7 @@ class Echo(commands.Cog):
         self._last_member = None
 
     @commands.command()
-    @commands.check(isnotThreat)
+    @commands.check(isNotThreat())
     @commands.guild_only()
     async def echo(self, ctx: commands.Context, text: str, target=None, deleteMsg=True):
         '''
@@ -43,7 +43,7 @@ class Echo(commands.Cog):
             await ctx.message.delete()
             
     @commands.command()
-    @commands.check(isnotThreat)
+    @commands.check(isNotThreat())
     @commands.guild_only()
     async def everyonesays(self, ctx: commands.Context, text: str, count: int = 5):
         '''

@@ -89,7 +89,7 @@ class Fun(commands.Cog):
             
 
     @commands.command()
-    @commands.check(isnotThreat)
+    @commands.check(isNotThreat())
     async def textToEmoji(self, ctx: commands.Context, *, text):
         '''
         Converts text to emoji
@@ -97,7 +97,7 @@ class Fun(commands.Cog):
         await ctx.send(textToEmoji(text))
 
     @commands.command()
-    @commands.check(isnotThreat)
+    @commands.check(isNotThreat())
     async def emojiToText(self, ctx: commands.Context, *, text):
         '''
         Converts emoji to text
@@ -105,7 +105,7 @@ class Fun(commands.Cog):
         await ctx.send(emojiToText(text))
            
     @commands.command()
-    @commands.check(isnotThreat)
+    @commands.check(isNotThreat())
     async def fanfic(self,ctx: commands.Context, site):
         '''
         initiate fanfiction
@@ -140,7 +140,7 @@ class Fun(commands.Cog):
                 await ctx.send(s)
 
     @commands.command()
-    @commands.check(isnotThreat)
+    @commands.check(isNotThreat())
     async def detectBad(self, ctx: commands.Context):
         '''
         Detects bad.
@@ -165,7 +165,7 @@ class Fun(commands.Cog):
             await ctx.send("No suitable images were found : (")
 
     @commands.command()
-    @commands.check(isnotThreat)
+    @commands.check(isNotThreat())
     async def quiz(self, ctx: commands.Context):
         '''
         Reaction based trivia.
@@ -223,13 +223,53 @@ class Fun(commands.Cog):
             if not check:
                 await ctx.send("Quiz ended because no one answered.")
 
+    @commands.command()
+    @commands.check(isOP)
+    @commands.guild_only()
+    async def timestop(self, ctx:commands.Context, time:int=5):
+        '''
+        Stops time.
+
+        TODO permissions for daily_roled
+        '''
+        embed = discord.Embed(title="ZA WARUDO", colour=discord.Colour.from_rgb(*THEME_COLOUR))
+        embed.set_image(url=("https://media1.tenor.com/images/4b953bf5b5ba531099a823944a5626c2/tenor.gif"))
+
+        await ctx.send(embed=embed, delete_after=1.95)
+
+        permsOG = ctx.channel.overwrites_for(ctx.guild.default_role)
+        permsNEW = discord.PermissionOverwrite.from_pair(*permsOG.pair())
+        permsNEW.send_messages = False
+
+        await ctx.channel.set_permissions(ctx.guild.default_role, overwrite=permsNEW)
+
+        await asyncio.sleep(1.95)
+        
+        mt = await ctx.send("*Time is frozen*")
+
+        # fun counter thing
+        if int(time) <= 20:
+            for i in range(int(time)):
+                await asyncio.sleep(1)
+                t = i+1
+                if t == 1: await mt.edit(content="1 second has passed", suppress=False)
+                else: await mt.edit(content="{} seconds have passed".format(t), suppress=False)
+
+        else: await asyncio.sleep(int(time)-2 if int(time) >= 2 else 0)
+
+        await ctx.channel.set_permissions(ctx.guild.default_role, overwrite=permsOG)
+        await mt.edit(content="*Time has begun to move again.*", suppress=False)
+
+        #await log(ctx.guild, "ZA HANDO in {}".format(ctx.channel.name)) TODO FIX
+
+
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         '''
         Emoji call listener
         Also guess checker implemented for use in the guessing minigame
         '''
-        if isnotThreat(await self.bot.get_context(message)):
+        if isNotThreat()(await self.bot.get_context(message)):
             # Emoji converters
             if message.content.lower()[0:3] == "tte":
                 await self.textToEmoji(await self.bot.get_context(message), text=message.content.lower().lstrip("tte "))
@@ -237,42 +277,11 @@ class Fun(commands.Cog):
                 await self.emojiToText(await self.bot.get_context(message), text=message.content.lower().lstrip("ett "))
 
         if message.author != self.bot.user:
-            if message.content == "STAR PLATINUM" and isnotSuperThreat(await self.bot.get_context(message)):
-
-                time = 5
-
-                embed = discord.Embed(title="ZA WARUDO", colour=discord.Colour.from_rgb(*THEME_COLOUR))
-                embed.set_image(url=("https://media1.tenor.com/images/4b953bf5b5ba531099a823944a5626c2/tenor.gif"))
-
-                await message.channel.send(embed=embed, delete_after=1.95)
-
-                permsOG = message.channel.overwrites_for(message.guild.default_role)
-
-                permsNEW = discord.PermissionOverwrite.from_pair(*permsOG.pair())
-                permsNEW.send_messages = False
-
-                await message.channel.set_permissions(message.guild.default_role, overwrite=permsNEW)
-                
-                mt = await message.channel.send("*Time is frozen*")
-
-                # fun counter thing
-                if int(time) <= 20:
-                    for i in range(int(time)):
-                        await asyncio.sleep(1)
-                        t = i+1
-                        if t == 1: await mt.edit(content="1 second has passed", suppress=False)
-                        else: await mt.edit(content="{} seconds have passed".format(t), suppress=False)
-
-                else: await asyncio.sleep(int(time)-2 if int(time) >= 2 else 0)
-
-                await message.channel.set_permissions(message.guild.default_role, overwrite=permsOG)
-                await mt.edit(content="*Time has begun to move again.*", suppress=False)
-                await log(message.guild, "Time stop of duration {} by {}".format(time, message.author))
-        
+            if message.content == "STAR PLATINUM" and isNotThreat(1)(await self.bot.get_context(message)):
+                await self.timestop(await self.bot.get_context(message), 5)
             elif message.content == "STAR PLATINUM":
                 await message.channel.send("You are unworthy to use the power of a stand!")
 
- 
             '''
             To guess after being given a prompt the you first type $guessing followed by the discord nickname in the channel
             ex: $guessing Itchono 

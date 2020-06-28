@@ -28,7 +28,7 @@ class MessageHandler(commands.Cog):
                 c = self.bot.get_cog("Echo")
                 await c.echo(await self.bot.get_context(message), unlucky.mention, str(message.author.id), deleteMsg=False)
 
-            if not isnotSuperThreat(await self.bot.get_context(message)) and len(
+            if not isNotThreat(1)(await self.bot.get_context(message)) and len(
                     message.attachments) + len(
                     message.embeds) > 0:
                 e = discord.Embed(title="You just posted cringe")

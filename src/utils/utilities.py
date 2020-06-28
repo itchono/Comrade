@@ -31,26 +31,14 @@ def isHChannel(ctx: commands.Context):
     if not ctx.guild: return True
     return ctx.channel.id == getCFG(ctx.guild.id)["hentai channel"]
 
-def isnotThreat(ctx: commands.Context):
+def isNotThreat(threatLevel:int = 0):
     '''
-    Determines whether message author is a threat
+    Returns a function that checks of the message author is of a certain threat level or higher
     '''
-    if not ctx.guild: return True
-    return not ctx.author.id in [i["user"] for i in getThreats(ctx.guild.id) if i["threat level"] > 0]
-
-def isnotSuperThreat(ctx: commands.Context):
-    '''
-    Determines whether message author is threat level >1
-    '''
-    if not ctx.guild: return True
-    return not ctx.author.id in [i["user"] for i in getThreats(ctx.guild.id) if i["threat level"] > 1]
-
-def isnotUltraThreat(ctx: commands.Context):
-    '''
-    Determines whether message author is threat level >2
-    '''
-    if not ctx.guild: return True
-    return not ctx.author.id in [i["user"] for i in getThreats(ctx.guild.id) if i["threat level"] > 2]
+    def ret(ctx: commands.Context):
+        if not ctx.guild: return True
+        return not ctx.author.id in [i["user"] for i in getThreats(ctx.guild.id) if i["threat level"] > threatLevel]
+    return ret
 
 purgeTGT = None
 def setTGT(tgt):
