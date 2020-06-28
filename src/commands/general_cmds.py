@@ -89,9 +89,6 @@ class General(commands.Cog):
 
             print(f"DONE #{channel.name}")
 
-        with open("purge.pickle", "wb") as f:
-            pickle.dump(member_ids, f)
-
         print(member_ids)
 
         await ctx.send(f"{len(member_ids)} members detected to have not posted in the past {day} days.")
