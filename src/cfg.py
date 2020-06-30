@@ -13,9 +13,6 @@ BOT_PREFIX = "$c "
 # default status of the bot
 DEFAULT_STATUS = "[{}] Mechanizing Communism".format(BOT_PREFIX) 
 
-# amount of daily member counts everyone starts with
-DEFAULT_DAILY_COUNT = 2 
-
 # max number of active polymorph models (affects RAM)
 RAM_LIMIT = 10 
 
@@ -25,6 +22,10 @@ MSG_BUFFER_LIMIT = 10
 # default channel to load for Polymorph cache
 DEFAULT_CACHE_LOAD = 419214713755402262 
 
+# TODO PER-SERVER
+# amount of daily member counts everyone starts with
+DEFAULT_DAILY_COUNT = 2 
+
 # main colour for server; used in embeds
 THEME_COLOUR = (215, 52, 42)
 
@@ -32,7 +33,7 @@ THEME_COLOUR = (215, 52, 42)
 DAILY_MEMBER_COLOUR = (241, 196, 15) 
 
 # enforces recency for daily members, in days. Set to -1 to disable. TODO
-DAILY_MEMBER_STALENESS = 15
+DAILY_MEMBER_STALENESS = 15 
 
 # time to vote for ZA HANDO, in seconds
 ZA_HANDO_VOTE_DURATION = 120 
