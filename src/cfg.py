@@ -32,7 +32,7 @@ THEME_COLOUR = (215, 52, 42)
 DAILY_MEMBER_COLOUR = (241, 196, 15) 
 
 # enforces recency for daily members, in days. Set to -1 to disable. TODO
-DAILY_MEMBER_STALENESS = 30
+DAILY_MEMBER_STALENESS = 15
 
 # time to vote for ZA HANDO, in seconds
 ZA_HANDO_VOTE_DURATION = 120 
