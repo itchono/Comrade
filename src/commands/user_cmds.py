@@ -106,17 +106,67 @@ class Users(commands.Cog):
                 d = getUser(member.id, g.id)
                 d["daily weight"] = 2
                 updateUser(d)
-            print("Refilled daily count for {}".format(g))
+
+            if DAILY_MEMBER_STALENESS >= 0:
+                threshold = datetime.datetime.now() - datetime.timedelta(DAILY_MEMBER_STALENESS)
+                member_ids = set([i.id for i in g.members])
+
+                for channel in g.text_channels:
+                    author_ids = set([i.author.id for i in await channel.history(limit=None,after=threshold).flatten()])
+                    member_ids -= author_ids
+
+                for i in member_ids:
+                    u = getUser(i, g.id)
+                    u["daily weight"] = 0
+                    updateUser(u)
+
+                await log(g, f"Refilled daily count and trimmed users in past {DAILY_MEMBER_STALENESS} days")
         await log(g, "User Cache Built Successfully.")
 
     @commands.command()
-    @commands.guild_only()
-    async def rollUser(self, ctx: commands.Context):
+    async def requiem(self, ctx: commands.Context, day: int = 30, trim = False):
         '''
-        Rolls a random user in the server with equal weigh
+        Generates a list of users who have not talked in the past x days
+        '''
+        threshold = datetime.datetime.now() - datetime.timedelta(day)
+
+        member_ids = set([i.id for i in ctx.guild.members])
+
+        await ctx.send('Scanning all members. This will take a while')
+
+        for channel in ctx.guild.text_channels:
+
+            author_ids = set([i.author.id for i in await channel.history(limit=None,after=threshold).flatten()])
+            member_ids -= author_ids
+
+        await ctx.send(f"{len(member_ids)} members detected to have not posted in the past {day} days.")
+
+        OP = isOP(ctx) # check before trimming
+
+        s = "```"
+        for i in [await extractUser(ctx, str(j)) for j in member_ids]:
+            s += i.display_name + "\n"
+            
+            if trim and OP:
+                u = getUser(i.id, ctx.guild.id)
+                u["daily weight"] = 0
+                updateUser(u)
+        s += "```"
+        await ctx.send(s)
+
+        if trim:
+            cog = self.bot.get_cog("Users")
+            await cog.rebuildUserCache(ctx.guild)
+            await ctx.send("Users above have been removed from the daily member pool.")
+
+    @commands.command()
+    @commands.guild_only()
+    async def rollUser(self, ctx: commands.Context, weighted=False):
+        '''
+        Rolls a random user in the server, either weighted or unweighted
         '''
         await ctx.channel.trigger_typing()
-        luckyperson = random.choice(self.UNWEIGHTED_RND_USER[ctx.guild.id])
+        luckyperson = random.choice(self.UNWEIGHTED_RND_USER[ctx.guild.id]) if not weighted else random.choice(self.WEIGHTED_RND_USER[ctx.guild.id])
         await self.userinfo(ctx, target=getUser(luckyperson.id, ctx.guild.id)["nickname"])
 
     @commands.command()
@@ -182,6 +232,21 @@ class Users(commands.Cog):
         s += "```"
 
         await ctx.send(s)
+
+    @commands.command()
+    async def remind(self, ctx:commands.Context, target:str):
+        '''
+        Makes it so that when a user comes online, you are notified by Comrade
+        '''
+        if u := await extractUser(ctx, target):
+            d = getUser(u.id, ctx.guild.id)
+            try: 
+                d["check when online"].remove(ctx.author.id)
+                await ctx.send(f"You will no longer be notified by when {u.display_name} changes their status.")
+            except:
+                d["check when online"].append(ctx.author.id)
+                await ctx.send(f"You will now be notified by when {u.display_name} changes their status.")
+            updateUser(d)
     
     @commands.Cog.listener()
     async def on_ready(self):

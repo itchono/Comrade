@@ -1,5 +1,6 @@
 from utils.utilities import *
 from utils.mongo_interface import *
+import ast
 
 class Setup(commands.Cog):
     def __init__(self, bot):
@@ -57,7 +58,6 @@ class Setup(commands.Cog):
         '''
         updates all fields of users to some given value.
         '''
-        await ctx.channel.trigger_typing()
 
         for user in ctx.guild.members:
             # each user is stored, themselves each as a dictionary
@@ -65,7 +65,7 @@ class Setup(commands.Cog):
             d = getUser(user.id, ctx.guild.id)
 
             try:
-                d[fieldname] = int(value)
+                d[fieldname] = ast.literal_eval(value)
             except:
                 d[fieldname] = value
 
@@ -92,7 +92,7 @@ class Setup(commands.Cog):
 
         else:
             try:
-                u[cfgitem] = eval(value)
+                u[cfgitem] = ast.literal_eval(value)
             except:
                 u[cfgitem] = value
             updateUser(u)
@@ -118,7 +118,7 @@ class Setup(commands.Cog):
 
         else:
             try:
-                c[cfgitem] = eval(value)
+                c[cfgitem] = ast.literal_eval(value)
             except:
                 c[cfgitem] = value
             updateCFG(c)
