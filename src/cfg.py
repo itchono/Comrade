@@ -1,5 +1,5 @@
 # version of the bot
-VERSION = "3.1 [Build June 28 v1]" 
+VERSION = "3.1 [Build June 30 v1]" 
 
 # set to True if you are testing the bot in a development environment, False otherwise
 DEVELOPMENT_MODE = False 
@@ -30,6 +30,9 @@ THEME_COLOUR = (215, 52, 42)
 
 # colour for daily member (RGB)
 DAILY_MEMBER_COLOUR = (241, 196, 15) 
+
+# enforces recency for daily members, in days. Set to -1 to disable. TODO
+DAILY_MEMBER_STALENESS = 30
 
 # time to vote for ZA HANDO, in seconds
 ZA_HANDO_VOTE_DURATION = 120 

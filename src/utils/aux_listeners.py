@@ -55,10 +55,24 @@ class AuxilliaryListener(commands.Cog):
                 d = getUser(before.id, user.guild.id)
                 d["last online"] = localTime().strftime("%I:%M:%S %p %Z")
                 updateUser(d)
+
+                try:
+                    for i in d["check when online"]:
+                        m = user.guild.get_member(i)
+                        await DM(f"{user.display_name} is now offline.", m)
+                except: pass
+            
             else:
                 d = getUser(before.id, user.guild.id)
                 d["last online"] = "now"
                 updateUser(d)
+
+                try:
+                    for i in d["check when online"]:
+                        m = user.guild.get_member(i)
+                        await DM(f"{user.display_name} is now {str(user.status)}.", m)
+                except: pass
+                        
 
     @commands.Cog.listener()
     async def on_user_update(self, before, user):
