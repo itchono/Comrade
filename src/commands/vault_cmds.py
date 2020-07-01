@@ -6,18 +6,25 @@ class Vault(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.activeposts = {}  # active for tomato stuff
+        self.vault_cache = {}
         self._last_member = None
 
     @commands.command()
     @commands.guild_only()
     async def randomvaultpost(self, ctx: commands.Context):
         '''
-        Returns a random post from the vault. TODO improved
+        Returns a random post from the vault.
         '''
-        await ctx.trigger_typing()
-        vault = await getChannel(ctx.guild, "vault channel")
-        msgs = await vault.history(limit=None).flatten()
-        await ctx.send(random.choice(msgs).jump_url)
+        item = random.choice(self.vault_cache[ctx.guild.id])
+
+        if item["type"] == "echo":
+            targetmsg = await commands.MessageConverter().convert(ctx, item["data"])
+            c = self.bot.get_cog("Echo")
+            await c.echo(ctx, targetmsg.content, str(targetmsg.author.name), deleteMsg=False)
+        else:
+            embed = discord.Embed()
+            embed.set_image(url=item["data"])
+            await ctx.send(embed=embed)
 
     @commands.command(name=u"\U0001F345", aliases = ["vault"])
     @commands.guild_only()
@@ -38,8 +45,7 @@ class Vault(commands.Cog):
         elif tgt and tgt.isnumeric():
             u = await ctx.fetch_message(int(tgt))
             IDmode = True
-        else:
-            u = tgt  # URL directly
+        else: u = tgt  # URL directly
 
         m = await ctx.send(
             "React to this message with 🍅 to vault the post {}. You have **{} seconds** to vote.".format(
@@ -52,24 +58,49 @@ class Vault(commands.Cog):
 
         await m.add_reaction("🍅")
 
+    async def rebuildcache(self, g:discord.Guild):
+        '''
+        Rebuilds vault cache
+        '''
+        if vault := await getChannel(g, "vault channel"):
+            msgs = await vault.history(limit=None).flatten()
+
+            posts = []
+
+            for m in msgs:
+                if len(m.embeds):
+                    if m.embeds[0].image:
+                        # vaulted embedded image
+                        posts.append({"type":"img", "data":m.embeds[0].image.url})
+                    elif m.embeds[0].url:
+                        posts.append({"type":"img", "data":m.embeds[0].url})
+                    else:
+                        posts.append({"type":"echo", "data":m.embeds[0].fields[0].value})
+
+            self.vault_cache[g.id] = posts
+            await log(g, "Vault Cache Built Successfully.")
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        '''
+        When bot is loaded
+        '''
+        # rebuilds cache
+        for g in self.bot.guilds: await self.rebuildcache(g)
+
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction,
                               user: discord.User):
         if reaction.emoji == "🍅":
-            if reaction.count > 1 and reaction.message.id in self.activeposts and \
-                    (user != self.activeposts[reaction.message.id]["Message"].author or DEVELOPMENT_MODE):
-                attachment_url = self.activeposts[
-                    reaction.message.id]["Attachment URL"]
+            if reaction.count > 1 and reaction.message.id in self.activeposts and (user != self.activeposts[reaction.message.id]["Message"].author or DEVELOPMENT_MODE):
+                attachment_url = self.activeposts[reaction.message.id]["Attachment URL"]
 
                 msg = self.activeposts[reaction.message.id]["Message"]
 
-                vault = await getChannel(reaction.message.guild,
-                                         "vault channel")
+                vault = await getChannel(reaction.message.guild,"vault channel")
 
                 if not attachment_url:
-
                     m = await vault.send("Vault operation in progress...")
-
                     e = discord.Embed(title=":tomato: Echoed Vault Entry",
                                       description="See Echoed Message Below.",
                                       colour=discord.Colour.from_rgb(*THEME_COLOUR))
@@ -82,7 +113,6 @@ class Vault(commands.Cog):
 
                 else:
                     # made by Slyflare
-
                     e = discord.Embed(title=":tomato: Vault Entry",
                                       colour=discord.Colour.from_rgb(*THEME_COLOUR))
                     e.set_image(url=str(attachment_url))
@@ -94,3 +124,6 @@ class Vault(commands.Cog):
                 del self.activeposts[reaction.message.id]
                 await reactOK(await self.bot.get_context(reaction.message))
                 await reaction.message.edit(content="Vault operation successful.", embed=None)
+
+                # rebuild vault cache
+                await self.rebuildcache(ctx.guild)

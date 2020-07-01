@@ -31,6 +31,8 @@ class Setup(commands.Cog):
         return d
 
     @commands.command()
+    @commands.guild_only()
+    @commands.check(isNotThreat())
     async def createChannel(self, ctx: commands.Context, *, channelname: str):
         '''
         Creates a channel, and gives the user who created it full permissions over it.
@@ -38,19 +40,20 @@ class Setup(commands.Cog):
         If "custom channel group" is set in the server cfg, it will create the channel there, 
         otherwise it will be the same category as where the command was called.
         '''
-        c = getCFG(ctx.guild.id)
-        try: v = c["custom channel group"]
-        except: 
-            if k:= ctx.channel.category: v = k.id
-            else: v = 0
+        async with ctx.channel.typing():
+            c = getCFG(ctx.guild.id)
+            try: v = c["custom channel group"]
+            except: 
+                if k:= ctx.channel.category: v = k.id
+                else: v = 0
 
-        if v:
-            # put in specific category
-            group = ctx.guild.get_channel(v)
-            chn = await group.create_text_channel(channelname)
-        else: chn = await ctx.guild.create_text_channel(channelname) # put in outside
+            if v:
+                # put in specific category
+                group = ctx.guild.get_channel(v)
+                chn = await group.create_text_channel(channelname)
+            else: chn = await ctx.guild.create_text_channel(channelname) # put in outside
 
-        await chn.set_permissions(ctx.author, manage_channels=True, manage_roles=True)
+            await chn.set_permissions(ctx.author, manage_channels=True, manage_roles=True)
         await ctx.send(f"Channel has been created at {chn.mention}")
 
     @commands.command()
@@ -60,31 +63,24 @@ class Setup(commands.Cog):
         '''
         POTENTIALLY DESTRUCTIVE. repopulates the UserData collection on Atlas with default values.
         '''
-        for user in ctx.guild.members:
-            # each user is stored, themselves each as a dictionary
-            updateUser(self.setupuser(user))
+        async with ctx.channel.typing():
+            for user in ctx.guild.members: updateUser(self.setupuser(user))
         await reactOK(ctx)
 
     @commands.command()
     @commands.check_any(commands.is_owner(), isServerOwner())
     @commands.guild_only()
-    async def updatealluserfields(self, ctx: commands.Context, fieldname,
-                                  value):
+    async def updatealluserfields(self, ctx: commands.Context, fieldname, value):
         '''
         updates all fields of users to some given value.
         '''
-
-        for user in ctx.guild.members:
-            # each user is stored, themselves each as a dictionary
-
-            d = getUser(user.id, ctx.guild.id)
-
-            try:
-                d[fieldname] = ast.literal_eval(value)
-            except:
-                d[fieldname] = value
-
-            updateUser(d)
+        async with ctx.channel.typing():
+            for user in ctx.guild.members:
+                # each user is stored, themselves each as a dictionary
+                d = getUser(user.id, ctx.guild.id)
+                try: d[fieldname] = ast.literal_eval(value)
+                except: d[fieldname] = value
+                updateUser(d)
 
         await reactOK(ctx)
 
@@ -95,24 +91,20 @@ class Setup(commands.Cog):
         '''
         Configures a user, mentioned by ping, id, or nickname. Leave value as none to delete field.
         '''
-        u = getUser((await extractUser(ctx, tgt)).id, ctx.guild.id)
+        async with ctx.channel.typing():
+            u = getUser((await extractUser(ctx, tgt)).id, ctx.guild.id)
 
-        if not value:
-            try:
-                del u[cfgitem]
-                updateUser(u)
-                await delSend(ctx, "User config value deleted.")
-            except:
-                await delSend(ctx, "Value was not found.")
-
-        else:
-            try:
-                u[cfgitem] = ast.literal_eval(value)
-            except:
-                u[cfgitem] = value
+            if not value:
+                try:
+                    del u[cfgitem]
+                    updateUser(u)
+                    await delSend(ctx, "User config value deleted.")
+                except: await delSend(ctx, "Value was not found.")
+            else:
+                try: u[cfgitem] = ast.literal_eval(value)
+                except: u[cfgitem] = value
             updateUser(u)
-
-            await reactOK(ctx)
+        await reactOK(ctx)
 
     @commands.command()
     @commands.check_any(commands.is_owner(), isServerOwner())
@@ -121,47 +113,47 @@ class Setup(commands.Cog):
         '''
         Modifies a value in Comrade's configuration. Leave value blank to delete the field.
         '''
-        c = getCFG(ctx.guild.id)
+        async with ctx.channel.typing():
+            c = getCFG(ctx.guild.id)
+            if not value:
+                try:
+                    del c[cfgitem]
+                    updateCFG(c)
+                    await delSend(ctx, "Config value deleted.")
+                except: await delSend(ctx, "Value was not found.")
 
-        if not value:
-            try:
-                del c[cfgitem]
+            else:
+                try: c[cfgitem] = ast.literal_eval(value)
+                except: c[cfgitem] = value
                 updateCFG(c)
-                await delSend(ctx, "Config value deleted.")
-            except:
-                await delSend(ctx, "Value was not found.")
 
-        else:
-            try:
-                c[cfgitem] = ast.literal_eval(value)
-            except:
-                c[cfgitem] = value
-            updateCFG(c)
-
-            await reactOK(ctx)
+        await reactOK(ctx)
 
     @commands.command()
     @commands.guild_only()
-    async def cfgstatus(self, ctx: commands.Context):
+    async def serverinfo(self, ctx: commands.Context, full = None):
         '''
-        Sends an embed providing a dump of all Comrade configuration data for this server.
+        Gets information about the server, with optional argument to view full configuration for server.
         '''
-        c = getCFG(ctx.guild.id)
-
         s = ""
 
-        for k in c:
-            if k != "_id":
-                s += str(k) + ": " + str(c[k]) + "\n"
+        if full:
+            s = "Comrade Configuration:\n"
+            c = getCFG(ctx.guild.id)
+            for k in c:
+                if k != "_id": s += str(k) + ": " + str(c[k]) + "\n"
 
-        e = discord.Embed(title="Comrade Configuration for {}".format(
-            ctx.guild.name),
-                          description=s,
-                          colour=discord.Colour.from_rgb(*THEME_COLOUR))
+        e = discord.Embed(title="Information for {}".format(
+            ctx.guild.name), description=s, colour=discord.Colour.from_rgb(*THEME_COLOUR))
         e.set_thumbnail(url=ctx.guild.icon_url)
 
+        e.add_field(name="Server Created", value=ctx.guild.created_at.strftime('%B %m %Y at %I:%M:%S %p %Z'))
+        e.add_field(name="Number of Text Channels", value=len(ctx.guild.text_channels))
+        e.add_field(name="Number of Total Members", value=ctx.guild.member_count)
+        e.add_field(name="Number of Human Members", value=len([i for i in ctx.guild.members if not i.bot]))
+        e.add_field(name="Owner", value=ctx.guild.owner.mention)
         await ctx.send(embed=e)
-
+        
     @commands.command()
     @commands.check_any(commands.is_owner(), isServerOwner())
     @commands.guild_only()
@@ -177,10 +169,11 @@ class Setup(commands.Cog):
         d["lethality override"] = 0
         d["zahando threshold"] = 3
         d["banned words"] = []
-        d["announcements channel"] = -1
+        d["announcements channel"] = 0
         d["meme channel"] = 0
         d["bot channel"] = 0
         d["log channel"] = 0
+        d["hentai channel"] = 0
         d["emote directory"] = 0
         d["custom channel group"] = 0
         updateCFG(d)
@@ -196,15 +189,16 @@ class Setup(commands.Cog):
         
         Also useful for rebuilding the emote cache on command
         '''
-        try:
-            for n in os.listdir("emotes"):
-                with open("emotes/{}".format(n), "rb") as f:
-                    msg = await ctx.send(file=discord.File(f))
-                    url = msg.attachments[0].url
-                    c = await getChannel(ctx.guild, "emote directory")
-                    await c.send(n[:n.index(".")] + "\n" + url)
-        except:
-            await ctx.send("Emotes could not be found on the host computer.")
-        
-        em = self.bot.get_cog("Emotes")
-        await m.rebuildcache()
+        async with ctx.channel.typing():
+            try:
+                for n in os.listdir("emotes"):
+                    with open("emotes/{}".format(n), "rb") as f:
+                        msg = await ctx.send(file=discord.File(f))
+                        url = msg.attachments[0].url
+                        c = await getChannel(ctx.guild, "emote directory")
+                        await c.send(n[:n.index(".")] + "\n" + url)
+            except:
+                await ctx.send("Emotes could not be found on the host computer.")
+            
+            em = self.bot.get_cog("Emotes")
+            await m.rebuildcache()

@@ -38,49 +38,58 @@ class Users(commands.Cog):
         '''
         Displays User Information of said person
         Made by Slyflare, upgraded by itchono
+
+        use userinfo full <person> to get a more detailed list of info
         '''
-        if not target:
-            target = ctx.author.mention
+        full = False
+        if "full" in target:
+            full = True
+            target = " ".join(target.split(" ")[1:])
 
-        if ctx.guild and (custom := getCustomUser(target, ctx.guild.id)):
-            e = discord.Embed(title="{} (Custom User)".format(target))
-            e.set_author(name=f"User Info - {target}")
-            e.set_thumbnail(url=custom["url"])
-            e.set_footer(icon_url=custom["url"])
+        if ctx.invoked_subcommand is None:
+            if not target:
+                target = ctx.author.mention
 
-            await ctx.send(embed=e)
- 
-        elif member := await extractUser(ctx, target):
-            if ctx.guild:
-                e = discord.Embed(title="{}".format(member.display_name), colour=member.colour)
-                e.set_author(name=f"User Info - {member}")
-                e.set_thumbnail(url=member.avatar_url)
-                e.set_footer(icon_url=ctx.author.avatar_url)
-                roles = [role for role in member.roles]
-
-                u = getUser(member.id, ctx.guild.id)
-
-                for c in u:
-                    if c != "_id":
-                        e.add_field(name=c, value=u[c], inline=True)
-                e.add_field(name=f"Roles: ({len(roles)})", value=" ".join([role.mention for role in member.roles]))
+            if ctx.guild and (custom := getCustomUser(target, ctx.guild.id)):
+                e = discord.Embed(title="{} (Custom User)".format(target))
+                e.set_author(name=f"User Info - {target}")
+                e.set_thumbnail(url=custom["url"])
+                e.set_footer(icon_url=custom["url"])
 
                 await ctx.send(embed=e)
-
-            else:
+    
+            elif member := await extractUser(ctx, target):
                 e = discord.Embed(title="Info for {}".format(member.name))
                 e.set_author(name=f"User Info - {member}")
                 e.set_thumbnail(url=member.avatar_url)
                 e.set_footer(icon_url=ctx.author.avatar_url)
+
+                if ctx.guild:
+
+                    roles = [role for role in member.roles]
+
+                    u = getUser(member.id, ctx.guild.id)
+
+                    if full:
+                        for c in u:
+                            if c != "_id": e.add_field(name=c, value=u[c], inline=True)
+                    
+                    e.add_field(name=f"Roles: ({len(roles)})", value=" ".join([role.mention for role in member.roles]))
+                    try: e.add_field(name="Joined Server", value=f"{member.joined_at.strftime('%B %m %Y at %I:%M:%S %p %Z')}")
+                    except: pass
+                    e.add_field(name="Account Created", value=member.created_at.strftime('%B %m %Y at %I:%M:%S %p %Z'))
                 
-                e.add_field(name="No info available", value="Comrade is in a DM environment, and therefore has no information stored. Try calling this in a server with Comrade set up.", inline=True)
+                else:
+                    e.add_field(name="Account Created", value=member.created_at.strftime('%B %m %Y at %I:%M:%S %p %Z'))
+                    e.add_field(name="No more info available", value="Comrade is in a DM environment, and therefore has no information stored. Try calling this in a server with Comrade set up.", inline=True)
+
 
                 await ctx.send(embed=e)
-
+            
     '''
     Random User Functions
     '''
-    async def rebuildUserCache(self, g):
+    async def rebuildcache(self, g):
         '''
         Rebuilds the random user cache for a given server.
         '''
@@ -156,7 +165,7 @@ class Users(commands.Cog):
 
         if trim:
             cog = self.bot.get_cog("Users")
-            await cog.rebuildUserCache(ctx.guild)
+            await cog.rebuildcache(ctx.guild)
             await ctx.send("Users above have been removed from the daily member pool.")
 
     @commands.command()
@@ -165,8 +174,8 @@ class Users(commands.Cog):
         '''
         Rolls a random user in the server, either weighted or unweighted
         '''
-        await ctx.channel.trigger_typing()
-        luckyperson = random.choice(self.UNWEIGHTED_RND_USER[ctx.guild.id]) if not weighted else random.choice(self.WEIGHTED_RND_USER[ctx.guild.id])
+        async with ctx.channel.typing():
+            luckyperson = random.choice(self.UNWEIGHTED_RND_USER[ctx.guild.id]) if not weighted else random.choice(self.WEIGHTED_RND_USER[ctx.guild.id])
         await self.userinfo(ctx, target=getUser(luckyperson.id, ctx.guild.id)["nickname"])
 
     @commands.command()
@@ -254,6 +263,6 @@ class Users(commands.Cog):
         When bot is loaded, rebuild the cache.
         '''
         for g in self.bot.guilds:
-            await self.rebuildUserCache(g)
+            await self.rebuildcache(g)
 
     

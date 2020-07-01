@@ -56,11 +56,8 @@ class General(commands.Cog):
         DM given user
         Made by vdoubleu
         '''
-        await ctx.trigger_typing()
-        
         if u := await extractUser(ctx, target):
             await DM(message, u, discord.Embed(title="", description = "Sent by {}".format(ctx.author)))
-            await reactOK(ctx)
             await ctx.send("DM sent to {}".format(target), delete_after=10)
 
     @commands.command()

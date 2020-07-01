@@ -1,15 +1,12 @@
 from utils.utilities import *
 from utils.mongo_interface import *
-from utils.emoji_converter import *
-from polymorph.text_gen import *
-from polymorph.model_gen import *
-from polymorph.data_compressor import *
 
 import urllib.request
 from bs4 import BeautifulSoup
 
 import numpy as np
-from numpy import *
+from numpy import log, log10, log1p, log2, logaddexp, logaddexp2, exp, exp2, sqrt, power, e, pi, sin, cos,tan,arcsin,arccos,arctan,arcsinh,arccosh,arctan2,radians,rad2deg,deg2rad,radians,sinc,sinh,tanh,angle
+
 import matplotlib.pyplot as plt
 import parser
 import io
@@ -34,40 +31,40 @@ class Fun(commands.Cog):
         '''
         Graphs a single variable algebraic function in some domain.
         '''
-        await ctx.trigger_typing()
-        if "." in function:
-            await ctx.send("Function rejected for invalid syntax.")
-        else:
-            function = re.sub(r"([0-9])([a-z])", r"\1*\2", function)
-            function = function.replace("^", "**") # exponentiation
+        async with ctx.channel.typing():
+            if "." in function:
+                await ctx.send("Function rejected for invalid syntax.")
+            else:
+                function = re.sub(r"([0-9])([a-z])", r"\1*\2", function)
+                function = function.replace("^", "**") # exponentiation
 
-            stepsize = 500
-            try:
-                D = xend-xstart
-                x = np.arange(xstart, xend, D/stepsize)
+                stepsize = 500
+                try:
+                    D = xend-xstart
+                    x = np.arange(xstart, xend, D/stepsize)
 
-                fnc = parser.expr(function).compile()
-                
-                arr = eval(fnc)
+                    fnc = parser.expr(function).compile()
+                    
+                    arr = eval(fnc)
 
-                plt.plot(x, arr, label=function)
+                    plt.plot(x, arr, label=function)
 
-                plt.title("Plot Requested by {}".format(ctx.author.name))
-                plt.ylabel("y")
-                plt.xlabel("x")
-                plt.legend()
-                plt.axhline(y=0, color='k')
-                plt.axvline(x=0, color='k')
-                plt.grid()
-                f = io.BytesIO()
-                plt.savefig(f, format="png")
-                f.seek(0)
-                plt.clf()
+                    plt.title("Plot Requested by {}".format(ctx.author.name))
+                    plt.ylabel("y")
+                    plt.xlabel("x")
+                    plt.legend()
+                    plt.axhline(y=0, color='k')
+                    plt.axvline(x=0, color='k')
+                    plt.grid()
+                    f = io.BytesIO()
+                    plt.savefig(f, format="png")
+                    f.seek(0)
+                    plt.clf()
 
-                await ctx.send(file=discord.File(f, "graph.png"))
+                    await ctx.send(file=discord.File(f, "graph.png"))
 
-            except:
-                await ctx.send("Something went wrong with parsing. Try again.")
+                except:
+                    await ctx.send("Something went wrong with parsing. Try again.")
 
 
     @commands.command()
@@ -155,14 +152,14 @@ class Fun(commands.Cog):
         '''
         Gets a random image from the last 1000 messages in a channel
         '''
-        await ctx.trigger_typing()
-        messages = [i.attachments[0].url for i in await channel.history(limit=2000).flatten() if len(i.attachments) > 0]
-        if len(messages) > 0:
-            embed = discord.Embed()
-            embed.set_image(url=random.choice(messages))
-            await ctx.send(embed=embed)
-        else:
-            await ctx.send("No suitable images were found : (")
+        async with ctx.channel.typing():
+            messages = [i.attachments[0].url for i in await channel.history(limit=2000).flatten() if len(i.attachments) > 0]
+            if len(messages) > 0:
+                embed = discord.Embed()
+                embed.set_image(url=random.choice(messages))
+                await ctx.send(embed=embed)
+            else:
+                await ctx.send("No suitable images were found : (")
 
     @commands.command()
     @commands.check(isNotThreat())
