@@ -61,13 +61,11 @@ class AuxilliaryListener(commands.Cog):
                 d["last online"] = "now"
                 updateUser(d)
 
-            try:
-                for i in d["check when online"]:
-                    m = user.guild.get_member(i)
-                    embed = discord.Embed(title=f"{user.display_name} is now {str(user.status)}.", description=m)
-                    embed.add_field(name="Time", value=(localTime().strftime("%I:%M:%S %p %Z")))
-                    await DM("", m, embed)
-            except: pass
+            for i in d["check when online"]:
+                m = user.guild.get_member(i)
+                embed = discord.Embed(title=f"{user.display_name} is now {str(user.status)}.", description=str(m))
+                embed.add_field(name="Time", value=(localTime().strftime("%I:%M:%S %p %Z")))
+                await DM("", m, embed)
                         
 
     @commands.Cog.listener()

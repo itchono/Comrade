@@ -56,24 +56,24 @@ class Polymorph(commands.Cog):
         If the model has not yet been built, it builds a model based on the last cached channel.
         If you want the model for a certain channel, run [buildmodel] in that channel.
         '''
-        if number > 100 or number < 0: await ctx.send("No")
-        
-        elif user := await extractUser(ctx, target):
-            c = self.bot.get_cog("Echo")
 
-            try:
-                model = self.models[(user.id, ctx.guild.id)]
-                await c.echo(ctx, text(model, number), str(user.id), deleteMsg=False)
+        async with ctx.channel.typing():
+            if number > 100 or number < 0: await ctx.send("No")
+            elif user := await extractUser(ctx, target):
+                c = self.bot.get_cog("Echo")
 
-            except:
-                await ctx.send("Model is not yet built, it will take a bit longer to produce this first iteration of text.")
-                await self.buildModel(ctx, target)
-                
                 try:
                     model = self.models[(user.id, ctx.guild.id)]
                     await c.echo(ctx, text(model, number), str(user.id), deleteMsg=False)
+
                 except:
-                    pass
+                    await ctx.send("Model is not yet built, it will take a bit longer to produce this first iteration of text.")
+                    await self.buildModel(ctx, target)
+                    
+                    try:
+                        model = self.models[(user.id, ctx.guild.id)]
+                        await c.echo(ctx, text(model, number), str(user.id), deleteMsg=False)
+                    except: pass
     
     @commands.command()
     @commands.guild_only()
@@ -83,30 +83,28 @@ class Polymorph(commands.Cog):
         By default, n=2.
         This command can be called manually to change the n number.
         '''
-        await ctx.trigger_typing()
+        async with ctx.channel.typing():
+            t_start = time.perf_counter()
 
-        t_start = time.perf_counter()
+            if ctx.guild.id in self.localcache:
+                if user := await extractUser(ctx, target):
+                    
+                    # check to see if we have too many models cached
+                    if len(self.models) >= RAM_LIMIT:
+                        self.models.pop(list(self.models.keys()).pop())
+                        if not silent: await ctx.send("Model cache full. Freeing up cache...")
 
-        if ctx.guild.id in self.localcache:
-            if user := await extractUser(ctx, target):
+                    msgs = [m["content"] for m in self.localcache[ctx.guild.id] if m["author"] == user.id]
+                    model = modelfrommsgs(msgs, n) # construct n-gram model
+
+                    self.models[(user.id, ctx.guild.id)] = model
+                    # load model into user cache
+
+                    if not silent: await ctx.send("{}-Gram model for {} built in {:.3f}s.".format(n, user.display_name, time.perf_counter()-t_start))
+            else:
+                await reactX(ctx)
+                await ctx.send("Model could not be built - no message cache has been loaded for this server. \nUse `{}extractChannel <channel>` to load a channel".format(BOT_PREFIX))
                 
-                # check to see if we have too many models cached
-                if len(self.models) >= RAM_LIMIT:
-                    self.models.pop(list(self.models.keys()).pop())
-                    if not silent: await ctx.send("Model cache full. Freeing up cache...")
-                    await ctx.trigger_typing()
-
-                msgs = [m["content"] for m in self.localcache[ctx.guild.id] if m["author"] == user.id]
-                model = modelfrommsgs(msgs, n) # construct n-gram model
-
-                self.models[(user.id, ctx.guild.id)] = model
-                # load model into user cache
-
-                if not silent: await ctx.send("{}-Gram model for {} built in {:.3f}s.".format(n, user.display_name, time.perf_counter()-t_start))
-        else:
-            await reactX(ctx)
-            await ctx.send("Model could not be built - no message cache has been loaded for this server. \nUse `{}extractChannel <channel>` to load a channel".format(BOT_PREFIX))
-            
 
     @commands.command()
     @commands.guild_only()

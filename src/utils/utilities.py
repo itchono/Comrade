@@ -117,7 +117,7 @@ async def getavatar(member: discord.Member):
 '''
 Converters and Stuff
 '''
-async def extractUser(ctx: commands.Context, tgt: str):
+async def extractUser(ctx: commands.Context, tgt: str, verbose=True):
     '''
     Returns a server member or user; based on display name in server, user ID, or by mention.
     '''
@@ -126,15 +126,12 @@ async def extractUser(ctx: commands.Context, tgt: str):
         
         if ctx.guild:
             try: return await commands.MemberConverter().convert(ctx, tgt)
-            except:
-                try: return await commands.MemberConverter().convert(ctx, string.capwords(tgt))
-                except: await ctx.send("Member with input '{}' could not be found.".format(tgt))
+            except: return await commands.MemberConverter().convert(ctx, string.capwords(tgt))
         else:
             try: return await commands.UserConverter().convert(ctx, tgt)
-            except:
-                try: return await commands.UserConverter().convert(ctx, string.capwords(tgt))
-                except: await ctx.send("User with input '{}' could not be found.".format(tgt))
-    except: pass
+            except: return await commands.UserConverter().convert(ctx, string.capwords(tgt))
+    except: 
+        if verbose: await ctx.send("User with input '{}' could not be found.".format(tgt))
 
 async def getChannel(guild: discord.Guild, name: str):
     '''
