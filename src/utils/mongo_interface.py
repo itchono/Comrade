@@ -13,28 +13,29 @@ OP_CACHE = {}
 
 dotenv.load_dotenv()
 client = MongoClient(os.environ.get('MONGOKEY'))
-print("Atlas Cluster Connected, Running Version {}.".format(
-    client.server_info()['version']))
+DB = client[client.list_database_names()[0]]
+print(f"MongoDB Atlas Connected to Database: {client.list_database_names()[0]}")
+
 
 def getUser(userID: int, serverID: int):
     '''
     gets a user based on user ID and guild ID.
     '''
-    users = client['Comrade']['UserData']
+    users = DB['UserData']
     return users.find_one({"user": userID, "server": serverID})
 
 def getUserfromNick(nickname: str, serverID: int):
     '''
     gets a user based on server nickname
     '''
-    users = client['Comrade']['UserData']
+    users = DB['UserData']
     return users.find_one({"nickname": nickname, "server": serverID})
 
 def userQuery(query: dict):
     '''
     Returns a set of users given a query
     '''
-    users = client['Comrade']['UserData']
+    users = DB['UserData']
     return users.find(query)
 
 def getOPS(server):
@@ -62,35 +63,35 @@ def cfgQuery(query:dict):
     '''
     Returns a set of cfgs given a query
     '''
-    cfg = client['Comrade']['cfg']
+    cfg = DB['cfg']
     return cfg.find(query)
 
 def customUserQuery(query:dict):
     '''
     Returns a set of custom users given a query
     '''
-    customs = client.Comrade.CustomUsers
+    customs = DB["CustomUsers"]
     return customs.find(query)
 
 def getCFG(serverID: int):
     '''
     Returns a dictionary with the cfg values for Comrade in a given server
     '''
-    cfg = client['Comrade']['cfg']
+    cfg = DB['cfg']
     return cfg.find_one({"_id": serverID})
 
 def updateCFG(newCFG: dict):
     '''
     Updates configuration file for a given server based on the ID
     '''
-    cfg = client['Comrade']['cfg']
+    cfg = DB['cfg']
     cfg.update({"_id": newCFG["_id"]}, newCFG, True)
 
 def updateUser(userData: dict):
     '''
     Upserts user into userData collection
     '''
-    users = client.Comrade.UserData
+    users = DB["UserData"]
 
     if u := users.find_one({"user": userData["user"], "server": userData["server"]}):
         oldOP = u["OP"]
@@ -115,7 +116,7 @@ def updateCustomUser(userData:dict):
     '''
     Upserts a custom user into userData collection
     '''
-    customs = client.Comrade.CustomUsers
+    customs = DB["CustomUsers"]
     customs.update({
         "name": userData["name"],
         "server": userData["server"]
@@ -125,21 +126,21 @@ def removeCustomUser(name, server):
     '''
     Removes a user from the collection
     '''
-    customs = client.Comrade.CustomUsers
+    customs = DB["CustomUsers"]
     customs.delete_one({"name": name, "server": server})
 
 def getCustomUser(name, server):
     '''
     Gets a custom user from the database
     '''
-    customs = client.Comrade.CustomUsers
+    customs = DB["CustomUsers"]
     return customs.find_one({"name": name, "server": server})
 
 def fillcache(channelID, cache):
     '''
     Fills channel message cache
     '''
-    channels = client.Comrade.ChannelCache
+    channels = DB.ChannelCache
     channels.update({
         "_id": channelID,
     }, {"_id": channelID,
@@ -150,7 +151,7 @@ def getcache(channelID):
     '''
     Tries to get message cache in list form.
     '''
-    channels = client.Comrade.ChannelCache
+    channels = DB.ChannelCache
     d = channels.find_one({"_id": channelID})
     if d: return decompressCache(d["cache"])
     return None
@@ -159,7 +160,7 @@ def getcache(channelID):
 Favourites Interface
 '''
 def updateFavourite(imageID:str, imgurl:str, serverID):
-    favourites = client.Comrade.favourites
+    favourites = DB.favourites
 
     thingy = {"imageID":imageID, "URL":imgurl, "server":serverID}
 
@@ -170,7 +171,7 @@ def allFavourites(serverID):
     '''
     Returns a list of all favourited hentai images in given server
     '''
-    favourites = client.Comrade.favourites
+    favourites = DB.favourites
 
     return list(favourites.find({"server":serverID}))
 
@@ -178,7 +179,7 @@ def getFavourite(serverID, imageID):
     '''
     Returns a given favourite image
     '''
-    favourites = client.Comrade.favourites
+    favourites = DB.favourites
 
     return favourites.find_one({"server":serverID, "imageID":imageID})
 
@@ -189,7 +190,7 @@ def updateCmd(serverID:int, name:str, cmdText:str, cmdType:str):
     '''
     Updates a custom commands
     '''
-    cfg = client.Comrade.CustomCommands
+    cfg = DB.CustomCommands
 
     thingy = {"server": serverID, "name":name, "cmd":cmdText, "type":cmdType}
 
@@ -200,7 +201,7 @@ def removeCmd(serverID:int, name:str):
     '''
     Removes a custom command
     '''
-    cfg = client.Comrade.CustomCommands
+    cfg = DB.CustomCommands
 
     try:
         cfg.delete_one({"server": serverID, "name":name})
@@ -211,7 +212,7 @@ def getCmd(serverID: int, name : str):
     '''
     Gets a custom command.
     '''
-    cfg = client.Comrade.CustomCommands
+    cfg = DB.CustomCommands
 
     if c := cfg.find_one({"server": serverID, "name":name}):
         return c["cmd"], c["type"]
@@ -221,7 +222,7 @@ def allcmds(serverID):
     '''
     Returns a list of all Cosmo Scripts in given server
     '''
-    favourites = client.Comrade.CustomCommands
+    favourites = DB.CustomCommands
     return list(favourites.find({"server":serverID}))
 
 '''
@@ -231,7 +232,7 @@ def getcustomList(serverID:int, listname):
     '''
     Reads a certain named list from the custom lists
     '''
-    lists = client.Comrade.CustomLists
+    lists = DB.CustomLists
 
     try:
         return lists.find_one({"server": serverID, "name":listname})["list"]
@@ -242,7 +243,7 @@ def updatecustomList(serverID:int, listname, value):
     '''
     Writes to a certain named list from the custom lists
     '''
-    lists = client.Comrade.CustomLists
+    lists = DB.CustomLists
     
     try:
         lists.update({"server": serverID, "name":listname}, {"server": serverID, "name":listname, "list":value}, True)
@@ -252,14 +253,14 @@ def updatecustomList(serverID:int, listname, value):
     return None
 
 def listcustomLists(serverID: int):
-    lists = client.Comrade.CustomLists
+    lists = DB.CustomLists
     return list(lists.find({"server": serverID}))
 
 def removecustomList(serverID:int, listname):
     '''
     Removed a certain named list from the custom lists
     '''
-    lists = client.Comrade.CustomLists
+    lists = DB.CustomLists
     
     try:
         lists.delete_one({"server": serverID, "name":listname})

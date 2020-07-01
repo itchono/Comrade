@@ -47,7 +47,7 @@ cogs = [NSFW, SelfPing]
 On fully hosted version, add NSFW module
 '''
 for c in cogs: client.add_cog(c(client))
-print("Bot components initialized, awaiting login.")
+print(f"Running discord.py version {discord.__version__}.\nBot components initialized, awaiting login.")
 
 @client.event
 async def on_ready():
@@ -64,7 +64,9 @@ async def on_ready():
 
     for server in client.guilds: await log(server, "Comrade {} is online.\nLogged in from {}.\nStartup done in {:.2f} seconds".format(VERSION, getHost(), time.perf_counter() - start_time))
 
-    await DM("Comrade {} is online.\nLogged in from {}.\nStartup done in {:.2f} seconds".format(VERSION, getHost(), time.perf_counter() - start_time), (await client.application_info()).owner)
+    embed = discord.Embed(title="Comrade is Online", description="Version {}\nLogged in from {}.\nStartup done in {:.2f} seconds".format(VERSION, getHost(), time.perf_counter() - start_time))
+    embed.add_field(name="Time", value=(localTime().strftime("%I:%M:%S %p %Z")))
+    await DM("", (await client.application_info()).owner, embed)
 '''
 Users with threat level >2 cannot use Comrade's features.
 '''
