@@ -226,7 +226,7 @@ class Fun(commands.Cog):
     @commands.command()
     @commands.check(isOP)
     @commands.guild_only()
-    async def timestop(self, ctx:commands.Context, time:int=5):
+    async def timestop(self, ctx:commands.Context, time:int=5, exemptdaily=False):
         '''
         Stops time.
 
@@ -243,6 +243,13 @@ class Fun(commands.Cog):
 
         await ctx.channel.set_permissions(ctx.guild.default_role, overwrite=permsNEW)
 
+        if exemptdaily:
+            dailyrole = await dailyRole(ctx.guild)
+            permsOGDaily = ctx.channel.overwrites_for(dailyrole)
+            permsNEWDaily = discord.PermissionOverwrite.from_pair(*permsOGDaily.pair())
+            permsNEWDaily.send_messages = True
+            await ctx.channel.set_permissions(dailyrole, overwrite=permsNEWDaily)
+
         await asyncio.sleep(1.95)
         
         mt = await ctx.send("*Time is frozen*")
@@ -258,6 +265,9 @@ class Fun(commands.Cog):
         else: await asyncio.sleep(int(time)-2 if int(time) >= 2 else 0)
 
         await ctx.channel.set_permissions(ctx.guild.default_role, overwrite=permsOG)
+
+        if exemptdaily: await ctx.channel.set_permissions(dailyrole, overwrite=None if permsOGDaily.is_empty() else permsOGDaily)
+
         await mt.edit(content="*Time has begun to move again.*", suppress=False)
 
         #await log(ctx.guild, "ZA HANDO in {}".format(ctx.channel.name)) TODO FIX
@@ -278,24 +288,10 @@ class Fun(commands.Cog):
 
         if message.author != self.bot.user:
             if message.content == "STAR PLATINUM" and isNotThreat(1)(await self.bot.get_context(message)):
-                await self.timestop(await self.bot.get_context(message), 5)
+                await self.timestop(await self.bot.get_context(message), 5, True)
             elif message.content == "STAR PLATINUM":
                 await message.channel.send("You are unworthy to use the power of a stand!")
 
-            '''
-            To guess after being given a prompt the you first type $guessing followed by the discord nickname in the channel
-            ex: $guessing Itchono 
-            '''
-            '''if "$set" in message.content.lower():
-                try:
-                    val = int(message.content.split()[1].strip())
-                except:
-                    await message.channel.send("Streak must be a valid integer!")
-                    return
-
-                self.streak[ctx.author.id] = val
-                await message.channel.send(f"Streak is now {self.streak[ctx.author.id]}")
-                return'''
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction:discord.Reaction, user:discord.User):

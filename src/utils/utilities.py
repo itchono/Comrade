@@ -140,26 +140,21 @@ async def getChannel(guild: discord.Guild, name: str):
     '''
     Gets a channel in a server, given a NAME of the channel; uses mongoDB cfg file. 
     '''
-    c = guild.get_channel(getCFG(guild.id)[name])
-    
+    try: c = guild.get_channel(getCFG(guild.id)[name])
+    except: c = 0
+
     if not c:
-        if name != "log channel":
-            await log(guild, "Channel not found.")
-        else:
-            print("Error: (Log Channel not set up); channel not found")
-    return c
-
-
+        if name != "log channel": await log(guild, f"Channel not found: {name}")
+        else: print("Error: (Log Channel not set up); channel not found")
+    else: return c
 '''
 logger
 '''
-
 async def log(guild, m: str, embed=None):
     '''
     Logs a message in the server's log channel in a clean embed form, or sends a pre-made embed.
     '''
     lgc = await getChannel(guild, "log channel")
-    #print("LOG [{}] {} -- {}".format(guild.name, localTime().strftime("%I:%M:%S %p %Z"), m)) # for testing
     if not embed:
         embed = discord.Embed(title="Log Entry", description=m)
         embed.add_field(name="Time", value=(localTime().strftime("%I:%M:%S %p %Z")))
