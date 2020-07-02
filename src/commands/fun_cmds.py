@@ -1,4 +1,5 @@
 from utils.utilities import *
+import utils.utilities
 from utils.mongo_interface import *
 from utils.emoji_converter import *
 from polymorph.text_gen import *
@@ -268,8 +269,10 @@ class Fun(commands.Cog):
         if exemptdaily: await ctx.channel.set_permissions(dailyrole, overwrite=None if permsOGDaily.is_empty() else permsOGDaily)
 
         await mt.edit(content="*Time has begun to move again.*", suppress=False)
+        await utils.utilities.log(ctx.guild, f"Timestop in {ctx.channel.mention} lasting {time} seconds, performed by {ctx.author.mention}")
+        
 
-        #await log(ctx.guild, "ZA HANDO in {}".format(ctx.channel.name))
+        
 
 
     @commands.Cog.listener()

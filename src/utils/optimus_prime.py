@@ -16,7 +16,7 @@ class TextFilter(commands.Cog):
         self.activepurge = {}  # active for ZAHANDO
         '''
         Stores stuff like
-        {1231240914120412:{"User":@Some user, "Amount":20}, ....}
+        {1231240914120412:{"User":@Some user, "Amount":20, "Perpetrator":<some user object>}, ....}
         '''
 
         self.bucket = {} # stores a bunch of messages
@@ -25,22 +25,17 @@ class TextFilter(commands.Cog):
     async def zahando(self,
                       ctx: commands.Context,
                       num: int = 20,
-                      user: discord.User = None):
+                      user: discord.User = None, perpetrator = None):
         '''
         erases a set number of messages in a context (Default 20)
         '''
         setTGT(user)
-        if user:
-            await ctx.channel.purge(limit=num, check=purgeCheck)
-        else:
-            await ctx.channel.purge(limit=num)
+        if user: await ctx.channel.purge(limit=num, check=purgeCheck)
+        else: await ctx.channel.purge(limit=num)
 
         with open("vid/Za_Hando_erase_that.mp4", "rb") as f:
-            m = await ctx.send(content="ZA HANDO Successful.",
-                               file=discord.File(f, "ZA HANDO.mp4"))
-            await log(ctx.guild, "ZA HANDO in {}".format(ctx.channel.name))
-            await asyncio.sleep(10)
-            await m.delete()
+            await ctx.send(content="ZA HANDO Successful.", file=discord.File(f, "ZA HANDO.mp4"), delete_after=10)
+            await log(ctx.guild, f"ZA HANDO in {ctx.channel.mention}, performed by {perpetrator.mention})")
 
     async def additionalChecks(self, message: discord.Message):
         '''
@@ -99,7 +94,8 @@ class TextFilter(commands.Cog):
                     )
                     self.activepurge[m.id] = {
                         "amount": amount,
-                        "user": message.mentions[0] if message.mentions else None
+                        "user": message.mentions[0] if message.mentions else None,
+                        "perpetrator": message.author
                     }
 
                     await m.add_reaction("✋")
@@ -176,5 +172,5 @@ class TextFilter(commands.Cog):
                 await self.zahando(
                     await self.bot.get_context(reaction.message),
                     self.activepurge[reaction.message.id]["amount"],
-                    self.activepurge[reaction.message.id]["user"])
+                    self.activepurge[reaction.message.id]["user"], self.activepurge[reaction.message.id]["perpetrator"])
                 del self.activepurge[reaction.message.id]
