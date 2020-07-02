@@ -59,7 +59,7 @@ class TimeWizard(commands.Cog):
         await channel.send("Today's Daily Member is {}".format(luckyperson.display_name))
         await cog.userinfo(ctx, target=luckyperson.mention)
         
-        await cog.rebuildUserCache(channel.guild)
+        await cog.rebuildcache(channel.guild)
 
     @tasks.loop(minutes=1.0)
     async def timedannounce(self):

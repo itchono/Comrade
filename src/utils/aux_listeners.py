@@ -23,7 +23,7 @@ class AuxilliaryListener(commands.Cog):
         updateUser(stp.setupuser(user))
 
         cog = self.bot.get_cog("Users")
-        await cog.rebuildUserCache(user.guild)
+        await cog.rebuildcache(user.guild)
 
     @commands.Cog.listener()
     async def on_member_remove(self, user: discord.Member):

@@ -1,5 +1,9 @@
 from utils.utilities import *
 from utils.mongo_interface import *
+from utils.emoji_converter import *
+from polymorph.text_gen import *
+from polymorph.model_gen import *
+from polymorph.data_compressor import *
 
 import urllib.request
 from bs4 import BeautifulSoup
@@ -226,8 +230,6 @@ class Fun(commands.Cog):
     async def timestop(self, ctx:commands.Context, time:int=5, exemptdaily=False):
         '''
         Stops time.
-
-        TODO permissions for daily_roled
         '''
         embed = discord.Embed(title="ZA WARUDO", colour=discord.Colour.from_rgb(*THEME_COLOUR))
         embed.set_image(url=("https://media1.tenor.com/images/4b953bf5b5ba531099a823944a5626c2/tenor.gif"))
@@ -267,7 +269,7 @@ class Fun(commands.Cog):
 
         await mt.edit(content="*Time has begun to move again.*", suppress=False)
 
-        #await log(ctx.guild, "ZA HANDO in {}".format(ctx.channel.name)) TODO FIX
+        #await log(ctx.guild, "ZA HANDO in {}".format(ctx.channel.name))
 
 
     @commands.Cog.listener()
