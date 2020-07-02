@@ -46,45 +46,44 @@ class Users(commands.Cog):
             full = True
             target = " ".join(target.split(" ")[1:])
 
-        if ctx.invoked_subcommand is None:
-            if not target:
-                target = ctx.author.mention
+        if not target:
+            target = ctx.author.mention
 
-            if ctx.guild and (custom := getCustomUser(target, ctx.guild.id)):
-                e = discord.Embed(title="{} (Custom User)".format(target))
-                e.set_author(name=f"User Info - {target}")
-                e.set_thumbnail(url=custom["url"])
-                e.set_footer(icon_url=custom["url"])
+        if ctx.guild and (custom := getCustomUser(target, ctx.guild.id)):
+            e = discord.Embed(title="{} (Custom User)".format(target))
+            e.set_author(name=f"User Info - {target}")
+            e.set_thumbnail(url=custom["url"])
+            e.set_footer(icon_url=custom["url"])
 
-                await ctx.send(embed=e)
-    
-            elif member := await extractUser(ctx, target):
-                e = discord.Embed(title="Info for {}".format(member.name))
-                e.set_author(name=f"User Info - {member}")
-                e.set_thumbnail(url=member.avatar_url)
-                e.set_footer(icon_url=ctx.author.avatar_url)
+            await ctx.send(embed=e)
 
-                if ctx.guild:
+        elif member := await extractUser(ctx, target):
+            e = discord.Embed(title="Info for {}".format(member.name))
+            e.set_author(name=f"User Info - {member}")
+            e.set_thumbnail(url=member.avatar_url)
+            e.set_footer(icon_url=ctx.author.avatar_url)
 
-                    roles = [role for role in member.roles]
+            if ctx.guild:
 
-                    u = getUser(member.id, ctx.guild.id)
+                roles = [role for role in member.roles]
 
-                    if full:
-                        for c in u:
-                            if c != "_id": e.add_field(name=c, value=u[c], inline=True)
-                    
-                    e.add_field(name=f"Roles: ({len(roles)})", value=" ".join([role.mention for role in member.roles]))
-                    try: e.add_field(name="Joined Server", value=f"{member.joined_at.strftime('%B %m %Y at %I:%M:%S %p %Z')}")
-                    except: pass
-                    e.add_field(name="Account Created", value=member.created_at.strftime('%B %m %Y at %I:%M:%S %p %Z'))
+                u = getUser(member.id, ctx.guild.id)
+
+                if full:
+                    for c in u:
+                        if c != "_id": e.add_field(name=c, value=u[c], inline=True)
                 
-                else:
-                    e.add_field(name="Account Created", value=member.created_at.strftime('%B %m %Y at %I:%M:%S %p %Z'))
-                    e.add_field(name="No more info available", value="Comrade is in a DM environment, and therefore has no information stored. Try calling this in a server with Comrade set up.", inline=True)
+                e.add_field(name=f"Roles: ({len(roles)})", value=" ".join([role.mention for role in member.roles]))
+                try: e.add_field(name="Joined Server", value=f"{member.joined_at.strftime('%B %m %Y at %I:%M:%S %p %Z')}")
+                except: pass
+                e.add_field(name="Account Created", value=member.created_at.strftime('%B %m %Y at %I:%M:%S %p %Z'))
+            
+            else:
+                e.add_field(name="Account Created", value=member.created_at.strftime('%B %m %Y at %I:%M:%S %p %Z'))
+                e.add_field(name="No more info available", value="Comrade is in a DM environment, and therefore has no information stored. Try calling this in a server with Comrade set up.", inline=True)
 
 
-                await ctx.send(embed=e)
+            await ctx.send(embed=e)
             
     '''
     Random User Functions
