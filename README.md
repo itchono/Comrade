@@ -1,4 +1,9 @@
-# Comrade ![Comrade Logo](https://github.com/itchono/Comrade/blob/media/Media/Comrade%20New%20Logo%20May%202020.png)
+# Comrade 
+
+![Comrade Logo](https://github.com/itchono/Comrade/blob/media/Media/Comrade%20New%20Logo%20May%202020.png)
+
+![Publish Docker image](https://github.com/itchono/Comrade/workflows/Publish%20Docker%20image/badge.svg?branch=master)
+
 Comrade is a Discord bot for my personal server, but available to use for anyone who would like a multipurpose bot!
 
 Check out the wiki page for more details!
