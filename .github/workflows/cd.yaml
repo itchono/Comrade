@@ -25,11 +25,11 @@ jobs:
         run: echo "::set-env name=TAG::sha-${GITHUB_SHA:0:7}"
       - name: Build and tag image
         run: |
-          docker build
-            -t $REPO:$TAG \
-            -t $REPO:latest \
-            --cache-from=$REPO:latest \
-            --build-arg BUILDKIT_INLINE_CACHE=1 \
-            "."
+            docker build \
+              --cache-from $REPO:latest \
+              --tag $REPO:$TAG \
+              --tag $REPO:latest \
+              --build-arg BUILDKIT_INLINE_CACHE=1 \
+              "."
       - name: Push image to Docker Hub
         run: docker push $REPO || true
