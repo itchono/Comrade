@@ -72,14 +72,30 @@ class General(commands.Cog):
     @commands.guild_only()
     async def customlist(self, ctx, operation, title=None, value=None):
         '''
-        Displays a lists, or adds
+        Displays a lists, or adds.
+
+        Commands: "make", "makefrom", "add", "remove", "show", "all"
         '''
-        if operation in {"make", "add", "remove", "show", "all"}:
+        if operation in {"make", "makefrom", "add", "remove", "show", "all"}:
 
             if operation == "make":
                 l = []
                 updatecustomList(ctx.guild.id, title, l)
                 await reactOK(ctx)
+                
+            elif operation == "makefrom":
+                try:
+                    msg = await commands.MessageConverter().convert(ctx, value)
+
+                    l = []
+
+                    for rxn in msg.reactions: l += [i.display_name for i in await rxn.users().flatten()]
+                    
+                    updatecustomList(ctx.guild.id, title, l)
+                    await reactOK(ctx)
+                
+                except:
+                    await ctx.send("Please specify a message to base list from.")
 
             elif operation == "show":
                 l = getcustomList(ctx.guild.id, title)
