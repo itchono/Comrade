@@ -1,4 +1,4 @@
-ARG VERSION=0.2.9
+ARG VERSION=0.2.10
 ARG JAR=JMusicBot-$VERSION-Linux.jar
 
 FROM debian:buster-slim as linux
