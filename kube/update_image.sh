@@ -39,6 +39,5 @@ update_deploy () {
   fi
 }
 
-update_deploy "master" "v2/deploy.yaml"
-update_deploy "Comrade-V3-dev" "v3/deploy.yaml"
+update_deploy "master" "v3/deploy.yaml"
 
