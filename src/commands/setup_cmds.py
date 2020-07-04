@@ -83,6 +83,7 @@ class Setup(commands.Cog):
                 updateUser(d)
 
         await reactOK(ctx)
+        await ctx.send(f"All fields {fieldname} updated with value {value}")
 
     @commands.command()
     @commands.check_any(commands.is_owner(), isServerOwner())
@@ -91,19 +92,18 @@ class Setup(commands.Cog):
         '''
         Configures a user, mentioned by ping, id, or nickname. Leave value as none to delete field.
         '''
-        async with ctx.channel.typing():
-            u = getUser((await extractUser(ctx, tgt)).id, ctx.guild.id)
+        u = getUser((await extractUser(ctx, tgt)).id, ctx.guild.id)
 
-            if not value:
-                try:
-                    del u[cfgitem]
-                    updateUser(u)
-                    await delSend(ctx, "User config value deleted.")
-                except: await delSend(ctx, "Value was not found.")
-            else:
-                try: u[cfgitem] = ast.literal_eval(value)
-                except: u[cfgitem] = value
-            updateUser(u)
+        if not value:
+            try:
+                del u[cfgitem]
+                updateUser(u)
+                await delSend(ctx, "User config value deleted.")
+            except: await delSend(ctx, "Value was not found.")
+        else:
+            try: u[cfgitem] = ast.literal_eval(value)
+            except: u[cfgitem] = value
+        updateUser(u)
         await reactOK(ctx)
 
     @commands.command()
@@ -113,19 +113,18 @@ class Setup(commands.Cog):
         '''
         Modifies a value in Comrade's configuration. Leave value blank to delete the field.
         '''
-        async with ctx.channel.typing():
-            c = getCFG(ctx.guild.id)
-            if not value:
-                try:
-                    del c[cfgitem]
-                    updateCFG(c)
-                    await delSend(ctx, "Config value deleted.")
-                except: await delSend(ctx, "Value was not found.")
-
-            else:
-                try: c[cfgitem] = ast.literal_eval(value)
-                except: c[cfgitem] = value
+        c = getCFG(ctx.guild.id)
+        if not value:
+            try:
+                del c[cfgitem]
                 updateCFG(c)
+                await delSend(ctx, "Config value deleted.")
+            except: await delSend(ctx, "Value was not found.")
+
+        else:
+            try: c[cfgitem] = ast.literal_eval(value)
+            except: c[cfgitem] = value
+            updateCFG(c)
 
         await reactOK(ctx)
 
