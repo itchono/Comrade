@@ -50,15 +50,21 @@ for c in cogs: client.add_cog(c(client))
 print(f"Running discord.py version {discord.__version__}.\nBot components initialized, awaiting login.")
 
 @client.event
-async def on_ready():
+async def on_connect():
     '''
-    On successful login
+    Connected to Discord
     '''
     await client.change_presence(status=discord.Status.online, activity=discord.Game(DEFAULT_STATUS))
-    
     print("{} is online, logged into {} server(s).\nServer List:".format(client.user, len(client.guilds)))
 
+@client.event
+async def on_ready():
+    '''
+    When bot is ready to go
+    '''
     for server in client.guilds: print("\t{} ({} members)".format(server.name, len(server.members)))
+
+    # TODO maybe move all the on_Ready here  
 
     print("Startup completed in {:.2f} seconds.\nCurrent Local Time: {}".format(time.perf_counter() - start_time, localTime().strftime("%I:%M:%S %p %Z")))
 
@@ -67,6 +73,7 @@ async def on_ready():
     embed = discord.Embed(title="Comrade is Online", description="Version {}\nLogged in from {}.\nStartup done in {:.2f} seconds".format(VERSION, getHost(), time.perf_counter() - start_time))
     embed.add_field(name="Time", value=(localTime().strftime("%I:%M:%S %p %Z")))
     await DM("", (await client.application_info()).owner, embed)
+
 '''
 Users with threat level >2 cannot use Comrade's features.
 '''

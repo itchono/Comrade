@@ -128,10 +128,12 @@ class TextFilter(commands.Cog):
                     self.bucket[message.guild.id][message.author.id].pop(0)
 
     @commands.Cog.listener()
-    async def on_message_edit(self, before: discord.message, message: discord.message):
+    async def on_raw_message_edit(self, payload):
         '''
         Catch people trying to edit messages
         '''
+        message = await self.bot.get_channel(payload.channel_id).fetch_message(payload.message_id) if not payload.cached_message else payload.cached_message
+
         if not message.author.bot and message.guild:
             # moderation system
             ctx = await self.bot.get_context(message)
@@ -159,7 +161,6 @@ class TextFilter(commands.Cog):
                 
                 elif len(self.bucket[message.guild.id][message.author.id]) > MSG_BUFFER_LIMIT:
                     self.bucket[message.guild.id][message.author.id].pop(0)
-
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction,

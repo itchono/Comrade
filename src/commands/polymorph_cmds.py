@@ -26,10 +26,8 @@ class Polymorph(commands.Cog):
         '''
         When bot is loaded
         '''
-        # load all messages from servers
-        for g in self.bot.guilds:
-
-            await self.load_messages(g)
+        for g in self.bot.guilds: await self.load_messages(g)# load all messages from servers
+        print("Polymorph Ready")
 
     async def load_messages(self, g):
         '''
@@ -42,10 +40,8 @@ class Polymorph(commands.Cog):
                 self.localcache[g.id] += cache
                 s += f"\t#{c.name} -- {len(cache)} messages\n"
 
-        if self.localcache[g.id]:
-            await log(g, "Message cache loaded with {} messages.\nChannels:\n{}".format(len(self.localcache[g.id]), s))
-        else:
-            await log(g, "No message cache loaded for this server!")
+        if self.localcache[g.id]: await log(g, "Message cache loaded with {} messages.\nChannels:\n{}".format(len(self.localcache[g.id]), s))
+        else: await log(g, "No message cache loaded for this server!")
 
 
     @commands.command(aliases = ["gen"])

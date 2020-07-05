@@ -129,7 +129,7 @@ class Users(commands.Cog):
                     updateUser(u)
 
                 await log(g, f"Refilled daily count and trimmed users in past {DAILY_MEMBER_STALENESS} days")
-        await log(g, "User Cache Built Successfully.")
+        await log(g, f"User Cache built.\nWeighted List -- {len(self.WEIGHTED_RND_USER[g.id])} entries\nUnweighed List -- {len(self.UNWEIGHTED_RND_USER[g.id])} entries")
 
     @commands.command()
     async def requiem(self, ctx: commands.Context, day: int = 30, trim = False):
@@ -261,7 +261,7 @@ class Users(commands.Cog):
         '''
         When bot is loaded, rebuild the cache.
         '''
-        for g in self.bot.guilds:
-            await self.rebuildcache(g)
+        for g in self.bot.guilds: await self.rebuildcache(g)
+        print("User Lists ready")
 
     

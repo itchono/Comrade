@@ -4,7 +4,7 @@ from discord.ext import commands, tasks
 from utils.mongo_interface import getOPS, getThreats, getCFG
 from cfg import *
 
-import requests, asyncio, random, datetime, time, pytz, string, socket, typing
+import requests, asyncio, random, datetime, time, pytz, string, socket, typing, re
 
 '''
 Checks
@@ -39,6 +39,13 @@ def isNotThreat(threatLevel:int = 0):
         if not ctx.guild: return True
         return not ctx.author.id in [i["user"] for i in getThreats(ctx.guild.id) if i["threat level"] > threatLevel]
     return ret
+
+def jokeMode(ctx: commands.Context):
+    '''
+    Determines whether Comrade should do the small jokey things.
+    '''
+    try: return bool(getCFG(ctx.guild.id)["joke mode"])
+    except: return True # this means that for DMs, this will automatically be true
 
 purgeTGT = None
 def setTGT(tgt):
@@ -208,3 +215,9 @@ def UTCtoLocalTime(t, zone=LOCAL_TIMEZONE):
     '''
     utc = pytz.timezone("UTC").localize(t)
     return utc.astimezone(pytz.timezone(LOCAL_TIMEZONE))
+    
+def match_url(url):
+    regex = re.compile(
+        "(([\w]+:)?//)?(([\d\w]|%[a-fA-f\d]{2,2})+(:([\d\w]|%[a-fA-f\d]{2,2})+)?@)?([\d\w][-\d\w]{0,253}[\d\w]\.)+[\w]{2,63}(:[\d]+)?(/([-+_~.\d\w]|%[a-fA-f\d]{2,2})*)*(\?(&?([-+_~.\d\w]|%[a-fA-f\d]{2,2})=?)*)?(#([-+_~.\d\w]|%[a-fA-f\d]{2,2})*)?"
+    )
+    return regex.match(url)

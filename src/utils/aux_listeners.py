@@ -36,6 +36,28 @@ class AuxilliaryListener(commands.Cog):
         await c.send(f":door: {user.display_name} has left.")
 
     @commands.Cog.listener()
+    async def on_raw_message_edit(self, payload):
+        '''
+        When a message edit is detected
+        '''
+        message = await self.bot.get_channel(payload.channel_id).fetch_message(payload.message_id) if not payload.cached_message else payload.cached_message
+
+        if not message.author.bot and message.guild:
+            await log(message.guild, f"Message edited by {message.author.display_name} ({message.author}) in {message.channel.mention}")
+
+
+    @commands.Cog.listener()
+    async def on_raw_message_delete(self, payload):
+        '''
+        When a message is deleted
+        '''
+        if msg := payload.cached_message:
+            if msg.guild:
+                await log(msg.guild, f"Message sent by {msg.author.display_name} ({msg.author}) deleted in {msg.channel.mention}")
+        elif payload.guild_id:
+            await log(self.bot.get_guild(payload.guild_id), f"Message deleted in {(self.bot.get_channel(payload.channel_id))}")
+
+    @commands.Cog.listener()
     async def on_member_update(self, before, user):
         '''
         Whenever a server member changes their state.

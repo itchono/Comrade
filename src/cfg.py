@@ -1,5 +1,5 @@
 # version of the bot
-VERSION = "3.1 [Build July 4 v1]" 
+VERSION = "3.1 [Build July 5 v1]" 
 
 # set to True if you are testing the bot in a development environment, False otherwise
 DEVELOPMENT_MODE = False 
@@ -19,9 +19,6 @@ RAM_LIMIT = 10
 # number of messages to be stored per user in buffer for moderation (affects RAM)
 MSG_BUFFER_LIMIT = 10 
 
-# default channel to load for Polymorph cache
-DEFAULT_CACHE_LOAD = 419214713755402262 
-
 # TODO PER-SERVER
 # amount of daily member counts everyone starts with
 DEFAULT_DAILY_COUNT = 2 
@@ -32,7 +29,7 @@ THEME_COLOUR = (215, 52, 42)
 # colour for daily member (RGB)
 DAILY_MEMBER_COLOUR = (241, 196, 15) 
 
-# enforces recency for daily members, in days. Set to -1 to disable.
+# enforces recency for daily members, in days. Set to -1 (or less) to disable.
 DAILY_MEMBER_STALENESS = 15 
 
 # time to vote for ZA HANDO, in seconds
