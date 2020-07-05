@@ -2,7 +2,7 @@ from utils.utilities import *
 
 # MODIFIED SYSTEM to interpret Cosmo code, in a way that works with Comrade.
 
-INTERP_TIMEOUT = 1 # number of seconds allowed for parser to operate before terminating
+INTERP_TIMEOUT = 0.5 # number of seconds allowed for parser to operate before terminating
 
 CMD_STACK = []
 

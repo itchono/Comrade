@@ -86,13 +86,12 @@ class Emotes(commands.Cog):
         else:
             await ctx.send("Emote `{}` was not found.".format(name.lower()))
 
-    @commands.Cog.listener()
-    async def on_ready(self):
+    async def on_load(self):
         '''
         When bot is loaded
         '''
         await self.rebuildcache()
-        print("Emotes Ready")
+        print('Emotes Ready')
 
     @commands.command()
     @commands.guild_only()

@@ -10,27 +10,11 @@ def token_line(input_str):
 def get_env(splt_line_lst):
     first_line = splt_line_lst[0]
 
-    if first_line[-1] != "]" and first_line[0] != "[":
-        # empty params
-        #raise SyntaxError("Missing or incorrect function parameters")
-        return {}
-
+    if first_line[-1] != "]" and first_line[0] != "[": return {} # empty params
     else:
         splt_line_lst.pop(0)
         env_list = first_line.replace("[", "").replace("]", "").split(",")
-
-        env_dict = {}
-
-        for var_pair in env_list:
-            var, val = var_pair.strip(" ").split(":")
-            """print(val)
-            try:
-                env_dict[var] = ast.literal_eval(val) # for any python parseable value
-                print(type(env_dict[var]))
-            except:"""
-            env_dict[var] = val # just a string
-
-        return env_dict
+        return {var_pair.strip(" ").split("=")[0]:var_pair.strip(" ").split("=")[1] for var_pair in env_list} # NOTE cosmo takes in string literals for everything
 
 def parse(program):
     seq = {"type": "Struct", "stype": "Main", "seq": []}

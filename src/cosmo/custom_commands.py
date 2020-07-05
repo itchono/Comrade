@@ -4,9 +4,9 @@ from utils.mongo_interface import *
 from cosmo.cosmo_interp import *
 from cosmo.cosmo_parser import *
 
-from discord.ext.commands.view import StringView
+import async_timeout
 
-MAX_STEP_TIME = 2
+from discord.ext.commands.view import StringView
 
 class Cosmo(commands.Cog):
 
@@ -25,33 +25,34 @@ class Cosmo(commands.Cog):
         use "wait" to delay execution of a function by a set time
         use "say" to send a message with some content
 
-        ex. <prefix> macro help, wait 5, version, dmuser itchono hello sir
+        ex. $c macro help, wait 5, version, dmuser itchono hello sir
         '''
-        for i in cmds.split(","):
-            i = i.strip(" ")
-            try:
-                if i.split(" ")[0].lower() == "wait":
-                    await asyncio.sleep(float(i.split(" ")[1]))
+        async with async_timeout.timeout(MACRO_TIMEOUT):
+            for i in cmds.split(","):
+                i = i.strip(" ")
+                try:
+                    if i.split(" ")[0].lower() == "wait":
+                        await asyncio.sleep(float(i.split(" ")[1]))
 
-                elif i.split(" ")[0].lower() == "say":
-                    await asyncio.wait_for(ctx.send(" ".join(i.split(" ")[1:])), timeout=MAX_STEP_TIME)
-                else:
-                    i = BOT_PREFIX + i
-                    view = StringView(i)
-                    ctx2 = commands.Context(prefix=BOT_PREFIX, view=view, bot=self.bot, message=ctx.message)
-                    view.skip_string(BOT_PREFIX)
+                    elif i.split(" ")[0].lower() == "say":
+                        await ctx.send(" ".join(i.split(" ")[1:]))
+                    else:
+                        i = BOT_PREFIX + i
+                        view = StringView(i)
+                        ctx2 = commands.Context(prefix=BOT_PREFIX, view=view, bot=self.bot, message=ctx.message)
+                        view.skip_string(BOT_PREFIX)
 
-                    invoker = view.get_word()
-                    ctx2.invoked_with = invoker
-                    ctx2.command = self.bot.all_commands.get(invoker)
+                        invoker = view.get_word()
+                        ctx2.invoked_with = invoker
+                        ctx2.command = self.bot.all_commands.get(invoker)
 
-                    await asyncio.wait_for(self.bot.invoke(ctx2), timeout=MAX_STEP_TIME)
-            except asyncio.TimeoutError:
-                await ctx.send(f"Maximum Program Execution time was exceeded.\nPlease write a more reasonable program {ctx.author.mention}")
-                break
-            except: 
-                await ctx.send(f"Input {i} could not be processed.")
-                break
+                        await self.bot.invoke(ctx2)
+                except (asyncio.CancelledError, asyncio.TimeoutError):
+                    await ctx.send(f"Command execution timed out after {MACRO_TIMEOUT} seconds.")
+                    break
+                except: 
+                    await ctx.send(f"Input {i} could not be processed.")
+                    break
 
     @commands.command()
     @commands.guild_only()
@@ -107,12 +108,13 @@ class Cosmo(commands.Cog):
         '''
         Runs a macro, or a stored Cosmo script, with a given name, and optional arguments [SPLIT BY COMMA].
 
+        ex. $c run script1 param1, param2
+
         Built on Victor's Cosmo language and Comrade's macro system
         '''
         args = args.split(" ")
         name = args.pop(0)
-
-        args = "".join(args).split(",") # strip spaces
+        args = "".join([i.strip(" ") for i in args]).split(",") # strip spaces
 
         if tup := getCmd(ctx.guild.id, name):
 
@@ -129,13 +131,12 @@ class Cosmo(commands.Cog):
                         # inject args
 
                         if len(args) == len(params):
-                            splt_line_lst[0] = str([f'{params[i]}:{args[i]}' for i in range(len(args))]).replace("'","")
+                            splt_line_lst[0] = str([f'{params[i]}={args[i]}' for i in range(len(args))]).replace("'","")
                         else:
                             await ctx.send(f"Not enough arguments for this script. Needs to be of form `{BOT_PREFIX}run {name} {splt_line_lst[0].strip('[').strip(']')}`")
                             return
 
-                except:
-                    pass
+                except: pass
 
                 #get env from first line
                 env = get_env(splt_line_lst)
@@ -147,14 +148,9 @@ class Cosmo(commands.Cog):
                     cmds = await asyncio.wait_for(interp(ast, env, extCall=True), timeout=INTERP_TIMEOUT)
                     await self.macro(ctx, cmds=",".join(cmds))
 
-                except asyncio.TimeoutError:
-                    await ctx.send(f"Program interpretation failed after {INTERP_TIMEOUT} seconds. Check to see if you have any infinite loops running!")
-            else:
-                try:
-                    await asyncio.wait_for(self.macro(ctx, cmds=cmd), timeout=0.5)
-                except asyncio.TimeoutError:
-                    await ctx.send("Program execution terminated after 30 seconds.")
-
+                except asyncio.TimeoutError: await ctx.send(f"Program interpretation failed. Check to see if you have any infinite loops running.")
+            
+            else: await self.macro(ctx, cmds=cmd) # Raw macro
         else:
             await reactX(ctx)
             await ctx.send(f"No script with name {name} was found.", delete_after=10)
@@ -165,9 +161,10 @@ class Cosmo(commands.Cog):
         '''
         Creates a command using a Cosmo script or Comrade Macro
 
-        INPUT FORMAT: <bot prefix> createcmd <command name> ```<CODE GOES HERE>```
-        '''
+        INPUT FORMAT: $c newscript <command name> ```<CODE GOES HERE>```
+        OR $c newscript <command name> <MACRO goes here>
 
+        '''
         if command[:3] == "```" and command[-3:] == "```":
             updateCmd(ctx.guild.id, command_name, command.strip("```"), "cosmo")
         else:

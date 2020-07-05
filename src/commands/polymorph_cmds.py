@@ -21,13 +21,12 @@ class Polymorph(commands.Cog):
 
         self._last_member = None
 
-    @commands.Cog.listener()
-    async def on_ready(self):
+    async def on_load(self):
         '''
         When bot is loaded
         '''
         for g in self.bot.guilds: await self.load_messages(g)# load all messages from servers
-        print("Polymorph Ready")
+        print('Polymorph Message Cache Ready')
 
     async def load_messages(self, g):
         '''

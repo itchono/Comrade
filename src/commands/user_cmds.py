@@ -255,13 +255,12 @@ class Users(commands.Cog):
                 d["check when online"].append(ctx.author.id)
                 await ctx.send(f"You will now be notified by when {u.display_name} changes their status.")
             updateUser(d)
-    
-    @commands.Cog.listener()
-    async def on_ready(self):
+
+    async def on_load(self):
         '''
         When bot is loaded, rebuild the cache.
         '''
         for g in self.bot.guilds: await self.rebuildcache(g)
-        print("User Lists ready")
+        print('User Lists ready')
 
     

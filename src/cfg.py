@@ -19,6 +19,9 @@ RAM_LIMIT = 10
 # number of messages to be stored per user in buffer for moderation (affects RAM)
 MSG_BUFFER_LIMIT = 10 
 
+# notifies the bot owner on startup
+NOTIFY_OWNER_ON_STARTUP = True
+
 # TODO PER-SERVER
 # amount of daily member counts everyone starts with
 DEFAULT_DAILY_COUNT = 2 
@@ -37,3 +40,6 @@ ZA_HANDO_VOTE_DURATION = 120
 
 # time to vote for Vault post, in seconds
 VAULT_VOTE_DURATION = 180 
+
+# maximum amount of time allowable for program execution
+MACRO_TIMEOUT = 15

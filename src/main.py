@@ -47,7 +47,7 @@ cogs = [NSFW, SelfPing]
 On fully hosted version, add NSFW module
 '''
 for c in cogs: client.add_cog(c(client))
-print(f"Running discord.py version {discord.__version__}.\nBot components initialized, awaiting login.")
+print(f"Running discord.py version {discord.__version__}.")
 
 @client.event
 async def on_connect():
@@ -55,24 +55,29 @@ async def on_connect():
     Connected to Discord
     '''
     await client.change_presence(status=discord.Status.online, activity=discord.Game(DEFAULT_STATUS))
-    print("{} is online, logged into {} server(s).\nServer List:".format(client.user, len(client.guilds)))
+    print(f"{client.user} is online, logged into {len(client.guilds)} server(s).")
 
 @client.event
 async def on_ready():
     '''
     When bot is ready to go
     '''
-    for server in client.guilds: print("\t{} ({} members)".format(server.name, len(server.members)))
+    print("Server List:")
+    for server in client.guilds: print(f"\t{server.name} ({len(server.members)} members)")
 
-    # TODO maybe move all the on_Ready here  
+    print("Loading Cogs:")
+    for name in ["Users", "Vault", "Polymorph", "Emotes"]: 
+        print("\t ", end="")
+        await client.get_cog(name).on_load() # Initialize cogs
 
     print("Startup completed in {:.2f} seconds.\nCurrent Local Time: {}".format(time.perf_counter() - start_time, localTime().strftime("%I:%M:%S %p %Z")))
 
     for server in client.guilds: await log(server, "Comrade {} is online.\nLogged in from {}.\nStartup done in {:.2f} seconds".format(VERSION, getHost(), time.perf_counter() - start_time))
 
-    embed = discord.Embed(title="Comrade is Online", description="Version {}\nLogged in from {}.\nStartup done in {:.2f} seconds".format(VERSION, getHost(), time.perf_counter() - start_time))
-    embed.add_field(name="Time", value=(localTime().strftime("%I:%M:%S %p %Z")))
-    await DM("", (await client.application_info()).owner, embed)
+    if NOTIFY_OWNER_ON_STARTUP:
+        embed = discord.Embed(title="Comrade is Online", description="Version {}\nLogged in from {}.\nStartup done in {:.2f} seconds".format(VERSION, getHost(), time.perf_counter() - start_time))
+        embed.add_field(name="Time", value=(localTime().strftime("%I:%M:%S %p %Z")))
+        await DM("", (await client.application_info()).owner, embed)
 
 '''
 Users with threat level >2 cannot use Comrade's features.

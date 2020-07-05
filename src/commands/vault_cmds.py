@@ -80,13 +80,12 @@ class Vault(commands.Cog):
             self.vault_cache[g.id] = posts
             await log(g, f"Vault Cache built with {len(posts)} entries.")
 
-    @commands.Cog.listener()
-    async def on_ready(self):
+    async def on_load(self):
         '''
         When bot is loaded
         '''
         for g in self.bot.guilds: await self.rebuildcache(g)
-        print("Vault Cache Ready")
+        print('Vault Cache Ready')
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction,
