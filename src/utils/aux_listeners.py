@@ -121,8 +121,9 @@ class AuxilliaryListener(commands.Cog):
             print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
             traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
         
-        if ctx.guild: await log(ctx.guild, "Failure: {}\nType: {}\nTraceback:{}".format(exception, type(exception), exception.__traceback__))
-        else: await ctx.send("```Failure: {}\nType: {}\nTraceback:{}```".format(exception, type(exception), exception.__traceback__))
+        if ctx.guild: await log(ctx.guild, "Failure: {}\nType: {}\nTraceback:{}".format(exception, type(exception).__name__, exception.__traceback__))
+        else: await ctx.send("```Failure: {}\nType: {}\nTraceback:{}```".format(exception, type(exception).__name__, exception.__traceback__))
+        # TODO print traceback
 
         if type(exception) == commands.NoPrivateMessage:
             await reactX(ctx)
@@ -140,6 +141,10 @@ class AuxilliaryListener(commands.Cog):
         elif type(exception) == commands.CommandNotFound:
             await reactQuestion(ctx)
             await ctx.send("'{}' is not a valid command.".format(ctx.message.content), delete_after=10)
+        
+        elif type(exception) == SyntaxError:
+            await reactX(ctx)
+            await ctx.send("Cosmo Error: {}".format(exception))
 
         else:
             await reactQuestion(ctx)
