@@ -34,7 +34,7 @@ class Vault(commands.Cog):
         1. Vault a message sent by a user based on Message ID.
         ex. $c 🍅 711064013387071620
         2. Vault a message with an image attachment
-        ex. $c 🍅    and then upload an image with this message
+        ex. $c 🍅 and then upload an image with this message
         3. Vault a message with an image url
         ex. $c 🍅 https://cdn.discordapp.com/attachments/419214713755402262/697604506975993896/2Q.png
         '''
@@ -78,15 +78,15 @@ class Vault(commands.Cog):
                         posts.append({"type":"echo", "data":m.embeds[0].fields[0].value})
 
             self.vault_cache[g.id] = posts
-            await log(g, "Vault Cache Built Successfully.")
+            await log(g, f"Vault Cache built with {len(posts)} entries.")
 
     @commands.Cog.listener()
     async def on_ready(self):
         '''
         When bot is loaded
         '''
-        # rebuilds cache
         for g in self.bot.guilds: await self.rebuildcache(g)
+        print("Vault Cache Ready")
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction,
@@ -126,4 +126,4 @@ class Vault(commands.Cog):
                 await reaction.message.edit(content="Vault operation successful.", embed=None)
 
                 # rebuild vault cache
-                await self.rebuildcache(ctx.guild)
+                await self.rebuildcache(reaction.message.guild)
