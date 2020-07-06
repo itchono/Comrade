@@ -112,7 +112,7 @@ class Users(commands.Cog):
         if self.WEIGHTED_RND_USER[g.id] == []:
             for member in g.members:
                 d = getUser(member.id, g.id)
-                d["daily weight"] = 2
+                d["daily weight"] = DEFAULT_DAILY_COUNT
                 updateUser(d)
 
             if DAILY_MEMBER_STALENESS >= 0:
