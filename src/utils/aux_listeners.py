@@ -105,16 +105,6 @@ class AuxilliaryListener(commands.Cog):
             await log(user.guild, "User Updated: {}".format(before.name))
 
     @commands.Cog.listener()
-    async def on_reaction_add(self, reaction: discord.Reaction,
-                              user: discord.User):
-        '''
-        When a user adds a reaction to a message.
-        '''
-        # self-cleanup
-        if reaction.message.author == self.bot.user and reaction.emoji == "🗑️" and user != self.bot.user:
-            await reaction.message.delete()
-
-    @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, exception):
         # When a command fails to execute
         if not (type(exception) == commands.CheckFailure or type(exception) == commands.CommandNotFound):

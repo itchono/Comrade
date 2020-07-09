@@ -42,9 +42,11 @@ class Users(commands.Cog):
         use userinfo full <person> to get a more detailed list of info
         '''
         full = False
-        if "full" in target:
-            full = True
-            target = " ".join(target.split(" ")[1:])
+        try:
+            if "full" in target:
+                full = True
+                target = " ".join(target.split(" ")[1:])
+        except: pass
 
         if not target:
             target = ctx.author.mention

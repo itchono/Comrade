@@ -68,6 +68,25 @@ class General(commands.Cog):
         msg = await ctx.channel.fetch_message(msgid)
         await ctx.send("Author: {}".format(msg.author))
 
+    @commands.command()
+    async def dateof(self, ctx: commands.Context,*, thing: typing.Union[discord.TextChannel, discord.User, discord.VoiceChannel, discord.Message]):
+        '''
+        Gets the creation time of a Channel, User, or Message.
+        '''
+        await ctx.send(f"{thing} was created on {UTCtoLocalTime(thing.created_at).strftime('%B %m %Y at %I:%M:%S %p %Z')}")
+
+    @commands.command()
+    async def staleness(self, ctx: commands.Context, channel: discord.TextChannel):
+        '''
+        Checks when the last message was sent in a channel
+        '''
+        msg = (await channel.history(limit=1).flatten()).pop()
+
+        t0 = UTCtoLocalTime(msg.created_at)
+        difference = (localTime() - t0).days
+
+        await ctx.send(f"Last message in {channel.mention} was sent on {t0.strftime('%B %m %Y at %I:%M:%S %p %Z')} by `{msg.author.display_name}` ({difference} days ago.)")
+
     @commands.command(name = "list")
     @commands.guild_only()
     async def customlist(self, ctx, operation, title=None, value=None):
