@@ -1,5 +1,5 @@
 # version of the bot
-VERSION = "3.1 [Build July 5 v2]" 
+VERSION = "3.1 [Build July 9 v1]" 
 
 # set to True if you are testing the bot in a development environment, False otherwise
 DEVELOPMENT_MODE = False 
@@ -18,6 +18,9 @@ RAM_LIMIT = 10
 
 # number of messages to be stored per user in buffer for moderation (affects RAM)
 MSG_BUFFER_LIMIT = 10 
+
+# maximum amount of time allowable for program execution (can affect performance)
+MACRO_TIMEOUT = 15
 
 # notifies the bot owner on startup
 NOTIFY_OWNER_ON_STARTUP = True
@@ -40,6 +43,3 @@ ZA_HANDO_VOTE_DURATION = 120
 
 # time to vote for Vault post, in seconds
 VAULT_VOTE_DURATION = 180 
-
-# maximum amount of time allowable for program execution
-MACRO_TIMEOUT = 15

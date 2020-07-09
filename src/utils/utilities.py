@@ -81,9 +81,16 @@ async def delSend(ctx : commands.Context, text: str, embed : discord.Embed = Non
     Sends a message to the desired channel, with a deletion option after a fixed time, default 5 seconds.
     Standard sending module for Comrade
     '''
-    msg = await ctx.send(content=text, embed=embed)
+    m = await ctx.send(content=text, embed=embed)
+
+    def check(reaction, user):
+        return reaction.message.author == ctx.bot.user and reaction.emoji == "🗑️" and user != ctx.bot.user
+
     await asyncio.sleep(time)
-    await msg.add_reaction("🗑️")
+    await m.add_reaction("🗑️")
+
+    await ctx.bot.wait_for('reaction_add', check=check)
+    await m.delete()
 
 async def reactOK(ctx: commands.Context):
     '''

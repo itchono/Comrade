@@ -31,7 +31,7 @@ dotenv.load_dotenv()
 TOKEN = os.environ.get('TOKEN')  # bot token; kept private
 
 # Bot initialization
-client = commands.Bot(command_prefix=BOT_PREFIX, case_insensitive=True,
+client = commands.Bot(command_prefix=commands.when_mentioned_or(BOT_PREFIX), case_insensitive=True,
                       help_command=commands.MinimalHelpCommand(
                           no_category="Help Command"))
 

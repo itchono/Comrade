@@ -47,38 +47,31 @@ class Echo(commands.Cog):
     @commands.command()
     @commands.check(isNotThreat())
     @commands.guild_only()
-    async def everyonesays(self, ctx: commands.Context, text: str, count: int = 5):
+    async def everyonesays(self, ctx: commands.Context, text: str, count: int = 0):
         '''
         Says something a lot of times.
         '''
-        onlinecount = 0
+        online_humans = [m for m in ctx.guild.members if (str(m.status) != "offline" and not m.bot)]
 
-        for member in ctx.guild.members:
-            if str(member.status) != "offline":
-                onlinecount += 1
+        onlinecount = len(online_humans)
+        # number of online human members
 
         if count > onlinecount:
-            await delSend(ctx, "Are you fucking serious")
+            await delSend(ctx, f"That's too many members! Only {onlinecount} human members are online right now!")
         else:
-            mems = list(ctx.guild.members)
-            random.shuffle(mems)
+            if not count: count = 5 if onlinecount >= 5 else onlinecount
 
-            for member in mems:
-                await self.echo(ctx, text, member.display_name, False)
-                count -= 1
-                if count <= 0: break
+            for m in random.sample(online_humans, count): await self.echo(ctx, text, m.display_name, False)
 
             await asyncio.sleep(30)
 
-            if count > 5:
-                await self.cleanwebhooks(ctx)
+            if count > 5: await self.cleanwebhooks(ctx)
     
     @commands.command()
     @commands.guild_only()
     async def cleanwebhooks(self, ctx:commands.Context):
         '''
-        Deletes echoed messages from Comrade andn cleans up Webhooks.
+        Deletes echoed messages from Comrade and cleans up Webhooks.
         '''
-        for wh in await ctx.channel.webhooks():
-            await wh.delete()
+        for wh in await ctx.channel.webhooks(): await wh.delete()
         await ctx.channel.purge(check=isWebhook, bulk=True)

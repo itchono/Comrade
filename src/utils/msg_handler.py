@@ -1,6 +1,8 @@
 from utils.utilities import *
 from utils.mongo_interface import *
 
+from fuzzywuzzy import fuzz
+
 
 class MessageHandler(commands.Cog):
     def __init__(self, bot):
@@ -59,14 +61,17 @@ class MessageHandler(commands.Cog):
                         with open("vid/{}".format(fn), "rb") as f:
                             await message.channel.send(file=discord.File(f, fn))
 
+            if fuzz.token_set_ratio(message.content, "still at cb") > 90:
+                await message.channel.send("And that's okay!")
+
             if "@someone" in message.content.lower():
-                # TODO refactor into independent code
-                mems = list(message.guild.members)
-                unlucky = random.choice(mems)
+                e = discord.Embed(description=random.choice(list(message.guild.members)).mention)
+                e.set_footer(author=f"Random ping by: {message.author.display_name}")
+                await message.channel.send(embed=e)
 
-                c = self.bot.get_cog("Echo")
-                await c.echo(await self.bot.get_context(message), unlucky.mention, str(message.author.id), deleteMsg=False)
-
+                '''c = self.bot.get_cog("Echo")
+                await c.echo(await self.bot.get_context(message), random.choice(list(message.guild.members)).mention, str(message.author.id), deleteMsg=False)
+                '''
             if not isNotThreat(1)(await self.bot.get_context(message)) and (len(
                     message.attachments) + len(
                     message.embeds) > 0 or match_url(message.content)):
