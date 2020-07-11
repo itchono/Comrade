@@ -60,7 +60,7 @@ class Users(commands.Cog):
             await ctx.send(embed=e)
 
         elif member := await extractUser(ctx, target):
-            e = discord.Embed(title="Info for {}".format(member.name))
+            e = discord.Embed(title="Info for {}".format(member.name), colour=member.colour)
             e.set_author(name=f"User Info - {member}")
             e.set_thumbnail(url=member.avatar_url)
             e.set_footer(icon_url=ctx.author.avatar_url)
@@ -120,6 +120,8 @@ class Users(commands.Cog):
                 d = getUser(member.id, g.id)                
                 d["daily-weight"] = daily
                 updateUser(d)
+
+            DAILY_MEMBER_STALENESS = getCFG(g.id)["daily-member-staleness"]
 
             if DAILY_MEMBER_STALENESS >= 0:
                 threshold = datetime.datetime.now() - datetime.timedelta(DAILY_MEMBER_STALENESS)
@@ -255,10 +257,10 @@ class Users(commands.Cog):
         if u := await extractUser(ctx, target):
             d = getUser(u.id, ctx.guild.id)
             try: 
-                d["check when online"].remove(ctx.author.id)
+                d["check-when-online"].remove(ctx.author.id)
                 await ctx.send(f"You will no longer be notified by when {u.display_name} changes their status.")
             except:
-                d["check when online"].append(ctx.author.id)
+                d["check-when-online"].append(ctx.author.id)
                 await ctx.send(f"You will now be notified by when {u.display_name} changes their status.")
             updateUser(d)
 

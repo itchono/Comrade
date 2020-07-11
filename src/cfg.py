@@ -1,5 +1,5 @@
 # version of the bot
-VERSION = "3.1 [Build July 10 v1]" 
+VERSION = "3.2 [Build July 11 v1]" 
 
 # set to True if you are testing the bot in a development environment, False otherwise
 DEVELOPMENT_MODE = False 
@@ -25,17 +25,3 @@ MACRO_TIMEOUT = 15
 # notifies the bot owner on startup
 NOTIFY_OWNER_ON_STARTUP = True
 
-# TODO PER-SERVER
-THEME_COLOUR = (215, 52, 42)
-
-
-DAILY_MEMBER_COLOUR = (241, 196, 15) 
-
-# enforces recency for daily members, in days. Set to -1 (or less) to disable.
-DAILY_MEMBER_STALENESS = 15 
-
-# time to vote for ZA HANDO, in seconds
-ZA_HANDO_VOTE_DURATION = 120 
-
-# time to vote for Vault post, in seconds
-VAULT_VOTE_DURATION = 180 

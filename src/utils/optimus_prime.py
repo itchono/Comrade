@@ -85,6 +85,8 @@ class TextFilter(commands.Cog):
                 if amount > 200 and not isOP(await self.bot.get_context(message)):
                     await message.channel.send("No")
                 else:
+                    ZA_HANDO_VOTE_DURATION = getCFG(message.guild.id)["za-hando-vote-duration"]
+
                     m = await message.channel.send(
                         "React with '✋' to purge the channel of {} messages {}. You have **{} seconds** to vote.".
                         format(
