@@ -43,7 +43,7 @@ class TextFilter(commands.Cog):
         '''
         try:
             u = getUser(message.author.id, message.guild.id)
-            if (u["stop pings"] and len(message.mentions) > 0) or (u["stop images"] and (len(message.attachments) > 0 or len(message.embeds) > 0)):
+            if (u["stop-pings"] and len(message.mentions) > 0) or (u["stop-images"] and (len(message.attachments) > 0 or len(message.embeds) > 0)):
                 c = self.bot.get_cog("Echo")
                 await c.echo(await self.bot.get_context(message), "```I sent a bad message: " + message.content + "```", str(message.author.id), deleteMsg=False)
                 return True
@@ -56,7 +56,7 @@ class TextFilter(commands.Cog):
     def filter(self, ctx: commands.Context, content: str):
         '''
         Detects if the string violates the moderation guidelines for a given context.
-        Optionally takes in message as filter parameter to stop images and pings
+        Optionally takes in message as filter parameter to stop-images and pings
         '''
         query = re.sub("\W+", '', unidecode.unidecode(content.lower()))
         # remove spaces, remove non-ascii, get into formattable form
@@ -64,7 +64,7 @@ class TextFilter(commands.Cog):
         u = getUser(ctx.author.id, ctx.guild.id)
         c = getCFG(ctx.guild.id)
 
-        words = u["banned words"] + c["banned words"]
+        words = u["banned-words"] + c["banned-words"]
 
         for w in words:
             if (len(query) > 3 and fuzz.partial_ratio(query, w) >= 80) or fuzz.ratio(query, w) >= 70:
@@ -167,7 +167,7 @@ class TextFilter(commands.Cog):
                               user: discord.User):
         if reaction.emoji == "✋":
             if (reaction.count > getCFG(
-                    reaction.message.guild.id)["zahando threshold"]
+                    reaction.message.guild.id)["zahando-threshold"]
                     or user.id in [i["user"] for i in getOPS(reaction.message.guild.id)]
                 ) and reaction.message.id in self.activepurge:
                 await self.zahando(

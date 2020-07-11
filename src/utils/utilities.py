@@ -24,27 +24,20 @@ def isOP(ctx: commands.Context):
     if not ctx.guild: return True
     return ctx.author.id in [i["user"] for i in getOPS(ctx.guild.id)]
 
-def isHChannel(ctx: commands.Context):
-    '''
-    Determines whether or not this is the server's designated hentai channel
-    '''
-    if not ctx.guild: return True
-    return ctx.channel.id == getCFG(ctx.guild.id)["hentai channel"]
-
 def isNotThreat(threatLevel:int = 0):
     '''
-    Returns a function that checks of the message author is of a certain threat level or higher
+    Returns a function that checks of the message author is of a certain threat-level or higher
     '''
     def ret(ctx: commands.Context):
         if not ctx.guild: return True
-        return not ctx.author.id in [i["user"] for i in getThreats(ctx.guild.id) if i["threat level"] > threatLevel]
+        return not ctx.author.id in [i["user"] for i in getThreats(ctx.guild.id) if i["threat-level"] > threatLevel]
     return ret
 
 def jokeMode(ctx: commands.Context):
     '''
     Determines whether Comrade should do the small jokey things.
     '''
-    try: return bool(getCFG(ctx.guild.id)["joke mode"])
+    try: return bool(getCFG(ctx.guild.id)["joke-mode"])
     except: return True # this means that for DMs, this will automatically be true
 
 purgeTGT = None
@@ -155,21 +148,21 @@ async def getChannel(guild: discord.Guild, name: str):
     except: c = 0
 
     if not c:
-        if name != "log channel": await log(guild, f"Channel not found: {name}")
-        else: print("Error: (Log Channel not set up); channel not found")
+        if name != "log-channel": await log(guild, f"Channel not found: {name}")
+        else: print("Error: (log-channel not set up); channel not found")
     else: return c
 '''
 logger
 '''
 async def log(guild, m: str, embed=None):
     '''
-    Logs a message in the server's log channel in a clean embed form, or sends a pre-made embed.
+    Logs a message in the server's log-channel in a clean embed form, or sends a pre-made embed.
     '''
-    lgc = await getChannel(guild, "log channel")
-    if not embed:
-        embed = discord.Embed(title="Log Entry", description=m)
-        embed.add_field(name="Time", value=(localTime().strftime("%I:%M:%S %p %Z")))
-    await lgc.send(embed=embed)
+    if lgc := await getChannel(guild, "log-channel"):
+        if not embed:
+            embed = discord.Embed(title="Log Entry", description=m)
+            embed.add_field(name="Time", value=(localTime().strftime("%I:%M:%S %p %Z")))
+        await lgc.send(embed=embed)
 
 def getHost(): 
     '''

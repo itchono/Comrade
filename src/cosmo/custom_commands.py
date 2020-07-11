@@ -61,7 +61,7 @@ class Cosmo(commands.Cog):
         '''
         Lists all Cosmo scripts in the server
         '''
-        e = discord.Embed(title=f"Scripts for {ctx.guild.name}", colour=discord.Colour.from_rgb(*THEME_COLOUR))
+        e = discord.Embed(title=f"Scripts for {ctx.guild.name}", colour=discord.Colour.from_rgb(*getCFG(ctx.guild.id)["theme-colour"]))
 
         scrs = allcmds(ctx.guild.id)
 

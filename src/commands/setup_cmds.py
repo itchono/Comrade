@@ -6,30 +6,75 @@ class Setup(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self._last_member = None
+
+    async def on_load(self):
+        '''
+        Builds new users and servers on startup
+        '''
+        for g in self.bot.guilds:
+            if not getCFG(g.id): 
+                updateCFG(self.setupcfg(g))
+                print(f"\t\tNew guild loaded: {g}")
+
+            for m in g.members:
+                if not getUser(m.id, g.id):
+                    updateUser(self.setupuser(m))
+                    print(f"\t\tNew member loaded: {m}")
+        print("Databases Ready")
     
     def setupuser(self, user: discord.Member):
         '''
-        Configures a new user for use
+        Configures a new user for use, returns a dictionary ready to be updated
         '''
-        d = {"user": user.id}
-        d["name"] = user.name
-        d["nickname"] = user.nick if user.nick else user.name
-        d["threat level"] = 0
-        d["banned words"] = []
-        d["kick votes"] = []
-        d["mute votes"] = []
-        d["server"] = user.guild.id
-        d["muted"] = False
-        d["OP"] = False
-        d["stop pings"] = False
-        d["stop images"] = False
-        d["daily weight"] = DEFAULT_DAILY_COUNT if not user.bot else 0
-        d["bot"] = user.bot
-        d["last online"] = "Now" if str(user.status) == "online" else "Never"
-        d["highest guess streak"] = 0
+        try: daily = getCFG(user.guild.id)["default-daily-count"]
+        except: daily = 0
 
-        return d
+        return {
+            "user": user.id,
+            "name": user.name,
+            "nickname": user.nick if user.nick else user.name,
+            "threat-level": 0,
+            "banned-words": [],
+            "kick-votes": [],
+            "mute-votes": [],
+            "server": user.guild.id,
+            "muted":False,
+            "OP":False,
+            "stop-pings": False,
+            "stop-images": False,
+            "daily-weight": daily if not user.bot else 0,
+            "bot": user.bot,
+            "last-online": "Now" if str(user.status) == "online" else "Never",
+            "highest-guess-streak": 0
+            }
 
+    def setupcfg(self, guild: discord.Guild):
+        '''
+        Configures a new server for use, returns a dictionary ready to be updated
+        '''
+        # attempt to locate channels
+        log_channel = discord.utils.find(lambda c: "log" in c.name, guild.text_channels)
+        emote_directory = discord.utils.find(lambda c: "emote" in c.name, guild.text_channels)
+
+        return {
+            "_id": guild.id,
+            "joke-mode": True, # allows for joke stuff to happen
+            "kick-requirement": 6,
+            "mute-requirement": 4,
+            "lethality-override": 0, # TODO defunct
+            "zahando-threshold": 3,
+            "banned-words": [],
+            "announcements-channel": 0,
+            "meme-channel": 0,
+            "bot-channel": 0, # TODO defunct
+            "log-channel": log_channel.id if log_channel else 0, # attempts to locate a log channel in the server
+            "emote-directory": emote_directory.id if emote_directory else 0, # attempts to locate an emote directory in the server
+            "custom-channel-group": 0, # id of the channel category under which you want to make custom channels
+            "default-daily-count": 2, # amount of daily member counts everyone starts with
+            "theme-colour": (215, 52, 42), # main colour for server; used in embeds
+            "daily-member-colour": (241, 196, 15), # colour for daily member (RGB)
+            }
+    
     @commands.command()
     @commands.guild_only()
     @commands.check(isNotThreat())
@@ -37,12 +82,12 @@ class Setup(commands.Cog):
         '''
         Creates a channel, and gives the user who created it full permissions over it.
 
-        If "custom channel group" is set in the server cfg, it will create the channel there, 
+        If "custom-channel-group" is set in the server cfg, it will create the channel there, 
         otherwise it will be the same category as where the command was called.
         '''
         async with ctx.channel.typing():
             c = getCFG(ctx.guild.id)
-            try: v = c["custom channel group"]
+            try: v = c["custom-channel-group"]
             except: 
                 if k:= ctx.channel.category: v = k.id
                 else: v = 0
@@ -59,12 +104,21 @@ class Setup(commands.Cog):
     @commands.command()
     @commands.check_any(commands.is_owner(), isServerOwner())
     @commands.guild_only()
-    async def reloadusers(self, ctx: commands.Context):
+    async def resetusers(self, ctx: commands.Context):
         '''
         POTENTIALLY DESTRUCTIVE. repopulates the UserData collection on Atlas with default values.
         '''
-        async with ctx.channel.typing():
-            for user in ctx.guild.members: updateUser(self.setupuser(user))
+        for user in ctx.guild.members: updateUser(self.setupuser(user))
+        await reactOK(ctx)
+
+    @commands.command()
+    @commands.check_any(commands.is_owner(), isServerOwner())
+    @commands.guild_only()
+    async def resetcfg(self, ctx: commands.Context):
+        '''
+        POTENTIALLY DESTRUCTIVE. Resets the configuration file for a server back to a default state. 
+        '''
+        updateCFG(self.setupcfg(ctx.guild))
         await reactOK(ctx)
 
     @commands.command()
@@ -143,7 +197,7 @@ class Setup(commands.Cog):
                 if k != "_id": s += str(k) + ": " + str(c[k]) + "\n"
 
         e = discord.Embed(title="Information for {}".format(
-            ctx.guild.name), description=s, colour=discord.Colour.from_rgb(*THEME_COLOUR))
+            ctx.guild.name), description=s, colour=discord.Colour.from_rgb(*getCFG(ctx.guild.id)["theme-colour"]))
         e.set_thumbnail(url=ctx.guild.icon_url)
 
         e.add_field(name="Server Created", value=ctx.guild.created_at.strftime('%B %m %Y at %I:%M:%S %p %Z'))
@@ -153,31 +207,7 @@ class Setup(commands.Cog):
         e.add_field(name="Owner", value=ctx.guild.owner.mention)
         await ctx.send(embed=e)
         
-    @commands.command()
-    @commands.check_any(commands.is_owner(), isServerOwner())
-    @commands.guild_only()
-    async def resetcfg(self, ctx: commands.Context):
-        '''
-        POTENTIALLY DESTRUCTIVE. Resets the configuration file for a server back to a default state. 
-        '''
-        d = {"_id": ctx.guild.id}
-        d["last daily"] = "2020-05-04"  # default "time = 0" for comrade
-        d["joke mode"] = True # allows for joke stuff to happen
-        d["kick requirement"] = 6
-        d["mute requirement"] = 4
-        d["lethality override"] = 0
-        d["zahando threshold"] = 3
-        d["banned words"] = []
-        d["announcements channel"] = 0
-        d["meme channel"] = 0
-        d["bot channel"] = 0
-        d["log channel"] = 0
-        d["hentai channel"] = 0
-        d["emote directory"] = 0
-        d["custom channel group"] = 0
-        updateCFG(d)
-
-        await reactOK(ctx)
+    
 
     @commands.command()
     @commands.check_any(commands.is_owner(), isServerOwner())
@@ -194,7 +224,7 @@ class Setup(commands.Cog):
                     with open("emotes/{}".format(n), "rb") as f:
                         msg = await ctx.send(file=discord.File(f))
                         url = msg.attachments[0].url
-                        c = await getChannel(ctx.guild, "emote directory")
+                        c = await getChannel(ctx.guild, "emote-directory")
                         await c.send(n[:n.index(".")] + "\n" + url)
             except:
                 await ctx.send("Emotes could not be found on the host computer.")
