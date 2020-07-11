@@ -43,9 +43,11 @@ class Vault(commands.Cog):
         if len(ctx.message.attachments) > 0:
             u = ctx.message.attachments[0].url
         elif tgt and tgt.isnumeric():
-            u = await ctx.fetch_message(int(tgt))
+            u = await commands.MessageConverter().convert(tgt)
             IDmode = True
         else: u = tgt  # URL directly
+
+        VAULT_VOTE_DURATION = getCFG(ctx.guild.id)["vault-vote-duration"]
 
         m = await ctx.send(
             "React to this message with 🍅 to vault the post {}. You have **{} seconds** to vote.".format(

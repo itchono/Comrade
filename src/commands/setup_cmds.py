@@ -45,7 +45,8 @@ class Setup(commands.Cog):
             "daily-weight": daily if not user.bot else 0,
             "bot": user.bot,
             "last-online": "Now" if str(user.status) == "online" else "Never",
-            "highest-guess-streak": 0
+            "highest-guess-streak": 0,
+            "check-when-online": False
             }
 
     def setupcfg(self, guild: discord.Guild):
@@ -72,7 +73,10 @@ class Setup(commands.Cog):
             "custom-channel-group": 0, # id of the channel category under which you want to make custom channels
             "default-daily-count": 2, # amount of daily member counts everyone starts with
             "theme-colour": (215, 52, 42), # main colour for server; used in embeds
-            "daily-member-colour": (241, 196, 15), # colour for daily member (RGB)
+            "daily-member-colour": (241, 196, 15), # colour for daily member (RGB),
+            "daily-member-staleness": 15, # enforces recency for daily members, in days. Set to -1 (or less) to disable.
+            "za-hando-vote-duration": 120, # time to vote for ZA HANDO, in seconds
+            "vault-vote-duration": 180 # time to vote for Vault post, in seconds
             }
     
     @commands.command()
