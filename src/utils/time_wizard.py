@@ -25,10 +25,7 @@ class TimeWizard(commands.Cog):
         '''
         now = localTime()
 
-        m = await channel.send("Good morning everyone! Today is {}. Have a great day.".format(now.strftime("%A, %B %d. It's %I:%M:%S %p")))
-        
-        serverDB["last daily"] = str(now.date())
-        updateCFG(serverDB)
+        m = await channel.send("Good morning everyone! Today is {}. Have a great day.".format(localTime().strftime("%A, %B %d (Day %j in %Y). It's %I:%M %p %Z")))
 
         '''
         Daily user
@@ -40,7 +37,7 @@ class TimeWizard(commands.Cog):
         luckyperson = random.choice(cog.WEIGHTED_RND_USER[ctx.guild.id])
 
         d = getUser(luckyperson.id, serverDB["_id"])
-        d["daily weight"] -= 1
+        d["daily-weight"] -= 1
         updateUser(d)
         # self regulating; once probability drops to zero, we just need to refill.
 
@@ -56,7 +53,7 @@ class TimeWizard(commands.Cog):
         roles.append(dailyrole)
         await luckyperson.edit(roles=roles)
 
-        await channel.send("Today's Daily Member is {}".format(luckyperson.display_name))
+        await channel.send("Today's Daily Member is **{}**".format(luckyperson.display_name))
         await cog.userinfo(ctx, target=luckyperson.mention)
         
         await cog.rebuildcache(channel.guild)
@@ -72,7 +69,7 @@ class TimeWizard(commands.Cog):
             now = localTime()
             for a in self.announcements:
                 if (now.strftime("%H:%M") == a):
-                    c = self.bot.get_channel(s["announcements channel"])
+                    c = self.bot.get_channel(s["announcements-channel"])
                     await self.announcements[a](c, s)
     
 

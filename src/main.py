@@ -66,8 +66,8 @@ async def on_ready():
     for server in client.guilds: print(f"\t{server.name} ({len(server.members)} members)")
 
     print("Loading Cogs:")
-    for name in ["Users", "Vault", "Polymorph", "Emotes"]: 
-        print("\t ", end="")
+    for name in ["Setup", "Users", "Vault", "Polymorph", "Emotes"]: # load cogs in order
+        print(f"\t{name}: ", end="")
         await client.get_cog(name).on_load() # Initialize cogs
 
     print("Startup completed in {:.2f} seconds.\nCurrent Local Time: {}".format(time.perf_counter() - start_time, localTime().strftime("%I:%M:%S %p %Z")))
@@ -80,7 +80,7 @@ async def on_ready():
         await DM("", (await client.application_info()).owner, embed)
 
 '''
-Users with threat level >2 cannot use Comrade's features.
+Users with threat-level >2 cannot use Comrade's features.
 '''
 @client.check_once
 async def globalcheck(ctx): return isNotThreat(2)(ctx)

@@ -232,7 +232,7 @@ class Fun(commands.Cog):
         '''
         Stops time.
         '''
-        embed = discord.Embed(title="ZA WARUDO", colour=discord.Colour.from_rgb(*THEME_COLOUR))
+        embed = discord.Embed(title="ZA WARUDO", colour=discord.Colour.from_rgb(*getCFG(ctx.guild.id)["theme-colour"]))
         embed.set_image(url=("https://media1.tenor.com/images/4b953bf5b5ba531099a823944a5626c2/tenor.gif"))
 
         await ctx.send(embed=embed, delete_after=1.95)
@@ -315,14 +315,8 @@ class Fun(commands.Cog):
         Stats for guess
         '''
 
-        highscore = 0
-        currscore = 0
-
-        try: highscore = getUser(ctx.author.id, ctx.guild.id)["highest guess streak"]
-        except: pass
-
-        try: currscore = self.streak[ctx.author.id]
-        except: pass
+        highscore = getUser(ctx.author.id, ctx.guild.id)["highest-guess-streak"]
+        currscore = self.streak[ctx.author.id]
 
         await ctx.send(f"**Info for {ctx.author.display_name}**\nCurrent Streak: {currscore}\nHighest Streak: {highscore}")
 
@@ -385,11 +379,11 @@ class Fun(commands.Cog):
 
                     udict = getUser(ctx.author.id, ctx.guild.id)
                     try:
-                        if self.streak[ctx.author.id] > udict["highest guess streak"]:
-                            udict["highest guess streak"] = self.streak[ctx.author.id]
+                        if self.streak[ctx.author.id] > udict["highest-guess-streak"]:
+                            udict["highest-guess-streak"] = self.streak[ctx.author.id]
                             
                     except: 
-                        udict["highest guess streak"] = self.streak[ctx.author.id]
+                        udict["highest-guess-streak"] = self.streak[ctx.author.id]
 
                     updateUser(udict)
 

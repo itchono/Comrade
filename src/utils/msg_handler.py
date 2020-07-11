@@ -38,7 +38,7 @@ class MessageHandler(commands.Cog):
                 "meme.mp4", "meme_rick_roll.mov", "Memes.mov", "Giorno.mp4", "meme_doom.mp4"
                 ]
 
-                if message.guild and message.channel.id == getCFG(message.guild.id)["meme channel"]:
+                if message.guild and message.channel.id == getCFG(message.guild.id)["meme-channel"]:
 
                     fn = "meme_what.mp4"  # default safety
 
@@ -66,7 +66,7 @@ class MessageHandler(commands.Cog):
 
             if "@someone" in message.content.lower():
                 e = discord.Embed(description=random.choice(list(message.guild.members)).mention)
-                e.set_footer(author=f"Random ping by: {message.author.display_name}")
+                e.set_footer(text=f"Random ping by: {message.author.display_name}")
                 await message.channel.send(embed=e)
 
                 '''c = self.bot.get_cog("Echo")

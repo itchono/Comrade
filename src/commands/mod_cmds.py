@@ -36,9 +36,9 @@ class Moderation(commands.Cog):
 
         else:
             usr = getUser(u.id, ctx.guild.id)
-            vm = usr["mute votes"]
+            vm = usr["mute-votes"]
 
-            kickreq = getCFG(ctx.guild.id)["mute requirement"]
+            kickreq = getCFG(ctx.guild.id)["mute-requirement"]
 
             if not ctx.author.id in vm:
                 vm.append(ctx.author.id)
@@ -63,7 +63,7 @@ class Moderation(commands.Cog):
                 vm.remove(ctx.author.id)
                 await ctx.send("Vote to {} {} removed. ({}/{} votes)".format("unmute" if mutedrole in u.roles else "mute", u.display_name, len(vm), kickreq))
 
-            usr["mute votes"] = vm
+            usr["mute-votes"] = vm
             updateUser(usr)
             
 
@@ -76,9 +76,9 @@ class Moderation(commands.Cog):
         u = await extractUser(ctx, target)
 
         usr = getUser(u.id, ctx.guild.id)
-        vk = usr["kick votes"]
+        vk = usr["kick-votes"]
 
-        kickreq = getCFG(ctx.guild.id)["kick requirement"]
+        kickreq = getCFG(ctx.guild.id)["kick-requirement"]
 
         if not ctx.author.id in vk:
             vk.append(ctx.author.id)
@@ -92,7 +92,7 @@ class Moderation(commands.Cog):
             vk.remove(ctx.author.id)
             await ctx.send("Vote to kick {} removed. ({}/{} votes)".format(u.display_name, len(vk), kickreq))
 
-        usr["kick votes"] = vk
+        usr["kick-votes"] = vk
         updateUser(usr)
 
     @commands.command()

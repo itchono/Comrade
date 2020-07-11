@@ -32,7 +32,7 @@ class AuxilliaryListener(commands.Cog):
         TODO reconfigure user DB
         '''
         await log(user.guild, "Left {}".format(user.name))
-        c = self.bot.get_channel(getCFG(user.guild.id)["announcements channel"])
+        c = self.bot.get_channel(getCFG(user.guild.id)["announcements-channel"])
         await c.send(f":door: {user.display_name} has left.")
 
     @commands.Cog.listener()
@@ -75,12 +75,12 @@ class AuxilliaryListener(commands.Cog):
 
             if str(user.status) == "offline":
                 d = getUser(before.id, user.guild.id)
-                d["last online"] = localTime().strftime("%I:%M:%S %p %Z")
+                d["last-online"] = localTime().strftime("%I:%M:%S %p %Z")
                 updateUser(d)
             
             else:
                 d = getUser(before.id, user.guild.id)
-                d["last online"] = "now"
+                d["last-online"] = "now"
                 updateUser(d)
 
             for i in d["check when online"]:

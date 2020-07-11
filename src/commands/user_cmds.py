@@ -105,16 +105,20 @@ class Users(commands.Cog):
                 updateUser(stp.setupuser(member))
                 u = getUser(member.id, g.id)
 
-            weight = u["daily weight"]
+            weight = u["daily-weight"]
             if not member.bot: 
                 self.WEIGHTED_RND_USER[g.id] += [member for i in range(weight)]
                 self.UNWEIGHTED_RND_USER[g.id] += [member]
         
         # special case: list is empty
         if self.WEIGHTED_RND_USER[g.id] == []:
+
+            try: daily = getCFG(g.id)["default-daily-count"]
+            except: daily = 0
+
             for member in g.members:
-                d = getUser(member.id, g.id)
-                d["daily weight"] = DEFAULT_DAILY_COUNT
+                d = getUser(member.id, g.id)                
+                d["daily-weight"] = daily
                 updateUser(d)
 
             if DAILY_MEMBER_STALENESS >= 0:
@@ -127,7 +131,7 @@ class Users(commands.Cog):
 
                 for i in member_ids:
                     u = getUser(i, g.id)
-                    u["daily weight"] = 0
+                    u["daily-weight"] = 0
                     updateUser(u)
 
                 await log(g, f"Refilled daily count and trimmed users in past {DAILY_MEMBER_STALENESS} days")
@@ -159,7 +163,7 @@ class Users(commands.Cog):
             
             if trim and OP:
                 u = getUser(i.id, ctx.guild.id)
-                u["daily weight"] = 0
+                u["daily-weight"] = 0
                 updateUser(u)
         s += "```"
         await ctx.send(s)

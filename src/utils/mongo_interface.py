@@ -55,7 +55,7 @@ def getThreats(server):
     try:
         return THREAT_CACHE[server]
     except:
-        THREAT_CACHE[server] = list(userQuery({"threat level": {"$gt": 0}, "server": server}))
+        THREAT_CACHE[server] = list(userQuery({"threat-level": {"$gt": 0}, "server": server}))
         return THREAT_CACHE[server]
 
 
@@ -95,7 +95,7 @@ def updateUser(userData: dict):
 
     if u := users.find_one({"user": userData["user"], "server": userData["server"]}):
         oldOP = u["OP"]
-        oldTHREAT = u["threat level"]
+        oldTHREAT = u["threat-level"]
 
     users.update({
         "user": userData["user"],
@@ -108,8 +108,8 @@ def updateUser(userData: dict):
             OP_CACHE[userData["server"]] = list(userQuery({"OP": True, "server": userData["server"]}))
             print("Rebuild OP Cache")
 
-        if oldTHREAT and oldTHREAT != userData["threat level"]: 
-            THREAT_CACHE[userData["server"]] = list(userQuery({"threat level": {"$gt": 0}, "server": userData["server"]}))
+        if oldTHREAT and oldTHREAT != userData["threat-level"]: 
+            THREAT_CACHE[userData["server"]] = list(userQuery({"threat-level": {"$gt": 0}, "server": userData["server"]}))
             print("Rebuild Threat Cache")
 
 def updateCustomUser(userData:dict):
