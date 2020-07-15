@@ -36,13 +36,18 @@ class TimeWizard(commands.Cog):
         cog = self.bot.get_cog("Users")
 
         ctx = await self.bot.get_context(m)
-        
-        luckyperson = random.choice(cog.WEIGHTED_RND_USER[ctx.guild.id])
+
+        active = bool(cog.WEIGHTED_RND_USER[ctx.guild.id])
+
+        choices = cog.WEIGHTED_RND_USER[ctx.guild.id] if active else cog.UNWEIGHTED_RND_USER[ctx.guild.id]
+        luckyperson = random.choice(choices)
 
         d = getUser(luckyperson.id, serverDB["_id"])
-        d["daily weight"] -= 1
-        updateUser(d)
-        # self regulating; once probability drops to zero, we just need to refill.
+        
+        if active: 
+            d["daily weight"] -= 1
+            updateUser(d)
+            # self regulating; once probability drops to zero, we just need to refill.
 
         dailyrole = await dailyRole(channel.guild)
 

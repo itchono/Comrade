@@ -146,7 +146,7 @@ class Users(commands.Cog):
 
         for channel in ctx.guild.text_channels:
 
-            author_ids = set([i.author.id for i in await channel.history(limit=None,after=threshold).flatten()])
+            authors = set([i.author for i in await channel.history(limit=None,after=threshold).flatten() if i.type == discord.MessageType.default])
             member_ids -= author_ids
 
         await ctx.send(f"{len(member_ids)} members detected to have not posted in the past {day} days.")
