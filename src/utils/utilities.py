@@ -199,6 +199,40 @@ async def mutedRole(guild: discord.Guild):
     return await guild.create_role(name="Comrade-Mute")
 
 '''
+Database
+'''
+
+def DB(ctx: commands.Context, collection):
+    '''
+    Returns the collection with the name
+    '''
+    try: return ctx.bot.get_cog("Databases").DB[collection]
+    except: return None
+
+THREAT_CACHE = {}
+OP_CACHE = {}
+
+def getOPS(server):
+    '''
+    Gets the ops in a server
+    '''
+    try:
+        return OP_CACHE[server]
+    except:
+        OP_CACHE[server] = list(userQuery({"OP": True, "server": server}))
+        return OP_CACHE[server]
+
+def getThreats(server):
+    '''
+    Gets the threats in server using memoization system
+    '''
+    try:
+        return THREAT_CACHE[server]
+    except:
+        THREAT_CACHE[server] = list(userQuery({"threat-level": {"$gt": 0}, "server": server}))
+        return THREAT_CACHE[server]
+
+'''
 Misc
 '''
 

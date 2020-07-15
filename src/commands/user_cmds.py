@@ -101,7 +101,7 @@ class Users(commands.Cog):
             if u := getUser(member.id, g.id): pass
             else:
                 # account for new users
-                stp = self.bot.get_cog("Setup")
+                stp = self.bot.get_cog("Databases")
                 updateUser(stp.setupuser(member))
                 u = getUser(member.id, g.id)
 
@@ -128,7 +128,7 @@ class Users(commands.Cog):
                 member_ids = set([i.id for i in g.members])
 
                 for channel in g.text_channels:
-                    author_ids = set([i.author.id for i in await channel.history(limit=None,after=threshold).flatten()])
+                    author_ids = set([i.author.id for i in await channel.history(limit=None,after=threshold).flatten() if i.type == discord.MessageType.default])
                     member_ids -= author_ids
 
                 for i in member_ids:
@@ -152,7 +152,7 @@ class Users(commands.Cog):
 
         for channel in ctx.guild.text_channels:
 
-            author_ids = set([i.author.id for i in await channel.history(limit=None,after=threshold).flatten()])
+            author_ids = set([i.author.id for i in await channel.history(limit=None,after=threshold).flatten() if i.type == discord.MessageType.default])
             member_ids -= author_ids
 
         await ctx.send(f"{len(member_ids)} members detected to have not posted in the past {day} days.")

@@ -1,10 +1,20 @@
 from utils.utilities import *
 from utils.mongo_interface import *
-import ast
+import ast, os, dotenv
+from pymongo import MongoClient
 
-class Setup(commands.Cog):
+class Databases(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+        self.THREAT_CACHE = {}
+        self.OP_CACHE = {}
+
+        dotenv.load_dotenv()
+        self.client = MongoClient(os.environ.get('MONGOKEY'))
+        self.DB = self.client[self.client.list_database_names()[0]]
+        print(f"MongoDB Atlas Connected to Database: {self.client.list_database_names()[0]}")
+
         self._last_member = None
 
     async def on_load(self):
@@ -46,7 +56,7 @@ class Setup(commands.Cog):
             "bot": user.bot,
             "last-online": "Now" if str(user.status) == "online" else "Never",
             "highest-guess-streak": 0,
-            "check-when-online": False
+            "check-when-online": []
             }
 
     def setupcfg(self, guild: discord.Guild):

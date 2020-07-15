@@ -36,7 +36,7 @@ client = commands.Bot(command_prefix=commands.when_mentioned_or(BOT_PREFIX), cas
                           no_category="Help Command"))
 
 cogs = [
-    AuxilliaryListener, MessageHandler, General, Setup, Vault, Echo,
+    AuxilliaryListener, MessageHandler, General, Databases, Vault, Echo,
     Users, TextFilter, Fun, TimeWizard, Emotes, Polymorph, Moderation, Cosmo
 ]
 
@@ -66,7 +66,7 @@ async def on_ready():
     for server in client.guilds: print(f"\t{server.name} ({len(server.members)} members)")
 
     print("Loading Cogs:")
-    for name in ["Setup", "Users", "Vault", "Polymorph", "Emotes"]: # load cogs in order
+    for name in ["Databases", "Users", "Vault", "Polymorph", "Emotes"]: # load cogs in order
         print(f"\t{name}: ", end="")
         await client.get_cog(name).on_load() # Initialize cogs
 
