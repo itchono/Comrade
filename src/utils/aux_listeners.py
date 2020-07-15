@@ -18,7 +18,7 @@ class AuxilliaryListener(commands.Cog):
         # member join
         await log(user.guild, "Join {}".format(user.name))
         
-        stp = self.bot.get_cog("Setup")
+        stp = self.bot.get_cog("Databases")
 
         updateUser(stp.setupuser(user))
 
