@@ -41,7 +41,7 @@ class Echo(commands.Cog):
                 await webhook.send(text, username=target, avatar_url=ctx.author.default_avatar_url)
             
         if deleteMsg: 
-            await log(ctx.guild, "Echo for {} sent by {} ({})".format(target,ctx.author.display_name, ctx.author))
+            await log(ctx.guild, "Echo for {} sent by {} ({})".format(target,ctx.author.mention, ctx.author))
             await ctx.message.delete()
             
     @commands.command()
