@@ -18,7 +18,7 @@ class AuxilliaryListener(commands.Cog):
         # member join
         await log(user.guild, "Join {}".format(user.name))
         
-        stp = self.bot.get_cog("Setup")
+        stp = self.bot.get_cog("Databases")
 
         updateUser(stp.setupuser(user))
 
@@ -32,7 +32,7 @@ class AuxilliaryListener(commands.Cog):
         TODO reconfigure user DB
         '''
         await log(user.guild, "Left {}".format(user.name))
-        c = self.bot.get_channel(getCFG(user.guild.id)["announcements channel"])
+        c = self.bot.get_channel(getCFG(user.guild.id)["announcements-channel"])
         await c.send(f":door: {user.display_name} has left.")
 
     @commands.Cog.listener()
@@ -52,8 +52,8 @@ class AuxilliaryListener(commands.Cog):
         When a message is deleted
         '''
         if msg := payload.cached_message:
-            if msg.guild:
-                await log(msg.guild, f"Message sent by {msg.author.display_name} ({msg.author}) deleted in {msg.channel.mention}")
+            if msg.guild and not message.author == self.bot.user:
+                await log(msg.guild, f"Message sent by {msg.author.display_name} ({msg.author}) deleted in {msg.channel.mention}\n Content: {msg.content}")
         elif payload.guild_id:
             await log(self.bot.get_guild(payload.guild_id), f"Message deleted in {(self.bot.get_channel(payload.channel_id))}")
 
@@ -75,15 +75,15 @@ class AuxilliaryListener(commands.Cog):
 
             if str(user.status) == "offline":
                 d = getUser(before.id, user.guild.id)
-                d["last online"] = localTime().strftime("%I:%M:%S %p %Z")
+                d["last-online"] = localTime().strftime("%I:%M:%S %p %Z")
                 updateUser(d)
             
             else:
                 d = getUser(before.id, user.guild.id)
-                d["last online"] = "now"
+                d["last-online"] = "now"
                 updateUser(d)
 
-            for i in d["check when online"]:
+            for i in d["check-when-online"]:
                 m = user.guild.get_member(i)
                 embed = discord.Embed(title=f"{user.display_name} is now {str(user.status)}.", description=str(m))
                 embed.add_field(name="Time", value=(localTime().strftime("%I:%M:%S %p %Z")))
@@ -111,8 +111,8 @@ class AuxilliaryListener(commands.Cog):
             print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
             traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
         
-        if ctx.guild: await log(ctx.guild, "Failure: {}\nType: {}\nTraceback:{}".format(exception, type(exception).__name__, exception.__traceback__))
-        else: await ctx.send("```Failure: {}\nType: {}\nTraceback:{}```".format(exception, type(exception).__name__, exception.__traceback__))
+        if ctx.guild: await log(ctx.guild, "Failure: {}\nType: {}\nTraceback:{}".format(exception, type(exception).__name__, exception.__traceback__.format_exc()))
+        else: await ctx.send("```Failure: {}\nType: {}\nTraceback:{}```".format(exception, type(exception).__name__, exception.__traceback__.format_exc()))
         # TODO print traceback
 
         if type(exception) == commands.NoPrivateMessage:
@@ -139,5 +139,7 @@ class AuxilliaryListener(commands.Cog):
         else:
             await reactQuestion(ctx)
             await ctx.send("Failure: {}".format(exception), delete_after=10)
+
+        await DM(f"Failure: {exception}\n {exception.__traceback__.format_exc()}", (await self.application_info()).owner)
 
         
