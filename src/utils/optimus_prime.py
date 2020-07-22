@@ -1,5 +1,6 @@
 from utils.utilities import *
 from utils.mongo_interface import *
+from utils.database_utils import *
 
 # Text Filtering
 import re

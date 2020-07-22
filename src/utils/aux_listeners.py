@@ -1,5 +1,6 @@
 from utils.utilities import *
 from utils.mongo_interface import *
+from utils.database_utils import *
 
 import datetime
 import traceback
@@ -52,7 +53,7 @@ class AuxilliaryListener(commands.Cog):
         When a message is deleted
         '''
         if msg := payload.cached_message:
-            if msg.guild and not message.author == self.bot.user:
+            if msg.guild and not msg.author == self.bot.user:
                 await log(msg.guild, f"Message sent by {msg.author.display_name} ({msg.author}) deleted in {msg.channel.mention}\n Content: {msg.content}")
         elif payload.guild_id:
             await log(self.bot.get_guild(payload.guild_id), f"Message deleted in {(self.bot.get_channel(payload.channel_id))}")
