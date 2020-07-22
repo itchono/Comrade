@@ -33,7 +33,7 @@ class AuxilliaryListener(commands.Cog):
         TODO reconfigure user DB
         '''
         await log(user.guild, "Left {}".format(user.name))
-        c = self.bot.get_channel(getCFG(user.guild.id)["announcements-channel"])
+        c = self.bot.get_channel(DBcfgitem(user.guild.id,"announcements-channel"))
         await c.send(f":door: {user.display_name} has left.")
 
     @commands.Cog.listener()
@@ -65,7 +65,7 @@ class AuxilliaryListener(commands.Cog):
         '''
         if (user.display_name != before.display_name):
             # member update
-            d = getUser(before.id, user.guild.id)
+            d = DBuser(before.id, user.guild.id)
             d["name"] = user.name
             d["nickname"] = user.nick if user.nick else user.name
             updateUser(d)
@@ -75,12 +75,12 @@ class AuxilliaryListener(commands.Cog):
             # status update
 
             if str(user.status) == "offline":
-                d = getUser(before.id, user.guild.id)
+                d = DBuser(before.id, user.guild.id)
                 d["last-online"] = localTime().strftime("%I:%M:%S %p %Z")
                 updateUser(d)
             
             else:
-                d = getUser(before.id, user.guild.id)
+                d = DBuser(before.id, user.guild.id)
                 d["last-online"] = "now"
                 updateUser(d)
 
@@ -98,7 +98,7 @@ class AuxilliaryListener(commands.Cog):
         '''
         if (user.name != before.name):
             # user update
-            POSSIBLES = userQuery({"user":user.id})
+            POSSIBLES = DBfind(USER_COLLECTION, {"user":user.id})
             for u in POSSIBLES:
                 u["name"] = user.name
                 updateUser(u)

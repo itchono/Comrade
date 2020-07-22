@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands, tasks
 
-from utils.mongo_interface import getOPS, getThreats, getCFG
+from utils.database_utils import getThreats, getOPS
 from cfg import *
 
 import requests, asyncio, random, datetime, time, pytz, string, socket, typing, re
@@ -42,7 +42,7 @@ def jokeMode(ctx: commands.Context):
     '''
     Determines whether Comrade should do the small jokey things.
     '''
-    try: return bool(getCFG(ctx.guild.id)["joke-mode"])
+    try: return bool(DBcfgitem(ctx.guild.id, "joke-mode"))
     except: return True # this means that for DMs, this will automatically be true
 
 purgeTGT = None
@@ -149,7 +149,7 @@ async def getChannel(guild: discord.Guild, name: str):
     '''
     Gets a channel in a server, given a NAME of the channel; uses mongoDB cfg file. 
     '''
-    try: c = guild.get_channel(getCFG(guild.id)[name])
+    try: c = guild.get_channel(DBcfgitem(guild.id, name))
     except: c = 0
 
     if not c:
@@ -207,35 +207,14 @@ async def mutedRole(guild: discord.Guild):
 Database
 '''
 
-def DBCollection(ctx: commands.Context, collection):
+def DBcollection(collection):
     '''
     Returns the collection with the name
     '''
-    try: return ctx.bot.get_cog("Databases").DB[collection]
+    try: return client.get_cog("Databases").DB[collection]
     except: return None
 
-THREAT_CACHE = {}
-OP_CACHE = {}
-
-def getOPS(server):
-    '''
-    Gets the ops in a server
-    '''
-    try:
-        return OP_CACHE[server]
-    except:
-        OP_CACHE[server] = list(userQuery({"OP": True, "server": server}))
-        return OP_CACHE[server]
-
-def getThreats(server):
-    '''
-    Gets the threats in server using memoization system
-    '''
-    try:
-        return THREAT_CACHE[server]
-    except:
-        THREAT_CACHE[server] = list(userQuery({"threat-level": {"$gt": 0}, "server": server}))
-        return THREAT_CACHE[server]
+## Rest is in database_utils.py
 
 '''
 Misc

@@ -23,13 +23,13 @@ class Databases(commands.Cog):
         Builds new users and servers on startup
         '''
         for g in self.bot.guilds:
-            if not getCFG(g.id): 
-                updateCFG(self.setupcfg(g))
+            if not DBfind_one(SERVERCFG_COLLECTION, {"_id":g.id}): 
+                DBupdate(SERVERCFG_COLLECTION, {"_id":g.id}, self.setupcfg(g.id))
                 print(f"\t\tNew guild loaded: {g}")
 
             for m in g.members:
-                if not getUser(m.id, g.id):
-                    updateUser(self.setupuser(m))
+                if not DBfind_one(USERDATA_COLLECTION, {"server":g.id, "user":m.id}): 
+                    DBupdate(USERDATA_COLLECTION, {"server":g.id, "user":m.id}, self.setupuser(m))
                     print(f"\t\tNew member loaded: {m}")
         print("Databases Ready")
     
@@ -37,7 +37,7 @@ class Databases(commands.Cog):
         '''
         Configures a new user for use, returns a dictionary ready to be updated
         '''
-        try: daily = getCFG(user.guild.id)["default-daily-count"]
+        try: daily = DBcfgitem(user.guild.id,"default-daily-count")
         except: daily = 0
 
         return {
@@ -101,7 +101,7 @@ class Databases(commands.Cog):
         otherwise it will be the same category as where the command was called.
         '''
         async with ctx.channel.typing():
-            c = getCFG(ctx.guild.id)
+            c = DBfind_one(SERVERCFG_COLLECTION, {"_id":ctx.guild.id})
             try: v = c["custom-channel-group"]
             except: 
                 if k:= ctx.channel.category: v = k.id
@@ -133,7 +133,7 @@ class Databases(commands.Cog):
         '''
         POTENTIALLY DESTRUCTIVE. Resets the configuration file for a server back to a default state. 
         '''
-        updateCFG(self.setupcfg(ctx.guild))
+        DBupdate(USERDATA_COLLECTION, {"_id":ctx.guild.id}, self.setupcfg(ctx.guild))
         await reactOK(ctx)
 
     @commands.command()
@@ -146,7 +146,7 @@ class Databases(commands.Cog):
         async with ctx.channel.typing():
             for user in ctx.guild.members:
                 # each user is stored, themselves each as a dictionary
-                d = getUser(user.id, ctx.guild.id)
+                d = DBuser(user.id, ctx.guild.id)
                 try: d[fieldname] = ast.literal_eval(value)
                 except: d[fieldname] = value
                 updateUser(d)
@@ -157,43 +157,43 @@ class Databases(commands.Cog):
     @commands.command()
     @commands.check_any(commands.is_owner(), isServerOwner())
     @commands.guild_only()
-    async def user(self, ctx: commands.Context, tgt, cfgitem, value=None):
+    async def user(self, ctx: commands.Context, tgt, DBcfgitem, value=None):
         '''
         Configures a user, mentioned by ping, id, or nickname. Leave value as none to delete field.
         '''
-        u = getUser((await extractUser(ctx, tgt)).id, ctx.guild.id)
+        u = DBuser((await extractUser(ctx, tgt)).id, ctx.guild.id)
 
         if not value:
             try:
-                del u[cfgitem]
+                del u[DBcfgitem]
                 updateUser(u)
                 await delSend(ctx, "User config value deleted.")
             except: await delSend(ctx, "Value was not found.")
         else:
-            try: u[cfgitem] = ast.literal_eval(value)
-            except: u[cfgitem] = value
+            try: u[DBcfgitem] = ast.literal_eval(value)
+            except: u[DBcfgitem] = value
         updateUser(u)
         await reactOK(ctx)
 
     @commands.command()
     @commands.check_any(commands.is_owner(), isServerOwner())
     @commands.guild_only()
-    async def cfg(self, ctx: commands.Context, cfgitem, value=None):
+    async def cfg(self, ctx: commands.Context, DBcfgitem, value=None):
         '''
         Modifies a value in Comrade's configuration. Leave value blank to delete the field.
         '''
-        c = getCFG(ctx.guild.id)
+        c = DBfind_one(SERVERCFG_COLLECTION, {"_id":ctx.guild.id})
         if not value:
             try:
-                del c[cfgitem]
-                updateCFG(c)
+                del c[DBcfgitem]
+                updateDB(SERVERCFG_COLLECTION, {"_id":ctx.guild.id}, c)
                 await delSend(ctx, "Config value deleted.")
             except: await delSend(ctx, "Value was not found.")
 
         else:
-            try: c[cfgitem] = ast.literal_eval(value)
-            except: c[cfgitem] = value
-            updateCFG(c)
+            try: c[DBcfgitem] = ast.literal_eval(value)
+            except: c[DBcfgitem] = value
+            updateDB(SERVERCFG_COLLECTION, {"_id":ctx.guild.id}, c)
 
         await reactOK(ctx)
 
@@ -207,12 +207,12 @@ class Databases(commands.Cog):
 
         if full:
             s = "Comrade Configuration:\n"
-            c = getCFG(ctx.guild.id)
+            c = DBfind_one(SERVERCFG_COLLECTION, {"_id":ctx.guild.id})
             for k in c:
                 if k != "_id": s += str(k) + ": " + str(c[k]) + "\n"
 
         e = discord.Embed(title="Information for {}".format(
-            ctx.guild.name), description=s, colour=discord.Colour.from_rgb(*getCFG(ctx.guild.id)["theme-colour"]))
+            ctx.guild.name), description=s, colour=discord.Colour.from_rgb(*DBcfgitem(ctx.guild.id,"theme-colour")))
         e.set_thumbnail(url=ctx.guild.icon_url)
 
         e.add_field(name="Server Created", value=ctx.guild.created_at.strftime('%B %m %Y at %I:%M:%S %p %Z'))

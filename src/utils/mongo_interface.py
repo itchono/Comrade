@@ -17,7 +17,7 @@ DB = client[client.list_database_names()[0]]
 print(f"MongoDB Atlas Connected to Database: {client.list_database_names()[0]}")
 
 
-def getUser(userID: int, serverID: int):
+def DBuser(userID: int, serverID: int):
     '''
     gets a user based on user ID and guild ID.
     '''
@@ -38,27 +38,6 @@ def userQuery(query: dict):
     users = DB['UserData']
     return users.find(query)
 
-def getOPS(server):
-    '''
-    Gets the ops in a server
-    '''
-    try:
-        return OP_CACHE[server]
-    except:
-        OP_CACHE[server] = list(userQuery({"OP": True, "server": server}))
-        return OP_CACHE[server]
-
-def getThreats(server):
-    '''
-    Gets the threats in server using memoization system
-    '''
-    try:
-        return THREAT_CACHE[server]
-    except:
-        THREAT_CACHE[server] = list(userQuery({"threat-level": {"$gt": 0}, "server": server}))
-        return THREAT_CACHE[server]
-
-
 def cfgQuery(query:dict):
     '''
     Returns a set of cfgs given a query
@@ -72,20 +51,6 @@ def customUserQuery(query:dict):
     '''
     customs = DB["CustomUsers"]
     return customs.find(query)
-
-def getCFG(serverID: int):
-    '''
-    Returns a dictionary with the cfg values for Comrade in a given server
-    '''
-    cfg = DB['cfg']
-    return cfg.find_one({"_id": serverID})
-
-def updateCFG(newCFG: dict):
-    '''
-    Updates configuration file for a given server based on the ID
-    '''
-    cfg = DB['cfg']
-    cfg.update({"_id": newCFG["_id"]}, newCFG, True)
 
 def updateUser(userData: dict):
     '''
@@ -272,7 +237,7 @@ def getuserList(userID: int, serverID:int, listname):
     Reads a certain named list from a user in the database
     '''
     try:
-        u = getUser(userID, serverID)[listname]
+        u = DBuser(userID, serverID)[listname]
         return u if type(u) == list else None
     except:
         return None
@@ -281,7 +246,7 @@ def updateuserList(userID: int, serverID:int, listname, value):
     '''
     Writes to a certain named list from a user in the database
     '''
-    if u := getUser(userID, serverID):
+    if u := DBuser(userID, serverID):
         try:
             u[listname] = value
             updateUser(u)
@@ -295,7 +260,7 @@ def setnum(userID: int, serverID:int, valuename, value):
     '''
     sets a numerical value for a user
     '''
-    if u := getUser(userID, serverID):
+    if u := DBuser(userID, serverID):
         try:
             if type(u[valuename]) == float: 
                 u[valuename] = float(value)
@@ -312,7 +277,7 @@ def togglebool(userID: int, serverID:int, valuename):
     '''
     Toggles a boolean for a user in the database
     '''
-    if u := getUser(userID, serverID):
+    if u := DBuser(userID, serverID):
         try:
             if type(u[valuename]) == bool:
                 u[valuename] = not u[valuename] 

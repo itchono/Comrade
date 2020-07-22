@@ -63,7 +63,7 @@ class Emotes(commands.Cog):
 
         for i in range(0, len(emotes), break_lim): # break into chunks
             e = discord.Embed(title = "Custom Emotes for {} ({} to {})".format(ctx.guild.name, i+1, (i+1+break_lim if i+1+break_lim < len(emotes) else len(emotes))),
-            colour=discord.Colour.from_rgb(*getCFG(ctx.guild.id)["theme-colour"]))
+            colour=discord.Colour.from_rgb(*DBcfgitem(ctx.guild.id,"theme-colour")))
             
             for k in emotes[i:i + break_lim]: e.add_field(name=k, value="[Link]({})".format(self.EMOTE_CACHE[ctx.guild.id][k]))
             

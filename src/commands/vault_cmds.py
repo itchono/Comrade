@@ -48,7 +48,7 @@ class Vault(commands.Cog):
             IDmode = True
         else: u = tgt  # URL directly
 
-        VAULT_VOTE_DURATION = getCFG(ctx.guild.id)["vault-vote-duration"]
+        VAULT_VOTE_DURATION = DBcfgitem(ctx.guild.id,"vault-vote-duration")
 
         m = await ctx.send(
             "React to this message with 🍅 to vault the post {}. You have **{} seconds** to vote.".format(
@@ -105,7 +105,7 @@ class Vault(commands.Cog):
                     m = await vault.send("Vault operation in progress...")
                     e = discord.Embed(title=":tomato: Echoed Vault Entry",
                                       description="See Echoed Message Below.",
-                                      colour=discord.Colour.from_rgb(*getCFG(user.guild.id)["theme-colour"]))
+                                      colour=discord.Colour.from_rgb(*DBcfgitem(ctx.guild.id,"theme-colour")))
                     e.add_field(name='Original Post: ', value=msg.jump_url)
                     e.set_footer(text="Sent by {}".format(msg.author))
                     c = await self.bot.get_context(m)
@@ -116,7 +116,7 @@ class Vault(commands.Cog):
                 else:
                     # made by Slyflare
                     e = discord.Embed(title=":tomato: Vault Entry",
-                                      colour=discord.Colour.from_rgb(*getCFG(user.guild.id)["theme-colour"]))
+                                      colour=discord.Colour.from_rgb(*DBcfgitem(ctx.guild.id,"theme-colour")))
                     e.set_image(url=str(attachment_url))
                     e.add_field(name='Original Post: ', value=msg.jump_url)
                     e.set_footer(text="Sent by {}".format(msg.author))
