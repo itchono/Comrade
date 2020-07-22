@@ -1,5 +1,5 @@
 from .general_cmds import *
-from .setup_cmds import *
+from .database_cmds import *
 from .nsfw_cmds import *
 from .vault_cmds import *
 from .echo_cmds import *

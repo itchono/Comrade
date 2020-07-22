@@ -6,6 +6,11 @@ from cfg import *
 
 import requests, asyncio, random, datetime, time, pytz, string, socket, typing, re
 
+# Bot Client
+client = commands.Bot(command_prefix=commands.when_mentioned_or(BOT_PREFIX), case_insensitive=True,
+                      help_command=commands.MinimalHelpCommand(
+                          no_category="Help Command"))
+
 '''
 Checks
 '''
@@ -202,7 +207,7 @@ async def mutedRole(guild: discord.Guild):
 Database
 '''
 
-def DB(ctx: commands.Context, collection):
+def DBCollection(ctx: commands.Context, collection):
     '''
     Returns the collection with the name
     '''
