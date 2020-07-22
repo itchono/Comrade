@@ -21,7 +21,7 @@ class AuxilliaryListener(commands.Cog):
         
         stp = self.bot.get_cog("Databases")
 
-        updateUser(stp.setupuser(user))
+        updateDBuser(stp.setupuser(user))
 
         cog = self.bot.get_cog("Users")
         await cog.rebuildcache(user.guild)
@@ -68,7 +68,7 @@ class AuxilliaryListener(commands.Cog):
             d = DBuser(before.id, user.guild.id)
             d["name"] = user.name
             d["nickname"] = user.nick if user.nick else user.name
-            updateUser(d)
+            updateDBuser(d)
             await log(user.guild, "Member Updated: {}".format(before.name))
 
         elif user.status != before.status:
@@ -77,12 +77,12 @@ class AuxilliaryListener(commands.Cog):
             if str(user.status) == "offline":
                 d = DBuser(before.id, user.guild.id)
                 d["last-online"] = localTime().strftime("%I:%M:%S %p %Z")
-                updateUser(d)
+                updateDBuser(d)
             
             else:
                 d = DBuser(before.id, user.guild.id)
                 d["last-online"] = "now"
-                updateUser(d)
+                updateDBuser(d)
 
             for i in d["check-when-online"]:
                 m = user.guild.get_member(i)
@@ -101,7 +101,7 @@ class AuxilliaryListener(commands.Cog):
             POSSIBLES = DBfind(USER_COLLECTION, {"user":user.id})
             for u in POSSIBLES:
                 u["name"] = user.name
-                updateUser(u)
+                updateDBuser(u)
 
             await log(user.guild, "User Updated: {}".format(before.name))
 

@@ -65,7 +65,7 @@ class Moderation(commands.Cog):
                 await ctx.send("Vote to {} {} removed. ({}/{} votes)".format("unmute" if mutedrole in u.roles else "mute", u.display_name, len(vm), kickreq))
 
             usr["mute-votes"] = vm
-            updateUser(usr)
+            updateDBuser(usr)
             
 
     @commands.command()
@@ -94,7 +94,7 @@ class Moderation(commands.Cog):
             await ctx.send("Vote to kick {} removed. ({}/{} votes)".format(u.display_name, len(vk), kickreq))
 
         usr["kick-votes"] = vk
-        updateUser(usr)
+        updateDBuser(usr)
 
     @commands.command()
     @commands.check(isOP)

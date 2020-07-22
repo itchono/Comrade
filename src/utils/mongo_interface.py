@@ -14,68 +14,7 @@ OP_CACHE = {}
 dotenv.load_dotenv()
 client = MongoClient(os.environ.get('MONGOKEY'))
 DB = client[client.list_database_names()[0]]
-print(f"MongoDB Atlas Connected to Database: {client.list_database_names()[0]}")
-
-
-def DBuser(userID: int, serverID: int):
-    '''
-    gets a user based on user ID and guild ID.
-    '''
-    users = DB['UserData']
-    return users.find_one({"user": userID, "server": serverID})
-
-def getUserfromNick(nickname: str, serverID: int):
-    '''
-    gets a user based on server nickname
-    '''
-    users = DB['UserData']
-    return users.find_one({"nickname": nickname, "server": serverID})
-
-def userQuery(query: dict):
-    '''
-    Returns a set of users given a query
-    '''
-    users = DB['UserData']
-    return users.find(query)
-
-def cfgQuery(query:dict):
-    '''
-    Returns a set of cfgs given a query
-    '''
-    cfg = DB['cfg']
-    return cfg.find(query)
-
-def customUserQuery(query:dict):
-    '''
-    Returns a set of custom users given a query
-    '''
-    customs = DB["CustomUsers"]
-    return customs.find(query)
-
-def updateUser(userData: dict):
-    '''
-    Upserts user into userData collection
-    '''
-    users = DB["UserData"]
-
-    if u := users.find_one({"user": userData["user"], "server": userData["server"]}):
-        oldOP = u["OP"]
-        oldTHREAT = u["threat-level"]
-
-    users.update({
-        "user": userData["user"],
-        "server": userData["server"]
-    }, userData, True)  # upsert
-
-    if u:
-        # Update caches, if the user exists
-        if oldOP and oldOP != userData["OP"]: 
-            OP_CACHE[userData["server"]] = list(userQuery({"OP": True, "server": userData["server"]}))
-            print("Rebuild OP Cache")
-
-        if oldTHREAT and oldTHREAT != userData["threat-level"]: 
-            THREAT_CACHE[userData["server"]] = list(userQuery({"threat-level": {"$gt": 0}, "server": userData["server"]}))
-            print("Rebuild Threat Cache")
+print(f"LEGACY: MongoDB Atlas Connected to Database: {client.list_database_names()[0]}")
 
 def updateCustomUser(userData:dict):
     '''
@@ -249,7 +188,7 @@ def updateuserList(userID: int, serverID:int, listname, value):
     if u := DBuser(userID, serverID):
         try:
             u[listname] = value
-            updateUser(u)
+            updateDBuser(u)
             return 1
         except:
             pass
@@ -264,11 +203,11 @@ def setnum(userID: int, serverID:int, valuename, value):
         try:
             if type(u[valuename]) == float: 
                 u[valuename] = float(value)
-                updateUser(u)
+                updateDBuser(u)
                 return u[valuename]
             elif type(u[valuename]) == int:
                 u[valuename] = int(value)
-                updateUser(u)
+                updateDBuser(u)
                 return u[valuename]
         except:
             pass
@@ -281,7 +220,7 @@ def togglebool(userID: int, serverID:int, valuename):
         try:
             if type(u[valuename]) == bool:
                 u[valuename] = not u[valuename] 
-                updateUser(u)
+                updateDBuser(u)
                 return u[valuename]
         except:
             pass

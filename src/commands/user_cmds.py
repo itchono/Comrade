@@ -103,7 +103,7 @@ class Users(commands.Cog):
             else:
                 # account for new users
                 stp = self.bot.get_cog("Databases")
-                updateUser(stp.setupuser(member))
+                updateDBuser(stp.setupuser(member))
                 u = DBuser(member.id, g.id)
 
             weight = u["daily-weight"]
@@ -120,7 +120,7 @@ class Users(commands.Cog):
             for member in g.members:
                 d = DBuser(member.id, g.id)                
                 d["daily-weight"] = daily
-                updateUser(d)
+                updateDBuser(d)
 
             DAILY_MEMBER_STALENESS = DBcfgitem(g.id, "daily-member-staleness")
 
@@ -135,7 +135,7 @@ class Users(commands.Cog):
                 for i in member_ids:
                     u = DBuser(i, g.id)
                     u["daily-weight"] = 0
-                    updateUser(u)
+                    updateDBuser(u)
 
                 await log(g, f"Refilled daily count and trimmed users in past {DAILY_MEMBER_STALENESS} days")
         await log(g, f"User Cache built.\nWeighted List -- {len(self.WEIGHTED_RND_USER[g.id])} entries\nUnweighed List -- {len(self.UNWEIGHTED_RND_USER[g.id])} entries")
@@ -167,7 +167,7 @@ class Users(commands.Cog):
             if trim and OP:
                 u = DBuser(i.id, ctx.guild.id)
                 u["daily-weight"] = 0
-                updateUser(u)
+                updateDBuser(u)
         s += "```"
         await ctx.send(s)
 
@@ -239,7 +239,7 @@ class Users(commands.Cog):
         '''
         Lists all custom users
         '''
-        u = customUserQuery({"server":ctx.guild.id}) # all custom users
+        u = DBfind(CUSTOMUSER_COLLECTION,{"server":ctx.guild.id}) # all custom users
 
         s = "```Custom Users in {}".format(ctx.guild.name)
 
@@ -263,7 +263,7 @@ class Users(commands.Cog):
             except:
                 d["check-when-online"].append(ctx.author.id)
                 await ctx.send(f"You will now be notified by when {u.display_name} changes their status.")
-            updateUser(d)
+            updateDBuser(d)
 
     async def on_load(self):
         '''
