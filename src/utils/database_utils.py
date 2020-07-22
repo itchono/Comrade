@@ -10,9 +10,9 @@ def DBfind_one(collection, query):
     try: return DBcollection(collection).find_one(query)
     except: return None
 
-def DBfind(collection, query):
+def DBfind(collection, query=None):
     '''
-    Retrieves multiple documents from the named collection as a **list.
+    Retrieves multiple documents from the named collection as a **list**.
     '''
     try: return list(DBcollection(collection).find(query))
     except: return None
@@ -72,6 +72,26 @@ def DBuser(user_id, server_id):
     Retrieves a user from the database
     '''
     return DBfind_one(USER_COLLECTION, {"server":server_id, "user":user_id})
+
+def updateDBuser(userdata):
+    '''
+    Updates a user in the database.
+    '''
+    if current_user := DBuser(userdata["user"], userdata["server"]):
+        current_op, current_threat = current_user["OP"], current_user["threat-level"]
+
+    DBupdate(USER_COLLECTION, {"server":userdata["server"], "user":userdata["user"]})
+
+    if current_user:
+        # update caches on database 
+        if current_op and current_op != userData["OP"]: 
+            OP_CACHE[userData["server"]] = DBfind(USER_COLLECTION, {"OP": True, "server": userData["server"]})
+            print("Rebuild OP Cache")
+
+        if current_threat and current_threat != userData["threat-level"]: 
+            THREAT_CACHE[userData["server"]] = DBfind(USER_COLLECTION, {"threat-level": {"$gt": 0}, "server": userData["server"]})
+            print("Rebuild Threat Cache")
+    
 
 ### NAMES OF EACH DB COLLECTION ###
 USER_COLLECTION = "UserData"

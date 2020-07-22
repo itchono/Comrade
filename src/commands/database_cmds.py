@@ -123,7 +123,7 @@ class Databases(commands.Cog):
         '''
         POTENTIALLY DESTRUCTIVE. repopulates the UserData collection on Atlas with default values.
         '''
-        for user in ctx.guild.members: updateUser(self.setupuser(user))
+        for user in ctx.guild.members: updateDBuser(self.setupuser(user))
         await reactOK(ctx)
 
     @commands.command()
@@ -149,7 +149,7 @@ class Databases(commands.Cog):
                 d = DBuser(user.id, ctx.guild.id)
                 try: d[fieldname] = ast.literal_eval(value)
                 except: d[fieldname] = value
-                updateUser(d)
+                updateDBuser(d)
 
         await reactOK(ctx)
         await ctx.send(f"All fields {fieldname} updated with value {value}")
@@ -166,13 +166,13 @@ class Databases(commands.Cog):
         if not value:
             try:
                 del u[DBcfgitem]
-                updateUser(u)
+                updateDBuser(u)
                 await delSend(ctx, "User config value deleted.")
             except: await delSend(ctx, "Value was not found.")
         else:
             try: u[DBcfgitem] = ast.literal_eval(value)
             except: u[DBcfgitem] = value
-        updateUser(u)
+        updateDBuser(u)
         await reactOK(ctx)
 
     @commands.command()

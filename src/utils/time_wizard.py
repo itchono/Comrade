@@ -39,7 +39,7 @@ class TimeWizard(commands.Cog):
 
         d = DBuser(luckyperson.id, serverDB["_id"])
         d["daily-weight"] -= 1
-        updateUser(d)
+        updateDBuser(d)
         # self regulating; once probability drops to zero, we just need to refill.
 
         dailyrole = await dailyRole(channel.guild)
@@ -64,7 +64,7 @@ class TimeWizard(commands.Cog):
         '''
         Makes an announcement
         '''
-        servers = list(cfgQuery(None))
+        servers = DBfind(SERVERCFG_COLLECTION)
 
         for s in servers:
             now = localTime()

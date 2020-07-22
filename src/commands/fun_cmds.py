@@ -386,7 +386,7 @@ class Fun(commands.Cog):
                     except: 
                         udict["highest-guess-streak"] = self.streak[ctx.author.id]
 
-                    updateUser(udict)
+                    updateDBuser(udict)
 
                     await ctx.send(f"{ctx.author.mention} has achieved a new high score: {self.streak[ctx.author.id]}")
 
