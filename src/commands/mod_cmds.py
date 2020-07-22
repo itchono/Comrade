@@ -36,10 +36,10 @@ class Moderation(commands.Cog):
                     await channel.set_permissions(mutedrole, send_messages=False, add_reactions=False)
 
         else:
-            usr = getUser(u.id, ctx.guild.id)
+            usr = DBuser(u.id, ctx.guild.id)
             vm = usr["mute-votes"]
 
-            kickreq = getCFG(ctx.guild.id)["mute-requirement"]
+            kickreq = DBcfgitem(ctx.guild.id, "mute-requirement")
 
             if not ctx.author.id in vm:
                 vm.append(ctx.author.id)
@@ -76,10 +76,10 @@ class Moderation(commands.Cog):
         '''
         u = await extractUser(ctx, target)
 
-        usr = getUser(u.id, ctx.guild.id)
+        usr = DBuser(u.id, ctx.guild.id)
         vk = usr["kick-votes"]
 
-        kickreq = getCFG(ctx.guild.id)["kick-requirement"]
+        kickreq = DBcfgitem(ctx.guild.id, "kick-requirement")
 
         if not ctx.author.id in vk:
             vk.append(ctx.author.id)

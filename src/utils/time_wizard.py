@@ -37,7 +37,7 @@ class TimeWizard(commands.Cog):
         
         luckyperson = random.choice(cog.WEIGHTED_RND_USER[ctx.guild.id])
 
-        d = getUser(luckyperson.id, serverDB["_id"])
+        d = DBuser(luckyperson.id, serverDB["_id"])
         d["daily-weight"] -= 1
         updateUser(d)
         # self regulating; once probability drops to zero, we just need to refill.
@@ -85,6 +85,6 @@ class TimeWizard(commands.Cog):
         '''
         Tests making an announcement
         '''
-        await self.dailyannounce(ctx.channel, getCFG(ctx.guild.id))
+        await self.dailyannounce(ctx.channel, DBfind_one(SERVERCFG_COLLECTION, {"_id": ctx.guild.id}))
 
 

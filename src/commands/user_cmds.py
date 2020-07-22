@@ -70,7 +70,7 @@ class Users(commands.Cog):
 
                 roles = [role for role in member.roles]
 
-                u = getUser(member.id, ctx.guild.id)
+                u = DBuser(member.id, ctx.guild.id)
 
                 if full:
                     for c in u:
@@ -99,12 +99,12 @@ class Users(commands.Cog):
         self.UNWEIGHTED_RND_USER[g.id] = []
         
         for member in g.members:
-            if u := getUser(member.id, g.id): pass
+            if u := DBuser(member.id, g.id): pass
             else:
                 # account for new users
                 stp = self.bot.get_cog("Databases")
                 updateUser(stp.setupuser(member))
-                u = getUser(member.id, g.id)
+                u = DBuser(member.id, g.id)
 
             weight = u["daily-weight"]
             if not member.bot: 
@@ -114,15 +114,15 @@ class Users(commands.Cog):
         # special case: list is empty
         if self.WEIGHTED_RND_USER[g.id] == []:
 
-            try: daily = getCFG(g.id)["default-daily-count"]
+            try: daily = DBcfgitem(g.id, "default-daily-count")
             except: daily = 0
 
             for member in g.members:
-                d = getUser(member.id, g.id)                
+                d = DBuser(member.id, g.id)                
                 d["daily-weight"] = daily
                 updateUser(d)
 
-            DAILY_MEMBER_STALENESS = getCFG(g.id)["daily-member-staleness"]
+            DAILY_MEMBER_STALENESS = DBcfgitem(g.id, "daily-member-staleness")
 
             if DAILY_MEMBER_STALENESS >= 0:
                 threshold = datetime.datetime.now() - datetime.timedelta(DAILY_MEMBER_STALENESS)
@@ -133,7 +133,7 @@ class Users(commands.Cog):
                     member_ids -= author_ids
 
                 for i in member_ids:
-                    u = getUser(i, g.id)
+                    u = DBuser(i, g.id)
                     u["daily-weight"] = 0
                     updateUser(u)
 
@@ -165,7 +165,7 @@ class Users(commands.Cog):
             s += i.display_name + "\n"
             
             if trim and OP:
-                u = getUser(i.id, ctx.guild.id)
+                u = DBuser(i.id, ctx.guild.id)
                 u["daily-weight"] = 0
                 updateUser(u)
         s += "```"
@@ -184,7 +184,7 @@ class Users(commands.Cog):
         '''
         async with ctx.channel.typing():
             luckyperson = random.choice(self.UNWEIGHTED_RND_USER[ctx.guild.id]) if not weighted else random.choice(self.WEIGHTED_RND_USER[ctx.guild.id])
-        await self.userinfo(ctx, target=getUser(luckyperson.id, ctx.guild.id)["nickname"])
+        await self.userinfo(ctx, target=DBuser(luckyperson.id, ctx.guild.id)["nickname"])
 
     @commands.command()
     @commands.guild_only()
@@ -256,7 +256,7 @@ class Users(commands.Cog):
         Makes it so that when a user comes online, you are notified by Comrade
         '''
         if u := await extractUser(ctx, target):
-            d = getUser(u.id, ctx.guild.id)
+            d = DBuser(u.id, ctx.guild.id)
             try: 
                 d["check-when-online"].remove(ctx.author.id)
                 await ctx.send(f"You will no longer be notified by when {u.display_name} changes their status.")

@@ -43,7 +43,7 @@ class TextFilter(commands.Cog):
         Checks a message for additional offending characteristics based on user
         '''
         try:
-            u = getUser(message.author.id, message.guild.id)
+            u = DBuser(message.author.id, message.guild.id)
             if (u["stop-pings"] and len(message.mentions) > 0) or (u["stop-images"] and (len(message.attachments) > 0 or len(message.embeds) > 0)):
                 c = self.bot.get_cog("Echo")
                 await c.echo(await self.bot.get_context(message), "```I sent a bad message: " + message.content + "```", str(message.author.id), deleteMsg=False)
@@ -62,10 +62,9 @@ class TextFilter(commands.Cog):
         query = re.sub("\W+", '', unidecode.unidecode(content.lower()))
         # remove spaces, remove non-ascii, get into formattable form
 
-        u = getUser(ctx.author.id, ctx.guild.id)
-        c = getCFG(ctx.guild.id)
+        u = DBuser(ctx.author.id, ctx.guild.id)
 
-        words = u["banned-words"] + c["banned-words"]
+        words = u["banned-words"] + DBcfgitem(ctx.guild.id, "banned-words")
 
         for w in words:
             if (len(query) > 3 and fuzz.partial_ratio(query, w) >= 80) or fuzz.ratio(query, w) >= 70:
@@ -86,7 +85,7 @@ class TextFilter(commands.Cog):
                 if amount > 200 and not isOP(await self.bot.get_context(message)):
                     await message.channel.send("No")
                 else:
-                    ZA_HANDO_VOTE_DURATION = getCFG(message.guild.id)["za-hando-vote-duration"]
+                    ZA_HANDO_VOTE_DURATION = DBcfgitem(message.guild.id,"za-hando-vote-duration")
 
                     m = await message.channel.send(
                         "React with '✋' to purge the channel of {} messages {}. You have **{} seconds** to vote.".
@@ -169,8 +168,8 @@ class TextFilter(commands.Cog):
     async def on_reaction_add(self, reaction: discord.Reaction,
                               user: discord.User):
         if reaction.emoji == "✋":
-            if (reaction.count > getCFG(
-                    reaction.message.guild.id)["zahando-threshold"]
+            if (reaction.count > DBcfgitem(
+                    reaction.message.guild.id, "zahando-threshold")
                     or user.id in [i["user"] for i in getOPS(reaction.message.guild.id)]
                 ) and reaction.message.id in self.activepurge:
                 await self.zahando(
