@@ -195,12 +195,12 @@ class NSFW(commands.Cog):
         Adds an image to the favourites list, or retrieves a favourite based on ID
         '''
         if url:
-            updateFavourite(imageName, url, ctx.guild.id)
+            updateFavourite(imageName, url, ctx.guild.id, ctx.author.id)
             await reactOK(ctx)
             await ctx.send("Image favourited as `{}`.".format(imageName), delete_after=10)
         else:
             try:
-                fav = getFavourite(ctx.guild.id, imageName)
+                fav = getFavourite(ctx.guild.id, imageName, ctx.author.id)
                 e = discord.Embed()
                 e.set_image(url=fav["URL"])
                 await ctx.send(embed=e)
@@ -210,16 +210,18 @@ class NSFW(commands.Cog):
     @commands.command()
     @commands.guild_only()
     @commands.is_nsfw()
-    async def listfavourites(self, ctx:commands.Context):
+    async def listfavourites(self, ctx:commands.Context, user: discord.Member = None):
         '''
         Lists all favourited images
         '''
-        favs = allFavourites(ctx.guild.id)
+        if not user: user = ctx.author
 
-        e = discord.Embed(title="All Favourites for {}".format(ctx.guild.name))
+        favs = allFavourites(ctx.guild.id, user.id)
+
+        e = discord.Embed(title=f"All Favourites for {user.display_name} in {ctx.guild}")
 
         for entry in favs:
-            e.add_field(name=str(entry["imageID"]), value=str(entry["URL"]))
+            e.add_field(name=str(entry["imageID"]), value=str(f"[Link]({entry['URL']})"))
 
         await ctx.send(embed=e)
 
