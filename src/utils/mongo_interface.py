@@ -63,29 +63,29 @@ def getcache(channelID):
 '''
 Favourites Interface
 '''
-def updateFavourite(imageID:str, imgurl:str, serverID):
+def updateFavourite(imageID:str, imgurl:str, serverID, userID):
     favourites = DB.favourites
 
-    thingy = {"imageID":imageID, "URL":imgurl, "server":serverID}
+    thingy = {"imageID":imageID, "URL":imgurl, "server":serverID, "user":userID}
 
-    favourites.update({"imageID":imageID}, thingy, True)
+    favourites.update({"imageID":imageID, "server":serverID, "user":userID}, thingy, True)
     # (search target, info to put in, should we INSERT if no matching records are found?)
 
-def allFavourites(serverID):
+def allFavourites(serverID, userID):
     '''
     Returns a list of all favourited hentai images in given server
     '''
     favourites = DB.favourites
 
-    return list(favourites.find({"server":serverID}))
+    return list(favourites.find({"server":serverID, "user":userID}))
 
-def getFavourite(serverID, imageID):
+def getFavourite(serverID, imageID, userID):
     '''
     Returns a given favourite image
     '''
     favourites = DB.favourites
 
-    return favourites.find_one({"server":serverID, "imageID":imageID})
+    return favourites.find_one({"server":serverID, "imageID":imageID, "user":userID})
 
 '''
 Commands
