@@ -7,9 +7,6 @@ class Databases(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-        self.THREAT_CACHE = {}
-        self.OP_CACHE = {}
-
         dotenv.load_dotenv()
         self.client = MongoClient(os.environ.get('MONGOKEY'))
         self.DB = self.client[self.client.list_database_names()[0]]
