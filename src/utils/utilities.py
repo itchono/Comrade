@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands, tasks
 
-from utils.database_utils import getThreats, getOPS
 from cfg import *
 
 import requests, asyncio, random, datetime, time, pytz, string, socket, typing, re
@@ -14,14 +13,6 @@ client = commands.Bot(command_prefix=commands.when_mentioned_or(BOT_PREFIX), cas
 '''
 Checks
 '''
-def isServerOwner():
-    def predicate(ctx: commands.Context):
-        '''
-        Determines whether message author is server owner
-        '''
-        return ctx.guild and (ctx.author.id == ctx.guild.owner.id or DEVELOPMENT_MODE)
-    return commands.check(predicate)
-
 def isOP(ctx: commands.Context):
     '''
     Determines whether message author is an OP
@@ -37,6 +28,14 @@ def isNotThreat(threatLevel:int = 0):
         if not ctx.guild: return True
         return not ctx.author.id in [i["user"] for i in getThreats(ctx.guild.id) if i["threat-level"] > threatLevel]
     return ret
+
+def isServerOwner():
+    def predicate(ctx: commands.Context):
+        '''
+        Determines whether message author is server owner
+        '''
+        return ctx.guild and (ctx.author.id == ctx.guild.owner.id or DEVELOPMENT_MODE)
+    return commands.check(predicate)
 
 def jokeMode(ctx: commands.Context):
     '''
@@ -214,7 +213,102 @@ def DBcollection(collection):
     try: return client.get_cog("Databases").DB[collection]
     except: return None
 
-## Rest is in database_utils.py
+### CORE FUNCTIONS ###
+
+def DBfind_one(collection, query):
+    '''
+    Retrieves a single document from the named collection
+    '''
+    return DBcollection(collection).find_one(query)
+
+def DBfind(collection, query=None):
+    '''
+    Retrieves multiple documents from the named collection as a **list**.
+    '''
+    try: return list(DBcollection(collection).find(query))
+    except: return None
+
+def DBupdate(collection, query, data, upsert=True):
+    '''
+    Updates an entry, into a collection. Upserts by default.
+    '''
+    try: DBcollection(collection).update(query, data, upsert)
+    except: pass
+
+def DBremove_one(collection, query):
+    '''
+    Removes one entry from the collection with the given query
+    '''
+    try: DBcollection(collection).delete_one(query)
+    except: pass
+
+### OPS and THREATS ###
+
+THREAT_CACHE = {}
+OP_CACHE = {}
+
+def getOPS(server):
+    '''
+    Gets the OPs in a server
+    '''
+    try:
+        return OP_CACHE[server]
+    except:
+        OP_CACHE[server] = DBfind(USER_COLLECTION, {"OP": True, "server": server})
+        return OP_CACHE[server]
+
+def getThreats(server):
+    '''
+    Gets the threats in server using memoization system
+    '''
+    try:
+        return THREAT_CACHE[server]
+    except:
+        THREAT_CACHE[server] = DBfind(USER_COLLECTION, {"threat-level": {"$gt": 0}, "server": server})
+        return THREAT_CACHE[server]
+
+### CFG Tools ###
+
+def DBcfgitem(server, itemname):
+    '''
+    Retrieves an item from the user database
+    '''
+    try: return DBfind_one(SERVERCFG_COLLECTION, {"_id":server})[itemname]
+    except: return 0
+
+## User Tools ##
+
+def DBuser(user_id, server_id):
+    '''
+    Retrieves a user from the database
+    '''
+    return DBfind_one(USER_COLLECTION, {"server":server_id, "user":user_id})
+
+def updateDBuser(userdata):
+    '''
+    Updates a user in the database.
+    '''
+    if current_user := DBuser(userdata["user"], userdata["server"]):
+        current_op, current_threat = current_user["OP"], current_user["threat-level"]
+
+    DBupdate(USER_COLLECTION, {"server":userdata["server"], "user":userdata["user"]}, userdata)
+
+    if current_user:
+        # update caches on database 
+        if current_op and current_op != userdata["OP"]: 
+            OP_CACHE[userdata["server"]] = DBfind(USER_COLLECTION, {"OP": True, "server": userdata["server"]})
+            print("Rebuild OP Cache")
+
+        if current_threat and current_threat != userdata["threat-level"]: 
+            THREAT_CACHE[userdata["server"]] = DBfind(USER_COLLECTION, {"threat-level": {"$gt": 0}, "server": userdata["server"]})
+            print("Rebuild Threat Cache")
+    
+
+### NAMES OF EACH DB COLLECTION ###
+USER_COLLECTION = "UserData"
+SERVERCFG_COLLECTION = "cfg"
+CUSTOMUSER_COLLECTION = "CustomUsers"
+ANNOUNCEMENTS_COLLECTION = "announcements"
 
 '''
 Misc

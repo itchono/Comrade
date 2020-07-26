@@ -1,9 +1,7 @@
 from utils.utilities import *
 from utils.mongo_interface import *
-from utils.database_utils import *
 
 from fuzzywuzzy import fuzz
-
 
 class MessageHandler(commands.Cog):
     def __init__(self, bot):

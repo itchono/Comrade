@@ -1,6 +1,5 @@
 from utils.utilities import *
 from utils.mongo_interface import *
-from utils.database_utils import *
 
 class Users(commands.Cog):
     def __init__(self, bot):
