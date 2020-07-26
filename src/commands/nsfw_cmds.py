@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 from utils.utilities import *
 from utils.mongo_interface import *
-from utils.database_utils import *
 
 import json
 import io

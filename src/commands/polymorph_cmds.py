@@ -1,6 +1,5 @@
 from utils.utilities import *
 from utils.mongo_interface import *
-from utils.database_utils import *
 from polymorph.text_gen import *
 from polymorph.model_gen import *
 from polymorph.data_compressor import *

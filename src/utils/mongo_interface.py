@@ -12,9 +12,9 @@ THREAT_CACHE = {}
 OP_CACHE = {}
 
 dotenv.load_dotenv()
-client = MongoClient(os.environ.get('MONGOKEY'))
-DB = client[client.list_database_names()[0]]
-print(f"LEGACY: MongoDB Atlas Connected to Database: {client.list_database_names()[0]}")
+mongo_client = MongoClient(os.environ.get('MONGOKEY'))
+DB = mongo_client[mongo_client.list_database_names()[0]]
+print(f"LEGACY: MongoDB Atlas Connected to Database: {mongo_client.list_database_names()[0]}")
 
 def updateCustomUser(userData:dict):
     '''

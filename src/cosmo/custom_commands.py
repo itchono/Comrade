@@ -1,6 +1,5 @@
 from utils.utilities import *
 from utils.mongo_interface import *
-from utils.database_utils import *
 
 from cosmo.cosmo_interp import *
 from cosmo.cosmo_parser import *

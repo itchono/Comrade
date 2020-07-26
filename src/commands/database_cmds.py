@@ -1,6 +1,5 @@
 from utils.utilities import *
 from utils.mongo_interface import *
-from utils.database_utils import *
 import ast, os, dotenv
 from pymongo import MongoClient
 
@@ -24,12 +23,12 @@ class Databases(commands.Cog):
         '''
         for g in self.bot.guilds:
             if not DBfind_one(SERVERCFG_COLLECTION, {"_id":g.id}): 
-                DBupdate(SERVERCFG_COLLECTION, {"_id":g.id}, self.setupcfg(g.id))
+                DBupdate(SERVERCFG_COLLECTION, {"_id":g.id}, self.setupcfg(g))
                 print(f"\t\tNew guild loaded: {g}")
 
             for m in g.members:
-                if not DBfind_one(USERDATA_COLLECTION, {"server":g.id, "user":m.id}): 
-                    DBupdate(USERDATA_COLLECTION, {"server":g.id, "user":m.id}, self.setupuser(m))
+                if not DBfind_one(USER_COLLECTION, {"server":g.id, "user":m.id}): 
+                    DBupdate(USER_COLLECTION, {"server":g.id, "user":m.id}, self.setupuser(m))
                     print(f"\t\tNew member loaded: {m}")
         print("Databases Ready")
     
@@ -133,7 +132,7 @@ class Databases(commands.Cog):
         '''
         POTENTIALLY DESTRUCTIVE. Resets the configuration file for a server back to a default state. 
         '''
-        DBupdate(USERDATA_COLLECTION, {"_id":ctx.guild.id}, self.setupcfg(ctx.guild))
+        DBupdate(USER_COLLECTION, {"_id":ctx.guild.id}, self.setupcfg(ctx.guild))
         await reactOK(ctx)
 
     @commands.command()
