@@ -87,6 +87,14 @@ def getFavourite(serverID, imageID, userID):
 
     return favourites.find_one({"server":serverID, "imageID":imageID, "user":userID})
 
+def removeFavoruite(serverID, imageID, userID):
+    '''
+    Removes a given favourite image
+    '''
+    favourites = DB.favourites
+    favourites.delete_one({"server":serverID, "imageID":imageID, "user":userID})
+
+
 '''
 Commands
 '''
