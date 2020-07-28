@@ -209,6 +209,20 @@ class NSFW(commands.Cog):
     @commands.command()
     @commands.guild_only()
     @commands.is_nsfw()
+    async def unfavourite(self, ctx: commands.Context, imageName: str):
+        '''
+        removes an image from the favourites list
+        '''
+        if fav := getFavourite(ctx.guild.id, imageName, ctx.author.id):
+            removeFavoruite(ctx.guild.id, imageName, ctx.author.id)
+            await reactOK(ctx)
+            await ctx.send(f"`{imageName}` has been removed.", delete_after=10)
+        else:
+            await delSend(ctx, "Image not found.")
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.is_nsfw()
     async def listfavourites(self, ctx:commands.Context, user: discord.Member = None):
         '''
         Lists all favourited images
@@ -217,12 +231,35 @@ class NSFW(commands.Cog):
 
         favs = allFavourites(ctx.guild.id, user.id)
 
-        e = discord.Embed(title=f"All Favourites for {user.display_name} in {ctx.guild}")
+        embeds = [discord.Embed(title=f"All Favourites for {user.display_name} in {ctx.guild}")]
 
-        for entry in favs:
-            e.add_field(name=str(entry["imageID"]), value=str(f"[Link]({entry['URL']})"))
+        activeindex = 0
 
-        await ctx.send(embed=e)
+        s = ""
+        s_prev = ""
+        
+
+        for i in range(len(favs)):
+
+            if i > 0: s_prev += f"* [{favs[i-1]["imageID"]}]({favs[i-1]['URL']})\n"
+
+            s += f"* [{favs[i]["imageID"]}]({favs[i]['URL']})\n"
+            
+            try:
+                embeds[activeindex].set_field_at(0, name, name="Uncategorized", value=s, inline=False)
+            except:
+                embeds[activeindex].add_field(name="Uncategorized", value=s, inline=False)
+
+            if len(embeds[activeindex] > 2000):
+                embeds[activeindex].set_field_at(0, name, name="Uncategorized", value=s_prev, inline=False)
+
+                embeds.append(discord.Embed(title=f"All Favourites for {user.display_name} in {ctx.guild}"))
+                activeindex += 1
+
+                embeds[activeindex].add_field(name="Uncategorized", value=f"* [{favs[i]["imageID"]}]({favs[i]['URL']})\n", inline=False)
+
+        for e in embeds:
+            await ctx.send(embed=e)
 
     @commands.command()
     @commands.is_nsfw()
