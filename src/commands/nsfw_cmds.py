@@ -161,7 +161,7 @@ class NSFW(commands.Cog):
     
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
-        if (not message.guild or message.channel.is_nsfw()) and not message.author.bot:
+        if (not message.guild or message.channel.is_nsfw()) and not message.author.bot and message.content:
             if message.content.lower() == "next":
                 await self.hentai(ctx = await self.bot.get_context(message), args = self.last_search)
             if message.content.lower() == "retry":
@@ -227,39 +227,35 @@ class NSFW(commands.Cog):
         '''
         Lists all favourited images
         '''
+
+        def constructstring(favs, index):
+            '''
+            Constructs the string based on array and index.
+            '''
+            return f"• **[{favs[index]['imageID']}]({favs[index]['URL']})**\n"
+
         if not user: user = ctx.author
 
         favs = allFavourites(ctx.guild.id, user.id)
 
         embeds = [discord.Embed(title=f"All Favourites for {user.display_name} in {ctx.guild}")]
 
-        activeindex = 0
-
-        s = ""
-        s_prev = ""
+        s, s_prev = "", "" # declare string variables
         
-
         for i in range(len(favs)):
 
-            if i > 0: s_prev += f"* [{favs[i-1]["imageID"]}]({favs[i-1]['URL']})\n"
-
-            s += f"* [{favs[i]["imageID"]}]({favs[i]['URL']})\n"
+            if i > 0: s_prev = s
+            s += constructstring(favs, i)
             
-            try:
-                embeds[activeindex].set_field_at(0, name, name="Uncategorized", value=s, inline=False)
-            except:
-                embeds[activeindex].add_field(name="Uncategorized", value=s, inline=False)
+            try: embeds[-1].set_field_at(0, name="Uncategorized", value=s, inline=False)
+            except: embeds[-1].add_field(name="Uncategorized", value=s, inline=False)
 
-            if len(embeds[activeindex] > 2000):
-                embeds[activeindex].set_field_at(0, name, name="Uncategorized", value=s_prev, inline=False)
-
+            if len(embeds[-1]) > 1024:
+                embeds[-1].set_field_at(0, name="Uncategorized", value=s_prev, inline=False) # fall back to previous string set
                 embeds.append(discord.Embed(title=f"All Favourites for {user.display_name} in {ctx.guild}"))
-                activeindex += 1
+                s_prev, s = s, constructstring(favs, i) # rotate strings
 
-                embeds[activeindex].add_field(name="Uncategorized", value=f"* [{favs[i]["imageID"]}]({favs[i]['URL']})\n", inline=False)
-
-        for e in embeds:
-            await ctx.send(embed=e)
+        for e in embeds: await ctx.send(embed=e)
 
     @commands.command()
     @commands.is_nsfw()
