@@ -1,5 +1,5 @@
 from utils.utilities import *
-from utils.mongo_interface import *
+
 import ast, os, dotenv
 from pymongo import MongoClient
 
@@ -8,9 +8,15 @@ class Databases(commands.Cog):
         self.bot = bot
 
         dotenv.load_dotenv()
-        self.client = MongoClient(os.environ.get('MONGOKEY'))
-        self.DB = self.client[self.client.list_database_names()[0]]
-        print(f"MongoDB Atlas Connected to Database: {self.client.list_database_names()[0]}")
+
+        if key := os.environ.get('MONGOKEY'):
+            self.client = MongoClient(key)
+            self.DB = self.client[self.client.list_database_names()[0]]
+            print(f"MongoDB Atlas Connected to Database: {self.client.list_database_names()[0]}")
+        else:
+            self.client = MongoClient('localhost', 27017)
+            self.DB = self.client["offline-db"]
+            print("WARN: Running database in offline mode; changes will not persist!")
 
         self._last_member = None
 
@@ -19,13 +25,13 @@ class Databases(commands.Cog):
         Builds new users and servers on startup
         '''
         for g in self.bot.guilds:
-            if not DBfind_one(SERVERCFG_COLLECTION, {"_id":g.id}): 
-                DBupdate(SERVERCFG_COLLECTION, {"_id":g.id}, self.setupcfg(g))
+            if not DBfind_one(SERVERCFG_COL, {"_id":g.id}): 
+                DBupdate(SERVERCFG_COL, {"_id":g.id}, self.setupcfg(g))
                 print(f"\t\tNew guild loaded: {g}")
 
             for m in g.members:
-                if not DBfind_one(USER_COLLECTION, {"server":g.id, "user":m.id}): 
-                    DBupdate(USER_COLLECTION, {"server":g.id, "user":m.id}, self.setupuser(m))
+                if not DBfind_one(USER_COL, {"server":g.id, "user":m.id}): 
+                    DBupdate(USER_COL, {"server":g.id, "user":m.id}, self.setupuser(m))
                     print(f"\t\tNew member loaded: {m}")
         print("Databases Ready")
     
@@ -97,7 +103,7 @@ class Databases(commands.Cog):
         otherwise it will be the same category as where the command was called.
         '''
         async with ctx.channel.typing():
-            c = DBfind_one(SERVERCFG_COLLECTION, {"_id":ctx.guild.id})
+            c = DBfind_one(SERVERCFG_COL, {"_id":ctx.guild.id})
             try: v = c["custom-channel-group"]
             except: 
                 if k:= ctx.channel.category: v = k.id
@@ -129,7 +135,7 @@ class Databases(commands.Cog):
         '''
         POTENTIALLY DESTRUCTIVE. Resets the configuration file for a server back to a default state. 
         '''
-        DBupdate(USER_COLLECTION, {"_id":ctx.guild.id}, self.setupcfg(ctx.guild))
+        DBupdate(USER_COL, {"_id":ctx.guild.id}, self.setupcfg(ctx.guild))
         await reactOK(ctx)
 
     @commands.command()
@@ -178,18 +184,18 @@ class Databases(commands.Cog):
         '''
         Modifies a value in Comrade's configuration. Leave value blank to delete the field.
         '''
-        c = DBfind_one(SERVERCFG_COLLECTION, {"_id":ctx.guild.id})
+        c = DBfind_one(SERVERCFG_COL, {"_id":ctx.guild.id})
         if not value:
             try:
                 del c[DBcfgitem]
-                updateDB(SERVERCFG_COLLECTION, {"_id":ctx.guild.id}, c)
+                updateDB(SERVERCFG_COL, {"_id":ctx.guild.id}, c)
                 await delSend(ctx, "Config value deleted.")
             except: await delSend(ctx, "Value was not found.")
 
         else:
             try: c[DBcfgitem] = ast.literal_eval(value)
             except: c[DBcfgitem] = value
-            updateDB(SERVERCFG_COLLECTION, {"_id":ctx.guild.id}, c)
+            updateDB(SERVERCFG_COL, {"_id":ctx.guild.id}, c)
 
         await reactOK(ctx)
 
@@ -203,7 +209,7 @@ class Databases(commands.Cog):
 
         if full:
             s = "Comrade Configuration:\n"
-            c = DBfind_one(SERVERCFG_COLLECTION, {"_id":ctx.guild.id})
+            c = DBfind_one(SERVERCFG_COL, {"_id":ctx.guild.id})
             for k in c:
                 if k != "_id": s += str(k) + ": " + str(c[k]) + "\n"
 

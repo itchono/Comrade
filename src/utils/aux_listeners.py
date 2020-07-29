@@ -1,5 +1,5 @@
 from utils.utilities import *
-from utils.mongo_interface import *
+
 
 import datetime
 import traceback
@@ -97,7 +97,7 @@ class AuxilliaryListener(commands.Cog):
         '''
         if (user.name != before.name):
             # user update
-            POSSIBLES = DBfind(USER_COLLECTION, {"user":user.id})
+            POSSIBLES = DBfind(USER_COL, {"user":user.id})
             for u in POSSIBLES:
                 u["name"] = user.name
                 updateDBuser(u)

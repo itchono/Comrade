@@ -1,5 +1,5 @@
 from utils.utilities import *
-from utils.mongo_interface import *
+
 
 class Users(commands.Cog):
     def __init__(self, bot):
@@ -51,7 +51,7 @@ class Users(commands.Cog):
         if not target:
             target = ctx.author.mention
 
-        if ctx.guild and (custom := DBfind_one(CUSTOMUSER_COLLECTION, {"name":target, "server":ctx.guild.id})):
+        if ctx.guild and (custom := DBfind_one(CUSTOMUSER_COL, {"name":target, "server":ctx.guild.id})):
             e = discord.Embed(title="{} (Custom User)".format(target))
             e.set_author(name=f"User Info - {target}")
             e.set_thumbnail(url=custom["url"])
@@ -193,10 +193,10 @@ class Users(commands.Cog):
         '''
         e =  self.bot.get_cog('Echo')
 
-        if u := DBfind_one(CUSTOMUSER_COLLECTION, {"name":username, "server":ctx.guild.id}): await e.echo(ctx, "Oh hey I'm already here!", username, False)
+        if u := DBfind_one(CUSTOMUSER_COL, {"name":username, "server":ctx.guild.id}): await e.echo(ctx, "Oh hey I'm already here!", username, False)
 
         else:
-            DBupdate(CUSTOMUSER_COLLECTION, {"name": username, "server": ctx.guild.id}, {"name": username, "url": avatar_url, "server": ctx.guild.id})
+            DBupdate(CUSTOMUSER_COL, {"name": username, "server": ctx.guild.id}, {"name": username, "url": avatar_url, "server": ctx.guild.id})
             await e.echo(ctx, "I have been added.", username, False)
 
     @commands.command()
@@ -206,19 +206,19 @@ class Users(commands.Cog):
         '''
         Edits a custom user's fields
         '''
-        u = DBfind_one(CUSTOMUSER_COLLECTION, {"name":username, "server":ctx.guild.id})
+        u = DBfind_one(CUSTOMUSER_COL, {"name":username, "server":ctx.guild.id})
 
         if not value:
             try:
                 del u[field]
-                DBupdate(CUSTOMUSER_COLLECTION, {"name": u["name"], "server": u["server"]}, u, False)
+                DBupdate(CUSTOMUSER_COL, {"name": u["name"], "server": u["server"]}, u, False)
                 await delSend(ctx, "User config value deleted.")
             except:
                 await delSend(ctx, "Value was not found.")
         
         else:
             u[field] = value
-            DBupdate(CUSTOMUSER_COLLECTION, {"name": u["name"], "server": u["server"]}, u, False)
+            DBupdate(CUSTOMUSER_COL, {"name": u["name"], "server": u["server"]}, u, False)
             await reactOK(ctx)
     
     @commands.command()
@@ -228,7 +228,7 @@ class Users(commands.Cog):
         '''
         Removes a custom user.
         '''
-        DBremove_one(CUSTOMUSER_COLLECTION, {"name": username, "server": ctx.guild.id})
+        DBremove_one(CUSTOMUSER_COL, {"name": username, "server": ctx.guild.id})
         await reactOK(ctx)
 
     @commands.command()
@@ -237,7 +237,7 @@ class Users(commands.Cog):
         '''
         Lists all custom users
         '''
-        u = DBfind(CUSTOMUSER_COLLECTION,{"server":ctx.guild.id}) # all custom users
+        u = DBfind(CUSTOMUSER_COL,{"server":ctx.guild.id}) # all custom users
 
         s = "```Custom Users in {}".format(ctx.guild.name)
 

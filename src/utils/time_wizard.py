@@ -1,5 +1,5 @@
 from utils.utilities import *
-from utils.mongo_interface import *
+
 
 import datetime
 
@@ -63,7 +63,7 @@ class TimeWizard(commands.Cog):
         '''
         Makes an announcement
         '''
-        servers = DBfind(SERVERCFG_COLLECTION)
+        servers = DBfind(SERVERCFG_COL)
 
         for s in servers:
             now = localTime()
@@ -84,6 +84,6 @@ class TimeWizard(commands.Cog):
         '''
         Tests making an announcement
         '''
-        await self.dailyannounce(ctx.channel, DBfind_one(SERVERCFG_COLLECTION, {"_id": ctx.guild.id}))
+        await self.dailyannounce(ctx.channel, DBfind_one(SERVERCFG_COL, {"_id": ctx.guild.id}))
 
 
