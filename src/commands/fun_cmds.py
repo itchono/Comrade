@@ -1,6 +1,6 @@
 from utils.utilities import *
 import utils.utilities
-from utils.mongo_interface import *
+
 from utils.emoji_converter import *
 from polymorph.text_gen import *
 from polymorph.model_gen import *

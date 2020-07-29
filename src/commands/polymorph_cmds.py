@@ -1,5 +1,5 @@
 from utils.utilities import *
-from utils.mongo_interface import *
+
 from polymorph.text_gen import *
 from polymorph.model_gen import *
 from polymorph.data_compressor import *
@@ -35,7 +35,8 @@ class Polymorph(commands.Cog):
         s = ""
         self.localcache[g.id] = []
         for c in g.channels:
-            if cache := getcache(c.id): 
+            if d := DBfind_one(CACHE_COL, {"_id":c.id}): 
+                cache = decompressCache(d["cache"])
                 self.localcache[g.id] += cache
                 s += f"\t#{c.name} -- {len(cache)} messages\n"
 
@@ -117,7 +118,8 @@ class Polymorph(commands.Cog):
         ex = [{"author":m.author.id, "content":m.content} for m in msgs]
 
         tx = compressCache(ex, 3)
-        fillcache(channel.id, tx)
+
+        DBupdate(CACHE_COL, {"_id": channel.id}, {"_id": channel.id, "cache": tx})
 
         await self.load_messages(ctx.guild)
 

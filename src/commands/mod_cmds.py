@@ -1,5 +1,5 @@
 from utils.utilities import *
-from utils.mongo_interface import *
+
 
 
 class Moderation(commands.Cog):
@@ -95,52 +95,53 @@ class Moderation(commands.Cog):
         usr["kick-votes"] = vk
         updateDBuser(usr)
 
-    @commands.command()
-    @commands.check(isOP)
-    @commands.guild_only()
-    async def mod(self, ctx: commands.Context, target, listname, operation=None, value=None):
-        '''
-        Changes a value in a user's configuration. Various possible operations
-        add: Add element to list
-        remove: Remove an element from list (specify value)
-        pop: Remove last element from list (no value specification needed)
-        set: Set numerical type
-        toggle: Switch a boolean
-        '''
-        if u := await extractUser(ctx, target):
+    # DEFUNCT
+    # @commands.command()
+    # @commands.check(isOP)
+    # @commands.guild_only()
+    # async def mod(self, ctx: commands.Context, target, listname, operation=None, value=None):
+    #     '''
+    #     Changes a value in a user's configuration. Various possible operations
+    #     add: Add element to list
+    #     remove: Remove an element from list (specify value)
+    #     pop: Remove last element from list (no value specification needed)
+    #     set: Set numerical type
+    #     toggle: Switch a boolean
+    #     '''
+    #     if u := await extractUser(ctx, target):
 
-            if operation in {"add", "remove", "pop"}:
-                if l := getuserList(u.id, ctx.guild.id, listname):
-                    if operation == "add": 
-                        l.append(value)
-                        await reactOK(ctx)
+    #         if operation in {"add", "remove", "pop"}:
+    #             if l := getuserList(u.id, ctx.guild.id, listname):
+    #                 if operation == "add": 
+    #                     l.append(value)
+    #                     await reactOK(ctx)
                     
-                    elif operation == "remove":
-                        try: 
-                            l.remove(value)
-                            await reactOK(ctx)
-                        except: await delSend(ctx, "Could not find element {} in list.".format(value))
-                    else:
-                        ret = l.pop()
-                        await delSend(ctx, "Popped element {}".format(ret))
+    #                 elif operation == "remove":
+    #                     try: 
+    #                         l.remove(value)
+    #                         await reactOK(ctx)
+    #                     except: await delSend(ctx, "Could not find element {} in list.".format(value))
+    #                 else:
+    #                     ret = l.pop()
+    #                     await delSend(ctx, "Popped element {}".format(ret))
 
-                    updateuserList(u.id, ctx.guild.id, listname, l)
+    #                 updateuserList(u.id, ctx.guild.id, listname, l)
 
-            elif operation == "set":
-                try:
-                    result = setnum(u.id, ctx.guild.id, listname, value)
-                    await reactOK(ctx)
-                    await ctx.send("{} is now set to {}".format(listname, result))
-                except:
-                    await delSend(ctx, "Invalid operation.")
+    #         elif operation == "set":
+    #             try:
+    #                 result = setnum(u.id, ctx.guild.id, listname, value)
+    #                 await reactOK(ctx)
+    #                 await ctx.send("{} is now set to {}".format(listname, result))
+    #             except:
+    #                 await delSend(ctx, "Invalid operation.")
 
-            elif operation == "toggle":
-                try:
-                    result = togglebool(u.id, ctx.guild.id, listname)
-                    await reactOK(ctx)
-                    await ctx.send("{} is now set to {}".format(listname, result))
-                except:
-                    await delSend(ctx, "Invalid operation.")
-            else:
-                await reactQuestion(ctx)
-                await delSend(ctx, "Unrecognized operation: {}".format(operation))
+    #         elif operation == "toggle":
+    #             try:
+    #                 result = togglebool(u.id, ctx.guild.id, listname)
+    #                 await reactOK(ctx)
+    #                 await ctx.send("{} is now set to {}".format(listname, result))
+    #             except:
+    #                 await delSend(ctx, "Invalid operation.")
+    #         else:
+    #             await reactQuestion(ctx)
+    #             await delSend(ctx, "Unrecognized operation: {}".format(operation))

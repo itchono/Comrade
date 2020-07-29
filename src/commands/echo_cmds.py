@@ -1,5 +1,5 @@
 from utils.utilities import *
-from utils.mongo_interface import *
+
 
 class Echo(commands.Cog):
     def __init__(self, bot):
@@ -31,7 +31,7 @@ class Echo(commands.Cog):
         '''
         Send the actual webhook
         '''
-        if u := DBfind_one(CUSTOMUSER_COLLECTION, {"name":target, "server":ctx.guild.id}):
+        if u := DBfind_one(CUSTOMUSER_COL, {"name":target, "server":ctx.guild.id}):
             await webhook.send(text, username=u["name"], avatar_url=u["url"])
         else:
             if u := (await extractUser(ctx, target, verbose=False) if target else ctx.author):
