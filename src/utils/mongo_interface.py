@@ -71,28 +71,29 @@ def updateFavourite(imageID:str, imgurl:str, serverID, userID):
     favourites.update({"imageID":imageID, "server":serverID, "user":userID}, thingy, True)
     # (search target, info to put in, should we INSERT if no matching records are found?)
 
-def allFavourites(serverID, userID):
+def allFavourites(serverID, userID, category=None):
     '''
     Returns a list of all favourited hentai images in given server
     '''
     favourites = DB.favourites
 
-    return list(favourites.find({"server":serverID, "user":userID}))
+    if category: return list(favourites.find({"server":serverID, "user":userID, "category":category}))
+    else: return list(favourites.find({"server":serverID, "user":userID}))
 
-def getFavourite(serverID, imageID, userID):
+def getFavourite(serverID, imageID, userID, category=""):
     '''
     Returns a given favourite image
     '''
     favourites = DB.favourites
 
-    return favourites.find_one({"server":serverID, "imageID":imageID, "user":userID})
+    return favourites.find_one({"server":serverID, "imageID":imageID, "user":userID, "category":category})
 
-def removeFavoruite(serverID, imageID, userID):
+def removeFavoruite(serverID, imageID, userID, category=""):
     '''
     Removes a given favourite image
     '''
     favourites = DB.favourites
-    favourites.delete_one({"server":serverID, "imageID":imageID, "user":userID})
+    favourites.delete_one({"server":serverID, "imageID":imageID, "user":userID, "category":category})
 
 
 '''

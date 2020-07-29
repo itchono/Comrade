@@ -194,12 +194,34 @@ class NSFW(commands.Cog):
         Adds an image to the favourites list, or retrieves a favourite based on ID
         '''
         if url:
-            updateFavourite(imageName, url, ctx.guild.id, ctx.author.id)
+            tokens = imageName.split(":") # split tokens
+
+            if len(tokens) > 1:
+                updateFavourite(tokens[0], url, ctx.guild.id, ctx.author.id, tokens[1])
+                fullname = f"{tokens[1]}:{tokens[0]}"
+            else:
+                updateFavourite(tokens[0], url, ctx.guild.id, ctx.author.id)
+                fullname = f"{tokens[0]}"
+
             await reactOK(ctx)
-            await ctx.send("Image favourited as `{}`.".format(imageName), delete_after=10)
+            await ctx.send(f"Image favourited as `{fullname}`.")
         else:
             try:
-                fav = getFavourite(ctx.guild.id, imageName, ctx.author.id)
+                tokens = imageName.split(":") # split tokens
+
+                fav = None
+
+                if len(tokens) == 1:
+                    fav = getFavourite(ctx.guild.id, tokens[0], ctx.author.id)
+
+                elif len(tokens) == 2:
+                    fav = getFavourite(ctx.guild.id, imageName, ctx.author.id)
+
+                elif len(tokens) == 3:
+                    fav = getFavourite(ctx.guild.id, imageName, ctx.author.id)
+
+
+                
                 e = discord.Embed()
                 e.set_image(url=fav["URL"])
                 await ctx.send(embed=e)
@@ -223,7 +245,7 @@ class NSFW(commands.Cog):
     @commands.command()
     @commands.guild_only()
     @commands.is_nsfw()
-    async def listfavourites(self, ctx:commands.Context, user: discord.Member = None):
+    async def listfavourites(self, ctx:commands.Context, user: discord.Member = None, category: str = None):
         '''
         Lists all favourited images
         '''
@@ -237,6 +259,8 @@ class NSFW(commands.Cog):
         if not user: user = ctx.author
 
         favs = allFavourites(ctx.guild.id, user.id)
+
+        # Sort favourites by category
 
         embeds = [discord.Embed(title=f"All Favourites for {user.display_name} in {ctx.guild}")]
 
