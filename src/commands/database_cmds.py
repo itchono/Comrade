@@ -9,14 +9,16 @@ class Databases(commands.Cog):
 
         dotenv.load_dotenv()
 
-        if key := os.environ.get('MONGOKEY'):
-            self.client = MongoClient(key)
-            self.DB = self.client[self.client.list_database_names()[0]]
-            print(f"MongoDB Atlas Connected to Database: {self.client.list_database_names()[0]}")
-        else:
-            self.client = MongoClient('localhost', 27017)
-            self.DB = self.client["offline-db"]
-            print("WARN: Running database in offline mode; changes will not persist!")
+        self.client = MongoClient(os.environ.get('MONGOKEY'))
+        self.DB = self.client[self.client.list_database_names()[0]]
+        print(f"MongoDB Atlas Connected to Database: {self.client.list_database_names()[0]}")
+
+        for collection_name in [USER_COL,SERVERCFG_COL,CUSTOMUSER_COL,ANNOUNCEMENTS_COL,CMD_COL,LIST_COL,CACHE_COL,FAVOURITES_COL]:
+            try:
+                _ = self.DB[collection_name]
+            except:
+                self.DB.create_collection(collection_name)
+                print(f"Created Collection: {collection_name}")
 
         self._last_member = None
 

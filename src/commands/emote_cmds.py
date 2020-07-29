@@ -22,12 +22,15 @@ class Emotes(commands.Cog):
 
         for g in self.bot.guilds:
             self.EMOTE_CACHE[g.id] = {}
-            directory = await getChannel(g, 'emote-directory')
+            if directory := await getChannel(g, 'emote-directory'):
             
-            async for e in directory.history(limit=None):
-                self.EMOTE_CACHE[g.id][e.content.lower().split("\n")[0]] = e.content.split("\n")[1]
-        
-            await log(g, f"Emote cache built with {len(self.EMOTE_CACHE[g.id])} emotes.")
+                async for e in directory.history(limit=None):
+                    try: self.EMOTE_CACHE[g.id][e.content.lower().split("\n")[0]] = e.content.split("\n")[1]
+                    except: pass # dirty emote directory
+            
+                await log(g, f"Emote cache built with {len(self.EMOTE_CACHE[g.id])} emotes.")
+            else:
+                await log(g, f"Emote directory was not found.")
 
     @commands.command()
     @commands.guild_only()
