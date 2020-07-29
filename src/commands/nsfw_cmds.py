@@ -193,7 +193,10 @@ class NSFW(commands.Cog):
         '''
         Adds an image to the favourites list, or retrieves a favourite based on ID
         '''
-        if url:
+        if url or len(ctx.message.attachments) > 0:
+
+            if len(ctx.message.attachments) > 0: url = ctx.message.attachments[0].url
+
             tokens = imageName.split(":") # split tokens
 
             if len(tokens) > 1:
@@ -303,12 +306,19 @@ class NSFW(commands.Cog):
                 s_prev = s
                 s += construct(item)
                 
-                embeds[-1].set_field_at(category_count, name=category if category else "Uncategorized", value=s, inline=False)
+                embeds[-1].set_field_at(category_count, name=embeds[-1].fields[category_count].name, value=s, inline=False)
 
                 if len(s) > 1024:
-                    print("trigger:", item["imageID"])
-                    embeds[-1].set_field_at(category_count, name=category if category else "Uncategorized", value=s_prev, inline=False) # fall back to previous string set
-                    embeds.append(discord.Embed(title=f"All Favourites for {user.display_name} in {ctx.guild} (cont.)"))
+
+                    embeds[-1].set_field_at(category_count, name=embeds[-1].fields[category_count].name, value=s_prev, inline=False) # fall back to previous string set
+                    
+                    if len(embeds[-1]) >= 6000:
+                        embeds.append(discord.Embed(title=f"All Favourites for {user.display_name} in {ctx.guild} (cont.)"))
+                        category_count = 0
+                        
+                    else: category_count +=1 # advance count
+
+                    embeds[-1].add_field(name=f'{category if category else "Uncategorized"} (cont.)', value="filler", inline=False)
                     s_prev, s = s, construct(item) # rotate strings
             
             category_count += 1
