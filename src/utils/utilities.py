@@ -309,6 +309,7 @@ USER_COLLECTION = "UserData"
 SERVERCFG_COLLECTION = "cfg"
 CUSTOMUSER_COLLECTION = "CustomUsers"
 ANNOUNCEMENTS_COLLECTION = "announcements"
+CMD_COLLECTION = "CustomCommands"
 
 '''
 Misc

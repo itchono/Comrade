@@ -63,7 +63,7 @@ class Cosmo(commands.Cog):
         '''
         e = discord.Embed(title=f"Scripts for {ctx.guild.name}", colour=discord.Colour.from_rgb(*DBcfgitem(ctx.guild.id,"theme-colour")))
 
-        scrs = allcmds(ctx.guild.id)
+        scrs = DBfind(CMD_COLLECTION, {"server":ctx.guild.id})
 
         e.add_field(name="Cosmo Scripts", value=", ".join([i["name"] for i in scrs if i["type"] == "cosmo"]), inline=True)
         e.add_field(name="Macros", value=", ".join([i["name"] for i in scrs if i["type"] == "macro"]), inline=True)
@@ -76,7 +76,7 @@ class Cosmo(commands.Cog):
         '''
         Deletes a Cosmo script
         '''
-        removeCmd(ctx.guild.id, name)
+        DBremove_one(CMD_COLLECTION, {"server":ctx.guild.id, "name":name})
         await reactOK(ctx)
 
 
@@ -87,7 +87,7 @@ class Cosmo(commands.Cog):
         '''
         Shows a Cosmos script
         '''
-        if tup := getCmd(ctx.guild.id, name):
+        if tup := DBfind_one(CMD_COLLECTION, {"server":ctx.guild.id, "name":name}):
 
             (cmd, cmdType) = tup
             if cmdType == "cosmo":
@@ -116,7 +116,7 @@ class Cosmo(commands.Cog):
         name = args.pop(0)
         args = "".join([i.strip(" ") for i in args]).split(",") # strip spaces
 
-        if tup := getCmd(ctx.guild.id, name):
+        if tup := DBfind_one(CMD_COLLECTION, {"server":ctx.guild.id, "name":name}):
 
             (cmd, cmdType) = tup
 
@@ -165,10 +165,8 @@ class Cosmo(commands.Cog):
         OR $c newscript <command name> <MACRO goes here>
 
         '''
-        if command[:3] == "```" and command[-3:] == "```":
-            updateCmd(ctx.guild.id, command_name, command.strip("```"), "cosmo")
-        else:
-            updateCmd(ctx.guild.id, command_name, command, "macro")
+        if command[:3] == "```" and command[-3:] == "```": DBupdate(CMD_COLLECTION, {"server":ctx.guild.id, "name":command_name}, {"server":ctx.guild.id, "name":command_name,"cmd":command.strip("```"), "type":"cosmo"})
+        else: DBupdate(CMD_COLLECTION, {"server":ctx.guild.id, "name":command_name}, {"server":ctx.guild.id, "name":command_name,"cmd":command, "type":"macro"})
         await reactOK(ctx)
 
 

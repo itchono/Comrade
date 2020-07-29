@@ -51,7 +51,7 @@ class Users(commands.Cog):
         if not target:
             target = ctx.author.mention
 
-        if ctx.guild and (custom := getCustomUser(target, ctx.guild.id)):
+        if ctx.guild and (custom := DBfind_one(CUSTOMUSER_COLLECTION, {"name":target, "server":ctx.guild.id})):
             e = discord.Embed(title="{} (Custom User)".format(target))
             e.set_author(name=f"User Info - {target}")
             e.set_thumbnail(url=custom["url"])
@@ -193,12 +193,11 @@ class Users(commands.Cog):
         '''
         e =  self.bot.get_cog('Echo')
 
-        if u := getCustomUser(username, ctx.guild.id): await e.echo(ctx, "Oh hey I'm already here!", username)
+        if u := DBfind_one(CUSTOMUSER_COLLECTION, {"name":username, "server":ctx.guild.id}): await e.echo(ctx, "Oh hey I'm already here!", username, False)
 
         else:
-            u = ({"name": username, "url": avatar_url, "server": ctx.guild.id})
-            updateCustomUser(u)
-            await e.echo(ctx, "I have been added.", username)
+            DBupdate(CUSTOMUSER_COLLECTION, {"name": username, "server": ctx.guild.id}, {"name": username, "url": avatar_url, "server": ctx.guild.id})
+            await e.echo(ctx, "I have been added.", username, False)
 
     @commands.command()
     @commands.guild_only()
@@ -207,19 +206,19 @@ class Users(commands.Cog):
         '''
         Edits a custom user's fields
         '''
-        u = getCustomUser(username, ctx.guild.id)
+        u = DBfind_one(CUSTOMUSER_COLLECTION, {"name":username, "server":ctx.guild.id})
 
         if not value:
             try:
                 del u[field]
-                updateCustomUser(u)
+                DBupdate(CUSTOMUSER_COLLECTION, {"name": u["name"], "server": u["server"]}, u, False)
                 await delSend(ctx, "User config value deleted.")
             except:
                 await delSend(ctx, "Value was not found.")
         
         else:
             u[field] = value
-            updateCustomUser(u)
+            DBupdate(CUSTOMUSER_COLLECTION, {"name": u["name"], "server": u["server"]}, u, False)
             await reactOK(ctx)
     
     @commands.command()
@@ -227,9 +226,9 @@ class Users(commands.Cog):
     @commands.check(isOP)
     async def removeCustomUser(self, ctx: commands.Context, username):
         '''
-        Edits a custom user's fields
+        Removes a custom user.
         '''
-        removeCustomUser(username, ctx.guild.id)
+        DBremove_one(CUSTOMUSER_COLLECTION, {"name": username, "server": ctx.guild.id})
         await reactOK(ctx)
 
     @commands.command()

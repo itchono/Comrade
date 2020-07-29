@@ -16,30 +16,6 @@ mongo_client = MongoClient(os.environ.get('MONGOKEY'))
 DB = mongo_client[mongo_client.list_database_names()[0]]
 print(f"LEGACY: MongoDB Atlas Connected to Database: {mongo_client.list_database_names()[0]}")
 
-def updateCustomUser(userData:dict):
-    '''
-    Upserts a custom user into userData collection
-    '''
-    customs = DB["CustomUsers"]
-    customs.update({
-        "name": userData["name"],
-        "server": userData["server"]
-    }, userData, True)  # upsert
-
-def removeCustomUser(name, server):
-    '''
-    Removes a user from the collection
-    '''
-    customs = DB["CustomUsers"]
-    customs.delete_one({"name": name, "server": server})
-
-def getCustomUser(name, server):
-    '''
-    Gets a custom user from the database
-    '''
-    customs = DB["CustomUsers"]
-    return customs.find_one({"name": name, "server": server})
-
 def fillcache(channelID, cache):
     '''
     Fills channel message cache
@@ -94,49 +70,6 @@ def removeFavourite(serverID, imageID, userID, category=""):
     '''
     favourites = DB.favourites
     favourites.delete_one({"server":serverID, "imageID":imageID, "user":userID, "category":category})
-
-
-'''
-Commands
-'''
-def updateCmd(serverID:int, name:str, cmdText:str, cmdType:str):
-    '''
-    Updates a custom commands
-    '''
-    cfg = DB.CustomCommands
-
-    thingy = {"server": serverID, "name":name, "cmd":cmdText, "type":cmdType}
-
-    cfg.update({"server": serverID, "name":name}, thingy, True)
-    # (search target, info to put in, should we INSERT if no matching records are found?)
-
-def removeCmd(serverID:int, name:str):
-    '''
-    Removes a custom command
-    '''
-    cfg = DB.CustomCommands
-
-    try:
-        cfg.delete_one({"server": serverID, "name":name})
-    except:
-        pass
-
-def getCmd(serverID: int, name : str):
-    '''
-    Gets a custom command.
-    '''
-    cfg = DB.CustomCommands
-
-    if c := cfg.find_one({"server": serverID, "name":name}):
-        return c["cmd"], c["type"]
-    return None
-
-def allcmds(serverID):
-    '''
-    Returns a list of all Cosmo Scripts in given server
-    '''
-    favourites = DB.CustomCommands
-    return list(favourites.find({"server":serverID}))
 
 '''
 Specific I/O for lists and vars
