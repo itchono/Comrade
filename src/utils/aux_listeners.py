@@ -111,8 +111,8 @@ class AuxilliaryListener(commands.Cog):
             print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
             traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
         
-        if ctx.guild: await log(ctx.guild, "Failure: {}\nType: {}\nTraceback:{}".format(exception, type(exception).__name__, exception.__traceback__.format_exc()))
-        else: await ctx.send("```Failure: {}\nType: {}\nTraceback:{}```".format(exception, type(exception).__name__, exception.__traceback__.format_exc()))
+        if ctx.guild: await log(ctx.guild, "Failure: {}\nType: {}\nTraceback:{}".format(exception, type(exception).__name__, traceback.format_exception(type(exception), exception, exception.__traceback__)))
+        else: await ctx.send("```Failure: {}\nType: {}\nTraceback:{}```".format(exception, type(exception).__name__,  traceback.format_exception(type(exception), exception, exception.__traceback__)))
         # TODO print traceback
 
         if type(exception) == commands.NoPrivateMessage:
@@ -140,6 +140,8 @@ class AuxilliaryListener(commands.Cog):
             await reactQuestion(ctx)
             await ctx.send("Failure: {}".format(exception), delete_after=10)
 
-        await DM(f"Failure: {exception}\n {exception.__traceback__.format_exc()}", (await self.application_info()).owner)
+
+        if type(exception) != commands.CommandNotFound:
+            await DM(f"Failure: {exception}\n {traceback.format_exception(type(exception), exception, exception.__traceback__)}", (await self.application_info()).owner)
 
         
