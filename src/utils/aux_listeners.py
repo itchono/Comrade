@@ -144,7 +144,7 @@ class AuxilliaryListener(commands.Cog):
             await ctx.send("Failure: {}".format(exception), delete_after=10)
 
         if type(exception) != commands.CommandNotFound:
-            await DM(f"Failure: {exception}\n {traceback.format_exception(type(exception), exception, exception.__traceback__)}", (await self.application_info()).owner)
+            await DM(f"Failure: {exception}\n {traceback.format_exception(type(exception), exception, exception.__traceback__)}", (await self.bot.application_info()).owner)
 
 
         

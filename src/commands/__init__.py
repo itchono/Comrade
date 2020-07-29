@@ -8,3 +8,4 @@ from .fun_cmds import *
 from .emote_cmds import *
 from .polymorph_cmds import *
 from .mod_cmds import *
+from .broken_picture_phone import *
