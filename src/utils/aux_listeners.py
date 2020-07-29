@@ -33,6 +33,7 @@ class AuxilliaryListener(commands.Cog):
         '''
         await log(user.guild, "Left {}".format(user.name))
         c = self.bot.get_channel(DBcfgitem(user.guild.id,"announcements-channel"))
+
         await c.send(f":door: {user.display_name} has left.")
 
     @commands.Cog.listener()
@@ -83,6 +84,7 @@ class AuxilliaryListener(commands.Cog):
                 d["last-online"] = "now"
                 updateDBuser(d)
 
+
             for i in d["check-when-online"]:
                 m = user.guild.get_member(i)
                 embed = discord.Embed(title=f"{user.display_name} is now {str(user.status)}.", description=str(m))
@@ -113,6 +115,7 @@ class AuxilliaryListener(commands.Cog):
         
         if ctx.guild: await log(ctx.guild, "Failure: {}\nType: {}\nTraceback:{}".format(exception, type(exception).__name__, traceback.format_exception(type(exception), exception, exception.__traceback__)))
         else: await ctx.send("```Failure: {}\nType: {}\nTraceback:{}```".format(exception, type(exception).__name__,  traceback.format_exception(type(exception), exception, exception.__traceback__)))
+
         # TODO print traceback
 
         if type(exception) == commands.NoPrivateMessage:
@@ -140,8 +143,8 @@ class AuxilliaryListener(commands.Cog):
             await reactQuestion(ctx)
             await ctx.send("Failure: {}".format(exception), delete_after=10)
 
-
         if type(exception) != commands.CommandNotFound:
             await DM(f"Failure: {exception}\n {traceback.format_exception(type(exception), exception, exception.__traceback__)}", (await self.application_info()).owner)
+
 
         
