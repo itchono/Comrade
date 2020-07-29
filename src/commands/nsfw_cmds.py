@@ -197,8 +197,8 @@ class NSFW(commands.Cog):
             tokens = imageName.split(":") # split tokens
 
             if len(tokens) > 1:
-                updateFavourite(tokens[0], url, ctx.guild.id, ctx.author.id, tokens[1])
-                fullname = f"{tokens[1]}:{tokens[0]}"
+                updateFavourite(tokens[1], url, ctx.guild.id, ctx.author.id, tokens[0])
+                fullname = f"{tokens[0]}:{tokens[1]}"
             else:
                 updateFavourite(tokens[0], url, ctx.guild.id, ctx.author.id)
                 fullname = f"{tokens[0]}"
@@ -215,12 +215,10 @@ class NSFW(commands.Cog):
                     fav = getFavourite(ctx.guild.id, tokens[0], ctx.author.id)
 
                 elif len(tokens) == 2:
-                    fav = getFavourite(ctx.guild.id, imageName, ctx.author.id)
+                    fav = getFavourite(ctx.guild.id, tokens[1], ctx.author.id, tokens[0])
 
                 elif len(tokens) == 3:
-                    fav = getFavourite(ctx.guild.id, imageName, ctx.author.id)
-
-
+                    fav = getFavourite(ctx.guild.id, tokens[2], (await extractUser(ctx, tokens[0])).id, tokens[1] if tokens[1] else "")
                 
                 e = discord.Embed()
                 e.set_image(url=fav["URL"])
@@ -235,50 +233,86 @@ class NSFW(commands.Cog):
         '''
         removes an image from the favourites list
         '''
-        if fav := getFavourite(ctx.guild.id, imageName, ctx.author.id):
-            removeFavoruite(ctx.guild.id, imageName, ctx.author.id)
+
+        try:
+            tokens = imageName.split(":") # split tokens
+
+            if len(tokens) > 1:
+                removeFavourite(ctx.guild.id, tokens[1], ctx.author.id, tokens[0])
+                fullname = f"{tokens[1]}:{tokens[0]}"
+            else:
+                removeFavourite(ctx.guild.id, tokens[0], ctx.author.id)
+                fullname = f"{tokens[0]}"
+
             await reactOK(ctx)
-            await ctx.send(f"`{imageName}` has been removed.", delete_after=10)
-        else:
+            await ctx.send(f"`{fullname}` has been removed.", delete_after=10)
+
+        except:
             await delSend(ctx, "Image not found.")
+
 
     @commands.command()
     @commands.guild_only()
     @commands.is_nsfw()
-    async def listfavourites(self, ctx:commands.Context, user: discord.Member = None, category: str = None):
+    async def rename(self, ctx: commands.Context, oldimageName: str, newimageName: str):
+        '''
+        renames an image in the favourites list
+        '''
+        tokens = oldimageName.split(":") # split tokens
+
+        fav = None
+
+        if len(tokens) == 1: fav = getFavourite(ctx.guild.id, tokens[0], ctx.author.id)
+        elif len(tokens) == 2: fav = getFavourite(ctx.guild.id, tokens[1], ctx.author.id, tokens[0])
+
+        if fav:
+            await self.unfavourite(ctx, oldimageName)
+            await self.favourite(ctx, newimageName, fav["URL"])
+
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.is_nsfw()
+    async def listfavourites(self, ctx:commands.Context, user: discord.Member = None, category = None):
         '''
         Lists all favourited images
         '''
-
-        def constructstring(favs, index):
-            '''
-            Constructs the string based on array and index.
-            '''
-            return f"• **[{favs[index]['imageID']}]({favs[index]['URL']})**\n"
+        
+        construct = lambda fav:f"• **[{fav['imageID']}]({fav['URL']})**\n"
 
         if not user: user = ctx.author
 
-        favs = allFavourites(ctx.guild.id, user.id)
+        favs = allFavourites(ctx.guild.id, user.id, category)
 
         # Sort favourites by category
 
+        categories = {}
+
+        for fav in favs:
+            try: categories[fav["category"]].append(fav)
+            except: categories[fav["category"]] = [fav]
+
         embeds = [discord.Embed(title=f"All Favourites for {user.display_name} in {ctx.guild}")]
-
-        s, s_prev = "", "" # declare string variables
+        category_count = 0
         
-        for i in range(len(favs)):
+        for category in categories:
+            s, s_prev = "", "" # declare string variables
+            embeds[-1].add_field(name=category if category else "Uncategorized", value="filler", inline=False)
 
-            if i > 0: s_prev = s
-            s += constructstring(favs, i)
+            for item in categories[category]:
+                s_prev = s
+                s += construct(item)
+                
+                embeds[-1].set_field_at(category_count, name=category if category else "Uncategorized", value=s, inline=False)
+
+                if len(s) > 1024:
+                    print("trigger:", item["imageID"])
+                    embeds[-1].set_field_at(category_count, name=category if category else "Uncategorized", value=s_prev, inline=False) # fall back to previous string set
+                    embeds.append(discord.Embed(title=f"All Favourites for {user.display_name} in {ctx.guild} (cont.)"))
+                    s_prev, s = s, construct(item) # rotate strings
             
-            try: embeds[-1].set_field_at(0, name="Uncategorized", value=s, inline=False)
-            except: embeds[-1].add_field(name="Uncategorized", value=s, inline=False)
-
-            if len(embeds[-1]) > 1024:
-                embeds[-1].set_field_at(0, name="Uncategorized", value=s_prev, inline=False) # fall back to previous string set
-                embeds.append(discord.Embed(title=f"All Favourites for {user.display_name} in {ctx.guild}"))
-                s_prev, s = s, constructstring(favs, i) # rotate strings
-
+            category_count += 1
+            
         for e in embeds: await ctx.send(embed=e)
 
     @commands.command()

@@ -63,10 +63,10 @@ def getcache(channelID):
 '''
 Favourites Interface
 '''
-def updateFavourite(imageID:str, imgurl:str, serverID, userID):
+def updateFavourite(imageID:str, imgurl:str, serverID, userID, category=""):
     favourites = DB.favourites
 
-    thingy = {"imageID":imageID, "URL":imgurl, "server":serverID, "user":userID}
+    thingy = {"imageID":imageID, "URL":imgurl, "server":serverID, "user":userID, "category":category}
 
     favourites.update({"imageID":imageID, "server":serverID, "user":userID}, thingy, True)
     # (search target, info to put in, should we INSERT if no matching records are found?)
@@ -88,7 +88,7 @@ def getFavourite(serverID, imageID, userID, category=""):
 
     return favourites.find_one({"server":serverID, "imageID":imageID, "user":userID, "category":category})
 
-def removeFavoruite(serverID, imageID, userID, category=""):
+def removeFavourite(serverID, imageID, userID, category=""):
     '''
     Removes a given favourite image
     '''
