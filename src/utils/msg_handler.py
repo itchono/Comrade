@@ -13,6 +13,8 @@ class MessageHandler(commands.Cog):
         if not message.author.bot:
 
             if jokeMode(await self.bot.get_context(message)):
+
+                # TODO turn this into triggerable behaviour {partial match, full match}
                 if "hello comrade" in message.content.lower():
                     await delSend(await self.bot.get_context(message), "Henlo")
 
@@ -21,6 +23,9 @@ class MessageHandler(commands.Cog):
                 
                 if "cesb" in message.content.lower():
                     await delSend(await self.bot.get_context(message), "https://www.youtube.com/watch?v=ON-7v4qnHP8")
+
+                if "mtc" in message.content.lower():
+                    await delSend(await self.bot.get_context(message), "https://www.youtube.com/watch?v=bO-NaEj2dQ0")
                 
                 if "approved" in message.content.lower():
                     with open("vid/meme_approved.mp4", "rb") as f: await message.channel.send(file=discord.File(f, "meme_approved.mp4"))
@@ -28,6 +33,19 @@ class MessageHandler(commands.Cog):
                 if message.content.lower() == "i dunno":
                     with open("vid/meme_what.mp4", "rb") as f: await message.channel.send(file=discord.File(f, "i_dunno.mp4"))
 
+                
+
+                if fuzz.token_set_ratio(message.content, "still at cb") > 90:
+                    await message.channel.send("And that's okay!")
+
+                if "@someone" in message.content.lower():
+                    e = discord.Embed(description=random.choice(list(message.guild.members)).mention)
+                    e.set_footer(text=f"Random ping by: {message.author.display_name}")
+                    await message.channel.send(embed=e)
+
+                    '''c = self.bot.get_cog("Echo")
+                    await c.echo(await self.bot.get_context(message), random.choice(list(message.guild.members)).mention, str(message.author.id), deleteMsg=False)
+                    '''
                 Knuckles_VD = [
                 "meme_approved.mp4", "meme_what.mp4", "meme_denied.mp4",
                 "meme_huh.mp4", "meme_illegal.mov",
@@ -59,18 +77,7 @@ class MessageHandler(commands.Cog):
                         fn = Knuckles_VD[hash(attach) % len(Knuckles_VD)]
                         with open("vid/{}".format(fn), "rb") as f:
                             await message.channel.send(file=discord.File(f, fn))
-
-            if fuzz.token_set_ratio(message.content, "still at cb") > 90:
-                await message.channel.send("And that's okay!")
-
-            if "@someone" in message.content.lower():
-                e = discord.Embed(description=random.choice(list(message.guild.members)).mention)
-                e.set_footer(text=f"Random ping by: {message.author.display_name}")
-                await message.channel.send(embed=e)
-
-                '''c = self.bot.get_cog("Echo")
-                await c.echo(await self.bot.get_context(message), random.choice(list(message.guild.members)).mention, str(message.author.id), deleteMsg=False)
-                '''
+                            
             if not isNotThreat(1)(await self.bot.get_context(message)) and (len(
                     message.attachments) + len(
                     message.embeds) > 0 or match_url(message.content)):
