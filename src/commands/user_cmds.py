@@ -251,10 +251,10 @@ class Users(commands.Cog):
         if u := await extractUser(ctx, target):
             d = getUser(u.id, ctx.guild.id)
             try: 
-                d["check when online"].remove(ctx.author.id)
+                d["check-when-online"].remove(ctx.author.id)
                 await ctx.send(f"You will no longer be notified by when {u.display_name} changes their status.")
             except:
-                d["check when online"].append(ctx.author.id)
+                d["check-when-online"].append(ctx.author.id)
                 await ctx.send(f"You will now be notified by when {u.display_name} changes their status.")
             updateUser(d)
 
