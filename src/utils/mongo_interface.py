@@ -24,7 +24,7 @@ def updateFavourite(imageID:str, imgurl:str, serverID, userID, category=""):
 
     thingy = {"imageID":imageID, "URL":imgurl, "server":serverID, "user":userID, "category":category}
 
-    favourites.update({"imageID":imageID, "server":serverID, "user":userID}, thingy, True)
+    favourites.update({"imageID":imageID, "server":serverID, "user":userID, "category":category}, thingy, True)
     # (search target, info to put in, should we INSERT if no matching records are found?)
 
 def allFavourites(serverID, userID, category=None):
