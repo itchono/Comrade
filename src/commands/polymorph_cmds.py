@@ -19,7 +19,7 @@ class Polymorph(commands.Cog):
         self.models = {} # local model store
         self.localcache = {} # message cache
 
-        self._last_member = None
+        
 
     async def on_load(self):
         '''

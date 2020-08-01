@@ -8,7 +8,7 @@ import sys
 class AuxilliaryListener(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self._last_member = None
+        
 
     @commands.Cog.listener()
     async def on_member_join(self, user: discord.Member):

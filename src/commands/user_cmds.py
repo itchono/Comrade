@@ -6,7 +6,7 @@ class Users(commands.Cog):
         self.bot = bot
         self.WEIGHTED_RND_USER = {} # Cache of users for daily roll, per server
         self.UNWEIGHTED_RND_USER = {} # Cache of users for standard rolling
-        self._last_member = None
+        
 
     @commands.command()
     async def avatar(self, ctx:commands.Context, *, target=None):

@@ -36,7 +36,7 @@ class SelfPing(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.lastping = None
-        self._last_member = None
+        
 
         self.selfping.start()
 

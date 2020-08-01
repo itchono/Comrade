@@ -11,7 +11,7 @@ class Emotes(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.EMOTE_CACHE = {}
-        self._last_member = None
+        
 
 
     async def rebuildcache(self):

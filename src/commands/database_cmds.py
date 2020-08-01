@@ -20,7 +20,7 @@ class Databases(commands.Cog):
                 self.DB.create_collection(collection_name)
                 print(f"Created Collection: {collection_name}")
 
-        self._last_member = None
+        
 
     async def on_load(self):
         '''

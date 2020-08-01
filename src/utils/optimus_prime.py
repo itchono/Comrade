@@ -20,7 +20,7 @@ class TextFilter(commands.Cog):
         '''
 
         self.bucket = {} # stores a bunch of messages
-        self._last_member = None
+        
 
     async def zahando(self,
                       ctx: commands.Context,

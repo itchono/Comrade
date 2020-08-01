@@ -165,7 +165,7 @@ class BPC(commands.Cog):
         self.active = False
         self.game = None
 
-        self._last_member = None
+        
 
     @commands.group()
     async def bpc(self, ctx: commands.Context):
