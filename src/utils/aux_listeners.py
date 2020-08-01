@@ -116,8 +116,6 @@ class AuxilliaryListener(commands.Cog):
         if ctx.guild: await log(ctx.guild, "Failure: {}\nType: {}\nTraceback:```{}```".format(exception, type(exception).__name__, traceback.format_exception(type(exception), exception, exception.__traceback__)))
         else: await ctx.send("```Failure: {}\nType: {}\nTraceback:{}```".format(exception, type(exception).__name__,  traceback.format_exception(type(exception), exception, exception.__traceback__)))
 
-        # TODO print traceback
-
         if type(exception) == commands.NoPrivateMessage:
             await reactX(ctx)
             await delSend(ctx, "This command can only be used in a server.")

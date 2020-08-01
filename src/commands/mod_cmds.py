@@ -80,6 +80,14 @@ class Moderation(commands.Cog):
 
         kickreq = DBcfgitem(ctx.guild.id, "kick-requirement")
 
+        '''
+        Dynamic kick requirement
+        '''
+
+        online_humans = [m for m in ctx.guild.members if (str(m.status) != "offline" and not m.bot)]
+        onlinecount = len(online_humans)
+
+
         if not ctx.author.id in vk:
             vk.append(ctx.author.id)
             await ctx.send("Vote to kick {} added. ({}/{} votes)".format(u.display_name, len(vk), kickreq))
