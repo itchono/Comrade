@@ -1,51 +1,42 @@
-from flask import Flask, render_template
-from threading import Thread
-from utils.utilities import *
+from utils.utilities import localTime
+from flask import Flask # used to create web server to keep bot actively hosted
+from threading import Thread # used to create separate parallel process to keep bot up
 
+import urllib.request
+
+# disable logging
 import logging
 import os
 
-import requests
-import json
-import aiohttp
-import urllib.request
+from time_utils import localTime
 
 logging.getLogger('werkzeug').disabled = True
 os.environ['WERKZEUG_RUN_MAIN'] = 'true'
 
-t_start = 0
-
 app = Flask('')
 
+start_time = localTime()
 
 @app.route('/')
-def main():
-    return 'Comrade is online - Uptime: {}'.format(localTime() -
-                                                       t_start)
+def main(): return f"Bot is online. Uptime: {localTime() - start_time}"
 
-
-def run():
-    global t_start
-    t_start = localTime()
-    app.run(host="0.0.0.0", port=8080)
-
+def run(): app.run(host="0.0.0.0", port=8080)
 
 def keep_alive():
     server = Thread(target=run)
     server.start()
 
+### Self-sustain module
 
-def shutdown():
-    server = Thread(target=run)
-    server._stop()
+'''
+This basically pings my other bots on repl.it and itself, to keep itself up
+'''
 
-# for repl.it
 class SelfPing(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.lastping = None
-        self.response = None
-        self._last_member = None
+        
 
         self.selfping.start()
 
@@ -56,24 +47,28 @@ class SelfPing(commands.Cog):
     async def selfping(self):
         user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
         headers={'User-Agent':user_agent}
-        url = 'https://comrade--itchono.repl.co/'
+        
+        urls = ['https://comrade--itchono.repl.co/', 'https://DadBot--itchono.repl.co', 
+        'https://SET-Bot--itchono.repl.co', 'https://psi-tama--itchono.repl.co', 'https://Comrade-Backup--itchono.repl.co'] # pinging my other bots
 
-        try:
-            request = urllib.request.Request(url,None,headers)
+        me = 'https://Comrade-Backup--itchono.repl.co'
 
-            response = urllib.request.urlopen(request)
-            self.response = response.read().decode("utf-8")
-            self.lastping = localTime()
-        except:
-            print("ERROR pinging self!")
+        for url in urls:
+            try:
+                request = urllib.request.Request(url,None,headers)
+                response = urllib.request.urlopen(request)
 
-    @commands.command(name="ping")
+                if url == me: self.lastping = {"message":response.read().decode("utf-8"), "time":localTime()}
+            except: print(f"ERROR pinging {url}")
+
+    @commands.command()
     async def ping(self, ctx : commands.Context):
-        await ctx.send("Last ping was at {}\nResponse:`{}`".format(self.lastping.strftime("%I:%M:%S %p %Z"), self.response))
-
+        '''
+        Shows when the bot last pinged itself
+        '''
+        await ctx.send(f"Last ping was at {self.lastping['time'].strftime('%I:%M:%S %p %Z')}\nResponse:`{self.lastping['message']}`")
 
     @selfping.before_loop
     async def before_selfping(self):
         await self.bot.wait_until_ready()
         print("Self ping routine started.")
-

@@ -1,12 +1,12 @@
 from utils.utilities import *
-from utils.mongo_interface import *
+
 
 class Users(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.WEIGHTED_RND_USER = {} # Cache of users for daily roll, per server
         self.UNWEIGHTED_RND_USER = {} # Cache of users for standard rolling
-        self._last_member = None
+        
 
     @commands.command()
     async def avatar(self, ctx:commands.Context, *, target=None):
@@ -51,7 +51,7 @@ class Users(commands.Cog):
         if not target:
             target = ctx.author.mention
 
-        if ctx.guild and (custom := getCustomUser(target, ctx.guild.id)):
+        if ctx.guild and (custom := DBfind_one(CUSTOMUSER_COL, {"name":target, "server":ctx.guild.id})):
             e = discord.Embed(title="{} (Custom User)".format(target))
             e.set_author(name=f"User Info - {target}")
             e.set_thumbnail(url=custom["url"])
@@ -60,7 +60,7 @@ class Users(commands.Cog):
             await ctx.send(embed=e)
 
         elif member := await extractUser(ctx, target):
-            e = discord.Embed(title="Info for {}".format(member.name))
+            e = discord.Embed(title="Info for {}".format(member.name), colour=member.colour)
             e.set_author(name=f"User Info - {member}")
             e.set_thumbnail(url=member.avatar_url)
             e.set_footer(icon_url=ctx.author.avatar_url)
@@ -69,7 +69,7 @@ class Users(commands.Cog):
 
                 roles = [role for role in member.roles]
 
-                u = getUser(member.id, ctx.guild.id)
+                u = DBuser(member.id, ctx.guild.id)
 
                 if full:
                     for c in u:
@@ -98,24 +98,30 @@ class Users(commands.Cog):
         self.UNWEIGHTED_RND_USER[g.id] = []
         
         for member in g.members:
-            if u := getUser(member.id, g.id): pass
+            if u := DBuser(member.id, g.id): pass
             else:
                 # account for new users
-                stp = self.bot.get_cog("Setup")
-                updateUser(stp.setupuser(member))
-                u = getUser(member.id, g.id)
+                stp = self.bot.get_cog("Databases")
+                updateDBuser(stp.setupuser(member))
+                u = DBuser(member.id, g.id)
 
-            weight = u["daily weight"]
+            weight = u["daily-weight"]
             if not member.bot: 
                 self.WEIGHTED_RND_USER[g.id] += [member for i in range(weight)]
                 self.UNWEIGHTED_RND_USER[g.id] += [member]
         
         # special case: list is empty
         if self.WEIGHTED_RND_USER[g.id] == []:
+
+            try: daily = DBcfgitem(g.id, "default-daily-count")
+            except: daily = 0
+
             for member in g.members:
-                d = getUser(member.id, g.id)
-                d["daily weight"] = DEFAULT_DAILY_COUNT
-                updateUser(d)
+                d = DBuser(member.id, g.id)                
+                d["daily-weight"] = daily
+                updateDBuser(d)
+
+            DAILY_MEMBER_STALENESS = DBcfgitem(g.id, "daily-member-staleness")
 
             if DAILY_MEMBER_STALENESS >= 0:
                 threshold = datetime.datetime.now() - datetime.timedelta(DAILY_MEMBER_STALENESS)
@@ -126,9 +132,9 @@ class Users(commands.Cog):
                     member_ids -= author_ids
 
                 for i in member_ids:
-                    u = getUser(i, g.id)
-                    u["daily weight"] = 0
-                    updateUser(u)
+                    u = DBuser(i, g.id)
+                    u["daily-weight"] = 0
+                    updateDBuser(u)
 
                 await log(g, f"Refilled daily count and trimmed users in past {DAILY_MEMBER_STALENESS} days")
         await log(g, f"User Cache built.\nWeighted List -- {len(self.WEIGHTED_RND_USER[g.id])} entries\nUnweighed List -- {len(self.UNWEIGHTED_RND_USER[g.id])} entries")
@@ -146,7 +152,8 @@ class Users(commands.Cog):
 
         for channel in ctx.guild.text_channels:
 
-            authors = set([i.author for i in await channel.history(limit=None,after=threshold).flatten() if i.type == discord.MessageType.default])
+            author_ids = set([i.author.id for i in await channel.history(limit=None,after=threshold).flatten() if i.type == discord.MessageType.default])
+
             member_ids -= author_ids
 
         await ctx.send(f"{len(member_ids)} members detected to have not posted in the past {day} days.")
@@ -158,9 +165,9 @@ class Users(commands.Cog):
             s += i.display_name + "\n"
             
             if trim and OP:
-                u = getUser(i.id, ctx.guild.id)
-                u["daily weight"] = 0
-                updateUser(u)
+                u = DBuser(i.id, ctx.guild.id)
+                u["daily-weight"] = 0
+                updateDBuser(u)
         s += "```"
         await ctx.send(s)
 
@@ -177,7 +184,7 @@ class Users(commands.Cog):
         '''
         async with ctx.channel.typing():
             luckyperson = random.choice(self.UNWEIGHTED_RND_USER[ctx.guild.id]) if not weighted else random.choice(self.WEIGHTED_RND_USER[ctx.guild.id])
-        await self.userinfo(ctx, target=getUser(luckyperson.id, ctx.guild.id)["nickname"])
+        await self.userinfo(ctx, target=DBuser(luckyperson.id, ctx.guild.id)["nickname"])
 
     @commands.command()
     @commands.guild_only()
@@ -187,12 +194,11 @@ class Users(commands.Cog):
         '''
         e =  self.bot.get_cog('Echo')
 
-        if u := getCustomUser(username, ctx.guild.id): await e.echo(ctx, "Oh hey I'm already here!", username)
+        if u := DBfind_one(CUSTOMUSER_COL, {"name":username, "server":ctx.guild.id}): await e.echo(ctx, "Oh hey I'm already here!", username, False)
 
         else:
-            u = ({"name": username, "url": avatar_url, "server": ctx.guild.id})
-            updateCustomUser(u)
-            await e.echo(ctx, "I have been added.", username)
+            DBupdate(CUSTOMUSER_COL, {"name": username, "server": ctx.guild.id}, {"name": username, "url": avatar_url, "server": ctx.guild.id})
+            await e.echo(ctx, "I have been added.", username, False)
 
     @commands.command()
     @commands.guild_only()
@@ -201,19 +207,19 @@ class Users(commands.Cog):
         '''
         Edits a custom user's fields
         '''
-        u = getCustomUser(username, ctx.guild.id)
+        u = DBfind_one(CUSTOMUSER_COL, {"name":username, "server":ctx.guild.id})
 
         if not value:
             try:
                 del u[field]
-                updateCustomUser(u)
+                DBupdate(CUSTOMUSER_COL, {"name": u["name"], "server": u["server"]}, u, False)
                 await delSend(ctx, "User config value deleted.")
             except:
                 await delSend(ctx, "Value was not found.")
         
         else:
             u[field] = value
-            updateCustomUser(u)
+            DBupdate(CUSTOMUSER_COL, {"name": u["name"], "server": u["server"]}, u, False)
             await reactOK(ctx)
     
     @commands.command()
@@ -221,9 +227,9 @@ class Users(commands.Cog):
     @commands.check(isOP)
     async def removeCustomUser(self, ctx: commands.Context, username):
         '''
-        Edits a custom user's fields
+        Removes a custom user.
         '''
-        removeCustomUser(username, ctx.guild.id)
+        DBremove_one(CUSTOMUSER_COL, {"name": username, "server": ctx.guild.id})
         await reactOK(ctx)
 
     @commands.command()
@@ -232,7 +238,7 @@ class Users(commands.Cog):
         '''
         Lists all custom users
         '''
-        u = customUserQuery({"server":ctx.guild.id}) # all custom users
+        u = DBfind(CUSTOMUSER_COL,{"server":ctx.guild.id}) # all custom users
 
         s = "```Custom Users in {}".format(ctx.guild.name)
 
@@ -249,14 +255,14 @@ class Users(commands.Cog):
         Makes it so that when a user comes online, you are notified by Comrade
         '''
         if u := await extractUser(ctx, target):
-            d = getUser(u.id, ctx.guild.id)
+            d = DBuser(u.id, ctx.guild.id)
             try: 
                 d["check-when-online"].remove(ctx.author.id)
                 await ctx.send(f"You will no longer be notified by when {u.display_name} changes their status.")
             except:
                 d["check-when-online"].append(ctx.author.id)
                 await ctx.send(f"You will now be notified by when {u.display_name} changes their status.")
-            updateUser(d)
+            updateDBuser(d)
 
     async def on_load(self):
         '''

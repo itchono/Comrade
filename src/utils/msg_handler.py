@@ -1,13 +1,12 @@
 from utils.utilities import *
-from utils.mongo_interface import *
+
 
 from fuzzywuzzy import fuzz
-
 
 class MessageHandler(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self._last_member = None
+        
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
@@ -56,7 +55,7 @@ class MessageHandler(commands.Cog):
                 "meme.mp4", "meme_rick_roll.mov", "Memes.mov", "Giorno.mp4", "meme_doom.mp4"
                 ]
 
-                if message.guild and message.channel.id == getCFG(message.guild.id)["meme channel"]:
+                if message.guild and message.channel == await getChannel(message.guild, "meme-channel"):
 
                     fn = "meme_what.mp4"  # default safety
 
@@ -78,7 +77,7 @@ class MessageHandler(commands.Cog):
                         fn = Knuckles_VD[hash(attach) % len(Knuckles_VD)]
                         with open("vid/{}".format(fn), "rb") as f:
                             await message.channel.send(file=discord.File(f, fn))
-                
+                            
             if not isNotThreat(1)(await self.bot.get_context(message)) and (len(
                     message.attachments) + len(
                     message.embeds) > 0 or match_url(message.content)):

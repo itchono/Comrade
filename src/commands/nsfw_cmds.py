@@ -17,7 +17,7 @@ class NSFW(commands.Cog):
     '''
     def __init__(self, bot):
         self.bot = bot
-        self._last_member = None
+        
         self.last_search = ""
         self.cur_page = 0
         self.prev_search = None
@@ -28,7 +28,6 @@ class NSFW(commands.Cog):
 
     @commands.command()
     @commands.is_nsfw()
-    @commands.check(isHChannel)
     async def nsearch(self, ctx: commands.Context, *, args:str = "small breasts"):
         '''
         Searches for a hentai on nhentai.net
@@ -89,7 +88,6 @@ class NSFW(commands.Cog):
 
     @commands.command()
     @commands.is_nsfw()
-    @commands.check(isHChannel)
     async def nhentai(self, ctx: commands.Context, args:int = 185217):
         '''
         Fetches a hentai from nhentai.net, by ID.
@@ -163,7 +161,7 @@ class NSFW(commands.Cog):
     
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
-        if (not message.guild or message.channel.is_nsfw()) and isHChannel(await self.bot.get_context(message)) and not message.author.bot:
+        if (not message.guild or message.channel.is_nsfw()) and not message.author.bot and message.content:
             if message.content.lower() == "next":
                 await self.hentai(ctx = await self.bot.get_context(message), args = self.last_search)
             if message.content.lower() == "retry":
@@ -191,18 +189,40 @@ class NSFW(commands.Cog):
     @commands.command()
     @commands.guild_only()
     @commands.is_nsfw()
-    @commands.check(isHChannel)
     async def favourite(self, ctx: commands.Context, imageName: str, url: str = None):
         '''
         Adds an image to the favourites list, or retrieves a favourite based on ID
         '''
-        if url:
-            updateFavourite(imageName, url, ctx.guild.id)
+        if url or len(ctx.message.attachments) > 0:
+
+            if len(ctx.message.attachments) > 0: url = ctx.message.attachments[0].url
+
+            tokens = imageName.split(":") # split tokens
+
+            if len(tokens) > 1:
+                updateFavourite(tokens[1], url, ctx.guild.id, ctx.author.id, tokens[0])
+                fullname = f"{tokens[0]}:{tokens[1]}"
+            else:
+                updateFavourite(tokens[0], url, ctx.guild.id, ctx.author.id)
+                fullname = f"{tokens[0]}"
+
             await reactOK(ctx)
-            await ctx.send("Image favourited as `{}`.".format(imageName), delete_after=10)
+            await ctx.send(f"Image favourited as `{fullname}`.")
         else:
             try:
-                fav = getFavourite(ctx.guild.id, imageName)
+                tokens = imageName.split(":") # split tokens
+
+                fav = None
+
+                if len(tokens) == 1:
+                    fav = getFavourite(ctx.guild.id, tokens[0], ctx.author.id)
+
+                elif len(tokens) == 2:
+                    fav = getFavourite(ctx.guild.id, tokens[1], ctx.author.id, tokens[0])
+
+                elif len(tokens) == 3:
+                    fav = getFavourite(ctx.guild.id, tokens[2], (await extractUser(ctx, tokens[0])).id, tokens[1] if tokens[1] else "")
+                
                 e = discord.Embed()
                 e.set_image(url=fav["URL"])
                 await ctx.send(embed=e)
@@ -212,23 +232,101 @@ class NSFW(commands.Cog):
     @commands.command()
     @commands.guild_only()
     @commands.is_nsfw()
-    @commands.check(isHChannel)
-    async def listfavourites(self, ctx:commands.Context):
+    async def unfavourite(self, ctx: commands.Context, imageName: str):
+        '''
+        removes an image from the favourites list
+        '''
+
+        try:
+            tokens = imageName.split(":") # split tokens
+
+            if len(tokens) > 1:
+                removeFavourite(ctx.guild.id, tokens[1], ctx.author.id, tokens[0])
+                fullname = f"{tokens[1]}:{tokens[0]}"
+            else:
+                removeFavourite(ctx.guild.id, tokens[0], ctx.author.id)
+                fullname = f"{tokens[0]}"
+
+            await reactOK(ctx)
+            await ctx.send(f"`{fullname}` has been removed.", delete_after=10)
+
+        except:
+            await delSend(ctx, "Image not found.")
+
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.is_nsfw()
+    async def rename(self, ctx: commands.Context, oldimageName: str, newimageName: str):
+        '''
+        renames an image in the favourites list
+        '''
+        tokens = oldimageName.split(":") # split tokens
+
+        fav = None
+
+        if len(tokens) == 1: fav = getFavourite(ctx.guild.id, tokens[0], ctx.author.id)
+        elif len(tokens) == 2: fav = getFavourite(ctx.guild.id, tokens[1], ctx.author.id, tokens[0])
+
+        if fav:
+            await self.unfavourite(ctx, oldimageName)
+            await self.favourite(ctx, newimageName, fav["URL"])
+
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.is_nsfw()
+    async def listfavourites(self, ctx:commands.Context, user: discord.Member = None, category = None):
         '''
         Lists all favourited images
         '''
-        favs = allFavourites(ctx.guild.id)
+        
+        construct = lambda fav:f"• **[{fav['imageID']}]({fav['URL']})**\n"
 
-        e = discord.Embed(title="All Favourites for {}".format(ctx.guild.name))
+        if not user: user = ctx.author
 
-        for entry in favs:
-            e.add_field(name=str(entry["imageID"]), value=str(entry["URL"]))
+        favs = allFavourites(ctx.guild.id, user.id, category)
 
-        await ctx.send(embed=e)
+        # Sort favourites by category
+
+        categories = {}
+
+        for fav in favs:
+            try: categories[fav["category"]].append(fav)
+            except: categories[fav["category"]] = [fav]
+
+        embeds = [discord.Embed(title=f"All Favourites for {user.display_name} in {ctx.guild}")]
+        category_count = 0
+        
+        for category in categories:
+            s, s_prev = "", "" # declare string variables
+            embeds[-1].add_field(name=category if category else "Uncategorized", value="filler", inline=False)
+
+            for item in categories[category]:
+                s_prev = s
+                s += construct(item)
+                
+                embeds[-1].set_field_at(category_count, name=embeds[-1].fields[category_count].name, value=s, inline=False)
+
+                if len(s) > 1024:
+
+                    embeds[-1].set_field_at(category_count, name=embeds[-1].fields[category_count].name, value=s_prev, inline=False) # fall back to previous string set
+                    
+                    if len(embeds[-1]) >= 6000:
+                        embeds.append(discord.Embed(title=f"All Favourites for {user.display_name} in {ctx.guild} (cont.)"))
+                        category_count = 0
+                        
+                    else: category_count +=1 # advance count
+
+                    embeds[-1].add_field(name=f'{category if category else "Uncategorized"} (cont.)', value="filler", inline=False)
+                    s_prev, s = s, construct(item) # rotate strings
+            
+            category_count += 1
+            
+        for e in embeds: await ctx.send(embed=e)
 
     @commands.command()
     @commands.is_nsfw()
-    @commands.check(isHChannel)
     async def hentai(self, ctx: commands.Context, *, args:str = ""):
         '''
         Fetches a number of posts from Danbooru given a series of tags.
