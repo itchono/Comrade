@@ -75,7 +75,7 @@ async def on_ready():
         embed.add_field(name="Time", value=(localTime().strftime("%I:%M:%S %p %Z")))
         await DM("", (await client.application_info()).owner, embed)
 
-@client.event()
+@client.event
 async def on_disconnect():
     '''
     Bot crashes because of loss of connection
