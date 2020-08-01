@@ -5,7 +5,7 @@ from utils.utilities import *
 class Moderation(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self._last_member = None
+        
 
     @commands.command()
     @commands.guild_only()

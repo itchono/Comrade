@@ -29,7 +29,7 @@ class Fun(commands.Cog):
         self.activeGuess = None
         self.guessState = False
         self.streak = {}  # NOTE: Changed to dictionary
-        self._last_member = None
+        
 
     @commands.command()
     async def graph(self, ctx: commands.Context, function: str, xstart: int = -10, xend: int = 10):

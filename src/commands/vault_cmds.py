@@ -6,7 +6,7 @@ class Vault(commands.Cog):
         self.bot = bot
         self.activeposts = {}  # active for tomato stuff
         self.vault_cache = {}
-        self._last_member = None
+        
 
     @commands.command()
     @commands.guild_only()
@@ -43,6 +43,8 @@ class Vault(commands.Cog):
             u = ctx.message.attachments[0].url
         elif tgt and tgt.isnumeric():
             u = await commands.MessageConverter().convert(tgt)
+            IDmode = True
+        elif u := await commands.MessageConverter().convert(tgt):
             IDmode = True
         else: u = tgt  # URL directly
 
@@ -91,6 +93,7 @@ class Vault(commands.Cog):
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction,
                               user: discord.Member):
+        # TODO refactor into other stuff using wait_for
         if reaction.emoji == "🍅":
             if reaction.count > 1 and reaction.message.id in self.activeposts and (user != self.activeposts[reaction.message.id]["Message"].author or DEVELOPMENT_MODE):
                 attachment_url = self.activeposts[reaction.message.id]["Attachment URL"]

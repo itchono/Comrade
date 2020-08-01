@@ -6,7 +6,7 @@ from fuzzywuzzy import fuzz
 class MessageHandler(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self._last_member = None
+        
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
