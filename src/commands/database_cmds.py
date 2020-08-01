@@ -191,14 +191,14 @@ class Databases(commands.Cog):
         if not value:
             try:
                 del c[DBcfgitem]
-                updateDB(SERVERCFG_COL, {"_id":ctx.guild.id}, c)
+                DBupdate(SERVERCFG_COL, {"_id":ctx.guild.id}, c)
                 await delSend(ctx, "Config value deleted.")
             except: await delSend(ctx, "Value was not found.")
 
         else:
             try: c[DBcfgitem] = ast.literal_eval(value)
             except: c[DBcfgitem] = value
-            updateDB(SERVERCFG_COL, {"_id":ctx.guild.id}, c)
+            DBupdate(SERVERCFG_COL, {"_id":ctx.guild.id}, c)
 
         await reactOK(ctx)
 

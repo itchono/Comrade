@@ -87,9 +87,9 @@ class Cosmo(commands.Cog):
         '''
         Shows a Cosmos script
         '''
-        if tup := DBfind_one(CMD_COL, {"server":ctx.guild.id, "name":name}):
+        if c := DBfind_one(CMD_COL, {"server":ctx.guild.id, "name":name}):
 
-            (cmd, cmdType) = tup
+            (cmd, cmdType) = c["cmd"], c["type"]
             if cmdType == "cosmo":
                 await ctx.send(f"```{cmd}```") 
             else:
@@ -116,9 +116,9 @@ class Cosmo(commands.Cog):
         name = args.pop(0)
         args = "".join([i.strip(" ") for i in args]).split(",") # strip spaces
 
-        if tup := DBfind_one(CMD_COL, {"server":ctx.guild.id, "name":name}):
+        if c := DBfind_one(CMD_COL, {"server":ctx.guild.id, "name":name}):
 
-            (cmd, cmdType) = tup
+            (cmd, cmdType) = c["cmd"], c["type"]
 
             if cmdType == "cosmo":
 
