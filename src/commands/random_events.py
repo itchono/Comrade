@@ -41,4 +41,5 @@ class RandomEvents(commands.Cog):
 
         if message.guild and not message.author.bot: 
 
-            if random.random() <= 0.1: await self.nameswap(await self.bot.get_context(message))
+            if random.random() <= 0.01: await self.nameswap(await self.bot.get_context(message))
+            # E(X) is 100 messages
