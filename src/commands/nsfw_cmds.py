@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 from utils.utilities import *
-from utils.mongo_interface import *
 
 import json
 import io
@@ -200,10 +199,10 @@ class NSFW(commands.Cog):
             tokens = imageName.split(":") # split tokens
 
             if len(tokens) > 1:
-                updateFavourite(tokens[1], url, ctx.guild.id, ctx.author.id, tokens[0])
+                DBupdate(FAVOURITES_COL, {"imageID":tokens[0], "server":ctx.guild.id, "user":ctx.author.id, "category":tokens[1]}, {"imageID":imageName, "URL":url, "server":ctx.guild.id, "user":ctx.author.id, "category":tokens[1]})
                 fullname = f"{tokens[0]}:{tokens[1]}"
             else:
-                updateFavourite(tokens[0], url, ctx.guild.id, ctx.author.id)
+                DBupdate(FAVOURITES_COL, {"imageID":tokens[0], "server":ctx.guild.id, "user":ctx.author.id, "category":""}, {"imageID":imageName, "URL":url, "server":ctx.guild.id, "user":ctx.author.id, "category":""})
                 fullname = f"{tokens[0]}"
 
             await reactOK(ctx)
@@ -215,13 +214,18 @@ class NSFW(commands.Cog):
                 fav = None
 
                 if len(tokens) == 1:
-                    fav = getFavourite(ctx.guild.id, tokens[0], ctx.author.id)
+
+                    fav = DBfind_one(FAVOURITES_COL, {"server":ctx.guild.id, "imageID":tokens[0], "user":ctx.author.id, "category":""})
 
                 elif len(tokens) == 2:
-                    fav = getFavourite(ctx.guild.id, tokens[1], ctx.author.id, tokens[0])
+
+                    fav = DBfind_one(FAVOURITES_COL, {"server":ctx.guild.id, "imageID":tokens[1], "user":ctx.author.id, "category":tokens[0]})
+
 
                 elif len(tokens) == 3:
-                    fav = getFavourite(ctx.guild.id, tokens[2], (await extractUser(ctx, tokens[0])).id, tokens[1] if tokens[1] else "")
+
+                    fav = DBfind_one(FAVOURITES_COL, {"server":ctx.guild.id, "imageID":tokens[2], "user":(await extractUser(ctx, tokens[0])).id, "category":tokens[1] if tokens[1] else ""})
+
                 
                 e = discord.Embed()
                 e.set_image(url=fav["URL"])
@@ -241,10 +245,10 @@ class NSFW(commands.Cog):
             tokens = imageName.split(":") # split tokens
 
             if len(tokens) > 1:
-                removeFavourite(ctx.guild.id, tokens[1], ctx.author.id, tokens[0])
+                DBremove_one(FAVOURITES_COL, {"server":ctx.guild.id, "imageID":tokens[0], "user":ctx.author.id, "category":""})
                 fullname = f"{tokens[1]}:{tokens[0]}"
             else:
-                removeFavourite(ctx.guild.id, tokens[0], ctx.author.id)
+                DBremove_one(FAVOURITES_COL, {"server":ctx.guild.id, "imageID":tokens[1], "user":ctx.author.id, "category":tokens[0]})
                 fullname = f"{tokens[0]}"
 
             await reactOK(ctx)
@@ -265,8 +269,8 @@ class NSFW(commands.Cog):
 
         fav = None
 
-        if len(tokens) == 1: fav = getFavourite(ctx.guild.id, tokens[0], ctx.author.id)
-        elif len(tokens) == 2: fav = getFavourite(ctx.guild.id, tokens[1], ctx.author.id, tokens[0])
+        if len(tokens) == 1: fav = DBfind_one(FAVOURITES_COL, {"server":ctx.guild.id, "imageID":tokens[0], "user":ctx.author.id, "category":""})
+        elif len(tokens) == 2: fav = DBfind_one(FAVOURITES_COL, {"server":ctx.guild.id, "imageID":tokens[1], "user":ctx.author.id, "category":tokens[0]})
 
         if fav:
             await self.unfavourite(ctx, oldimageName)
@@ -276,7 +280,7 @@ class NSFW(commands.Cog):
     @commands.command()
     @commands.guild_only()
     @commands.is_nsfw()
-    async def listfavourites(self, ctx:commands.Context, user: discord.Member = None, category = None):
+    async def listfavourites(self, ctx:commands.Context, user: discord.Member = None, category:str = None):
         '''
         Lists all favourited images
         '''
@@ -284,8 +288,11 @@ class NSFW(commands.Cog):
         construct = lambda fav:f"• **[{fav['imageID']}]({fav['URL']})**\n"
 
         if not user: user = ctx.author
-
-        favs = allFavourites(ctx.guild.id, user.id, category)
+       
+        if category:
+            favs = DBfind(FAVOURITES_COL, {"server":ctx.guild.id, "user":user.id, "category":category})
+        else:
+            favs = DBfind(FAVOURITES_COL, {"server":ctx.guild.id, "user":user.id})
 
         # Sort favourites by category
 

@@ -113,7 +113,7 @@ class AuxilliaryListener(commands.Cog):
             print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
             traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
         
-        if ctx.guild: await log(ctx.guild, "Failure: {}\nType: {}\nTraceback:{}".format(exception, type(exception).__name__, traceback.format_exception(type(exception), exception, exception.__traceback__)))
+        if ctx.guild: await log(ctx.guild, "Failure: {}\nType: {}\nTraceback:```{}```".format(exception, type(exception).__name__, traceback.format_exception(type(exception), exception, exception.__traceback__)))
         else: await ctx.send("```Failure: {}\nType: {}\nTraceback:{}```".format(exception, type(exception).__name__,  traceback.format_exception(type(exception), exception, exception.__traceback__)))
 
         # TODO print traceback
@@ -144,7 +144,7 @@ class AuxilliaryListener(commands.Cog):
             await ctx.send("Failure: {}".format(exception), delete_after=10)
 
         if type(exception) != commands.CommandNotFound:
-            await DM(f"Failure: {exception}\n {traceback.format_exception(type(exception), exception, exception.__traceback__)}", (await self.bot.application_info()).owner)
+            await DM(f"Failure: {exception}\n ```{traceback.format_exception(type(exception), exception, exception.__traceback__)}```", (await self.bot.application_info()).owner)
 
 
         
