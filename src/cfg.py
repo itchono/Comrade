@@ -1,5 +1,5 @@
 # version of the bot
-VERSION = "3.2 [Build August 1 v1]" 
+VERSION = "3.2 [Build August 1 v2]" 
 
 # set to True if you are testing the bot in a development environment, False otherwise
 DEVELOPMENT_MODE = False 
@@ -9,6 +9,7 @@ LOCAL_TIMEZONE = 'Canada/Eastern'
 
 # the thing you type at the beginning of a command
 BOT_PREFIX = "$c " 
+SECONDARY_PREFIX = ".c " # default: None
 
 # default status of the bot
 DEFAULT_STATUS = "[{}] Mechanizing Communism".format(BOT_PREFIX) 

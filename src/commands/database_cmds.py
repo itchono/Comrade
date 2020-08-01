@@ -77,12 +77,13 @@ class Databases(commands.Cog):
             "joke-mode": True, # allows for joke stuff to happen
             "kick-requirement": 6,
             "mute-requirement": 4,
-            "lethality-override": 0, # TODO defunct
+            # "lethality-override": 0, # TODO defunct
             "zahando-threshold": 3,
             "banned-words": [],
             "announcements-channel": 0,
             "meme-channel": 0,
-            "bot-channel": 0, # TODO defunct
+            # "bot-channel": 0, # TODO defunct
+            "vault-channel": 0,
             "log-channel": log_channel.id if log_channel else 0, # attempts to locate a log channel in the server
             "emote-directory": emote_directory.id if emote_directory else 0, # attempts to locate an emote directory in the server
             "custom-channel-group": 0, # id of the channel category under which you want to make custom channels

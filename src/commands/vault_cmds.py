@@ -65,7 +65,7 @@ class Vault(commands.Cog):
         '''
         Rebuilds vault cache
         '''
-        if vault := await getChannel(g, "vault channel"):
+        if vault := await getChannel(g, "vault-channel"):
             msgs = await vault.history(limit=None).flatten()
 
             posts = []
@@ -100,7 +100,7 @@ class Vault(commands.Cog):
 
                 msg = self.activeposts[reaction.message.id]["Message"]
 
-                vault = await getChannel(reaction.message.guild,"vault channel")
+                vault = await getChannel(reaction.message.guild,"vault-channel")
 
                 if not attachment_url:
                     m = await vault.send("Vault operation in progress...")
