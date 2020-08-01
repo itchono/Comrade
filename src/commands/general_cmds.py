@@ -1,11 +1,12 @@
 from utils.utilities import *
-from utils.mongo_interface import *
+
+import math
 
 
 class General(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self._last_member = None
+        
 
     @commands.command()
     async def version(self, ctx: commands.Context):
@@ -87,6 +88,33 @@ class General(commands.Cog):
 
         await ctx.send(f"Last message in {channel.mention} was sent on {t0.strftime('%B %m %Y at %I:%M:%S %p %Z')} by `{msg.author.display_name}` ({difference} days ago.)")
 
+    @commands.command()
+    async def moststale(self, ctx: commands.Context, limit:int = None):
+        '''
+        Returns the top n most stale channels (default: 15%)
+        '''
+
+        channels = {}
+
+        await ctx.trigger_typing()
+
+        for channel in ctx.guild.text_channels:
+            try:
+                msg = (await channel.history(limit=1).flatten()).pop()
+
+                t0 = UTCtoLocalTime(msg.created_at)
+                difference = (localTime() - t0).days
+
+                channels[channel.mention] = difference
+            except: pass # empty channel
+
+        if not limit: limit = math.ceil(0.15*len(channels)) # 15% of top
+
+        top = sorted([(channels[k], k) for k in channels], reverse=True)[:limit]
+
+        await ctx.send(f"Top {limit} most stale channels:\n" + "\n".join([f"{top.index(i) + 1}. {i[1]} ({i[0]} days)" for i in top]))
+
+
     @commands.command(name = "list")
     @commands.guild_only()
     async def customlist(self, ctx, operation, title=None, value=None):
@@ -95,11 +123,13 @@ class General(commands.Cog):
 
         Commands: "make", "makefrom", "add", "remove", "show", "all"
         '''
+        # TODO turn into command-subcommand deal
         if operation in {"make", "makefrom", "add", "remove", "show", "all"}:
 
             if operation == "make":
                 l = []
-                updatecustomList(ctx.guild.id, title, l)
+
+                DBupdate(LIST_COL, {"server":ctx.guild.id, "name":title}, {"server":ctx.guild.id, "name":title, "list":l})
                 await reactOK(ctx)
                 
             elif operation == "makefrom":
@@ -110,41 +140,43 @@ class General(commands.Cog):
 
                     for rxn in msg.reactions: l += [i.display_name for i in await rxn.users().flatten()]
                     
-                    updatecustomList(ctx.guild.id, title, l)
+                    DBupdate(LIST_COL, {"server":ctx.guild.id, "name":title}, {"server":ctx.guild.id, "name":title, "list":l})
                     await reactOK(ctx)
                 
                 except:
                     await ctx.send("Please specify a message to base list from.")
 
             elif operation == "show":
-                l = getcustomList(ctx.guild.id, title)
-                if l is not None:
+                try: 
+                    l = DBfind_one(LIST_COL, {"server":ctx.guild.id, "name":title})["list"]
                     await ctx.send("{}:\n{}".format(title, l))
-                else:
+                except:
                     await delSend(ctx, "List not found.")
             elif operation == "add":
-                l = getcustomList(ctx.guild.id, title)
-                if l is not None:
+                try: 
+                    l = DBfind_one(LIST_COL, {"server":ctx.guild.id, "name":title})["list"]
                     l.append(value)
-                    updatecustomList(ctx.guild.id, title, l)
+
+                    DBupdate(LIST_COL, {"server":ctx.guild.id, "name":title}, {"server":ctx.guild.id, "name":title, "list":l})
+
                     await reactOK(ctx)
-                else:
+                except:
                     await delSend(ctx, "List not found.")
 
             elif operation == "remove":
-                l = getcustomList(ctx.guild.id, title)
-                if l is not None:
+                try: 
+                    l = DBfind_one(LIST_COL, {"server":ctx.guild.id, "name":title})["list"]
                     try:
                         l.remove(value)
-                        updatecustomList(ctx.guild.id, title, l)
+                        DBupdate(LIST_COL, {"server":ctx.guild.id, "name":title}, {"server":ctx.guild.id, "name":title, "list":l})
                         await reactOK(ctx)
                     except:
                         await delSend(ctx, "Element {} not found.".format(value))
-                else:
+                except:
                     await delSend(ctx, "List not found.")
 
             elif operation == "all":
-                await ctx.send("{}".format([i["name"] for i in listcustomLists(ctx.guild.id)]))
+                await ctx.send("{}".format([i["name"] for i in DBfind(LIST_COL, {"server":ctx.guild.id})]))
 
 
 

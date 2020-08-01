@@ -1,5 +1,5 @@
 from utils.utilities import *
-from utils.mongo_interface import *
+
 
 import re
 from fuzzywuzzy import fuzz
@@ -11,7 +11,7 @@ class Emotes(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.EMOTE_CACHE = {}
-        self._last_member = None
+        
 
 
     async def rebuildcache(self):
@@ -22,12 +22,15 @@ class Emotes(commands.Cog):
 
         for g in self.bot.guilds:
             self.EMOTE_CACHE[g.id] = {}
-            directory = await getChannel(g, 'emote directory')
+            if directory := await getChannel(g, 'emote-directory'):
             
-            async for e in directory.history(limit=None):
-                self.EMOTE_CACHE[g.id][e.content.lower().split("\n")[0]] = e.content.split("\n")[1]
-        
-            await log(g, f"Emote cache built with {len(self.EMOTE_CACHE[g.id])} emotes.")
+                async for e in directory.history(limit=None):
+                    try: self.EMOTE_CACHE[g.id][e.content.lower().split("\n")[0]] = e.content.split("\n")[1]
+                    except: pass # dirty emote directory
+            
+                await log(g, f"Emote cache built with {len(self.EMOTE_CACHE[g.id])} emotes.")
+            else:
+                await log(g, f"Emote directory was not found.")
 
     @commands.command()
     @commands.guild_only()
@@ -41,7 +44,7 @@ class Emotes(commands.Cog):
             u = args[(len(args)-1)]
 
         if not name.lower() in self.EMOTE_CACHE[ctx.guild.id]:
-            emoteDirectory = await getChannel(ctx.guild, 'emote directory')
+            emoteDirectory = await getChannel(ctx.guild, 'emote-directory')
             await emoteDirectory.send('{}\n{}'.format(name.lower(), u))
             await ctx.send('Emote `{}` was added. you can call it using `:{}:`'.format(name.lower(), name.lower()))
             await self.rebuildcache() # refresh cache
@@ -62,7 +65,7 @@ class Emotes(commands.Cog):
 
         for i in range(0, len(emotes), break_lim): # break into chunks
             e = discord.Embed(title = "Custom Emotes for {} ({} to {})".format(ctx.guild.name, i+1, (i+1+break_lim if i+1+break_lim < len(emotes) else len(emotes))),
-            colour=discord.Colour.from_rgb(*THEME_COLOUR))
+            colour=discord.Colour.from_rgb(*DBcfgitem(ctx.guild.id,"theme-colour")))
             
             for k in emotes[i:i + break_lim]: e.add_field(name=k, value="[Link]({})".format(self.EMOTE_CACHE[ctx.guild.id][k]))
             
@@ -77,7 +80,7 @@ class Emotes(commands.Cog):
         Removes a custom emote from the Comrade Emote System
         '''
         if name.lower() in self.EMOTE_CACHE[ctx.guild.id]:
-            async for m in (await getChannel(ctx.guild, 'emote directory')).history(limit = None):
+            async for m in (await getChannel(ctx.guild, 'emote-directory')).history(limit = None):
                 if name.lower() in m.content:
                     await m.delete()
                     del self.EMOTE_CACHE[ctx.guild.id][name.lower()]
@@ -112,7 +115,7 @@ class Emotes(commands.Cog):
             if similar != []:
                 for k in similar: embed.add_field(name="Suggestion", value=":{}:".format(k))
             else:
-                directory = await getChannel(ctx.guild, 'emote directory')
+                directory = await getChannel(ctx.guild, 'emote-directory')
                 embed.add_field(name="Sorry, no similar results were found.", value="See {}, or type `{}listemotes` for a list of all emotes.".format(directory.mention, BOT_PREFIX))
 
             await ctx.send(embed=embed)

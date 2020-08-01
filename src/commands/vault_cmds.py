@@ -1,5 +1,4 @@
 from utils.utilities import *
-from utils.mongo_interface import *
 
 
 class Vault(commands.Cog):
@@ -7,7 +6,7 @@ class Vault(commands.Cog):
         self.bot = bot
         self.activeposts = {}  # active for tomato stuff
         self.vault_cache = {}
-        self._last_member = None
+        
 
     @commands.command()
     @commands.guild_only()
@@ -43,9 +42,13 @@ class Vault(commands.Cog):
         if len(ctx.message.attachments) > 0:
             u = ctx.message.attachments[0].url
         elif tgt and tgt.isnumeric():
-            u = await ctx.fetch_message(int(tgt))
+            u = await commands.MessageConverter().convert(tgt)
+            IDmode = True
+        elif u := await commands.MessageConverter().convert(tgt):
             IDmode = True
         else: u = tgt  # URL directly
+
+        VAULT_VOTE_DURATION = DBcfgitem(ctx.guild.id,"vault-vote-duration")
 
         m = await ctx.send(
             "React to this message with 🍅 to vault the post {}. You have **{} seconds** to vote.".format(
@@ -89,7 +92,8 @@ class Vault(commands.Cog):
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction,
-                              user: discord.User):
+                              user: discord.Member):
+        # TODO refactor into other stuff using wait_for
         if reaction.emoji == "🍅":
             if reaction.count > 1 and reaction.message.id in self.activeposts and (user != self.activeposts[reaction.message.id]["Message"].author or DEVELOPMENT_MODE):
                 attachment_url = self.activeposts[reaction.message.id]["Attachment URL"]
@@ -102,7 +106,7 @@ class Vault(commands.Cog):
                     m = await vault.send("Vault operation in progress...")
                     e = discord.Embed(title=":tomato: Echoed Vault Entry",
                                       description="See Echoed Message Below.",
-                                      colour=discord.Colour.from_rgb(*THEME_COLOUR))
+                                      colour=discord.Colour.from_rgb(*DBcfgitem(ctx.guild.id,"theme-colour")))
                     e.add_field(name='Original Post: ', value=msg.jump_url)
                     e.set_footer(text="Sent by {}".format(msg.author))
                     c = await self.bot.get_context(m)
@@ -113,7 +117,7 @@ class Vault(commands.Cog):
                 else:
                     # made by Slyflare
                     e = discord.Embed(title=":tomato: Vault Entry",
-                                      colour=discord.Colour.from_rgb(*THEME_COLOUR))
+                                      colour=discord.Colour.from_rgb(*DBcfgitem(ctx.guild.id,"theme-colour")))
                     e.set_image(url=str(attachment_url))
                     e.add_field(name='Original Post: ', value=msg.jump_url)
                     e.set_footer(text="Sent by {}".format(msg.author))

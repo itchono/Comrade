@@ -1,5 +1,5 @@
 from utils.utilities import *
-from utils.mongo_interface import *
+
 
 import datetime
 import traceback
@@ -8,7 +8,7 @@ import sys
 class AuxilliaryListener(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self._last_member = None
+        
 
     @commands.Cog.listener()
     async def on_member_join(self, user: discord.Member):
@@ -20,7 +20,7 @@ class AuxilliaryListener(commands.Cog):
         
         stp = self.bot.get_cog("Databases")
 
-        updateUser(stp.setupuser(user))
+        updateDBuser(stp.setupuser(user))
 
         cog = self.bot.get_cog("Users")
         await cog.rebuildcache(user.guild)
@@ -32,7 +32,8 @@ class AuxilliaryListener(commands.Cog):
         TODO reconfigure user DB
         '''
         await log(user.guild, "Left {}".format(user.name))
-        c = self.bot.get_channel(getCFG(user.guild.id)["announcements-channel"])
+        c = self.bot.get_channel(DBcfgitem(user.guild.id,"announcements-channel"))
+
         await c.send(f":door: {user.display_name} has left.")
 
     @commands.Cog.listener()
@@ -64,24 +65,25 @@ class AuxilliaryListener(commands.Cog):
         '''
         if (user.display_name != before.display_name):
             # member update
-            d = getUser(before.id, user.guild.id)
+            d = DBuser(before.id, user.guild.id)
             d["name"] = user.name
             d["nickname"] = user.nick if user.nick else user.name
-            updateUser(d)
+            updateDBuser(d)
             await log(user.guild, "Member Updated: {}".format(before.name))
 
         elif user.status != before.status:
             # status update
 
             if str(user.status) == "offline":
-                d = getUser(before.id, user.guild.id)
+                d = DBuser(before.id, user.guild.id)
                 d["last-online"] = localTime().strftime("%I:%M:%S %p %Z")
-                updateUser(d)
+                updateDBuser(d)
             
             else:
-                d = getUser(before.id, user.guild.id)
+                d = DBuser(before.id, user.guild.id)
                 d["last-online"] = "now"
-                updateUser(d)
+                updateDBuser(d)
+
 
             for i in d["check-when-online"]:
                 m = user.guild.get_member(i)
@@ -97,10 +99,10 @@ class AuxilliaryListener(commands.Cog):
         '''
         if (user.name != before.name):
             # user update
-            POSSIBLES = userQuery({"user":user.id})
+            POSSIBLES = DBfind(USER_COL, {"user":user.id})
             for u in POSSIBLES:
                 u["name"] = user.name
-                updateUser(u)
+                updateDBuser(u)
 
             await log(user.guild, "User Updated: {}".format(before.name))
 
@@ -111,8 +113,9 @@ class AuxilliaryListener(commands.Cog):
             print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
             traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
         
-        if ctx.guild: await log(ctx.guild, "Failure: {}\nType: {}\nTraceback:{}".format(exception, type(exception).__name__, exception.__traceback__.format_exc()))
-        else: await ctx.send("```Failure: {}\nType: {}\nTraceback:{}```".format(exception, type(exception).__name__, exception.__traceback__.format_exc()))
+        if ctx.guild: await log(ctx.guild, "Failure: {}\nType: {}\nTraceback:{}".format(exception, type(exception).__name__, traceback.format_exception(type(exception), exception, exception.__traceback__)))
+        else: await ctx.send("```Failure: {}\nType: {}\nTraceback:{}```".format(exception, type(exception).__name__,  traceback.format_exception(type(exception), exception, exception.__traceback__)))
+
         # TODO print traceback
 
         if type(exception) == commands.NoPrivateMessage:
@@ -140,6 +143,8 @@ class AuxilliaryListener(commands.Cog):
             await reactQuestion(ctx)
             await ctx.send("Failure: {}".format(exception), delete_after=10)
 
-        await DM(f"Failure: {exception}\n {exception.__traceback__.format_exc()}", (await self.application_info()).owner)
+        if type(exception) != commands.CommandNotFound:
+            await DM(f"Failure: {exception}\n {traceback.format_exception(type(exception), exception, exception.__traceback__)}", (await self.bot.application_info()).owner)
+
 
         
