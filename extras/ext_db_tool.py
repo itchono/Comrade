@@ -24,8 +24,7 @@ for u in users.find(None):
             del u[field]
 
     
-    # users.update({"_id":u["_id"]}, u)
-    print(u)
+    users.update({"_id":u["_id"]}, u)
 
 print("User Data has been refactored.")
 
@@ -38,4 +37,7 @@ for u in cfg.find(None):
         if " " in field:
             u[field.replace(" ", "-")] = u[field] 
             del u[field]
-    print(u)
+    
+    cfg.update({"_id":u["_id"]}, u)
+
+print("CFG Data has been refactored.")
