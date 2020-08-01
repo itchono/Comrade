@@ -24,9 +24,12 @@ class RandomEvents(commands.Cog):
         Changes the nickname of the above person
         '''
 
-        await ctx.send(f"__**~RANDOM EVENT~**__\nThe person above (Current name: {ctx.author.display_name}) will have their name changed to the first thing that the next person below says.")
+        e = discord.Embed()
+        e.set_image(url="https://i.kym-cdn.com/entries/icons/original/000/026/104/marioTestRender2.jpg")
 
-        def check(m): return not m.author.bot and m.content and m.author != ctx.author
+        await ctx.send(f"__**~RANDOM EVENT~**__\nThe person above (Current name: {ctx.author.display_name}) will have their name changed to the first thing that the next person below says.", embed=e)
+
+        def check(m): return not m.author.bot and m.content and m.author != ctx.author and m.channel == ctx.channel
 
         msg = await client.wait_for('message', check=check)
 
@@ -41,5 +44,5 @@ class RandomEvents(commands.Cog):
 
         if message.guild and not message.author.bot: 
 
-            if random.random() <= 0.01: await self.nameswap(await self.bot.get_context(message))
-            # E(X) is 100 messages
+            if random.random() <= 0.001: await self.nameswap(await self.bot.get_context(message))
+            # E(X) is 1000 messages

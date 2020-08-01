@@ -77,12 +77,16 @@ class BPCGame():
 
         for i in mapping: await DM(f"Round {self.round_number}: Draw something that describes the following prompt ```{self.pictochains[mapping[i]].prompt()}```", self.ctx.guild.get_member(i))
 
-        def check(m): return len(m.attachments) > 0 and m.author.id in pending
+        def check(m): return (len(m.attachments) > 0 or len(m.embeds) > 0) and m.author.id in pending
+        # also tolerate embed
 
         while pending:
             msg = await self.bot.wait_for('message', check=check)
 
-            self.pictochains[mapping[msg.author.id]].draw(self.ctx.guild.get_member(msg.author.id), msg.attachments[0].url)
+            if len(msg.attachments) > 0:
+                self.pictochains[mapping[msg.author.id]].draw(self.ctx.guild.get_member(msg.author.id), msg.attachments[0].url)
+            else:
+                self.pictochains[mapping[msg.author.id]].draw(self.ctx.guild.get_member(msg.author.id), msg.embeds[0].url)
             await msg.add_reaction("👍")
             pending.remove(msg.author.id)
 
@@ -102,7 +106,7 @@ class BPCGame():
             if self.round_number == 0:
                 await DM(f"Round {self.round_number}: Please type in your prompt below.", self.ctx.guild.get_member(i))
             else:
-                e = discord.Embed(title=f"Describe this drawing!")
+                e = discord.Embed(title=f"Describe this drawing!", url=self.pictochains[mapping[i]].image())
                 e.set_image(url=self.pictochains[mapping[i]].image())
                 await DM(f"Round {self.round_number}: Write something that describes the following drawing:", self.ctx.guild.get_member(i), e)
 
