@@ -55,7 +55,7 @@ class MessageHandler(commands.Cog):
                 "meme.mp4", "meme_rick_roll.mov", "Memes.mov", "Giorno.mp4", "meme_doom.mp4"
                 ]
 
-                if message.guild and message.channel == await getChannel(message.guild, "meme-channel"):
+                if message.guild and message.channel.id == DBcfgitem(message.guild.id,"meme-channel"):
 
                     fn = "meme_what.mp4"  # default safety
 
