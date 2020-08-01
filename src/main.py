@@ -19,6 +19,7 @@ https://discord.com/api/oauth2/authorize?client_id=707042278132154408&permission
 Requires MongoDB Set Up, with Database called Comrade, and Collections: 
 [ChannelCache, CustomCommands, CustomLists, CustomUsers, UserData, announcements, cfg, favourites]
 '''
+import sys
 from utils import *
 from polymorph import *
 from cosmo import *
@@ -73,6 +74,14 @@ async def on_ready():
         embed = discord.Embed(title="Comrade is Online", description="Version {}\nLogged in from {}.\nStartup done in {:.2f} seconds".format(VERSION, getHost(), time.perf_counter() - start_time))
         embed.add_field(name="Time", value=(localTime().strftime("%I:%M:%S %p %Z")))
         await DM("", (await client.application_info()).owner, embed)
+
+@client.event()
+async def on_disconnect():
+    '''
+    Bot crashes because of loss of connection
+    '''
+    # TODO make bot time-out as well if startup doesn't succeed
+    sys.exit(0)
 
 '''
 Users with threat-level >2 cannot use Comrade's features.
