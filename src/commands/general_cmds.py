@@ -124,24 +124,21 @@ class General(commands.Cog):
         BORDER_BOTTOM = "╚═══.·:·.✧    ✦    ✧.·:·.═══╝"
 
         words = content.split(" ")
-
-        max_word =  max(words, key = len)
-                       
-        if len(max_word) > len(BORDER_TOP):
-            first_half = max_word[:len(BORDER_TOP)-2] + '-'
-            second_half = max_word[len(BORDER_TOP)-2:]
-            i = words.index(max_word)
-            words = words[:i] + [first_half, second_half] + words[i+1:]
-
+        len_border = len(BORDER_TOP)
         lines = []
         buffer = ""
-                       
+
         while words:
+            if len(words[0]) > len_border:
+                    max_word = words.pop(0)
+                    split = [max_word[:len_border-2] + '-', max_word[len_border-2:]]
+                    words = split + words
             while words and len(buffer + words[0]) < len(BORDER_TOP):
                     buffer += words.pop(0) + " "
-            lines.append(buffer.center(len(BORDER_TOP))
+            buffer = buffer.center(len(BORDER_TOP))
+            lines.append(buffer)
             buffer = ""
-
+                       
         content = "\n".join(lines)
 
         c = self.bot.get_cog("Echo")
