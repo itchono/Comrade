@@ -123,25 +123,26 @@ class General(commands.Cog):
         ACCENT_BORDER = "      ≻───── ⋆✩⋆ ─────≺"
         BORDER_BOTTOM = "╚═══.·:·.✧    ✦    ✧.·:·.═══╝"
 
-        content_half_padding = round((len(BORDER_TOP) - len(content))/2) # used to center the content so that the border is even
+        words = content.split(" ")
 
-        if content_half_padding > 0:
-            content = " "*content_half_padding + content + " "*content_half_padding
-        
-        elif content_half_padding < 0:
-            # need to wrap the content
+        max_word =  max(words, key = len)
+                       
+        if len(max_word) > len(BORDER_TOP):
+            first_half = max_word[:len(BORDER_TOP)-2] + '-'
+            second_half = max_word[len(BORDER_TOP)-2:]
+            i = words.index(max_word)
+            words = words[:i] + [first_half, second_half] + words[i+1:]
 
-            words = content.split(" ")
-            lines = []
+        lines = []
+        buffer = ""
+                       
+        while words:
+            while words and len(buffer + words[0]) < len(BORDER_TOP):
+                    buffer += words.pop(0) + " "
+            lines.append(buffer.center(len(BORDER_TOP))
             buffer = ""
 
-            while words:
-                while len(buffer) < len(BORDER_TOP) and words:
-                    buffer += words.pop(0) + " "
-                lines.append(buffer)
-                buffer = ""
-
-            content = "\n".join(lines)
+        content = "\n".join(lines)
 
         c = self.bot.get_cog("Echo")
 
