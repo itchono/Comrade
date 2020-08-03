@@ -56,10 +56,13 @@ class TextFilter(commands.Cog):
     def filter(self, ctx: commands.Context, content: str):
         '''
         Detects if the string violates the moderation guidelines for a given context.
-        Optionally takes in message as filter parameter to stop-images and pings
         '''
         query = re.sub("\W+", '', unidecode.unidecode(content.lower()))
-        # remove spaces, remove non-ascii, get into formattable form
+        # remove non-ascii, attempt to decode unicode, get into formattable form
+
+        # TODO Filter improvements
+        # - Check end-cap letters i.e. banana --> baanna
+        # - Add requirement to partial filter
 
         u = DBuser(ctx.author.id, ctx.guild.id)
 

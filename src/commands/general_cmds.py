@@ -114,6 +114,39 @@ class General(commands.Cog):
 
         await ctx.send(f"Top {limit} most stale channels:\n" + "\n".join([f"{top.index(i) + 1}. {i[1]} ({i[0]} days)" for i in top]))
 
+    @commands.command()
+    async def news(self, ctx:commands.Context,*, content):
+        '''
+        Wraps a piece of text in a fancy border for news
+        '''
+        BORDER_TOP =    "╔═══.·:·.✧    ✦    ✧.·:·.═══╗"
+        ACCENT_BORDER = "      ≻───── ⋆✩⋆ ─────≺"
+        BORDER_BOTTOM = "╚═══.·:·.✧    ✦    ✧.·:·.═══╝"
+
+        content_half_padding = round((len(BORDER_TOP) - len(content))/2) # used to center the content so that the border is even
+
+        if content_half_padding > 0:
+            content = " "*content_half_padding + content + " "*content_half_padding
+        
+        elif content_half_padding < 0:
+            # need to wrap the content
+
+            words = content.split(" ")
+            lines = []
+            buffer = ""
+
+            while words:
+                while len(buffer) < len(BORDER_TOP) and words:
+                    buffer += words.pop(0) + " "
+                lines.append(buffer)
+                buffer = ""
+
+            content = "\n".join(lines)
+
+        c = self.bot.get_cog("Echo")
+
+        await c.echo(ctx, f"**```{BORDER_TOP}\n{ACCENT_BORDER}\n{content}\n{ACCENT_BORDER}\n{BORDER_BOTTOM}```**", str(ctx.author.id))
+
 
     @commands.command(name = "list")
     @commands.guild_only()
