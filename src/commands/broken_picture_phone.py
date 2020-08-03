@@ -126,7 +126,7 @@ class BPCGame():
         Starts the game
         '''
 
-        if not rounds: rounds = len(self.players)
+        if not rounds: rounds = len(self.players)-1
 
         for p in self.players:
             self.pictochains[p.id] = PictoChain(p)
