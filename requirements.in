@@ -5,6 +5,7 @@ python-Levenshtein
 requests
 unidecode
 dnspython
+PyDictionary
 pymongo
 pybooru
 bs4
