@@ -1,6 +1,7 @@
 from utils.utilities import *
 
 import math
+from PyDictionary import PyDictionary
 
 
 class General(commands.Cog):
@@ -41,6 +42,31 @@ class General(commands.Cog):
         Cleans up commands from sent from users in a channel.
         '''
         await ctx.channel.purge(check=isCommand, bulk=True)
+
+    @commands.command()
+    async def define(self, ctx:commands.Context,*, word):
+        '''
+        Defines a word in a dictionary
+        '''
+        dictionary=PyDictionary()
+
+        printout = f"**__{word}__:**\n"
+
+        if meanings := dictionary.meaning(word):
+            
+            for wordtype in meanings:
+                defs = meanings[wordtype]
+                printout += f"__{wordtype}__\n"
+
+                for num, d in enumerate(defs, 1):
+                    printout += f"{num}. {d}\n"
+
+            await ctx.send(printout)
+
+        else:
+            await delSend(f"Definition for `{word}` could not be found.")
+
+        
 
     @commands.command()
     @commands.check_any(commands.is_owner(), isServerOwner())
