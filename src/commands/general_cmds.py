@@ -2,7 +2,7 @@ from utils.utilities import *
 
 import math
 from PyDictionary import PyDictionary
-
+import html2text
 
 class General(commands.Cog):
     def __init__(self, bot):
@@ -44,7 +44,7 @@ class General(commands.Cog):
         await ctx.channel.purge(check=isCommand, bulk=True)
 
     @commands.command()
-    async def define(self, ctx:commands.Context,*, word):
+    async def define(self, ctx:commands.Context,*, word, source = 'WordNet'):
         '''
         Defines a word in a dictionary
         '''
@@ -52,8 +52,34 @@ class General(commands.Cog):
 
         printout = f"**__{word}__:**\n"
 
-        if meanings := dictionary.meaning(word):
+        if source = 'urban dictionary':
             
+            user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
+            headers={'User-Agent':user_agent,}
+            tags = '%20'.join(args.split(" "))
+            url = 'https://www.urbandictionary.com/define.php?term=' + tags
+            
+            request = urllib.request.Request(url,None,headers)
+            try:
+                response = urllib.request.urlopen(request)
+            except:
+                print("No results found.")
+                return
+
+            data = response.read()
+            soup = BeautifulSoup(data, 'html.parser')
+            r = '(?<=<div class\="meaning">)(.*?)(?=<div class\="def-footer">)' #'(?<=href\="/define\.php\?term\='+tags+'" name\=)(.*?)(?=<div class\="def-footer">)'
+            num_results = re.findall(r, str(soup))
+
+            h = html2text.HTML2Text()
+            h.ignore_links = True
+            def_1 = h.handle(str(BeautifulSoup(num_results[0])))
+
+            printout += def_1  
+            await ctx.send(printout)
+        
+        elif source == 'WordNet' and (meanings := dictionary.meaning(word)):
+     
             for wordtype in meanings:
                 defs = meanings[wordtype]
                 printout += f"__{wordtype}__\n"
