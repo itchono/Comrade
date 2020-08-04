@@ -36,13 +36,14 @@ class RandomEvents(commands.Cog):
         try:    
             await ctx.author.edit(nick=msg.content, reason="Comrade name change")
             await ctx.send(f"{ctx.author.mention}, your name has been changed to `{msg.content}`!")
-        except:
+        except Exception as e:
             await ctx.send(f"{ctx.author.mention}, you must change your name to `{msg.content}`!")
+            await ctx.send(e)
 
     @commands.Cog.listener()
     async def on_message(self, message):
 
         if message.guild and not message.author.bot: 
 
-            if random.random() <= 0.001: await self.nameswap(await self.bot.get_context(message))
+            if random.random() <= 0.007: await self.nameswap(await self.bot.get_context(message))
             # E(X) is 1000 messages
