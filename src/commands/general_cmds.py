@@ -122,29 +122,27 @@ class General(commands.Cog):
         BORDER_TOP =    "╔═══.·:·.✧    ✦    ✧.·:·.═══╗"
         ACCENT_BORDER = "      ≻───── ⋆✩⋆ ─────≺"
         BORDER_BOTTOM = "╚═══.·:·.✧    ✦    ✧.·:·.═══╝"
+        len_border = len(BORDER_TOP)
 
-        content_half_padding = round((len(BORDER_TOP) - len(content))/2) # used to center the content so that the border is even
+        words = content.split(" ")
+        lines = []
+        buffer = "" # line buffer
 
-        if content_half_padding > 0:
-            content = " "*content_half_padding + content + " "*content_half_padding
-        
-        elif content_half_padding < 0:
-            # need to wrap the content
+        while words:
+            # do until the array of words is empty
 
-            words = content.split(" ")
-            lines = []
+            if len(words[0]) >= len_border and (max_word := words.pop(0)): words = [max_word[:len_border-2] + '-', max_word[len_border-2:]] + words
+
+            while words and len(buffer + words[0]) < len_border: buffer += words.pop(0) + " "
+            
+            lines.append(buffer.strip(" ").center(len_border)) # center the text in the block after removing spaces
             buffer = ""
-
-            while words:
-                while len(buffer) < len(BORDER_TOP) and words:
-                    buffer += words.pop(0) + " "
-                lines.append(buffer)
-                buffer = ""
-
-            content = "\n".join(lines)
+                       
+        content = "\n".join(lines)
 
         c = self.bot.get_cog("Echo")
 
+        # using monospaced font to fix spacing
         await c.echo(ctx, f"**```{BORDER_TOP}\n{ACCENT_BORDER}\n{content}\n{ACCENT_BORDER}\n{BORDER_BOTTOM}```**", str(ctx.author.id))
 
 
