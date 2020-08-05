@@ -224,7 +224,7 @@ class NSFW(commands.Cog):
 
                 elif len(tokens) == 3:
 
-                    fav = DBfind_one(FAVOURITES_COL, {"server":ctx.guild.id, "imageID":tokens[2], "user":(await extractUser(ctx, tokens[0])).id, "category":tokens[1] if tokens[1] else ""})
+                    fav = DBfind_one(FAVOURITES_COL, {"server":ctx.guild.id, "imageID":tokens[2], "user":(await getUser(ctx, tokens[0])).id, "category":tokens[1] if tokens[1] else ""})
 
                 
                 e = discord.Embed()

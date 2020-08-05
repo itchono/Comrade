@@ -148,7 +148,7 @@ class Fun(commands.Cog):
         Detects bad.
         By Kevinozoid
         '''
-        if (ctx.author== await (extractUser(ctx,"itchono"))): await ctx.send("you are in fact bad")
+        if (ctx.author== await (getUser(ctx,"itchono"))): await ctx.send("you are in fact bad")
         else: await ctx.send("you are in fact non-bad")
 
     @commands.command()
@@ -360,7 +360,7 @@ class Fun(commands.Cog):
                 9999: "\nIf someone reaches this, good job, you have earned my respect - Stephen Luu June 13, 2020."
             }
 
-            if u := await extractUser(ctx, guess):
+            if u := await getUser(ctx, guess):
                 if u.display_name == self.activeGuess:
                     out = "Congratulations you gave guessed right!"
                     self.guessState = False 

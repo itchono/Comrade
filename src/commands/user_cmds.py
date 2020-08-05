@@ -17,7 +17,7 @@ class Users(commands.Cog):
         if not target:
             target = ctx.author.mention
 
-        if u := await extractUser(ctx, target):
+        if u := await getUser(ctx, target):
             if ctx.guild:
                 # server environment
                 a = discord.Embed(color=discord.Color.dark_blue(), 
@@ -33,20 +33,55 @@ class Users(commands.Cog):
                 await ctx.send(embed=a)
         # error case triggers automatically.
 
-    @commands.command()
+    @commands.group(invoke_without_command=True)
     async def userinfo(self, ctx: commands.Context, *, target=None):
         '''
         Displays User Information of said person
         Made by Slyflare, upgraded by itchono
-
-        use userinfo full <person> to get a more detailed list of info
         '''
-        full = False
-        try:
-            if "full" in target:
-                full = True
-                target = " ".join(target.split(" ")[1:])
-        except: pass
+        if not target:
+            target = ctx.author.mention
+
+        if ctx.guild and (custom := DBfind_one(CUSTOMUSER_COL, {"name":target, "server":ctx.guild.id})):
+            e = discord.Embed(title="{} (Custom User)".format(target))
+            e.set_author(name=f"User Info - {target}")
+            e.set_thumbnail(url=custom["url"])
+            e.set_footer(icon_url=custom["url"])
+
+            await ctx.send(embed=e)
+
+        elif member := await getUser(ctx, target):
+            e = discord.Embed(title="Info for {}".format(member.name), colour=member.colour)
+            e.set_author(name=f"User Info - {member}")
+            e.set_thumbnail(url=member.avatar_url)
+            e.set_footer(icon_url=ctx.author.avatar_url)
+
+            if ctx.guild:
+
+                roles = [role for role in member.roles]
+
+                u = DBuser(member.id, ctx.guild.id)
+
+                for c in u:
+                    if c == "daily-weight": e.add_field(name=c, value=u[c], inline=True)
+                
+                e.add_field(name=f"Roles: ({len(roles)})", value=" ".join([role.mention for role in member.roles]))
+                try: e.add_field(name="Joined Server", value=f"{member.joined_at.strftime('%B %m %Y at %I:%M:%S %p %Z')}")
+                except: pass
+                e.add_field(name="Account Created", value=member.created_at.strftime('%B %m %Y at %I:%M:%S %p %Z'))
+            
+            else:
+                e.add_field(name="Account Created", value=member.created_at.strftime('%B %m %Y at %I:%M:%S %p %Z'))
+                e.add_field(name="No more info available", value="Comrade is in a DM environment, and therefore has no information stored. Try calling this in a server with Comrade set up.", inline=True)
+
+
+            await ctx.send(embed=e)
+
+    @userinfo.command()
+    async def full(self, ctx: commands.Context, *, target=None):
+        '''
+        More detailed user info
+        '''
 
         if not target:
             target = ctx.author.mention
@@ -59,7 +94,7 @@ class Users(commands.Cog):
 
             await ctx.send(embed=e)
 
-        elif member := await extractUser(ctx, target):
+        elif member := await getUser(ctx, target):
             e = discord.Embed(title="Info for {}".format(member.name), colour=member.colour)
             e.set_author(name=f"User Info - {member}")
             e.set_thumbnail(url=member.avatar_url)
@@ -71,9 +106,8 @@ class Users(commands.Cog):
 
                 u = DBuser(member.id, ctx.guild.id)
 
-                if full:
-                    for c in u:
-                        if c != "_id": e.add_field(name=c, value=u[c], inline=True)
+                for c in u:
+                    if c != "_id": e.add_field(name=c, value=u[c], inline=True)
                 
                 e.add_field(name=f"Roles: ({len(roles)})", value=" ".join([role.mention for role in member.roles]))
                 try: e.add_field(name="Joined Server", value=f"{member.joined_at.strftime('%B %m %Y at %I:%M:%S %p %Z')}")
@@ -161,7 +195,7 @@ class Users(commands.Cog):
         OP = isOP(ctx) # check before trimming
 
         s = "```"
-        for i in [await extractUser(ctx, str(j)) for j in member_ids]:
+        for i in [await getUser(ctx, str(j)) for j in member_ids]:
             s += i.display_name + "\n"
             
             if trim and OP:
@@ -254,7 +288,7 @@ class Users(commands.Cog):
         '''
         Makes it so that when a user comes online, you are notified by Comrade
         '''
-        if u := await extractUser(ctx, target):
+        if u := await getUser(ctx, target):
             d = DBuser(u.id, ctx.guild.id)
             try: 
                 d["check-when-online"].remove(ctx.author.id)
