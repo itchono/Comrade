@@ -4,6 +4,7 @@ python-dotenv
 python-Levenshtein
 requests
 unidecode
+html2text
 dnspython
 PyDictionary
 pymongo

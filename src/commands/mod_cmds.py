@@ -14,7 +14,7 @@ class Moderation(commands.Cog):
         Votes to mute a selected user.
         As OP: Mute the user
         '''
-        u = await extractUser(ctx, target)
+        u = await getUser(ctx, target)
         mutedrole = await mutedRole(ctx.guild)
 
         if isOP(ctx):
@@ -73,7 +73,7 @@ class Moderation(commands.Cog):
         '''
         Votes to kick a user from the server.
         '''
-        u = await extractUser(ctx, target)
+        u = await getUser(ctx, target)
 
         usr = DBuser(u.id, ctx.guild.id)
         vk = usr["kick-votes"]
@@ -116,7 +116,7 @@ class Moderation(commands.Cog):
     #     set: Set numerical type
     #     toggle: Switch a boolean
     #     '''
-    #     if u := await extractUser(ctx, target):
+    #     if u := await getUser(ctx, target):
 
     #         if operation in {"add", "remove", "pop"}:
     #             if l := getuserList(u.id, ctx.guild.id, listname):

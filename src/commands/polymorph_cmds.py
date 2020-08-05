@@ -55,7 +55,7 @@ class Polymorph(commands.Cog):
 
         async with ctx.channel.typing():
             if number > 100 or number < 0: await ctx.send("No")
-            elif user := await extractUser(ctx, target):
+            elif user := await getUser(ctx, target):
                 c = self.bot.get_cog("Echo")
 
                 try:
@@ -83,7 +83,7 @@ class Polymorph(commands.Cog):
             t_start = time.perf_counter()
 
             if ctx.guild.id in self.localcache:
-                if user := await extractUser(ctx, target):
+                if user := await getUser(ctx, target):
                     
                     # check to see if we have too many models cached
                     if len(self.models) >= RAM_LIMIT:

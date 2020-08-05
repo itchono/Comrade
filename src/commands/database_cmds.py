@@ -166,7 +166,7 @@ class Databases(commands.Cog):
         '''
         Configures a user, mentioned by ping, id, or nickname. Leave value as none to delete field.
         '''
-        u = DBuser((await extractUser(ctx, tgt)).id, ctx.guild.id)
+        u = DBuser((await getUser(ctx, tgt)).id, ctx.guild.id)
 
         if not value:
             try:
@@ -202,19 +202,32 @@ class Databases(commands.Cog):
 
         await reactOK(ctx)
 
-    @commands.command()
+    @commands.group(invoke_without_command=True)
     @commands.guild_only()
-    async def serverinfo(self, ctx: commands.Context, full = None):
+    async def serverinfo(self, ctx: commands.Context):
         '''
         Gets information about the server, with optional argument to view full configuration for server.
         '''
-        s = ""
+        e = discord.Embed(title="Information for {}".format(
+            ctx.guild.name), colour=discord.Colour.from_rgb(*DBcfgitem(ctx.guild.id,"theme-colour")))
+        e.set_thumbnail(url=ctx.guild.icon_url)
 
-        if full:
-            s = "Comrade Configuration:\n"
-            c = DBfind_one(SERVERCFG_COL, {"_id":ctx.guild.id})
-            for k in c:
-                if k != "_id": s += str(k) + ": " + str(c[k]) + "\n"
+        e.add_field(name="Server Created", value=ctx.guild.created_at.strftime('%B %m %Y at %I:%M:%S %p %Z'))
+        e.add_field(name="Number of Text Channels", value=len(ctx.guild.text_channels))
+        e.add_field(name="Number of Total Members", value=ctx.guild.member_count)
+        e.add_field(name="Number of Human Members", value=len([i for i in ctx.guild.members if not i.bot]))
+        e.add_field(name="Owner", value=ctx.guild.owner.mention)
+        await ctx.send(embed=e)
+
+    @serverinfo.command()
+    async def full(self, ctx: commands.Context):
+        '''
+        Full server info.
+        '''
+        s = "Comrade Configuration:\n"
+        c = DBfind_one(SERVERCFG_COL, {"_id":ctx.guild.id})
+        for k in c:
+            if k != "_id": s += str(k) + ": " + str(c[k]) + "\n"
 
         e = discord.Embed(title="Information for {}".format(
             ctx.guild.name), description=s, colour=discord.Colour.from_rgb(*DBcfgitem(ctx.guild.id,"theme-colour")))
@@ -226,6 +239,7 @@ class Databases(commands.Cog):
         e.add_field(name="Number of Human Members", value=len([i for i in ctx.guild.members if not i.bot]))
         e.add_field(name="Owner", value=ctx.guild.owner.mention)
         await ctx.send(embed=e)
+
         
     
 
