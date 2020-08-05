@@ -130,7 +130,7 @@ async def getavatar(member: discord.Member):
 '''
 Converters and Stuff
 '''
-async def extractUser(ctx: commands.Context, tgt: str, verbose=True):
+async def getUser(ctx: commands.Context, tgt: str, verbose=True):
     '''
     Returns a server member or user; based on display name in server, user ID, or by mention.
     '''

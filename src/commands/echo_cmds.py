@@ -34,7 +34,7 @@ class Echo(commands.Cog):
         if u := DBfind_one(CUSTOMUSER_COL, {"name":target, "server":ctx.guild.id}):
             await webhook.send(text, username=u["name"], avatar_url=u["url"])
         else:
-            if u := (await extractUser(ctx, target, verbose=False) if target else ctx.author):
+            if u := (await getUser(ctx, target, verbose=False) if target else ctx.author):
                 # uses self if no target given
                 await webhook.send(text, username=u.display_name, avatar_url=u.avatar_url)
             else:

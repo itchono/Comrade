@@ -69,7 +69,7 @@ class TextFilter(commands.Cog):
         words = u["banned-words"] + DBcfgitem(ctx.guild.id, "banned-words")
 
         for w in words:
-            if (len(query) > 3 and fuzz.partial_ratio(query, w) >= 80) or fuzz.ratio(query, w) >= 70:
+            if (len(query) > 3 and fuzz.partial_ratio(query, w) >= 80) or query == w:
                 return True
 
         return False

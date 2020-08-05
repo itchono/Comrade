@@ -34,7 +34,7 @@ class RandomEvents(commands.Cog):
         msg = await client.wait_for('message', check=check)
 
         try:    
-            await ctx.author.edit(nick=msg.content, reason="Comrade name change")
+            await ctx.author.edit(nick=msg.content[:32], reason="Comrade name change") # Note: must be less than 32 char
             await ctx.send(f"{ctx.author.mention}, your name has been changed to `{msg.content}`!")
         except Exception as e:
             await ctx.send(f"{ctx.author.mention}, you must change your name to `{msg.content}`!")
