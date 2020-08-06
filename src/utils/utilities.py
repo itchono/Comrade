@@ -39,6 +39,15 @@ def isServerOwner():
         return ctx.guild and (ctx.author.id == ctx.guild.owner.id or DEVELOPMENT_MODE)
     return commands.check(predicate)
 
+def isUser(name:str):
+    
+    def predicate(ctx: commands.Context):
+        '''
+        Determines whether message author bears the name.
+        '''
+        return ctx.author.name == name
+    return commands.check(predicate)
+
 def jokeMode(ctx: commands.Context):
     '''
     Determines whether Comrade should do the small jokey things.
@@ -203,6 +212,17 @@ async def mutedRole(guild: discord.Guild):
             return role
     
     return await guild.create_role(name="Comrade-Mute")
+
+async def rickRole(guild: discord.Guild):
+    '''
+    Returns the Comrade "Rick" role for a guild, if it exists, or creates it.
+    '''
+    for role in guild.roles:
+        if role.name == "Rick":
+            return role
+    
+    return await guild.create_role(name="Rick", colour=discord.Colour.from_rgb(92, 199, 81), mentionable=True)
+
 
 '''
 Database
