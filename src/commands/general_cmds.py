@@ -2,6 +2,10 @@ from utils.utilities import *
 
 import math
 
+from PyDictionary import PyDictionary
+import html2text
+import urllib.request
+from bs4 import BeautifulSoup
 
 class General(commands.Cog):
     def __init__(self, bot):
@@ -42,6 +46,82 @@ class General(commands.Cog):
         '''
         await ctx.channel.purge(check=isCommand, bulk=True)
 
+    @commands.group(invoke_without_command=True)
+    async def define(self, ctx:commands.Context, *, word):
+        '''
+        Defines a word
+        '''
+        if ctx.invoked_subcommand is None:
+            await ctx.trigger_typing()
+
+            dictionary=PyDictionary()
+
+            if (meanings := dictionary.meaning(word)):
+
+                printout = f"**__{string.capwords(word)}__:**\n"
+     
+                for wordtype in meanings:
+                    defs = meanings[wordtype]
+                    printout += f"__{wordtype}__\n"
+
+                    for num, d in enumerate(defs, 1):
+                        printout += f"{num}. {d}\n"
+
+                await ctx.send(printout)
+            
+            else:
+                await delSend(ctx, f"Definition for `{word}` could not be found.")
+
+
+    @define.command()
+    async def urban(self, ctx:commands.Context,*, word):
+        '''
+        Defines a word in a dictionary
+
+        Credits to MgWg
+        '''
+        printout = f"**__{string.capwords(word)}__:**\n"
+
+        await ctx.trigger_typing()
+            
+        user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
+        headers={'User-Agent':user_agent,}
+        tags = '%20'.join(word.split(" "))
+        url = 'https://www.urbandictionary.com/define.php?term=' + tags
+        
+        request = urllib.request.Request(url,None,headers)
+        try:
+            response = urllib.request.urlopen(request)
+        except:
+            print("No results found.")
+            return
+
+        data = response.read()
+        soup = BeautifulSoup(data, 'html.parser')
+        r = '(?<=<div class\="meaning">)(.*?)(?=<div class\="def-footer">)' #'(?<=href\="/define\.php\?term\='+tags+'" name\=)(.*?)(?=<div class\="def-footer">)'
+        num_results = re.findall(r, str(soup))
+
+        h = html2text.HTML2Text()
+        h.ignore_links = True
+
+        def_1 = BeautifulSoup(num_results[0], features="html.parser")
+        ex = def_1.find_all('div', {'class':'example'})
+        example = BeautifulSoup(str(ex[0]), features="html.parser").get_text()
+        index = def_1.get_text().index(example)
+        def_1 = def_1.get_text()[:index]
+
+        printout += def_1  + f"\n\n__Example:__\n*{example}*"
+        await ctx.send(printout)    
+
+    @commands.command()
+    @commands.guild_only()
+    async def disappear(self, ctx:commands.Context, duration:int, *, message):
+        '''
+        Sends an automatically disappearing message
+        '''
+        c = self.bot.get_cog("Echo")
+        await c.echo(ctx, text(model, number), str(user.id), deleteMsg=False)
+
     @commands.command()
     @commands.check_any(commands.is_owner(), isServerOwner())
     async def shutdown(self, ctx:commands.Context):
@@ -57,7 +137,7 @@ class General(commands.Cog):
         DM given user
         Made by vdoubleu
         '''
-        if u := await extractUser(ctx, target):
+        if u := await getUser(ctx, target):
             await DM(message, u, discord.Embed(title="", description = "Sent by {}".format(ctx.author)))
             await ctx.send("DM sent to {}".format(target), delete_after=10)
 
@@ -128,10 +208,10 @@ class General(commands.Cog):
         lines = []
         buffer = "" # line buffer
 
-        while words:
-            # do until the array of words is empty
-
+        while words: # do until the array of words is empty
+            
             if len(words[0]) >= len_border and (max_word := words.pop(0)): words = [max_word[:len_border-2] + '-', max_word[len_border-2:]] + words
+            # case: word is too long
 
             while words and len(buffer + words[0]) < len_border: buffer += words.pop(0) + " "
             
@@ -140,10 +220,13 @@ class General(commands.Cog):
                        
         content = "\n".join(lines)
 
-        c = self.bot.get_cog("Echo")
+        if ctx.guild:
+            c = self.bot.get_cog("Echo")
 
-        # using monospaced font to fix spacing
-        await c.echo(ctx, f"**```{BORDER_TOP}\n{ACCENT_BORDER}\n{content}\n{ACCENT_BORDER}\n{BORDER_BOTTOM}```**", str(ctx.author.id))
+            # using monospaced font to fix spacing
+            await c.echo(ctx, f"**```{BORDER_TOP}\n{ACCENT_BORDER}\n{content}\n{ACCENT_BORDER}\n{BORDER_BOTTOM}```**", str(ctx.author.id))
+        else:
+            await ctx.send(f"**```{BORDER_TOP}\n{ACCENT_BORDER}\n{content}\n{ACCENT_BORDER}\n{BORDER_BOTTOM}```**")
 
 
     
