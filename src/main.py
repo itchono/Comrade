@@ -80,8 +80,12 @@ async def on_disconnect():
     '''
     Bot crashes because of loss of connection
     '''
-    # TODO make bot time-out as well if startup doesn't succeed
-    sys.exit(0)
+    try: 
+        dc_time = time.perf_counter()
+        await client.wait_for("connect", timeout=300.0)
+        await DM(f"Bot reconnected after {time.perf_counter() - dc_time} of downtime.", (await client.application_info()).owner)
+
+    except asyncio.TimeoutError: sys.exit(0)  
 
 '''
 Users with threat-level >2 cannot use Comrade's features.

@@ -29,11 +29,11 @@ class AuxilliaryListener(commands.Cog):
     async def on_member_remove(self, user: discord.Member):
         '''
         When a member leaves the server
-        TODO reconfigure user DB
         '''
         await log(user.guild, "Left {}".format(user.name))
         c = self.bot.get_channel(DBcfgitem(user.guild.id,"announcements-channel"))
 
+        DBremove_one(USER_COL, {"server":user.guild.id, "user":user.id})
         await c.send(f":door: {user.display_name} has left.")
 
     @commands.Cog.listener()

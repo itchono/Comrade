@@ -21,6 +21,7 @@ matplotlib==3.2.1         # via -r requirements.in
 multidict==4.7.6          # via aiohttp, yarl
 numpy==1.18.5             # via -r requirements.in, matplotlib
 pybooru==4.2.0            # via -r requirements.in
+PyDictionary==2.0.1
 pymongo==3.10.1           # via -r requirements.in
 pyparsing==2.4.7          # via matplotlib
 python-dateutil==2.8.1    # via matplotlib
@@ -34,6 +35,7 @@ unidecode==1.1.1          # via -r requirements.in
 urllib3==1.25.9           # via requests
 websockets==8.1           # via discord.py
 yarl==1.4.2               # via aiohttp
+html2text==2020.1.16
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
