@@ -208,10 +208,10 @@ class General(commands.Cog):
         lines = []
         buffer = "" # line buffer
 
-        while words:
-            # do until the array of words is empty
-
+        while words: # do until the array of words is empty
+            
             if len(words[0]) >= len_border and (max_word := words.pop(0)): words = [max_word[:len_border-2] + '-', max_word[len_border-2:]] + words
+            # case: word is too long
 
             while words and len(buffer + words[0]) < len_border: buffer += words.pop(0) + " "
             
@@ -220,10 +220,13 @@ class General(commands.Cog):
                        
         content = "\n".join(lines)
 
-        c = self.bot.get_cog("Echo")
+        if ctx.guild:
+            c = self.bot.get_cog("Echo")
 
-        # using monospaced font to fix spacing
-        await c.echo(ctx, f"**```{BORDER_TOP}\n{ACCENT_BORDER}\n{content}\n{ACCENT_BORDER}\n{BORDER_BOTTOM}```**", str(ctx.author.id))
+            # using monospaced font to fix spacing
+            await c.echo(ctx, f"**```{BORDER_TOP}\n{ACCENT_BORDER}\n{content}\n{ACCENT_BORDER}\n{BORDER_BOTTOM}```**", str(ctx.author.id))
+        else:
+            await ctx.send(f"**```{BORDER_TOP}\n{ACCENT_BORDER}\n{content}\n{ACCENT_BORDER}\n{BORDER_BOTTOM}```**")
 
 
     @commands.command(name = "list")
