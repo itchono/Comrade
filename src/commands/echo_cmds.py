@@ -1,6 +1,13 @@
 from utils.utilities import *
 
 
+def isWebhook(message: discord.Message):
+    '''
+    Checks if it's a webhook
+    '''
+    return message.author.discriminator == "0000"
+
+
 class Echo(commands.Cog):
     def __init__(self, bot):
         self.bot = bot

@@ -7,6 +7,12 @@ import html2text
 import urllib.request
 from bs4 import BeautifulSoup
 
+def isCommand(message: discord.Message):
+    '''
+    Check's if it's a Comrade Command
+    '''
+    return BOT_PREFIX in message.content.lower()
+
 class General(commands.Cog):
     def __init__(self, bot):
         self.bot = bot

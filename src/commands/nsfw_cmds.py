@@ -364,8 +364,7 @@ class NSFW(commands.Cog):
             await ctx.send("Can you calm your genitals")
         else:
             if "clear" in tag_list:
-                setTGT(self.bot.user)
-                await ctx.channel.purge(check=purgeCheck, bulk=True)
+                await ctx.channel.purge(check=purgeCheck(self.bot.user), bulk=True)
             else:
                 url_base = 'https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1'
                 url_base = url_base + '&limit={limit}&tags=-rating%3asafe+sort:random+'.format(
