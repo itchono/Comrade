@@ -9,7 +9,7 @@ class RandomEvents(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.lastroll = []
-        self.probabilities = {"nameswap":0.007, "rickroll":0.01}
+        self.probabilities = {"nameswap":0.001, "rickroll":0.002}
 
     @commands.command()
     @commands.check_any(commands.is_owner(), isServerOwner())
