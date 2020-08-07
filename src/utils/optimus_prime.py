@@ -29,8 +29,7 @@ class TextFilter(commands.Cog):
         '''
         erases a set number of messages in a context (Default 20)
         '''
-        setTGT(user)
-        if user: await ctx.channel.purge(limit=num, check=purgeCheck)
+        if user: await ctx.channel.purge(limit=num, check=purgeCheck(user))
         else: await ctx.channel.purge(limit=num)
 
         with open("vid/Za_Hando_erase_that.mp4", "rb") as f:
