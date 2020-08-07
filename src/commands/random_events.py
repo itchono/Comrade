@@ -38,11 +38,8 @@ class RandomEvents(commands.Cog):
                 servers = DBfind(SERVERCFG_COL)
 
                 for s in servers:
-                    now = localTime()
-                    for a in self.announcements:
-                        if (now.strftime("%H:%M") == a):
-                            c = self.bot.get_channel(s["announcements-channel"])
-                            await c.send(f"{ctx.author.mention} has set the probability for {event_name} to {probability}%.")
+                    c = self.bot.get_channel(s["announcements-channel"])
+                    await c.send(f"{ctx.author.mention} has set the probability for {event_name} to {probability}%.")
 
 
             except: pass
