@@ -119,15 +119,7 @@ class General(commands.Cog):
         printout += def_1  + f"\n\n__Example:__\n*{example}*"
         await ctx.send(printout)    
 
-    @commands.command()
-    @commands.guild_only()
-    async def disappear(self, ctx:commands.Context, duration:int, *, message):
-        '''
-        Sends an automatically disappearing message
-        '''
-        c = self.bot.get_cog("Echo")
-        await c.echo(ctx, text(model, number), str(user.id), deleteMsg=False)
-
+    
     @commands.command()
     @commands.check_any(commands.is_owner(), isServerOwner())
     async def shutdown(self, ctx:commands.Context):
