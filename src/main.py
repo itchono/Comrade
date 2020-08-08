@@ -1,14 +1,15 @@
 '''
-Comrade Bot - V3.0
+Comrade Bot - V3.2
 
 Versatile and Adaptable Version of Comrade, Rewritten from the ground up
 Created by Mingde Yin
 
 With Help from:
-Sean D'Souza, Nuha Sahraoui, Victor Wang, Vimal Gunasegaran
-Kevin Zhao, Nick Hewko, Stephen Luu, Anthony Luo
+Sean D'Souza, Nuha Sahraoui, Victor Wang, Vimal Gunasegaran,
+Maggie Wang, Kevin Hu, Kevin Zhao, Nick Hewko, Stephen Luu, Anthony Luo
 
-Developed from April - June 2020
+Post-v3 Development
+v3 Developed from April - June 2020
 Originally started in October 2019
 
 CONFIGURE LOCAL VARIABLES IN cfg.py
@@ -33,7 +34,8 @@ TOKEN = os.environ.get('TOKEN')  # bot token; kept private
 
 cogs = [
     AuxilliaryListener, MessageHandler, General, Databases, Vault, Echo,
-    Users, TextFilter, Fun, TimeWizard, Emotes, Polymorph, Moderation, Cosmo, BPC, RandomEvents
+    Users, TextFilter, Fun, TimeWizard, Emotes, Polymorph, Moderation, Cosmo, 
+    BPC, RandomEvents, Waifu
 ]
 
 '''
@@ -41,6 +43,7 @@ For Repl.it hosted version:
 cogs = [NSFW, SelfPing]
 
 On fully hosted version, add NSFW module
+
 '''
 for c in cogs: client.add_cog(c(client))
 print(f"Running discord.py version {discord.__version__}.")
@@ -83,6 +86,7 @@ async def on_disconnect():
     try: 
         dc_time = time.perf_counter()
         await client.wait_for("connect", timeout=300.0)
+        await client.wait_for("ready")
         await DM(f"Bot reconnected after {time.perf_counter() - dc_time} of downtime.", (await client.application_info()).owner)
 
     except asyncio.TimeoutError: sys.exit(0)  

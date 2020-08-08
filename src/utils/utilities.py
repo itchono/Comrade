@@ -63,23 +63,19 @@ def setTGT(tgt):
     global purgeTGT
     purgeTGT = tgt
 
-def purgeCheck(message: discord.Message):
+def purgeCheck(tgt):
     '''
-    Checks whether or not to delete the message
+    Sets purge target
     '''
-    return message.author == purgeTGT
 
-def isWebhook(message: discord.Message):
-    '''
-    Checks if it's a webhook
-    '''
-    return message.author.discriminator == "0000"
+    def check(message: discord.Message):
+        '''
+        Checks whether or not to delete the message
+        '''
+        return message.author == tgt
+    return check
 
-def isCommand(message: discord.Message):
-    '''
-    Check's if it's a Comrade Command
-    '''
-    return BOT_PREFIX in message.content.lower()
+
 
 '''
 Message Helpers

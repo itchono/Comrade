@@ -9,7 +9,7 @@ class RandomEvents(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.lastroll = []
-        self.probabilities = {"nameswap":0.0169, "rickroll":0.1}
+        self.probabilities = {"nameswap":0.001, "rickroll":0.002}
 
     @commands.command()
     @commands.check_any(commands.is_owner(), isServerOwner())
@@ -34,6 +34,14 @@ class RandomEvents(commands.Cog):
                 self.probabilities[event_name] = probability/100
                 await reactOK(ctx)
                 await ctx.send(f"Probability for {event_name} set to {probability}%.")
+
+                servers = DBfind(SERVERCFG_COL)
+
+                for s in servers:
+                    c = self.bot.get_channel(s["announcements-channel"])
+                    await c.send(f"{ctx.author.mention} has set the probability for {event_name} to {probability}%.")
+
+
             except: pass
 
     async def rickroll(self, ctx:commands.Context):
