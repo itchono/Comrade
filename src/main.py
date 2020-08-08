@@ -33,7 +33,7 @@ TOKEN = os.environ.get('TOKEN')  # bot token; kept private
 
 cogs = [
     AuxilliaryListener, MessageHandler, General, Databases, Vault, Echo,
-    Users, TextFilter, Fun, TimeWizard, Emotes, Polymorph, Moderation, Cosmo, BPC, RandomEvents, NSFW
+    Users, TextFilter, Fun, TimeWizard, Emotes, Polymorph, Moderation, Cosmo, BPC, RandomEvents, Waifu
 ]
 
 '''
@@ -41,6 +41,7 @@ For Repl.it hosted version:
 cogs = [NSFW, SelfPing]
 
 On fully hosted version, add NSFW module
+
 '''
 for c in cogs: client.add_cog(c(client))
 print(f"Running discord.py version {discord.__version__}.")
