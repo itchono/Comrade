@@ -33,7 +33,7 @@ TOKEN = os.environ.get('TOKEN')  # bot token; kept private
 
 cogs = [
     AuxilliaryListener, MessageHandler, General, Databases, Vault, Echo,
-    Users, TextFilter, Fun, TimeWizard, Emotes, Polymorph, Moderation, Cosmo, BPC, RandomEvents
+    Users, TextFilter, Fun, TimeWizard, Emotes, Polymorph, Moderation, Cosmo, BPC, RandomEvents, NSFW
 ]
 
 '''
