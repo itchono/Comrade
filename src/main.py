@@ -28,15 +28,14 @@ from commands import *
 from cfg import *
 
 start_time = time.perf_counter()
-
 dotenv.load_dotenv()
-TOKEN = os.environ.get('TOKEN')  # bot token; kept private
+REDUCED_INSTRUCTION_SET = [AuxilliaryListener, MessageHandler,  Databases,  Echo]
 
 cogs = [
     AuxilliaryListener, MessageHandler, General, Databases, Vault, Echo,
     Users, TextFilter, Fun, TimeWizard, Emotes, Polymorph, Moderation, Cosmo, 
     BPC, RandomEvents, Waifu
-]
+] if not DEVELOPMENT_MODE else REDUCED_INSTRUCTION_SET # for use with development to get faster start
 
 '''
 For Repl.it hosted version:
@@ -66,8 +65,10 @@ async def on_ready():
 
     print("Loading Cogs:")
     for name in ["Databases", "Users", "Vault", "Polymorph", "Emotes"]: # load cogs in order
-        print(f"\t{name}: ", end="")
-        await client.get_cog(name).on_load() # Initialize cogs
+        try:
+            print(f"\t{name}: ", end="")
+            await client.get_cog(name).on_load() # Initialize cogs
+        except: print(f"WARN: Cog not loaded {name}")
 
     print("Startup completed in {:.2f} seconds.\nCurrent Local Time: {}".format(time.perf_counter() - start_time, localTime().strftime("%I:%M:%S %p %Z")))
 
@@ -101,4 +102,4 @@ async def globalcheck(ctx): return isNotThreat(2)(ctx)
 For Repl.it hosted version:
 keep_alive()
 '''
-client.run(TOKEN)
+client.run(os.environ.get('TOKEN')) # Run bot with loaded password
