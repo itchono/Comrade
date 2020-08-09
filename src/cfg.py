@@ -1,8 +1,8 @@
 # version of the bot
-VERSION = "3.2 [Build August 8 v1]" 
+VERSION = "3.3 [Build August 9 v1]" 
 
 # set to True if you are testing the bot in a development environment, False otherwise
-DEVELOPMENT_MODE = True
+DEVELOPMENT_MODE = False
 
 # change depending on host location.
 LOCAL_TIMEZONE = 'Canada/Eastern' 

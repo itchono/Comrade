@@ -174,7 +174,7 @@ class BPC(commands.Cog):
     @commands.group()
     async def bpc(self, ctx: commands.Context):
         if ctx.invoked_subcommand is None:
-            await ctx.send(f'```=========================\nBROKEN PICTURE PHONE v1.0\n=========================```\nDo {BOT_PREFIX}bpc start to start a game!')
+            await ctx.send(f'```=========================\nBROKEN PICTURE PHONE v1.0\n=========================```\nDo `{BOT_PREFIX}bpc start` to start a game!')
 
     @bpc.command()
     async def start(self, ctx: commands.Context, members: commands.Greedy[discord.Member]):
