@@ -1,13 +1,19 @@
 from utils.utilities import *
 
-import ast, os, dotenv
+import ast, os, dotenv, sys
 from pymongo import MongoClient
 
 class Databases(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        try:
+            self.client = MongoClient(os.environ.get('MONGOKEY')) # Load atlas with pre-loaded password
+        except:
+            print("MongoDB could not be connected. Terminating program...\nCheck internet connection and/or MongoDB Key")
+            sys.exit(0) 
 
-        self.client = MongoClient(os.environ.get('MONGOKEY')) # Load atlas with pre-loaded password
+        # This will terminate the bot automatically 
+
         self.DB = self.client[self.client.list_database_names()[0]]
         print(f"MongoDB Atlas Connected to Database: {self.client.list_database_names()[0]}")
 
@@ -160,11 +166,11 @@ class Databases(commands.Cog):
     @commands.command()
     @commands.check_any(commands.is_owner(), isServerOwner())
     @commands.guild_only()
-    async def user(self, ctx: commands.Context, tgt, DBcfgitem, value=None):
+    async def user(self, ctx: commands.Context, member:discord.Member, DBcfgitem, value=None):
         '''
         Configures a user, mentioned by ping, id, or nickname. Leave value as none to delete field.
         '''
-        u = DBuser((await getUser(ctx, tgt)).id, ctx.guild.id)
+        u = DBuser(member.id, ctx.guild.id)
 
         if not value:
             try:

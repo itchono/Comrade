@@ -126,18 +126,17 @@ class General(commands.Cog):
         '''
         Logs out the user.
         '''
-        await self.bot.logout()
-
+        await self.bot.close()
+    
     @commands.command()
     @commands.check(isNotThreat())
-    async def dmUser(self, ctx: commands.Context, target, * , message:str):
+    async def dmUser(self, ctx: commands.Context, user:typing.Union[discord.Member, discord.User]=None, * , message:str):
         '''
         DM given user
         Made by vdoubleu
         '''
-        if u := await getUser(ctx, target):
-            await DM(message, u, discord.Embed(title="", description = "Sent by {}".format(ctx.author)))
-            await ctx.send("DM sent to {}".format(target), delete_after=10)
+        await DM(message, user, discord.Embed(title="", description = f"Sent by: {ctx.author.display_name + f' ({ctx.author}), in {ctx.guild}' if ctx.guild else ctx.author}"))
+        await ctx.send(f"DM sent to {user.display_name if ctx.guild else user.name}", delete_after=10)
 
     @commands.command()
     async def msgInfo(self, ctx: commands.Context, msgid):
