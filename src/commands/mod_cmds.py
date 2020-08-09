@@ -9,59 +9,58 @@ class Moderation(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    async def mute(self, ctx: commands.Context, target):
+    async def mute(self, ctx: commands.Context, member: discord.Member):
         '''
         Votes to mute a selected user.
         As OP: Mute the user
         '''
-        u = await getUser(ctx, target)
         mutedrole = await mutedRole(ctx.guild)
 
         if isOP(ctx):
             # direct mute
 
-            if mutedrole in u.roles:
-                roles = u.roles
+            if mutedrole in member.roles:
+                roles = member.roles
                 roles.remove(mutedrole)
-                await u.edit(roles=roles)
-                await ctx.send("{} was unmuted.".format(u.display_name))
+                await member.edit(roles=roles)
+                await ctx.send("{} was unmuted.".format(member.display_name))
             else:
-                roles = u.roles
+                roles = member.roles
                 roles.append(mutedrole)
-                await u.edit(roles=roles)
-                await ctx.send("{} was muted.".format(u.display_name))
+                await member.edit(roles=roles)
+                await ctx.send("{} was muted.".format(member.display_name))
 
                 for channel in ctx.guild.channels:
                     await channel.set_permissions(mutedrole, send_messages=False, add_reactions=False)
 
         else:
-            usr = DBuser(u.id, ctx.guild.id)
+            usr = DBuser(member.id, ctx.guild.id)
             vm = usr["mute-votes"]
 
             kickreq = DBcfgitem(ctx.guild.id, "mute-requirement")
 
             if not ctx.author.id in vm:
                 vm.append(ctx.author.id)
-                await ctx.send("Vote to {} {} added. ({}/{} votes)".format("unmute" if mutedrole in u.roles else "mute", u.display_name, len(vm), kickreq))
+                await ctx.send("Vote to {} {} added. ({}/{} votes)".format("unmute" if mutedrole in member.roles else "mute", member.display_name, len(vm), kickreq))
 
                 if len(vm) >= kickreq:
-                    if mutedrole in u.roles:
-                        roles = u.roles
+                    if mutedrole in member.roles:
+                        roles = member.roles
                         roles.remove(mutedrole)
-                        await u.edit(roles=roles)
-                        await ctx.send("{} was unmuted.".format(u.display_name))
+                        await member.edit(roles=roles)
+                        await ctx.send(f"{member.display_name} was unmuted.")
                     else:
-                        roles = u.roles
+                        roles = member.roles
                         roles.append(mutedrole)
-                        await u.edit(roles=roles)
-                        await ctx.send("{} was muted.".format(u.display_name))
+                        await member.edit(roles=roles)
+                        await ctx.send(f"{member.display_name} was muted.")
 
                         for channel in ctx.guild.channels:
                             await channel.set_permissions(mutedrole, send_messages=False, add_reactions=False)
                     vm = []
             else:
                 vm.remove(ctx.author.id)
-                await ctx.send("Vote to {} {} removed. ({}/{} votes)".format("unmute" if mutedrole in u.roles else "mute", u.display_name, len(vm), kickreq))
+                await ctx.send("Vote to {} {} removed. ({}/{} votes)".format("unmute" if mutedrole in member.roles else "mute", member.display_name, len(vm), kickreq))
 
             usr["mute-votes"] = vm
             updateDBuser(usr)
@@ -69,13 +68,11 @@ class Moderation(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    async def kick(self, ctx: commands.Context, target):
+    async def kick(self, ctx: commands.Context, member:discord.Member):
         '''
         Votes to kick a user from the server.
         '''
-        u = await getUser(ctx, target)
-
-        usr = DBuser(u.id, ctx.guild.id)
+        usr = DBuser(member.id, ctx.guild.id)
         vk = usr["kick-votes"]
 
         kickreq = DBcfgitem(ctx.guild.id, "kick-requirement")
@@ -90,7 +87,7 @@ class Moderation(commands.Cog):
 
         if not ctx.author.id in vk:
             vk.append(ctx.author.id)
-            await ctx.send("Vote to kick {} added. ({}/{} votes)".format(u.display_name, len(vk), kickreq))
+            await ctx.send("Vote to kick {} added. ({}/{} votes)".format(member.display_name, len(vk), kickreq))
 
             if len(vk) >= kickreq:
                 await ctx.guild.kick(u)
@@ -98,7 +95,7 @@ class Moderation(commands.Cog):
                 vk = []
         else:
             vk.remove(ctx.author.id)
-            await ctx.send("Vote to kick {} removed. ({}/{} votes)".format(u.display_name, len(vk), kickreq))
+            await ctx.send("Vote to kick {} removed. ({}/{} votes)".format(member.display_name, len(vk), kickreq))
 
         usr["kick-votes"] = vk
         updateDBuser(usr)

@@ -9,29 +9,26 @@ class Users(commands.Cog):
         
 
     @commands.command()
-    async def avatar(self, ctx:commands.Context, *, target=None):
+    async def avatar(self, ctx:commands.Context, *, member:typing.Union[discord.Member, discord.User]=None):
         '''
         Displays the avatar of a target user, self by default
         Made by Slyflare, PhtephenLuu, itchono
         '''
-        if not target:
-            target = ctx.author.mention
+        if not member: member = ctx.author
 
-        if u := await getUser(ctx, target):
-            if ctx.guild:
-                # server environment
-                a = discord.Embed(color=discord.Color.dark_blue(), 
-                                title="{}'s Avatar".format(u.display_name),
-                                url=str(u.avatar_url_as(static_format="png")))
-                a.set_image(url='{}'.format(u.avatar_url))
-                await ctx.send(embed=a)
-            else:
-                a = discord.Embed(color=discord.Color.dark_blue(), 
-                                    title="{}'s Avatar".format(u.name),
-                                    url=str(u.avatar_url_as(static_format="png")))
-                a.set_image(url='{}'.format(u.avatar_url))
-                await ctx.send(embed=a)
-        # error case triggers automatically.
+        if type(member) == discord.Member:
+            # server environment
+            a = discord.Embed(color=discord.Color.dark_blue(), 
+                            title="{}'s Avatar".format(member.display_name),
+                            url=str(member.avatar_url_as(static_format="png")))
+            a.set_image(url='{}'.format(member.avatar_url))
+            await ctx.send(embed=a)
+        else:
+            a = discord.Embed(color=discord.Color.dark_blue(), 
+                                title="{}'s Avatar".format(member.name),
+                                url=str(member.avatar_url_as(static_format="png")))
+            a.set_image(url='{}'.format(member.avatar_url))
+            await ctx.send(embed=a)
 
     @commands.group(invoke_without_command=True)
     async def userinfo(self, ctx: commands.Context, *, target=None):
@@ -39,6 +36,7 @@ class Users(commands.Cog):
         Displays User Information of said person
         Made by Slyflare, upgraded by itchono
         '''
+        # TODO refactor with custom users
         if not target:
             target = ctx.author.mention
 
@@ -286,19 +284,19 @@ class Users(commands.Cog):
         await ctx.send(s)
 
     @commands.command()
-    async def remind(self, ctx:commands.Context, target:str):
+    @commands.guild_only()
+    async def remind(self, ctx:commands.Context, *, member:discord.Member):
         '''
         Makes it so that when a user comes online, you are notified by Comrade
         '''
-        if u := await getUser(ctx, target):
-            d = DBuser(u.id, ctx.guild.id)
-            try: 
-                d["check-when-online"].remove(ctx.author.id)
-                await ctx.send(f"You will no longer be notified by when {u.display_name} changes their status.")
-            except:
-                d["check-when-online"].append(ctx.author.id)
-                await ctx.send(f"You will now be notified by when {u.display_name} changes their status.")
-            updateDBuser(d)
+        d = DBuser(member.id, ctx.guild.id)
+        try: 
+            d["check-when-online"].remove(ctx.author.id)
+            await ctx.send(f"You will no longer be notified by when {member.display_name} changes their status.")
+        except:
+            d["check-when-online"].append(ctx.author.id)
+            await ctx.send(f"You will now be notified by when {member.display_name} changes their status.")
+        updateDBuser(d)
 
     async def on_load(self):
         '''
