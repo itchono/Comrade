@@ -37,7 +37,7 @@ class SelfPing(commands.Cog):
         self.bot = bot
         self.lastping = None
         
-
+        keep_alive()
         self.selfping.start()
 
     def cog_unload(self):

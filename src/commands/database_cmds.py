@@ -7,9 +7,7 @@ class Databases(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-        dotenv.load_dotenv()
-
-        self.client = MongoClient(os.environ.get('MONGOKEY'))
+        self.client = MongoClient(os.environ.get('MONGOKEY')) # Load atlas with pre-loaded password
         self.DB = self.client[self.client.list_database_names()[0]]
         print(f"MongoDB Atlas Connected to Database: {self.client.list_database_names()[0]}")
 

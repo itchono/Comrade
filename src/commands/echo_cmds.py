@@ -7,22 +7,37 @@ def isWebhook(message: discord.Message):
     '''
     return message.author.discriminator == "0000"
 
+class ComradeUser(commands.Converter):
+
+    async def convert(self, ctx, argument):
+        '''
+        Attempts to convert either using memberconverter or custom user converter.
+        '''
+        if "\\" in argument: raise Exception # allow user to escape mentions
+
+        if customuser := DBfind_one(CUSTOMUSER_COL, {"name":argument, "server":ctx.guild.id}): return ("custom", customuser)
+        
+        elif member := await getUser(ctx, argument, False): return ("member", member)
+
+        raise Exception # parsing error; intentional
 
 class Echo(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-        
+    def __init__(self, bot): self.bot = bot
 
     @commands.command()
     @commands.check(isNotThreat())
     @commands.guild_only()
-    async def echo(self, ctx: commands.Context, text: str, target=None, deleteMsg=True, channelOverride:discord.TextChannel=None):
+    async def echo(self, ctx: commands.Context, target: typing.Optional[ComradeUser] = None, 
+                    deleteMsg: typing.Optional[bool] = True, channelOverride: typing.Optional[discord.TextChannel] = None, 
+                    *, text: str):
         '''
-        Echoes a block of text as if it were sent by someone else.
-        Defaults to the author of the message is no target is given.
+        Echoes a block of text as if it were sent by someone else [server member, custom user]
         Can mention people by nickname or user ID too.
 
-        Ex. $c echo "HELLO THERE SIR" @itchono
+        Defaults to self if no user specified. Use \ to escape mentioning names if you want this case.
+        
+        Ex. $c echo itchono HELLO THERE SIR 
+        >>> Impersonates itchono, sending a message with content `HELLO THERE SIR`
         '''
 
         channel = ctx.channel if not channelOverride else channelOverride
@@ -40,20 +55,24 @@ class Echo(commands.Cog):
         '''
         Send the actual webhook
         '''
-        if u := DBfind_one(CUSTOMUSER_COL, {"name":target, "server":ctx.guild.id}):
-            await webhook.send(text, username=u["name"], avatar_url=u["url"])
-        else:
-            if u := (await getUser(ctx, target, verbose=False) if target else ctx.author):
-                # uses self if no target given
-                await webhook.send(text, username=u.display_name, avatar_url=u.avatar_url)
-            else:
-                # uses alternate name if no other option given
-                await webhook.send(text, username=target, avatar_url=ctx.author.default_avatar_url)
+        if target:
+            if target[0] == "custom": await webhook.send(text, username=target[1]["name"], avatar_url=target[1]["url"])
+            elif target[0] == "member": await webhook.send(text, username=target[1].display_name, avatar_url=target[1].avatar_url)
+        
+        else: await webhook.send(text.lstrip("\\"), username=ctx.author.display_name, avatar_url=ctx.author.avatar_url)
             
-        if deleteMsg: 
-            await log(ctx.guild, "Echo for {} sent by {} ({})".format(target,ctx.author.mention, ctx.author))
-            await ctx.message.delete()
+        if deleteMsg: await log(ctx.guild, "Echo for {} sent by {} ({})".format(target,ctx.author.mention, ctx.author)); await ctx.message.delete()
             
+    async def extecho(self, ctx: commands.Context, text, target, deleteMsg=True):
+        '''
+        For external calls to echo.
+        '''
+        try: target = await ComradeUser().convert(ctx, target)
+        except: target = None
+
+        await self.echo(ctx, target=target, text=text, deleteMsg=deleteMsg)
+
+
     @commands.command()
     @commands.check(isNotThreat())
     @commands.guild_only()
@@ -71,7 +90,7 @@ class Echo(commands.Cog):
         else:
             if not count: count = 5 if onlinecount >= 5 else onlinecount
 
-            for m in random.sample(online_humans, count): await self.echo(ctx, text, m.display_name, False)
+            for m in random.sample(online_humans, count): await self.extecho(ctx, text, str(m.id), False)
 
             await asyncio.sleep(30)
 

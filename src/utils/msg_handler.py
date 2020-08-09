@@ -44,7 +44,7 @@ class MessageHandler(commands.Cog):
                     await message.channel.send(embed=e)
 
                     '''c = self.bot.get_cog("Echo")
-                    await c.echo(await self.bot.get_context(message), random.choice(list(message.guild.members)).mention, str(message.author.id), deleteMsg=False)
+                    await c.extecho(await self.bot.get_context(message), random.choice(list(message.guild.members)).mention, str(message.author.id), deleteMsg=False)
                     '''
                 Knuckles_VD = [
                 "meme_approved.mp4", "meme_what.mp4", "meme_denied.mp4",
