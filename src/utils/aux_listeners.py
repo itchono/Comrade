@@ -113,25 +113,30 @@ class AuxilliaryListener(commands.Cog):
             print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
             traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
         
-        if ctx.guild: await log(ctx.guild, "Failure: {}\nType: {}\nTraceback:```{}```".format(exception, type(exception).__name__, traceback.format_exception(type(exception), exception, exception.__traceback__)))
-        else: await ctx.send("```Failure: {}\nType: {}\nTraceback:{}```".format(exception, type(exception).__name__,  traceback.format_exception(type(exception), exception, exception.__traceback__)))
-
         if type(exception) == commands.NoPrivateMessage:
             await reactX(ctx)
-            await delSend(ctx, "This command can only be used in a server.")
+            await ctx.send("This command can only be used in a server.")
             
         elif type(exception) == commands.CheckFailure:
             await reactX(ctx)
             await ctx.send("You have insufficient permission to use this command {}".
-                format(ctx.author.mention), delete_after=10)
+                format(ctx.author.mention))
+
+        elif type(exception) == commands.BadArgument:
+            await reactX(ctx)
+            await ctx.send(exception)
+
+        elif type(exception) == commands.BadUnionArgument:
+            await reactX(ctx)
+            await ctx.send("\n".join([str(e) for e in exception.errors]))
         
         elif type(exception) == commands.NSFWChannelRequired:
             await reactX(ctx)
-            await delSend(ctx, "This command can only be used in a NSFW channel.")
+            await ctx.send("This command can only be used in a NSFW channel.")
             
         elif type(exception) == commands.CommandNotFound:
             await reactQuestion(ctx)
-            await ctx.send("'{}' is not a valid command.".format(ctx.message.content), delete_after=10)
+            await ctx.send("'{}' is not a valid command.".format(ctx.message.content))
         
         elif type(exception) == SyntaxError:
             await reactX(ctx)
@@ -139,9 +144,10 @@ class AuxilliaryListener(commands.Cog):
 
         else:
             await reactQuestion(ctx)
-            await ctx.send("Failure: {}".format(exception), delete_after=10)
-
-        if type(exception) != commands.CommandNotFound:
+            await ctx.send("Command Error: {}".format(exception))
+            
+            if ctx.guild: await log(ctx.guild, "Failure: {}\nType: {}\nTraceback:```{}```".format(exception, type(exception).__name__, traceback.format_exception(type(exception), exception, exception.__traceback__)))
+            else: await ctx.send("```Failure: {}\nType: {}\nTraceback:{}```".format(exception, type(exception).__name__,  traceback.format_exception(type(exception), exception, exception.__traceback__)))
             await DM(f"Failure: {exception}\n ```{traceback.format_exception(type(exception), exception, exception.__traceback__)}```", (await self.bot.application_info()).owner)
 
 

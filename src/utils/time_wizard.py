@@ -60,7 +60,7 @@ class TimeWizard(commands.Cog):
         await luckyperson.edit(roles=roles)
 
         await channel.send("Today's Daily Member is **{}**".format(luckyperson.display_name))
-        await cog.userinfo(ctx, target=luckyperson.mention)
+        await cog.userinfo(ctx, target=luckyperson.mention) # TODO dependancy
         
         await cog.rebuildcache(channel.guild)
 

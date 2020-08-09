@@ -126,18 +126,17 @@ class General(commands.Cog):
         '''
         Logs out the user.
         '''
-        await self.bot.logout()
-
+        await self.bot.close()
+    
     @commands.command()
     @commands.check(isNotThreat())
-    async def dmUser(self, ctx: commands.Context, target, * , message:str):
+    async def dmUser(self, ctx: commands.Context, user:typing.Union[discord.Member, discord.User]=None, * , message:str):
         '''
         DM given user
         Made by vdoubleu
         '''
-        if u := await getUser(ctx, target):
-            await DM(message, u, discord.Embed(title="", description = "Sent by {}".format(ctx.author)))
-            await ctx.send("DM sent to {}".format(target), delete_after=10)
+        await DM(message, user, discord.Embed(title="", description = f"Sent by: {ctx.author.display_name + f' ({ctx.author}), in {ctx.guild}' if ctx.guild else ctx.author}"))
+        await ctx.send(f"DM sent to {user.display_name if ctx.guild else user.name}", delete_after=10)
 
     @commands.command()
     async def msgInfo(self, ctx: commands.Context, msgid):
@@ -222,73 +221,12 @@ class General(commands.Cog):
             c = self.bot.get_cog("Echo")
 
             # using monospaced font to fix spacing
-            await c.echo(ctx, f"**```{BORDER_TOP}\n{ACCENT_BORDER}\n{content}\n{ACCENT_BORDER}\n{BORDER_BOTTOM}```**", str(ctx.author.id))
+            await c.extecho(ctx, f"**```{BORDER_TOP}\n{ACCENT_BORDER}\n{content}\n{ACCENT_BORDER}\n{BORDER_BOTTOM}```**", str(ctx.author.id))
         else:
             await ctx.send(f"**```{BORDER_TOP}\n{ACCENT_BORDER}\n{content}\n{ACCENT_BORDER}\n{BORDER_BOTTOM}```**")
 
 
-    @commands.command(name = "list")
-    @commands.guild_only()
-    async def customlist(self, ctx, operation, title=None, value=None):
-        '''
-        Displays a lists, or adds.
-
-        Commands: "make", "makefrom", "add", "remove", "show", "all"
-        '''
-        # TODO turn into command-subcommand deal
-        if operation in {"make", "makefrom", "add", "remove", "show", "all"}:
-
-            if operation == "make":
-                l = []
-
-                DBupdate(LIST_COL, {"server":ctx.guild.id, "name":title}, {"server":ctx.guild.id, "name":title, "list":l})
-                await reactOK(ctx)
-                
-            elif operation == "makefrom":
-                try:
-                    msg = await commands.MessageConverter().convert(ctx, value)
-
-                    l = []
-
-                    for rxn in msg.reactions: l += [i.display_name for i in await rxn.users().flatten()]
-                    
-                    DBupdate(LIST_COL, {"server":ctx.guild.id, "name":title}, {"server":ctx.guild.id, "name":title, "list":l})
-                    await reactOK(ctx)
-                
-                except:
-                    await ctx.send("Please specify a message to base list from.")
-
-            elif operation == "show":
-                try: 
-                    l = DBfind_one(LIST_COL, {"server":ctx.guild.id, "name":title})["list"]
-                    await ctx.send("{}:\n{}".format(title, l))
-                except:
-                    await delSend(ctx, "List not found.")
-            elif operation == "add":
-                try: 
-                    l = DBfind_one(LIST_COL, {"server":ctx.guild.id, "name":title})["list"]
-                    l.append(value)
-
-                    DBupdate(LIST_COL, {"server":ctx.guild.id, "name":title}, {"server":ctx.guild.id, "name":title, "list":l})
-
-                    await reactOK(ctx)
-                except:
-                    await delSend(ctx, "List not found.")
-
-            elif operation == "remove":
-                try: 
-                    l = DBfind_one(LIST_COL, {"server":ctx.guild.id, "name":title})["list"]
-                    try:
-                        l.remove(value)
-                        DBupdate(LIST_COL, {"server":ctx.guild.id, "name":title}, {"server":ctx.guild.id, "name":title, "list":l})
-                        await reactOK(ctx)
-                    except:
-                        await delSend(ctx, "Element {} not found.".format(value))
-                except:
-                    await delSend(ctx, "List not found.")
-
-            elif operation == "all":
-                await ctx.send("{}".format([i["name"] for i in DBfind(LIST_COL, {"server":ctx.guild.id})]))
+    
 
 
 
