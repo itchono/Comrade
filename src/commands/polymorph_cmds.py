@@ -60,7 +60,7 @@ class Polymorph(commands.Cog):
 
                 try:
                     model = self.models[(user.id, ctx.guild.id)]
-                    await c.echo(ctx, text(model, number), str(user.id), deleteMsg=False)
+                    await c.extecho(ctx, text(model, number), str(user.id), deleteMsg=False)
 
                 except:
                     await ctx.send("Model is not yet built, it will take a bit longer to produce this first iteration of text.")
@@ -68,7 +68,7 @@ class Polymorph(commands.Cog):
                     
                     try:
                         model = self.models[(user.id, ctx.guild.id)]
-                        await c.echo(ctx, text(model, number), str(user.id), deleteMsg=False)
+                        await c.extecho(ctx, text(model, number), str(user.id), deleteMsg=False)
                     except: pass
     
     @commands.command()

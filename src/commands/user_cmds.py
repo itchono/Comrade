@@ -222,17 +222,19 @@ class Users(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    async def addCustomUser(self, ctx: commands.Context, username, avatar_url):
+    async def addCustomUser(self, ctx: commands.Context, username, avatar=None):
         '''
         Adds custom user to database, which can be mentioned.
         '''
         e =  self.bot.get_cog('Echo')
 
-        if u := DBfind_one(CUSTOMUSER_COL, {"name":username, "server":ctx.guild.id}): await e.echo(ctx, "Oh hey I'm already here!", username, False)
+        if len(ctx.message.attachments): avatar = ctx.message.attachments[0].url
+
+        if u := DBfind_one(CUSTOMUSER_COL, {"name":username, "server":ctx.guild.id}): await e.extecho(ctx, "Oh hey I'm already here!", username, False)
 
         else:
-            DBupdate(CUSTOMUSER_COL, {"name": username, "server": ctx.guild.id}, {"name": username, "url": avatar_url, "server": ctx.guild.id})
-            await e.echo(ctx, "I have been added.", username, False)
+            DBupdate(CUSTOMUSER_COL, {"name": username, "server": ctx.guild.id}, {"name": username, "url": avatar, "server": ctx.guild.id})
+            await e.extecho(ctx, "I have been added.", username, False)
 
     @commands.command()
     @commands.guild_only()

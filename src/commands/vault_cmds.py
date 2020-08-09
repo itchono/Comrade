@@ -19,7 +19,7 @@ class Vault(commands.Cog):
         if item["type"] == "echo":
             targetmsg = await commands.MessageConverter().convert(ctx, item["data"])
             c = self.bot.get_cog("Echo")
-            await c.echo(ctx, targetmsg.content, str(targetmsg.author.name), deleteMsg=False)
+            await c.extecho(ctx, targetmsg.content, str(targetmsg.author.name), deleteMsg=False)
         else:
             embed = discord.Embed()
             embed.set_image(url=item["data"])
@@ -112,7 +112,7 @@ class Vault(commands.Cog):
                     c = await self.bot.get_context(m)
                     E = self.bot.get_cog("Echo")
                     await vault.send(embed=e)
-                    await E.echo(c, msg.content, msg.author.display_name)
+                    await E.extecho(c, msg.content, msg.author.display_name)
 
                 else:
                     # made by Slyflare
