@@ -145,10 +145,14 @@ class AuxilliaryListener(commands.Cog):
         else:
             await reactQuestion(ctx)
             await ctx.send("Command Error: {}".format(exception))
+
+            formatted_traceback = "".join(traceback.format_exception(type(exception), exception, exception.__traceback__))
             
-            if ctx.guild: await log(ctx.guild, "Failure: {}\nType: {}\nTraceback:```{}```".format(exception, type(exception).__name__, traceback.format_exception(type(exception), exception, exception.__traceback__)))
-            else: await ctx.send("```Failure: {}\nType: {}\nTraceback:{}```".format(exception, type(exception).__name__,  traceback.format_exception(type(exception), exception, exception.__traceback__)))
-            await DM(f"Failure: {exception}\n ```{traceback.format_exception(type(exception), exception, exception.__traceback__)}```", (await self.bot.application_info()).owner)
+            if ctx.guild: await log(ctx.guild, f"Failure: {exception}\n ```{formatted_traceback}```")
+            
+            else: await ctx.send(f"Failure: {exception}\n ```{formatted_traceback}```")
+            
+            await DM(f"Failure: {exception}\n ```{formatted_traceback}```", (await self.bot.application_info()).owner)
 
 
         
