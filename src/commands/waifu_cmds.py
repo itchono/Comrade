@@ -12,12 +12,36 @@ class Waifu(commands.Cog):
         self.produce_waifu.start()
 
     @commands.command()
-    async def claim(self, ctx:commands.Context,*, waifuname):
+    async def wclaim(self, ctx:commands.Context,*, waifuname):
         '''
         Claim your favourite waifu :)
         '''
-        await ctx.send(f"Congrats {ctx.author.mention}, you claimed **{waifuname}**!")
-        
+        if waifuname == self.active_waifu:
+            await ctx.send(f"Congrats {ctx.author.mention}, you claimed **{waifuname}**!")
+            
+            #should produce another waifu after the current one is claimed.
+            self.produce_waifu
+        else:
+            await ctx.send(f"Try again")
+    
+    @commands.command()
+    async def wdailygacha (self, ctx:commands.Context):
+        '''
+        gives u a random waifu
+        '''
+
+    @commands.command()
+    async def wlistwaifus (self, ctx:commands.Context):
+        '''
+        lists your waifus
+        '''
+
+    @commands.command()
+    async def wtradewaifus (self, ctx:commands.Context, *, user):
+        '''
+        Trade with someone?? idk how this would work tbh
+        '''
+
     '''
     Timer based thing
     '''
@@ -29,10 +53,10 @@ class Waifu(commands.Cog):
 
         self.active_waifu = waifu
 
-        '''iraq_btw = self.bot.get_guild(419214713252216848)
-
-        west_korea = iraq_btw.get_channel(522428899184082945)'''
-
+        '''
+        iraq_btw = self.bot.get_guild(419214713252216848)
+        west_korea = iraq_btw.get_channel(522428899184082945)
+        '''
 
         # NOTE: This is just for bot development; NOT when we actually deploy
         test_btw = self.bot.get_guild(709954286376976425)
