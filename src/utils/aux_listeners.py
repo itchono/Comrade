@@ -41,11 +41,15 @@ class AuxilliaryListener(commands.Cog):
         '''
         When a message edit is detected
         '''
-        message = await self.bot.get_channel(payload.channel_id).fetch_message(payload.message_id) if not payload.cached_message else payload.cached_message
 
-        if not message.author.bot and message.guild:
-            await log(message.guild, f"Message edited by {message.author.display_name} ({message.author}) in {message.channel.mention}")
+        if message := payload.cached_message:
 
+            if not message.author.bot and message.guild:
+                await log(message.guild, f"Message edited by {message.author.display_name} ({message.author}) in {message.channel.mention} [link]({message.jump_url})\nOriginal Content: ```{message.content}```")
+
+        elif not message.author.bot and message.guild:
+            message = await self.bot.get_channel(payload.channel_id).fetch_message(payload.message_id)
+            await log(message.guild, f"Message edited by {message.author.display_name} ({message.author}) in {message.channel.mention} [link]({message.jump_url})")
 
     @commands.Cog.listener()
     async def on_raw_message_delete(self, payload):
@@ -53,9 +57,12 @@ class AuxilliaryListener(commands.Cog):
         When a message is deleted
         '''
         if msg := payload.cached_message:
-            if msg.guild and not msg.author == self.bot.user:
-                await log(msg.guild, f"Message sent by {msg.author.display_name} ({msg.author}) deleted in {msg.channel.mention}\n Content: {msg.content}")
-        elif payload.guild_id:
+            if msg.guild and not msg.author.bot:
+                await log(msg.guild, f"Message sent by {msg.author.display_name} ({msg.author}) deleted in {msg.channel.mention}\n Content: ```{msg.content}```")
+
+                if msg.mentions: await msg.channel.send(f":rotating_light: PING POLICE :rotating_light:\n{msg.author.mention} deleted a message which pinged the following user(s): {', '.join(['`' + m.display_name + '`' for m in msg.mentions])}")
+
+        elif payload.guild:
             await log(self.bot.get_guild(payload.guild_id), f"Message deleted in {(self.bot.get_channel(payload.channel_id))}")
 
     @commands.Cog.listener()
