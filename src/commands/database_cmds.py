@@ -1,6 +1,6 @@
 from utils.utilities import *
 
-import ast, os, dotenv, sys
+import ast, os, sys
 from pymongo import MongoClient
 
 class Databases(commands.Cog):
