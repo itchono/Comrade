@@ -213,12 +213,12 @@ class NSFW(commands.Cog):
                         else:
                             data = io.BytesIO(await resp.read())
                             e.set_thumbnail(url='https://img.icons8.com/cotton/2x/movie-beginning.png')
-                            channel = self.bot.get_channel(709956363526340719)
+                            channel = self.bot.get_channel(522428899184082945)
                             await channel.send(embed = e)
                             await channel.send(file=discord.File(data, img_url))
             else:
                 e.set_thumbnail(url='https://vectorified.com/images/image-gallery-icon-21.png')
-                channel = self.bot.get_channel(709956363526340719)
+                channel = self.bot.get_channel(522428899184082945)
                 await channel.send(embed = e)
 
     @commands.command()
