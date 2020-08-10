@@ -1,8 +1,11 @@
 # version of the bot
-VERSION = "3.3 [Build August 9 v2]" 
+VERSION = "3.3 [Build August 10 v1]" 
 
 # set to True if you are testing the bot in a development environment, False otherwise
 DEVELOPMENT_MODE = False
+
+# set to True if you're hosting the bot on something like repl.it or heroku and need the bot to keep alive
+SELFPING_REQUIRED = False
 
 # change depending on host location.
 LOCAL_TIMEZONE = 'Canada/Eastern' 

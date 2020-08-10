@@ -19,7 +19,7 @@ CONFIGURE LOCAL VARIABLES IN cfg.py
 For inviting the bot to your server complete set up shown below and use the link:
 https://discord.com/api/oauth2/authorize?client_id=707042278132154408&permissions=536083799&scope=bot
 
-Requires MongoDB Set Up. TODO
+Requires MongoDB Atlas [link to database; collections are automatically created.]
 '''
 import sys
 from utils import *
@@ -116,4 +116,5 @@ async def on_disconnect():
 @client.check_once
 async def globalcheck(ctx): return isNotThreat(2)(ctx)
 
+if SELFPING_REQUIRED: keep_alive()
 client.run(os.environ.get('TOKEN')) # Run bot with loaded password
