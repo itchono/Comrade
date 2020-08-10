@@ -331,6 +331,7 @@ CMD_COL = "CustomCommands"
 LIST_COL = "CustomLists"
 CACHE_COL = "ChannelCache"
 FAVOURITES_COL = "favourites"
+PNG_COL = "pngs"
 
 '''
 Misc
