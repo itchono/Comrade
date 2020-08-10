@@ -21,7 +21,7 @@ https://discord.com/api/oauth2/authorize?client_id=707042278132154408&permission
 
 Requires MongoDB Atlas [link to database; collections are automatically created.]
 '''
-import sys
+import sys, dotenv
 from utils import *
 from polymorph import *
 from cosmo import *
