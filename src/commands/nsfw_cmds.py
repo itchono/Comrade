@@ -189,9 +189,9 @@ class NSFW(commands.Cog):
                             data = io.BytesIO(await resp.read())
                             await ctx.send(
                                 file=discord.File(data, img_url))
-        if random.randint(1,100)==1 and not message.author.bot:
+        if random.randint(1,100)<21 and not message.author.bot:
             url_base = 'https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1'
-            url_base = url_base + '&sort:random+'
+            url_base = url_base + '&tags=-rating%3asafe+-webm+sort%3arandom+'
             post = requests.get(url_base).json()
             self.last_post = post
             img_url = post[0]['file_url']
@@ -412,7 +412,7 @@ class NSFW(commands.Cog):
         #Claim a png
         claim = True
         user = ctx.author
-        if len(tags) >= self.last_number:
+        if self.last_number and len(tags) >= self.last_number:
             for i in tags:
                 if i not in self.last_tags:
                     claim = False
@@ -516,7 +516,7 @@ class NSFW(commands.Cog):
                 await ctx.channel.purge(check=purgeCheck(self.bot.user), bulk=True)
             else:
                 url_base = 'https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1'
-                url_base = url_base + '&limit={limit}&tags=-rating%3asafe+sort:random+'.format(
+                url_base = url_base + '&limit={limit}&tags=-rating%3asafe+-webm+sort%3arandom+'.format(
                     limit=limit)
                 for i in range(len(tag_list)):
                     url_base = url_base + '{tag}+'.format(tag=tag_list[i])
