@@ -21,7 +21,7 @@ https://discord.com/api/oauth2/authorize?client_id=707042278132154408&permission
 
 Requires MongoDB Atlas [link to database; collections are automatically created.]
 '''
-import sys
+import sys, dotenv
 from utils import *
 from polymorph import *
 from cosmo import *
@@ -105,7 +105,7 @@ async def on_disconnect():
         try: 
             online = False
             dc_time = time.perf_counter()
-            await client.wait_for("connect", timeout=20.0)
+            await client.wait_for("connect", timeout=300.0)
             await client.wait_for("ready")
             print(f"Bot reconnected after {time.perf_counter() - dc_time} of downtime.")
             await DM(f"Bot reconnected after {time.perf_counter() - dc_time} of downtime.", (await client.application_info()).owner)
