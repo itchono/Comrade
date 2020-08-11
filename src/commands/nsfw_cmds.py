@@ -195,7 +195,6 @@ class NSFW(commands.Cog):
             post = requests.get(url_base).json()
             self.last_post = post
             img_url = post[0]['file_url']
-            postid = post[0]['id']
             self.last_tags = post[0]['tags']
             self.last_number = int(len(post[0]['tags'])/200 + 3)
             e = discord.Embed(
