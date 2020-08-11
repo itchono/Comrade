@@ -204,6 +204,18 @@ class NSFW(commands.Cog):
                 color=0xfecbed)
             e.set_author(name='Retrieved from Gelbooru')
             e.set_image(url=img_url)
+            list1 = []
+            tags = self.last_tags.split()
+            for i in range(len(tags)):
+                cuts = random.sample(range(len(tags[i])),int(len(tags[i])/2))
+                cuttag = ""
+                for j in range(len(tags[i])):
+                    if j in cuts:
+                        cuttag += "_"
+                    else:
+                        cuttag += tags[i][j]
+                list1.append(cuttag)
+            e.set_footer(text=" ".join(list1))
 
             if img_url.endswith(".webm"):
                 async with aiohttp.ClientSession() as session:
