@@ -105,7 +105,7 @@ async def on_disconnect():
         try: 
             online = False
             dc_time = time.perf_counter()
-            await client.wait_for("connect", timeout=20.0)
+            await client.wait_for("connect", timeout=300.0)
             await client.wait_for("ready")
             print(f"Bot reconnected after {time.perf_counter() - dc_time} of downtime.")
             await DM(f"Bot reconnected after {time.perf_counter() - dc_time} of downtime.", (await client.application_info()).owner)
