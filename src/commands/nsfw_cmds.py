@@ -189,7 +189,7 @@ class NSFW(commands.Cog):
                             data = io.BytesIO(await resp.read())
                             await ctx.send(
                                 file=discord.File(data, img_url))
-        if random.randint(1,100)<2 and not message.author.bot:
+        if random.randint(1,100)<5 and not message.author.bot:
             url_base = 'https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1'
             url_base = url_base + '&tags=-webm+sort%3arandom+'
             post = requests.get(url_base).json()
