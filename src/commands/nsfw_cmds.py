@@ -195,12 +195,23 @@ class NSFW(commands.Cog):
             post = requests.get(url_base).json()
             self.last_post = post
             img_url = post[0]['file_url']
-            postid = post[0]['id']
             self.last_tags = post[0]['tags']
             self.last_number = int(len(post[0]['tags'])/200 + 3)
             e = discord.Embed(description=f":camera_with_flash: **A PNG HAS SPAWNED, NAME {self.last_number} OF ITS TAGS TO CLAIM IT**",
                 color=0xfecbed)
             e.set_image(url=img_url)
+            list1 = []
+            tags = self.last_tags.split()
+            for i in range(len(tags)):
+                cuts = random.sample(range(len(tags[i])),int(len(tags[i])/2))
+                cuttag = ""
+                for j in range(len(tags[i])):
+                    if j in cuts:
+                        cuttag += "_"
+                    else:
+                        cuttag += tags[i][j]
+                list1.append(cuttag)
+            e.set_footer(text=" ".join(list1))
             channel = self.bot.get_channel(522428899184082945)
             await channel.send(embed = e)
 
