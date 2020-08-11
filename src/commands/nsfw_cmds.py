@@ -189,37 +189,20 @@ class NSFW(commands.Cog):
                             data = io.BytesIO(await resp.read())
                             await ctx.send(
                                 file=discord.File(data, img_url))
-        if random.randint(1,100)<21 and not message.author.bot:
+        if random.randint(1,100)<2 and not message.author.bot:
             url_base = 'https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1'
-            url_base = url_base + '&tags=-rating%3asafe+-webm+sort%3arandom+'
+            url_base = url_base + '&tags=-webm+sort%3arandom+'
             post = requests.get(url_base).json()
             self.last_post = post
             img_url = post[0]['file_url']
             postid = post[0]['id']
             self.last_tags = post[0]['tags']
             self.last_number = int(len(post[0]['tags'])/200 + 3)
-            e = discord.Embed(
-                title="A PNG HAS SPAWNED, NAME " + str(self.last_number) + " OF ITS TAGS TO CLAIM IT!",
-                url=img_url,
+            e = discord.Embed(description=f":camera_with_flash: **A PNG HAS SPAWNED, NAME {self.last_number} OF ITS TAGS TO CLAIM IT**",
                 color=0xfecbed)
-            e.set_author(name='Retrieved from Gelbooru')
             e.set_image(url=img_url)
-
-            if img_url.endswith(".webm"):
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(img_url) as resp:
-                        if resp.status != 200:
-                            await ctx.send('Could not download file.')
-                        else:
-                            data = io.BytesIO(await resp.read())
-                            e.set_thumbnail(url='https://img.icons8.com/cotton/2x/movie-beginning.png')
-                            channel = self.bot.get_channel(522428899184082945)
-                            await channel.send(embed = e)
-                            await channel.send(file=discord.File(data, img_url))
-            else:
-                e.set_thumbnail(url='https://vectorified.com/images/image-gallery-icon-21.png')
-                channel = self.bot.get_channel(522428899184082945)
-                await channel.send(embed = e)
+            channel = self.bot.get_channel(522428899184082945)
+            await channel.send(embed = e)
 
     @commands.command()
     @commands.guild_only()
