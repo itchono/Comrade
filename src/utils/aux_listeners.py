@@ -96,6 +96,7 @@ class AuxilliaryListener(commands.Cog):
                 m = user.guild.get_member(i)
                 embed = discord.Embed(title=f"{user.display_name} is now {str(user.status)}.", description=str(m))
                 embed.add_field(name="Time", value=(localTime().strftime("%I:%M:%S %p %Z")))
+                print(i)
                 await DM("", m, embed)
                         
 

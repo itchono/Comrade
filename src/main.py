@@ -100,15 +100,16 @@ async def on_disconnect():
     Bot crashes because of loss of connection
     '''
     global online
+    global start_time
     if online:
         print("WARN: Bot has disconnected from Discord.")
         try: 
             online = False
-            dc_time = time.perf_counter()
+            start_time = time.perf_counter()
             await client.wait_for("connect", timeout=300.0)
             await client.wait_for("ready")
-            print(f"Bot reconnected after {time.perf_counter() - dc_time} of downtime.")
-            await DM(f"Bot reconnected after {time.perf_counter() - dc_time} of downtime.", (await client.application_info()).owner)
+            print(f"Bot reconnected after {time.perf_counter() - start_time} of downtime.")
+            await DM(f"Bot reconnected after {time.perf_counter() - start_time} of downtime.", (await client.application_info()).owner)
             online = True
         except asyncio.TimeoutError: sys.exit(0)  
 
