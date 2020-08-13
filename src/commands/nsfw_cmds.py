@@ -275,10 +275,10 @@ class NSFW(commands.Cog):
             tokens = imageName.split(":") # split tokens
 
             if len(tokens) > 1:
-                DBremove_one(FAVOURITES_COL, {"server":ctx.guild.id, "imageID":tokens[0], "user":ctx.author.id, "category":""})
+                DBremove_one(FAVOURITES_COL, {"server":ctx.guild.id, "imageID":tokens[1], "user":ctx.author.id, "category":tokens[0]})
                 fullname = f"{tokens[1]}:{tokens[0]}"
             else:
-                DBremove_one(FAVOURITES_COL, {"server":ctx.guild.id, "imageID":tokens[1], "user":ctx.author.id, "category":tokens[0]})
+                DBremove_one(FAVOURITES_COL, {"server":ctx.guild.id, "imageID":tokens[0], "user":ctx.author.id, "category":""})
                 fullname = f"{tokens[0]}"
 
             await reactOK(ctx)
