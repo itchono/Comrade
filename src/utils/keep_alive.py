@@ -1,4 +1,4 @@
-from utils.utilities import localTime
+from utils.utilities import *
 from flask import Flask # used to create web server to keep bot actively hosted
 from threading import Thread # used to create separate parallel process to keep bot up
 
@@ -7,8 +7,6 @@ import urllib.request
 # disable logging
 import logging
 import os
-
-from time_utils import localTime
 
 logging.getLogger('werkzeug').disabled = True
 os.environ['WERKZEUG_RUN_MAIN'] = 'true'
@@ -37,21 +35,20 @@ class SelfPing(commands.Cog):
         self.bot = bot
         self.lastping = None
         
-        keep_alive()
         self.selfping.start()
 
     def cog_unload(self):
         self.selfping.cancel()
 
-    @tasks.loop(minutes=1.0)
+    @tasks.loop(seconds=30.0)
     async def selfping(self):
         user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
         headers={'User-Agent':user_agent}
         
-        urls = ['https://comrade--itchono.repl.co/', 'https://DadBot--itchono.repl.co', 
-        'https://SET-Bot--itchono.repl.co', 'https://psi-tama--itchono.repl.co', 'https://Comrade-Backup--itchono.repl.co'] # pinging my other bots
+        urls = ['https://Comrade.itchono.repl.co', 'https://DadBot.itchono.repl.co', 
+        'https://SET-Bot.itchono.repl.co', 'https://psi-tama.itchono.repl.co'] # pinging my other bots
 
-        me = 'https://Comrade-Backup--itchono.repl.co'
+        me = 'https://Comrade.itchono.repl.co'
 
         for url in urls:
             try:
