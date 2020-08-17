@@ -249,6 +249,7 @@ def DBfind(collection, query=None):
 def DBupdate(collection, query, data, upsert=True):
     '''
     Updates an entry, into a collection. Upserts by default.
+    Upsert means: if the entry is not found, insert it instead.
     '''
     try: DBcollection(collection).update(query, data, upsert)
     except: pass

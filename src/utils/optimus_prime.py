@@ -1,5 +1,5 @@
 from utils.utilities import *
-
+from utils.emoji_converter import *
 
 # Text Filtering
 import re
@@ -56,20 +56,21 @@ class TextFilter(commands.Cog):
         '''
         Detects if the string violates the moderation guidelines for a given context.
         '''
-        query = re.sub("\W+", '', unidecode.unidecode(content.lower()))
+        spaced_query = unidecode.unidecode(emojiToText(content.lower()))
         # remove non-ascii, attempt to decode unicode, get into formattable form
+        query = re.sub("\W+", '', spaced_query) # spaces
 
-        # TODO Filter improvements
-        # - Check end-cap letters i.e. banana --> baanna
-        # - Add requirement to partial filter
+        words = DBcfgitem(ctx.guild.id, "banned-words")
+        words.update(DBuser(ctx.author.id, ctx.guild.id)["banned-words"])
 
-        u = DBuser(ctx.author.id, ctx.guild.id)
-
-        words = u["banned-words"] + DBcfgitem(ctx.guild.id, "banned-words")
-
+        # TODO with python 3.9 -- dictionary union
         for w in words:
-            if (len(query) > 3 and fuzz.partial_ratio(query, w) >= 80) or query == w:
-                return True
+
+            if words[w] < 100 and (len(query) > 2 and fuzz.partial_ratio(query, w) >= words[w]) or query == w: return True
+
+            for word in spaced_query.split(" "):
+                if word[0] == w[0] and word[-1] == w[-1] and fuzz.partial_ratio(word, w) >= words[w]: return True
+                # checking endcap letters
 
         return False
         
@@ -109,26 +110,24 @@ class TextFilter(commands.Cog):
             if self.filter(ctx, message.content) or await self.additionalChecks(message):
                 await message.delete()
             else:
-                try: self.bucket[message.guild.id][message.author.id] += [message]
+                try: 
+                    self.bucket[message.guild.id][message.author.id] += [message]
+
+                    joined = " ".join([m.content for m in self.bucket[message.guild.id][message.author.id]])
+                    if self.filter(ctx, joined):
+                        for m in self.bucket[message.guild.id][message.author.id]:
+                            try:  await m.delete()
+                            except: print("Cannot delete message {}".format(m.content))
+                        self.bucket[message.guild.id][message.author.id] = []
+                    
+                    elif len(self.bucket[message.guild.id][message.author.id]) > MSG_BUFFER_LIMIT:
+                        self.bucket[message.guild.id][message.author.id].pop(0)
                 except:
                     try:
                         self.bucket[message.guild.id] = {}
                         self.bucket[message.guild.id][message.author.id] = [message]
-                    except:
-                        pass
-                
-                joined = "".join([m.content for m in self.bucket[message.guild.id][message.author.id]])
+                    except: pass
 
-                if self.filter(ctx, joined):
-                    for m in self.bucket[message.guild.id][message.author.id]:
-                        try:
-                            await m.delete()
-                        except:
-                            print("Cannot delete message {}".format(m.content))
-                    self.bucket[message.guild.id][message.author.id] = []
-                
-                elif len(self.bucket[message.guild.id][message.author.id]) > MSG_BUFFER_LIMIT:
-                    self.bucket[message.guild.id][message.author.id].pop(0)
 
     @commands.Cog.listener()
     async def on_raw_message_edit(self, payload):
