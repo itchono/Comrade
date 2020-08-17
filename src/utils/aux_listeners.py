@@ -41,11 +41,15 @@ class AuxilliaryListener(commands.Cog):
         '''
         When a message edit is detected
         '''
-        message = await self.bot.get_channel(payload.channel_id).fetch_message(payload.message_id) if not payload.cached_message else payload.cached_message
 
-        if not message.author.bot and message.guild:
-            await log(message.guild, f"Message edited by {message.author.display_name} ({message.author}) in {message.channel.mention}")
+        if message := payload.cached_message:
 
+            if not message.author.bot and message.guild:
+                await log(message.guild, f"Message edited by {message.author.display_name} ({message.author}) in {message.channel.mention} [link]({message.jump_url})\nOriginal Content: ```{message.content}```")
+
+        elif not message.author.bot and message.guild:
+            message = await self.bot.get_channel(payload.channel_id).fetch_message(payload.message_id)
+            await log(message.guild, f"Message edited by {message.author.display_name} ({message.author}) in {message.channel.mention} [link]({message.jump_url})")
 
     @commands.Cog.listener()
     async def on_raw_message_delete(self, payload):
@@ -53,9 +57,12 @@ class AuxilliaryListener(commands.Cog):
         When a message is deleted
         '''
         if msg := payload.cached_message:
-            if msg.guild and not msg.author == self.bot.user:
-                await log(msg.guild, f"Message sent by {msg.author.display_name} ({msg.author}) deleted in {msg.channel.mention}\n Content: {msg.content}")
-        elif payload.guild_id:
+            if msg.guild and not msg.author.bot:
+                await log(msg.guild, f"Message sent by {msg.author.display_name} ({msg.author}) deleted in {msg.channel.mention}\n Content: ```{msg.content}```")
+
+                if msg.mentions: await msg.channel.send(f":rotating_light: PING POLICE :rotating_light:\n{msg.author.mention} deleted a message which pinged the following user(s): {', '.join(['`' + m.display_name + '`' for m in msg.mentions])}")
+
+        elif payload.guild:
             await log(self.bot.get_guild(payload.guild_id), f"Message deleted in {(self.bot.get_channel(payload.channel_id))}")
 
     @commands.Cog.listener()
@@ -89,6 +96,7 @@ class AuxilliaryListener(commands.Cog):
                 m = user.guild.get_member(i)
                 embed = discord.Embed(title=f"{user.display_name} is now {str(user.status)}.", description=str(m))
                 embed.add_field(name="Time", value=(localTime().strftime("%I:%M:%S %p %Z")))
+                print(i)
                 await DM("", m, embed)
                         
 
@@ -146,13 +154,11 @@ class AuxilliaryListener(commands.Cog):
             await reactQuestion(ctx)
             await ctx.send("Command Error: {}".format(exception))
 
-            formatted_traceback = "".join(traceback.format_exception(type(exception), exception, exception.__traceback__))
+            formatted_tb = "".join(traceback.format_exception(type(exception), exception, exception.__traceback__))
             
-            if ctx.guild: await log(ctx.guild, f"Failure: {exception}\n ```{formatted_traceback}```")
-            
-            else: await ctx.send(f"Failure: {exception}\n ```{formatted_traceback}```")
-            
-            await DM(f"Failure: {exception}\n ```{formatted_traceback}```", (await self.bot.application_info()).owner)
+            if ctx.guild: await log(ctx.guild, "Failure: {}\nType: {}\nTraceback:```{}```".format(exception, type(exception).__name__,formatted_tb ))
+            else: await ctx.send("```Failure: {}\nType: {}\nTraceback:{}```".format(exception, type(exception).__name__,  formatted_tb))
+            await DM(f"Failure: {exception}\n ```{formatted_tb}```", (await self.bot.application_info()).owner)
 
 
         
