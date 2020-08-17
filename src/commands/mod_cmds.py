@@ -39,6 +39,15 @@ class Moderation(commands.Cog):
 
             kickreq = DBcfgitem(ctx.guild.id, "mute-requirement")
 
+            '''
+            Dynamic mute requirement
+            '''
+            if type(kickreq) == str and "%" in kickreq:
+                online_humans = [m for m in ctx.guild.members if (str(m.status) != "offline" and not m.bot)]
+                onlinecount = len(online_humans)
+                kickreq = int(float(kickreq[:-1]) / 100 * onlinecount) # rounds to nearest number of online members.
+                await ctx.send(f"Threshold of {DBcfgitem(ctx.guild.id, 'mute-requirement')} equals to {kickreq} online members needed to mute.")
+
             if not ctx.author.id in vm:
                 vm.append(ctx.author.id)
                 await ctx.send("Vote to {} {} added. ({}/{} votes)".format("unmute" if mutedrole in member.roles else "mute", member.display_name, len(vm), kickreq))
@@ -80,10 +89,11 @@ class Moderation(commands.Cog):
         '''
         Dynamic kick requirement
         '''
-
-        online_humans = [m for m in ctx.guild.members if (str(m.status) != "offline" and not m.bot)]
-        onlinecount = len(online_humans)
-
+        if type(kickreq) == str and "%" in kickreq:
+            online_humans = [m for m in ctx.guild.members if (str(m.status) != "offline" and not m.bot)]
+            onlinecount = len(online_humans)
+            kickreq = int(float(kickreq[:-1]) / 100 * onlinecount) # rounds to nearest number of online members.
+            await ctx.send(f"Threshold of {DBcfgitem(ctx.guild.id, 'kick-requirement')} equals to {kickreq} online members needed to kick.")
 
         if not ctx.author.id in vk:
             vk.append(ctx.author.id)
@@ -100,53 +110,38 @@ class Moderation(commands.Cog):
         usr["kick-votes"] = vk
         updateDBuser(usr)
 
-    # DEFUNCT
-    # @commands.command()
-    # @commands.check(isOP)
-    # @commands.guild_only()
-    # async def mod(self, ctx: commands.Context, target, listname, operation=None, value=None):
-    #     '''
-    #     Changes a value in a user's configuration. Various possible operations
-    #     add: Add element to list
-    #     remove: Remove an element from list (specify value)
-    #     pop: Remove last element from list (no value specification needed)
-    #     set: Set numerical type
-    #     toggle: Switch a boolean
-    #     '''
-    #     if u := await getUser(ctx, target):
+    @commands.command()
+    @commands.check(isOP)
+    @commands.guild_only()
+    async def banword(self, ctx:commands.Context, member:typing.Optional[discord.Member]=None, threshold:typing.Optional[int]=100, *, word):
+        '''
+        Bans a word, with an optional person to ban the word for, and a percentage similarity threshold required to trigger.
+        If no member is specified, the word is banned for the whole server
+        If no threshold is specified, the default threshold is 100 (exact match required)
 
-    #         if operation in {"add", "remove", "pop"}:
-    #             if l := getuserList(u.id, ctx.guild.id, listname):
-    #                 if operation == "add": 
-    #                     l.append(value)
-    #                     await reactOK(ctx)
-                    
-    #                 elif operation == "remove":
-    #                     try: 
-    #                         l.remove(value)
-    #                         await reactOK(ctx)
-    #                     except: await delSend(ctx, "Could not find element {} in list.".format(value))
-    #                 else:
-    #                     ret = l.pop()
-    #                     await delSend(ctx, "Popped element {}".format(ret))
+        Use \ to escape arguments
+        '''
+        word = word.lstrip("\\")
 
-    #                 updateuserList(u.id, ctx.guild.id, listname, l)
+        d = DBuser(member.id, ctx.guild.id) if member else DBfind_one(SERVERCFG_COL, {"_id":ctx.guild.id})
+        worddict = d["banned-words"]
 
-    #         elif operation == "set":
-    #             try:
-    #                 result = setnum(u.id, ctx.guild.id, listname, value)
-    #                 await reactOK(ctx)
-    #                 await ctx.send("{} is now set to {}".format(listname, result))
-    #             except:
-    #                 await delSend(ctx, "Invalid operation.")
+        if word in worddict and worddict[word] != threshold:
+            del worddict[word]
+            if member: 
+                updateDBuser(d)
+                await ctx.send(f"Word has been removed from {member.display_name}'s set of personal banned words.")
+            else: 
+                DBupdate(SERVERCFG_COL, {"_id":ctx.guild.id}, d)
+                await ctx.send(f"Word has been removed from {ctx.guild}'s set of global banned words.")
+            
+        else:
+            worddict[word] = threshold
 
-    #         elif operation == "toggle":
-    #             try:
-    #                 result = togglebool(u.id, ctx.guild.id, listname)
-    #                 await reactOK(ctx)
-    #                 await ctx.send("{} is now set to {}".format(listname, result))
-    #             except:
-    #                 await delSend(ctx, "Invalid operation.")
-    #         else:
-    #             await reactQuestion(ctx)
-    #             await delSend(ctx, "Unrecognized operation: {}".format(operation))
+            if member: 
+                updateDBuser(d)
+                await ctx.send(f"Word has been added to {member.display_name}'s set of personal banned words.\nActivation threshold: {threshold}%")
+            else: 
+                DBupdate(SERVERCFG_COL, {"_id":ctx.guild.id}, d)
+                await ctx.send(f"Word has been added to {ctx.guild}'s set of global banned words.\nActivation threshold: {threshold}%")
+
