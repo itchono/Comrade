@@ -9,7 +9,7 @@ class Moderation(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    async def mute(self, ctx: commands.Context, member: discord.Member):
+    async def mute(self, ctx: commands.Context,*, member: discord.Member):
         '''
         Votes to mute a selected user.
         As OP: Mute the user
@@ -77,7 +77,7 @@ class Moderation(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    async def kick(self, ctx: commands.Context, member:discord.Member):
+    async def kick(self, ctx: commands.Context,*, member:discord.Member):
         '''
         Votes to kick a user from the server.
         '''
