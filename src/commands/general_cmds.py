@@ -225,6 +225,28 @@ class General(commands.Cog):
         else:
             await ctx.send(f"**```{BORDER_TOP}\n{ACCENT_BORDER}\n{content}\n{ACCENT_BORDER}\n{BORDER_BOTTOM}```**")
 
+    @commands.command()
+    @commands.guild_only()
+    async def favcolour(self, ctx, member:typing.Optional[discord.Member]=None, colour=None):
+        '''
+        Sets a user's favourite colour. 
+        TODO: Can be either hex or a common word. If recognized, it will show up in your userinfo command.
+        can also view another user's favourite colour
+        '''
+        if member:
+            u = DBUser(member.id, ctx.guild.id)
+            await ctx.send(f"{member.display_name}'s favourite colour is {u['favourite-colour']}")
+        elif colour:
+            u = DBUser(ctx.author.id, ctx.guild.id)
+            u["favourite-colour"] = colour
+            updateDBUser(u)
+            await reactOK(ctx)
+
+        else:
+            u = DBUser(ctx.author.id, ctx.guild.id)
+            await ctx.send(f"{ctx.author.display_name}'s favourite colour is {u['favourite-colour']}")
+
+
 
     
 

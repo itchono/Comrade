@@ -53,7 +53,7 @@ class Databases(commands.Cog):
             "name": user.name,
             "nickname": user.nick if user.nick else user.name,
             "threat-level": 0,
-            "banned-words": [],
+            "banned-words": {},
             "kick-votes": [],
             "mute-votes": [],
             "server": user.guild.id,
@@ -61,6 +61,7 @@ class Databases(commands.Cog):
             "OP":False,
             "stop-pings": False,
             "stop-images": False,
+            "favourite-colour":"Unknown",
             "daily-weight": daily if not user.bot else 0,
             "bot": user.bot,
             "last-online": "Now" if str(user.status) == "online" else "Never",
@@ -81,12 +82,10 @@ class Databases(commands.Cog):
             "joke-mode": True, # allows for joke stuff to happen
             "kick-requirement": 6,
             "mute-requirement": 4,
-            # "lethality-override": 0, # defunct
             "zahando-threshold": 3,
-            "banned-words": [],
+            "banned-words": {},
             "announcements-channel": 0,
             "meme-channel": 0,
-            # "bot-channel": 0, # defunct
             "vault-channel": 0,
             "log-channel": log_channel.id if log_channel else 0, # attempts to locate a log channel in the server
             "emote-directory": emote_directory.id if emote_directory else 0, # attempts to locate an emote directory in the server
@@ -96,7 +95,8 @@ class Databases(commands.Cog):
             "daily-member-colour": (241, 196, 15), # colour for daily member (RGB),
             "daily-member-staleness": 15, # enforces recency for daily members, in days. Set to -1 (or less) to disable.
             "za-hando-vote-duration": 120, # time to vote for ZA HANDO, in seconds
-            "vault-vote-duration": 180 # time to vote for Vault post, in seconds
+            "vault-vote-duration": 180, # time to vote for Vault post, in seconds
+            "message-triggers": {}
             }
     
     @commands.command()
@@ -204,6 +204,16 @@ class Databases(commands.Cog):
             except: c[DBcfgitem] = value
             DBupdate(SERVERCFG_COL, {"_id":ctx.guild.id}, c)
 
+        await reactOK(ctx)
+
+    @commands.command()
+    @commands.check_any(commands.is_owner(), isServerOwner())
+    @commands.guild_only()
+    async def setchannel(self, ctx: commands.Context, DBchannelname, channel:discord.TextChannel):
+        '''
+        Sets a channel with the given name into the Database.
+        '''
+        await self.cfg(ctx, DBchannelname, channel.id)
         await reactOK(ctx)
 
     @commands.group(invoke_without_command=True)
