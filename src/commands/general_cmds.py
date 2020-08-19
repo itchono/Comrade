@@ -128,7 +128,7 @@ class General(commands.Cog):
         '''
         await self.bot.close()
     
-    @commands.command()
+    @commands.command(aliases = ["annoy"])
     @commands.check(isNotThreat())
     async def dmUser(self, ctx: commands.Context, user:typing.Union[discord.Member, discord.User]=None, * , message:str):
         '''

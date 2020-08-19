@@ -58,7 +58,7 @@ class SelfPing(commands.Cog):
                 if url == me: self.lastping = {"message":response.read().decode("utf-8"), "time":localTime()}
             except: print(f"ERROR pinging {url}")
 
-    @commands.command()
+    @commands.command(aliases = ["stalk"])
     async def ping(self, ctx : commands.Context):
         '''
         Shows when the bot last pinged itself
