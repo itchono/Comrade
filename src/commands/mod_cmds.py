@@ -7,7 +7,7 @@ class Moderation(commands.Cog):
         self.bot = bot
         
 
-    @commands.command()
+    @commands.command(aliases = ["shutup"])
     @commands.guild_only()
     async def mute(self, ctx: commands.Context,*, member: discord.Member):
         '''
@@ -75,7 +75,7 @@ class Moderation(commands.Cog):
             updateDBuser(usr)
             
 
-    @commands.command()
+    @commands.command(aliases = ["erase"])
     @commands.guild_only()
     async def kick(self, ctx: commands.Context,*, member:discord.Member):
         '''
