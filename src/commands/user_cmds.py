@@ -218,7 +218,7 @@ class Users(commands.Cog):
             luckyperson = random.choice(self.UNWEIGHTED_RND_USER[ctx.guild.id]) if not weighted else random.choice(self.WEIGHTED_RND_USER[ctx.guild.id])
         await self.userinfo(ctx, target=DBuser(luckyperson.id, ctx.guild.id)["nickname"])
 
-    @commands.command()
+    @commands.command(aliases = ["birth"])
     @commands.guild_only()
     async def addCustomUser(self, ctx: commands.Context, username, avatar=None):
         '''
@@ -234,7 +234,7 @@ class Users(commands.Cog):
             DBupdate(CUSTOMUSER_COL, {"name": username, "server": ctx.guild.id}, {"name": username, "url": avatar, "server": ctx.guild.id})
             await e.extecho(ctx, "I have been added.", username, False)
 
-    @commands.command()
+    @commands.command(aliases = ["plasticsurgery"])
     @commands.guild_only()
     @commands.check(isOP)
     async def editCustomUser(self, ctx: commands.Context, username, field, value):
@@ -256,7 +256,7 @@ class Users(commands.Cog):
             DBupdate(CUSTOMUSER_COL, {"name": u["name"], "server": u["server"]}, u, False)
             await reactOK(ctx)
     
-    @commands.command()
+    @commands.command(aliases = ["kill"])
     @commands.guild_only()
     @commands.check(isOP)
     async def removeCustomUser(self, ctx: commands.Context, username):
@@ -266,7 +266,7 @@ class Users(commands.Cog):
         DBremove_one(CUSTOMUSER_COL, {"name": username, "server": ctx.guild.id})
         await reactOK(ctx)
 
-    @commands.command()
+    @commands.command(aliases = ["listchildren"])
     @commands.guild_only()
     async def listCustomUsers(self, ctx: commands.Context):
         '''
