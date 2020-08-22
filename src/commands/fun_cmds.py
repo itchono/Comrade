@@ -24,7 +24,6 @@ class Fun(commands.Cog):
     '''
     def __init__(self, bot):
         self.bot = bot
-        self.activetrivia = {}
 
         self.activeGuess = None
         self.guessState = False
@@ -174,14 +173,14 @@ class Fun(commands.Cog):
         Reaction based trivia.
         By Kevinozoid.
         '''
-        check = True
+        checkboi = [1]
         req = urllib.request.urlopen("https://pastebin.com/raw/2PjhRjtn", timeout = 10)
         questions = req.read().decode().splitlines()
         questions.remove("")
-        while check:
+        while checkboi:
             count = 0
             random.seed()
-            check = False
+            checkboi.pop()
             element = round(random.random() * (len(questions)-1))
             while not any(char.isdigit() for char in questions[element][0:2]) or not "." in questions[element][0:5]:
                 element = round(random.random() * (len(questions)-1))
@@ -195,36 +194,48 @@ class Fun(commands.Cog):
                 count+=1
             await ctx.send(questions[element+counter])
 
+
             if " A" in questions[element+counter+1] or " A" in questions[element+counter+2]:
-                self.activetrivia[m.id] = "1️⃣"
+                answer = "1️⃣"
             elif " B" in questions[element+counter+1] or " B" in questions[element+counter+2]:
-                self.activetrivia[m.id] = "2️⃣"
+                answer = "2️⃣"
             elif " C" in questions[element+counter+1] or " C" in questions[element+counter+2]:
-                self.activetrivia[m.id] = "3️⃣"
+                answer = "3️⃣"
             elif " D" in questions[element+counter+1] or " D" in questions[element+counter+2]:
-               self.activetrivia[m.id] = "4️⃣"
+                answer = "4️⃣"
             else:
-                await(ctx.send("SOMETHING BROKE"))
+                await ctx.send("SOMETHING BROKE")
 
             await m.add_reaction("1️⃣")
             await m.add_reaction("2️⃣")
             await m.add_reaction("3️⃣")
             await m.add_reaction("4️⃣")
-            await asyncio.sleep(count*5)
-            await m.remove_reaction("1️⃣", self.bot.user)
-            await m.remove_reaction("2️⃣", self.bot.user)
-            await m.remove_reaction("3️⃣", self.bot.user)
-            await m.remove_reaction("4️⃣", self.bot.user)
+
+            async def capturereacts():
+
+                while 1:
+
+                    def checker(reaction, user): return reaction.message.author == self.bot.user and user != self.bot.user
+                    
+                    reaction, user = await self.bot.wait_for("reaction_add", check=checker, timeout = count)
+
+                    if self.bot.user in await reaction.users().flatten() and reaction.emoji in {"1️⃣", "2️⃣", "3️⃣", "4️⃣"}:
+                        checkboi.append(1)
+                        try:
+                            await reaction.message.add_reaction({True:"☑", False:"🅱"}[reaction.emoji == answer])
+                            await reaction.message.channel.send(user.mention + {True:" CORRECT", False:" WRONG"}[reaction.emoji == answer])
+                        except: pass
+                        
             
-            m2 = await ctx.channel.fetch_message(m.id)
+            try: await capturereacts()
+            except asyncio.TimeoutError:
+                await m.remove_reaction("1️⃣", self.bot.user)
+                await m.remove_reaction("2️⃣", self.bot.user)
+                await m.remove_reaction("3️⃣", self.bot.user)
+                await m.remove_reaction("4️⃣", self.bot.user)
 
-            for u in m2.reactions:
-                async for u2 in u.users():
-                    if (u2==self.bot.user):
-                        check = True
-
-            if not check:
-                await ctx.send("Quiz ended because no one answered.")
+                if checkboi: continue
+                else: await ctx.send("Quiz ended because no one answered.")
 
     @commands.command()
     @commands.check(isOP)
@@ -295,19 +306,6 @@ class Fun(commands.Cog):
             elif message.content == "STAR PLATINUM":
                 await message.channel.send("You are unworthy to use the power of a stand!")
 
-
-    @commands.Cog.listener()
-    async def on_reaction_add(self, reaction:discord.Reaction, user:discord.User):
-        '''
-        When a user adds a reaction to a message.
-        '''
-        m = reaction.message
-
-        checker = self.bot.user in await reaction.users().flatten() # validates that the reponse comes from the bot
-
-        if reaction.message.author == self.bot.user and checker and user != self.bot.user and reaction.emoji in {"1️⃣", "2️⃣", "3️⃣", "4️⃣"}:
-            await reaction.message.add_reaction({True:"☑", False:"🅱"}[reaction.emoji ==  self.activetrivia[m.id]])
-            await reaction.message.channel.send(user.mention + {True:" CORRECT", False:" WRONG"}[reaction.emoji ==  self.activetrivia[m.id]])
                 
     @commands.command()
     @commands.guild_only()
