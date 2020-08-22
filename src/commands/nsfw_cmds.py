@@ -228,7 +228,7 @@ class NSFW(commands.Cog):
             tokens = imageName.split(":") # split tokens
 
             if len(tokens) > 1:
-                DBupdate(FAVOURITES_COL, {"imageID":tokens[0], "server":ctx.guild.id, "user":ctx.author.id, "category":tokens[1]}, {"imageID":imageName, "URL":url, "server":ctx.guild.id, "user":ctx.author.id, "category":tokens[1]})
+                DBupdate(FAVOURITES_COL, {"imageID":tokens[1], "server":ctx.guild.id, "user":ctx.author.id, "category":tokens[0]}, {"imageID":imageName, "URL":url, "server":ctx.guild.id, "user":ctx.author.id, "category":tokens[1]})
                 fullname = f"{tokens[0]}:{tokens[1]}"
             else:
                 DBupdate(FAVOURITES_COL, {"imageID":tokens[0], "server":ctx.guild.id, "user":ctx.author.id, "category":""}, {"imageID":imageName, "URL":url, "server":ctx.guild.id, "user":ctx.author.id, "category":""})
