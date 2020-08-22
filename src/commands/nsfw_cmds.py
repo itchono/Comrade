@@ -214,7 +214,7 @@ class NSFW(commands.Cog):
             channel = self.bot.get_channel(522428899184082945)
             await channel.send(embed = e)
 
-    @commands.command()
+    @commands.command(aliases = ["stash"])
     @commands.guild_only()
     @commands.is_nsfw()
     async def favourite(self, ctx: commands.Context, imageName: str, url: str = None):
@@ -306,7 +306,7 @@ class NSFW(commands.Cog):
             await self.favourite(ctx, newimageName, fav["URL"])
 
 
-    @commands.command()
+    @commands.command(aliases = ["viewstash"])
     @commands.guild_only()
     @commands.is_nsfw()
     async def listfavourites(self, ctx:commands.Context, user: discord.Member = None, category:str = None):
