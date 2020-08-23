@@ -8,11 +8,11 @@ class Polls(commands.Cog):
     @commands.command()
     @commands.guild_only()
     async def poll(self, ctx: commands.Context, prompt:str, *options):
-        f'''
+        '''
         Creates a poll.
         Specify a prompt, and then split options by spaces.
 
-        ex. {BOT_PREFIX}poll "apples or bananas?" "apples are better" "bananas are the best!"
+        ex. $c poll "apples or bananas?" "apples are better" "bananas are the best!"
         '''
 
         if len(options) < 36:
