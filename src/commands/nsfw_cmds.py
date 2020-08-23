@@ -214,12 +214,24 @@ class NSFW(commands.Cog):
             channel = self.bot.get_channel(522428899184082945)
             await channel.send(embed = e)
 
-    @commands.command(aliases = ["stash"])
+    @commands.command(aliases = ["sister"])
     @commands.guild_only()
     @commands.is_nsfw()
     async def favourite(self, ctx: commands.Context, imageName: str, url: str = None):
         '''
         Adds an image to the favourites list, or retrieves a favourite based on ID
+
+        Category naming system:
+        type as `$c favourite category:name <URL>`
+        ex. `$c favourite neko:kurumi <URL>` saves an entry under the "neko" category, titled "kurumi"
+        
+        To view a post, you can either specify a name, category, or both.
+        ex. `$c favourite neko:kurumi` or `$c favourite kurumi` will get you identical results,
+        UNLESS you have multiple posts under different catergories with the same name, in which case it will be based on the most recent entry.
+
+        You can view other people's favourites by specifying their name when you call the command.
+        ex. `$c favourite itchono:neko:kurumi`
+
         '''
         if url or len(ctx.message.attachments) > 0:
 
@@ -244,11 +256,13 @@ class NSFW(commands.Cog):
 
                 if len(tokens) == 1:
 
-                    fav = DBfind_one(FAVOURITES_COL, {"server":ctx.guild.id, "imageID":tokens[0], "user":ctx.author.id, "category":""})
+                    if fav := DBfind_one(FAVOURITES_COL, {"server":ctx.guild.id, "imageID":tokens[0], "user":ctx.author.id, "category":""}): pass
+                    else: fav = DBfind_one(FAVOURITES_COL, {"server":ctx.guild.id, "imageID":tokens[0], "user":ctx.author.id})
 
                 elif len(tokens) == 2:
 
-                    fav = DBfind_one(FAVOURITES_COL, {"server":ctx.guild.id, "imageID":tokens[1], "user":ctx.author.id, "category":tokens[0]})
+                    if fav := DBfind_one(FAVOURITES_COL, {"server":ctx.guild.id, "imageID":tokens[1], "user":ctx.author.id, "category":tokens[0]}): pass
+                    else: fav = DBfind_one(FAVOURITES_COL, {"server":ctx.guild.id, "imageID":tokens[1], "user":(await getUser(ctx, tokens[0])).id})
 
 
                 elif len(tokens) == 3:
@@ -262,7 +276,7 @@ class NSFW(commands.Cog):
             except:
                 await delSend(ctx, "Image not found.")
 
-    @commands.command()
+    @commands.command(aliases = ["turnout"])
     @commands.guild_only()
     @commands.is_nsfw()
     async def unfavourite(self, ctx: commands.Context, imageName: str):
@@ -306,14 +320,13 @@ class NSFW(commands.Cog):
             await self.favourite(ctx, newimageName, fav["URL"])
 
 
-    @commands.command(aliases = ["viewstash"])
+    @commands.command(aliases = ["viewstable"])
     @commands.guild_only()
     @commands.is_nsfw()
-    async def listfavourites(self, ctx:commands.Context, user: discord.Member = None, category:str = None):
+    async def favourites(self, ctx:commands.Context, user: discord.Member = None, category:str = None):
         '''
-        Lists all favourited images
+        Lists all favourited images. Can specify another user, or a category.
         '''
-        
         construct = lambda fav:f"• **[{fav['imageID']}]({fav['URL']})**\n"
 
         if not user: user = ctx.author
@@ -474,7 +487,7 @@ class NSFW(commands.Cog):
         else:
             await ctx.send("Please enter a valid PNG number.")
 
-    @commands.command()
+    @commands.command(aliases = ["find"])
     @commands.is_nsfw()
     async def hentai(self, ctx: commands.Context, *, args:str = ""):
         '''
