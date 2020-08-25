@@ -1,12 +1,17 @@
 from utils.utilities import *
+from jikanpy import Jikan
+
+import numpy as np
 import random
 
-NAMES = ["Apple", "Banana", "Cow", "DNA", "E"]
+jikan = Jikan()
+
+#NAMES = ["Apple", "Banana", "Cow", "DNA", "E"]
 
 class Waifu(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
+        self.random_ID = np.random.randint(0, 150000)
         self.active_waifu = None
 
         self.produce_waifu.start()
@@ -31,7 +36,7 @@ class Waifu(commands.Cog):
         '''
 
     @commands.command()
-    async def wlistwaifus (self, ctx:commands.Context):
+    async def wlistwaifus (self, ctx:commands.Context, user: discord.Member = None):
         '''
         lists your waifus
         '''
