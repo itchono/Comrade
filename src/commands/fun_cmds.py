@@ -108,38 +108,39 @@ class Fun(commands.Cog):
            
     @commands.command()
     @commands.check(isNotThreat())
-    async def fanfic(self,ctx: commands.Context, site):
+    async def fanfic(self,ctx: commands.Context,*, site):
         '''
         initiate fanfiction
         by Kevinozoid.
         '''
-        req = urllib.request.urlopen(site, timeout=10)
-        html = req.read()
-        soup = BeautifulSoup(html)
+        await ctx.trigger_typing()
 
-        for script in soup(["script", "style"]):
-            script.extract() 
+        user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
+        headers={'User-Agent':user_agent,}
+
+        request = urllib.request.Request(site,None,headers)
+        req = urllib.request.urlopen(request)
+        html = req.read()
+        soup = BeautifulSoup(html, features="html.parser")
+
+        for script in soup(["script", "style"]): script.extract() 
 
         holyText = soup.get_text()
 
-        if len(holyText > 10000):
-            holyText = holyText[0:10000]
-            await ctx.send("Text was trimmed to first 10000 characters for being too long.")
+        if len(holyText) > 100000:
+            holyText = holyText[:100000]
+            await ctx.send("Text was trimmed to first 100000 characters for being too long.")
 
-        lines = (line.strip() for line in holyText.splitlines())
-        chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-        string = []
+        paginator = commands.Paginator(prefix="", suffix="")
 
-        for s in chunks:
-            if len(s)>2000:
-                while len(s)>2000:
-                    string.append(s[0:2000])
-                    s = s[2000:len(s)]
-            string.append(s)
+        lines = holyText.splitlines()
 
-        for s in string:
-            if not s=='' and not s==' ' and not s== '  ' and len(s)>20:
-                await ctx.send(s)
+        lines = [lines[i] for i in range(len(lines))]
+
+        for line in lines: paginator.add_line(line)
+
+        for page in paginator.pages: await ctx.send(page); await asyncio.sleep(1)
+        await ctx.send("**<END OF TEXT>**")
 
     @commands.command()
     @commands.check(isNotThreat())
