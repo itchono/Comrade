@@ -34,14 +34,14 @@ class Emotes(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    async def addEmote(self, ctx: commands.Context, name, *args):
+    async def addEmote(self, ctx: commands.Context, name, url=None):
         '''
         Adds a custom emote to the Comrade Emote System
         '''
-        if len(ctx.message.attachments) > 0:
-            u = ctx.message.attachments[0].url
-        else:
-            u = args[(len(args)-1)]
+        try:
+            if not url: url = ctx.message.attachments[0].url
+        except:
+            if not match_url(url): await ctx.send("Invalid URL Provided.")
 
         if not name.lower() in self.EMOTE_CACHE[ctx.guild.id]:
             emoteDirectory = await getChannel(ctx.guild, 'emote-directory')
@@ -89,6 +89,21 @@ class Emotes(commands.Cog):
         else:
             await ctx.send("Emote `{}` was not found.".format(name.lower()))
 
+    @commands.command()
+    @commands.guild_only()
+    @commands.check(isOP)
+    async def renameEmote(self, ctx: commands.Context, name_old, name_new):
+        '''
+        Renames an emote in the emote system by removing and re-adding it
+        '''
+        try:
+            url = self.EMOTE_CACHE[ctx.guild.id][name_old]
+            await self.removeEmote(ctx, name_old)
+            await self.addEmote(ctx, name_new, url)
+
+        except:
+            await ctx.send(f"Emote `{name_old}` was not found.")
+
     async def on_load(self):
         '''
         When bot is loaded
@@ -125,7 +140,7 @@ class Emotes(commands.Cog):
         '''
         Emote listener
         '''
-        if message.content and not message.author.bot and message.guild and message.content[0] == ':' and message.content[-1] == ':':
+        if message.content and not message.author.bot and message.guild and message.content[0] == ':' and message.content[-1] == ':' and len(message) > 1:
             await self.emote(await self.bot.get_context(message), message.content.lower().strip(':'))
 
             
