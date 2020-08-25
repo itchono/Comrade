@@ -168,6 +168,19 @@ class Users(commands.Cog):
                     u["daily-weight"] = 0
                     updateDBuser(u)
 
+            for member in g.members:
+                if u := DBuser(member.id, g.id): pass
+                else:
+                    # account for new users
+                    stp = self.bot.get_cog("Databases")
+                    updateDBuser(stp.setupuser(member))
+                    u = DBuser(member.id, g.id)
+
+                weight = u["daily-weight"]
+                if not member.bot: 
+                    self.WEIGHTED_RND_USER[g.id] += [member for i in range(weight)]
+                    self.UNWEIGHTED_RND_USER[g.id] += [member]
+
                 await log(g, f"Refilled daily count and trimmed users in past {DAILY_MEMBER_STALENESS} days")
         await log(g, f"User Cache built.\nWeighted List -- {len(self.WEIGHTED_RND_USER[g.id])} entries\nUnweighed List -- {len(self.UNWEIGHTED_RND_USER[g.id])} entries")
 
