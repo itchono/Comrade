@@ -324,15 +324,15 @@ def updateDBuser(userdata):
     
 
 ### NAMES OF EACH DB COLLECTION ###
-USER_COL = "user_data"
-SERVERCFG_COL = "server_configs"
-CUSTOMUSER_COL = "custom_users"
+USER_COL = "UserData"
+SERVERCFG_COL = "cfg"
+CUSTOMUSER_COL = "CustomUsers"
 ANNOUNCEMENTS_COL = "announcements"
-CMD_COL = "custom_commands"
-LIST_COL = "custom_lists"
-CACHE_COL = "channel_cache"
-FAVOURITES_COL = "favourite_h_images"
-PNG_COL = "claimed_pngs"
+CMD_COL = "CustomCommands"
+LIST_COL = "CustomLists"
+CACHE_COL = "ChannelCache"
+FAVOURITES_COL = "favourites"
+PNG_COL = "pngs"
 
 '''
 Misc
