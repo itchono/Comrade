@@ -16,8 +16,6 @@ import matplotlib.pyplot as plt
 import parser
 import io
 
-import re
-
 class Fun(commands.Cog):
     '''
     Fun stuff.
@@ -464,3 +462,76 @@ class Fun(commands.Cog):
         await ctx.send("```⠀⠀⠀⠀⠀⠀⠀⠀⠀⣤⣤\n⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⣿\n⠀⠀⣶⠀⠀⣀⣤⣶⣤⣉⣿⣿⣤⣀\n⠤⣤⣿⣤⣿⠿⠿⣿⣿⣿⣿⣿⣿⣿⣿⣀\n⠀⠛⠿⠀⠀⠀⠀⠉⣿⣿⣿⣿⣿⠉⠛⠿⣿⣤\n⠀⠀⠀⠀⠀⠀⠀⠀⠿⣿⣿⣿⠛⠀⠀⠀⣶⠿\n⠀⠀⠀⠀⠀⠀⠀⠀⣀⣿⣿⣿⣿⣤⠀⣿⠿\n⠀⠀⠀⠀⠀⠀⠀⣶⣿⣿⣿⣿⣿⣿⣿⣿\n⠀⠀⠀⠀⠀⠀⠀⠿⣿⣿⣿⣿⣿⠿⠉⠉\n⠀⠀⠀⠀⠀⠀⠀⠉⣿⣿⣿⣿⠿\n⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⣿⠉\n⠀⠀⠀⠀⠀⠀⠀⠀⣛⣿⣭⣶⣀\n⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⣿⣿⣿\n⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⠉⠛⣿\n⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⠀⠀⣿⣿\n⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣉⠀⣶⠿\n⠀⠀⠀⠀⠀⠀⠀⠀⣶⣿⠿\n⠀⠀⠀⠀⠀⠀⠀⠛⠿⠛```")
         await asyncio.sleep(1)
         await ctx.send("```⠀⠀⠀⣶⣿⣶\n⠀⠀⠀⣿⣿⣿⣀\n⠀⣀⣿⣿⣿⣿⣿⣿\n⣶⣿⠛⣭⣿⣿⣿⣿\n⠛⠛⠛⣿⣿⣿⣿⠿\n⠀⠀⠀⠀⣿⣿⣿\n⠀⠀⣀⣭⣿⣿⣿⣿⣀\n⠀⠤⣿⣿⣿⣿⣿⣿⠉\n⠀⣿⣿⣿⣿⣿⣿⠉\n⣿⣿⣿⣿⣿⣿\n⣿⣿⣶⣿⣿\n⠉⠛⣿⣿⣶⣤\n⠀⠀⠉⠿⣿⣿⣤\n⠀⠀⣀⣤⣿⣿⣿\n⠀⠒⠿⠛⠉⠿⣿\n⠀⠀⠀⠀⠀⣀⣿⣿\n⠀⠀⠀⠀⣶⠿⠿⠛ ```")
+
+    #owo
+    def konoesubaru (self, t):
+        remove_characters = ["R", "L", "r", "l"]
+        for character in remove_characters:
+            if character.islower():
+                t = t.replace(character, "w")
+            else:
+                t = t.replace(character, "W")
+        return t
+
+    @commands.command()
+    async def owoify(self, ctx: commands.Context, *, text:str = ""):
+        '''
+        changes all R's and L's to W's
+        '''
+        t = text.strip()      
+        
+        if len(t) == 0:
+            #owoify previous message
+            t = (await ctx.channel.history(limit=2).flatten())[1].content
+        
+        await ctx.send(self.konoesubaru(t))
+
+    #emojify
+    def tokisakikurumi (self, ctx, t):
+        return "".join([str(random.choice(ctx.guild.emojis)) if s == " " else s for s in t])
+
+    @commands.command()
+    async def emojify (self, ctx: commands.Context, *, text:str = ""):
+        '''
+        adds random emojis in spaces
+        '''
+        t = text.strip()
+        
+        if len(t) == 0:
+            t = (await ctx.channel.history(limit=2).flatten())[1].content
+
+        await ctx.send(self.tokisakikurumi(ctx, t))
+
+    #mock
+    def nyaruko (self, t):
+        s = ""
+
+        for character in t:
+            if random.random() < 0.5:
+                s += character.lower()
+            else:
+                s += character.upper()
+        return s
+
+    @commands.command()
+    async def mock (self, ctx: commands.Context, *, text:str = ""):
+        '''
+        randomly capitalizes and lowercases a message
+        '''
+
+        t = text.strip()
+
+        if len(t) == 0:
+            t = (await ctx.channel.history(limit=2).flatten())[1].content
+              
+        await ctx.send(self.nyaruko(t))
+
+    @commands.command()
+    async def fuckup (self, ctx: commands.Context, *, text:str = ""):
+        t = text.strip()
+        if len(t) == 0:
+            t = (await ctx.channel.history(limit=2).flatten())[1].content
+        
+        await ctx.send(self.konoesubaru(self.tokisakikurumi(ctx, self.nyaruko(text))))
+            
+
