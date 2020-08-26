@@ -7,6 +7,7 @@ Sean D'Souza, Nuha Sahraoui, Victor Wang, Vimal Gunasegaran,
 Maggie Wang, Kevin Hu, Kevin Zhao, Nick Hewko, Stephen Luu, Anthony Luo
 
 Post-v3 Development
+3.4 - Message triggers and other tweaks
 3.3 - List Refactor + Minor Tweaks
 3.2 - Database refactor
 3.1 - Scripting System Added
@@ -39,7 +40,7 @@ REDUCED_INSTRUCTION_SET = [AuxilliaryListener, MessageHandler,  Databases,  Echo
 cogs = [
     AuxilliaryListener, MessageHandler, General, Databases, Vault, Echo,
     Users, TextFilter, Fun, TimeWizard, Emotes, Polymorph, Moderation, Cosmo, 
-    BPC, RandomEvents, Waifu, Lists, Polls
+    BPC, RandomEvents, Waifu, Lists, Polls, NSFW, SelfPing
 ] if not DEVELOPMENT_MODE else REDUCED_INSTRUCTION_SET # for use with development to get faster start
 
 '''

@@ -53,8 +53,18 @@ class MessageHandler(commands.Cog):
 
         if attach:
             with open(f"vid/{Knuckles_VD[hash(attach) % len(Knuckles_VD)]}", "rb") as f:
-                await message.channel.send(file=discord.File(f, fn))
-        
+                await message.channel.send(file=discord.File(f,"meme review.mp4"))
+
+    @commands.command()
+    async def yeet(self, ctx):
+        '''
+        yeet
+        '''
+
+        msgs = (await ctx.channel.history(limit=1).flatten())[0]
+
+
+        await ctx.send(msgs.content)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):

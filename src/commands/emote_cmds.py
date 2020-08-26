@@ -140,7 +140,7 @@ class Emotes(commands.Cog):
         '''
         Emote listener
         '''
-        if message.content and not message.author.bot and message.guild and message.content[0] == ':' and message.content[-1] == ':' and len(message) > 1:
+        if message.content and not message.author.bot and message.guild and message.content[0] == ':' and message.content[-1] == ':' and len(message.content) > 1:
             await self.emote(await self.bot.get_context(message), message.content.lower().strip(':'))
 
             
