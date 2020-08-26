@@ -61,7 +61,7 @@ class Echo(commands.Cog):
         
         else: await webhook.send(text.lstrip("\\"), username=ctx.author.display_name, avatar_url=ctx.author.avatar_url)
             
-        if deleteMsg: await log(ctx.guild, "Echo for {} sent by {} ({})".format(target[1],ctx.author.mention, ctx.author)); await ctx.message.delete()
+        if deleteMsg and target: await log(ctx.guild, "Echo for {} sent by {} ({})".format(target[1],ctx.author.mention, ctx.author)); await ctx.message.delete()
             
     async def extecho(self, ctx: commands.Context, text, target, deleteMsg=True):
         '''

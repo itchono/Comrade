@@ -482,9 +482,14 @@ class Fun(commands.Cog):
         
         if len(t) == 0:
             #owoify previous message
-            t = (await ctx.channel.history(limit=2).flatten())[1].content
-        
-        await ctx.send(self.konoesubaru(t))
+            msg = (await ctx.channel.history(limit=2).flatten())[1]
+            auth = msg.author
+            t = msg.content
+        else:
+            auth = ctx.author
+
+        c = self.bot.get_cog("Echo")
+        await c.extecho(ctx, self.konoesubaru(t), str(auth.name), deleteMsg=False)
 
     #emojify
     def tokisakikurumi (self, ctx, t):
@@ -498,9 +503,14 @@ class Fun(commands.Cog):
         t = text.strip()
         
         if len(t) == 0:
-            t = (await ctx.channel.history(limit=2).flatten())[1].content
+            msg = (await ctx.channel.history(limit=2).flatten())[1]
+            auth = msg.author
+            t = msg.content
+        else:
+            auth = ctx.author
 
-        await ctx.send(self.tokisakikurumi(ctx, t))
+        c = self.bot.get_cog("Echo")
+        await c.extecho(ctx, self.tokisakikurumi(ctx, t), str(auth.name), deleteMsg=False)
 
     #mock
     def nyaruko (self, t):
@@ -522,16 +532,26 @@ class Fun(commands.Cog):
         t = text.strip()
 
         if len(t) == 0:
-            t = (await ctx.channel.history(limit=2).flatten())[1].content
+            msg = (await ctx.channel.history(limit=2).flatten())[1]
+            auth = msg.author
+            t = msg.content
+        else:
+            auth = ctx.author
               
-        await ctx.send(self.nyaruko(t))
+        c = self.bot.get_cog("Echo")
+        await c.extecho(ctx, self.nyaruko(t), str(auth.name), deleteMsg=False)
 
     @commands.command()
     async def fuckup (self, ctx: commands.Context, *, text:str = ""):
         t = text.strip()
         if len(t) == 0:
-            t = (await ctx.channel.history(limit=2).flatten())[1].content
-        
-        await ctx.send(self.konoesubaru(self.tokisakikurumi(ctx, self.nyaruko(text))))
+            msg = (await ctx.channel.history(limit=2).flatten())[1]
+            auth = msg.author
+            t = msg.content
+        else:
+            auth = ctx.author
+
+        c = self.bot.get_cog("Echo")
+        await c.extecho(ctx, self.konoesubaru(self.tokisakikurumi(ctx, self.nyaruko(t))), str(auth.name), deleteMsg=False)
             
 

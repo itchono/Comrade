@@ -11,5 +11,6 @@ from .mod_cmds import *
 from .broken_picture_phone import *
 from .random_events import *
 from .list_cmds import *
-from .waifu_cmds import *
+# from .waifu_cmds import *
 from .poll_cmds import *
+from .tex_renderer import *
