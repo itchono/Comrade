@@ -45,7 +45,7 @@ class Emotes(commands.Cog):
 
         if not name.lower() in self.EMOTE_CACHE[ctx.guild.id]:
             emoteDirectory = await getChannel(ctx.guild, 'emote-directory')
-            await emoteDirectory.send('{}\n{}'.format(name.lower(), u))
+            await emoteDirectory.send('{}\n{}'.format(name.lower(), url))
             await ctx.send('Emote `{}` was added. you can call it using `:{}:`'.format(name.lower(), name.lower()))
             await self.rebuildcache() # refresh cache
             await self.emote(ctx, name.lower())

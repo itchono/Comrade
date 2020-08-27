@@ -49,23 +49,12 @@ class MessageHandler(commands.Cog):
         
         attach = None
         if len(message.attachments) > 0: attach = message.attachments[0].size # this way, same video gets same hash
-        elif len(message.embeds) > 0: attach = message.embeds[0].size
+        elif len(message.embeds) > 0: attach = message.embeds[0].url
         elif match_url(message.content.lower()): attach = message.content.lower()
 
         if attach:
             with open(f"vid/{Knuckles_VD[hash(attach) % len(Knuckles_VD)]}", "rb") as f:
                 await message.channel.send(file=discord.File(f,"meme review.mp4"))
-
-    @commands.command()
-    async def yeet(self, ctx):
-        '''
-        yeet
-        '''
-
-        msgs = (await ctx.channel.history(limit=1).flatten())[0]
-
-
-        await ctx.send(msgs.content)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
@@ -74,8 +63,6 @@ class MessageHandler(commands.Cog):
             ctx = await self.bot.get_context(message)
 
             if jokeMode(ctx):
-
-                # TODO turn this into triggerable behaviour {partial match, full match}
                 await self.message_triggers(ctx)
 
                 if fuzz.token_set_ratio(message.content, "still at cb") > 90:
