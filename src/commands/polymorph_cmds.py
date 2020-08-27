@@ -54,7 +54,7 @@ class Polymorph(commands.Cog):
         '''
         if not member: member = ctx.author
 
-        await ctx.trigger_typing()
+        
 
         if number > 100 or number < 0: await ctx.send("No")
         else:
@@ -66,6 +66,7 @@ class Polymorph(commands.Cog):
 
             except:
                 await ctx.send("Model is not yet built, it will take a bit longer to produce this first iteration of text.")
+                await ctx.trigger_typing()
                 await self.buildModel(ctx, member=member)
                 
                 try:
