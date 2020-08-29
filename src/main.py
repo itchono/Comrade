@@ -40,7 +40,7 @@ REDUCED_INSTRUCTION_SET = [AuxilliaryListener, MessageHandler,  Databases,  Echo
 cogs = [
     AuxilliaryListener, MessageHandler, General, Databases, Vault, Echo,
     Users, TextFilter, Fun, TimeWizard, Emotes, Polymorph, Moderation, Cosmo, 
-    BPC, RandomEvents, Lists, Polls, NSFW, SelfPing, TexRender
+    BPC, RandomEvents, Lists, Polls, NSFW, SelfPing, TexRender, Shoujo
 ] if not DEVELOPMENT_MODE else REDUCED_INSTRUCTION_SET # for use with development to get faster start
 
 '''
