@@ -13,6 +13,16 @@ class Shoujo(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    async def shoujosend(self, ctx, content):
+
+        if not DBfind_one(CUSTOMUSER_COL,{"server":ctx.guild.id, "name":"ShoujoBot"}):
+            us = self.bot.get_cog("Users")
+            await us.addCustomUser(ctx, "ShoujoBot", avatar="https://cdn.discordapp.com/attachments/420664953435979806/749064831935447071/Annotation_2020-08-24_174359.jpg")
+
+        c = self.bot.get_cog("Echo")
+        await c.extecho(ctx, content, "ShoujoBot", deleteMsg=False)
+
+
     @commands.command()
     async def secret(self, ctx:commands.Context):
         '''
@@ -21,7 +31,8 @@ class Shoujo(commands.Cog):
         message = ctx.message
         try: await message.delete()
         except: pass
-        await ctx.send("Don't worry, your secret is safe with me~ (^_<)〜☆")
+
+        await self.shoujosend(ctx, "Don't worry, your secret is safe with me~ (^_<)〜☆")
 
     @commands.command()
     async def sparklify(self, ctx:commands.Context, *, message=None):
@@ -36,7 +47,7 @@ class Shoujo(commands.Cog):
             try: await ctx.message.delete()
             except: pass
 
-            await ctx.send(sparklyMessage)
+            await self.shoujosend(ctx, sparklyMessage)
         else:
             url = ctx.message.attachments[0].url
             #size = (ctx.message.attachments[0].width, ctx.message.attachments[0].height)
