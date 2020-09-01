@@ -22,9 +22,7 @@ class Databases(commands.Cog):
                 _ = self.DB[collection_name]
             except:
                 self.DB.create_collection(collection_name)
-                print(f"Created Collection: {collection_name}")
-
-        
+                print(f"Created Collection: {collection_name}")   
 
     async def on_load(self):
         '''
@@ -52,16 +50,16 @@ class Databases(commands.Cog):
             "user": user.id,
             "name": user.name,
             "nickname": user.nick if user.nick else user.name,
-            "threat-level": 0,
+            "threat-level": 0, # used to control access to server
             "banned-words": {},
             "kick-votes": [],
             "mute-votes": [],
-            "server": user.guild.id,
-            "muted":False,
-            "OP":False,
+            "server": user.guild.id, # server the user account is associated with
+            "muted": False,
+            "OP": False,
             "stop-pings": False,
             "stop-images": False,
-            "favourite-colour":"Unknown",
+            "favourite-colour": "Unknown",
             "daily-weight": daily if not user.bot else 0,
             "bot": user.bot,
             "last-online": "Now" if str(user.status) == "online" else "Never",
@@ -96,7 +94,8 @@ class Databases(commands.Cog):
             "daily-member-staleness": 15, # enforces recency for daily members, in days. Set to -1 (or less) to disable.
             "za-hando-vote-duration": 120, # time to vote for ZA HANDO, in seconds
             "vault-vote-duration": 180, # time to vote for Vault post, in seconds
-            "message-triggers": {}
+            "message-triggers": {}, # triggers for messages
+            "announcements": [] # scheduled announcements
             }
     
     @commands.command()

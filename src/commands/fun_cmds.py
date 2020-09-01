@@ -124,9 +124,9 @@ class Fun(commands.Cog):
 
         holyText = soup.get_text()
 
-        if len(holyText) > 100000:
-            holyText = holyText[:100000]
-            await ctx.send("Text was trimmed to first 100000 characters for being too long.")
+        if len(holyText) > 10000:
+            holyText = holyText[:10000]
+            await ctx.send("Text was trimmed to first 10000 characters for being too long.")
 
         paginator = commands.Paginator(prefix="", suffix="")
 
