@@ -8,7 +8,7 @@ import requests, asyncio, random, datetime, time, pytz, string, socket, typing, 
 prefixes = (BOT_PREFIX, SECONDARY_PREFIX) if SECONDARY_PREFIX else (BOT_PREFIX,)
 
 # Bot Client
-client = commands.Bot(command_prefix=*prefixes, case_insensitive=True,
+client = commands.Bot(command_prefix=prefixes, case_insensitive=True,
                       help_command=commands.MinimalHelpCommand(
                           no_category="Help Command"))
 
@@ -321,18 +321,6 @@ def updateDBuser(userdata):
         if current_threat and current_threat != userdata["threat-level"]: 
             THREAT_CACHE[userdata["server"]] = DBfind(USER_COL, {"threat-level": {"$gt": 0}, "server": userdata["server"]})
             print("Rebuild Threat Cache")
-    
-
-### NAMES OF EACH DB COLLECTION ###
-USER_COL = "UserData"
-SERVERCFG_COL = "cfg"
-CUSTOMUSER_COL = "CustomUsers"
-ANNOUNCEMENTS_COL = "announcements"
-CMD_COL = "CustomCommands"
-LIST_COL = "CustomLists"
-CACHE_COL = "ChannelCache"
-FAVOURITES_COL = "favourites"
-PNG_COL = "pngs"
 
 '''
 Misc

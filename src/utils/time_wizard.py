@@ -12,9 +12,17 @@ class TimeWizard(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.announcements = {"08:00":self.dailyannounce}
-        
 
         self.timedannounce.start()
+
+
+    async def on_load(self):
+        for g in self.bot.guilds:
+            self.announcements[g.id] = DBfind(ANNOUNCEMENT_COL, {"server":g.id})
+
+            # custom announcements
+            self.announcements[g.id] += [{"time":"08:00", "announcement":self.dailyannounce}]
+
 
     def cog_unload(self):
         self.timedannounce.cancel()
@@ -73,10 +81,16 @@ class TimeWizard(commands.Cog):
 
         for s in servers:
             now = localTime()
-            for a in self.announcements:
-                if (now.strftime("%H:%M") == a):
+            for a in self.announcements[s["_id"]]:
+                if (now.strftime("%H:%M") == a["time"]):
                     c = self.bot.get_channel(s["announcements-channel"])
-                    await self.announcements[a](c, s)
+
+                    if hasattr(a["announcement"], "__call__"): await a["announcement"](c, s) # daily announce
+                        
+                    else: await c.send(a["announcement"])
+
+
+
     
 
     @timedannounce.before_loop

@@ -29,3 +29,14 @@ MACRO_TIMEOUT = 15
 # notifies the bot owner on startup
 NOTIFY_OWNER_ON_STARTUP = True
 
+### NAMES OF EACH DB COLLECTION ###
+USER_COL = "UserData"
+SERVERCFG_COL = "cfg"
+CUSTOMUSER_COL = "CustomUsers"
+ANNOUNCEMENTS_COL = "announcements"
+CMD_COL = "CustomCommands"
+LIST_COL = "CustomLists"
+CACHE_COL = "ChannelCache"
+FAVOURITES_COL = "favourites"
+PNG_COL = "pngs"
+
