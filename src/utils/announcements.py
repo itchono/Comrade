@@ -70,12 +70,13 @@ class Announcements(commands.Cog):
         for s in servers:
             now = localTime()
             for a in self.announcements[s["_id"]]:
-                if (now.strftime("%H:%M") == a["time"]):
-                    c = await getChannel(s, "announcements-channel")
 
-                    if hasattr(a["announcement"], "__call__"): await a["announcement"](c, s["_id"]) # daily announce
-                        
-                    else: await c.send(a["announcement"])
+                if (now.strftime("%H:%M") == a["time"]):
+                    c = self.bot.get_channel(s["announcements-channel"])
+
+                    if c:
+                        if hasattr(a["announcement"], "__call__"): await a["announcement"](c, s["_id"]) # daily announce
+                        else: await c.send(a["announcement"])
 
 
     @timedannounce.before_loop
@@ -97,6 +98,7 @@ class Announcements(commands.Cog):
         announce = {"server":ctx.guild.id, "time":time, "announcement":message, "owner":ctx.author.id}
         DBupdate(ANNOUNCEMENTS_COL, {"server":ctx.guild.id, "owner":ctx.author.id}, announce)
         await reactOK(ctx)
+        await self.before_timedannounce() # rebuild cache
 
     @commands.command()
     @commands.guild_only()
@@ -106,6 +108,7 @@ class Announcements(commands.Cog):
         '''
         DBremove_one({"server":ctx.guild.id, "owner":ctx.author.id})
         await reactOK(ctx)
+        await self.before_timedannounce()
 
     @commands.command()
     @commands.check_any(commands.is_owner(), isServerOwner())
