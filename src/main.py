@@ -1,26 +1,7 @@
 '''
 Comrade Bot
-Created by Mingde Yin
 
-With Help from:
-Sean D'Souza, Nuha Sahraoui, Victor Wang, Vimal Gunasegaran,
-Maggie Wang, Kevin Hu, Kevin Zhao, Nick Hewko, Stephen Luu, Anthony Luo
-
-Post-v3 Development
-3.4 - Message triggers and other tweaks
-3.3 - List Refactor + Minor Tweaks
-3.2 - Database refactor
-3.1 - Scripting System Added
-
-v3 Developed from April - June 2020
-Originally started in October 2019
-
-CONFIGURE LOCAL VARIABLES IN cfg.py
-
-For inviting the bot to your server complete set up shown below and use the link:
-https://discord.com/api/oauth2/authorize?client_id=707042278132154408&permissions=536083799&scope=bot
-
-Requires MongoDB Atlas [link to database; collections are automatically created.]
+By Mingde Yin
 '''
 import sys, dotenv
 from utils import *
@@ -39,8 +20,8 @@ REDUCED_INSTRUCTION_SET = [AuxilliaryListener, MessageHandler,  Databases,  Echo
 
 # Databases MUST load first, otherwise things will NOT work
 cogs = [ Databases, AuxilliaryListener, MessageHandler, General, Vault, Echo,
-    Users, TextFilter, Fun, TimeWizard, Emotes, Polymorph, Moderation, Cosmo, 
-    BPC, RandomEvents, Lists, Polls, NSFW, SelfPing, TexRender, Shoujo
+    Users, TextFilter, Fun, Announcements, Emotes, Polymorph, Moderation, Cosmo, 
+    BPC, RandomEvents, Lists, Polls, NSFW, SelfPing, TexRender, Shoujo, Graphing
 ] if not DEVELOPMENT_MODE else REDUCED_INSTRUCTION_SET # for use with development to get faster start
 
 for c in cogs: client.add_cog(c(client))

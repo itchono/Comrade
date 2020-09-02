@@ -1,33 +1,22 @@
 from utils.utilities import *
-
-
-import datetime
+from utils.db_utils import *
 
 '''
-Comrade - Time dependent modules
-Timed announcements
+Comrade - Timed announcements
 '''
 
-class TimeWizard(commands.Cog):
+class Announcements(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.announcements = {"08:00":self.dailyannounce}
+        self.announcements = {}
 
         self.timedannounce.start()
 
-
-    async def on_load(self):
-        for g in self.bot.guilds:
-            self.announcements[g.id] = DBfind(ANNOUNCEMENT_COL, {"server":g.id})
-
-            # custom announcements
-            self.announcements[g.id] += [{"time":"08:00", "announcement":self.dailyannounce}]
-
-
+        
     def cog_unload(self):
         self.timedannounce.cancel()
 
-    async def dailyannounce(self, channel: discord.TextChannel, serverDB: dict):
+    async def dailyannounce(self, channel: discord.TextChannel, guildid):
         '''
         Daily announcement
         '''
@@ -47,13 +36,12 @@ class TimeWizard(commands.Cog):
         choices = cog.WEIGHTED_RND_USER[ctx.guild.id] if active else cog.UNWEIGHTED_RND_USER[ctx.guild.id]
         luckyperson = random.choice(choices)
 
-        d = DBuser(luckyperson.id, serverDB["_id"])
+        d = DBuser(luckyperson.id, guildid)
   
         if active: 
           d["daily-weight"] -= 1
           updateDBuser(d)
           # self regulating; once probability drops to zero, we just need to refill.
-
 
         dailyrole = await dailyRole(channel.guild)
 
@@ -68,7 +56,7 @@ class TimeWizard(commands.Cog):
         await luckyperson.edit(roles=roles)
 
         await channel.send("Today's Daily Member is **{}**".format(luckyperson.display_name))
-        await cog.userinfo(ctx, target=luckyperson.mention) # TODO dependancy
+        await cog.avatar(ctx, member=luckyperson)
         
         await cog.rebuildcache(channel.guild)
 
@@ -83,27 +71,57 @@ class TimeWizard(commands.Cog):
             now = localTime()
             for a in self.announcements[s["_id"]]:
                 if (now.strftime("%H:%M") == a["time"]):
-                    c = self.bot.get_channel(s["announcements-channel"])
+                    c = await getChannel(s, "announcements-channel")
 
-                    if hasattr(a["announcement"], "__call__"): await a["announcement"](c, s) # daily announce
+                    if hasattr(a["announcement"], "__call__"): await a["announcement"](c, s["_id"]) # daily announce
                         
                     else: await c.send(a["announcement"])
 
-
-
-    
 
     @timedannounce.before_loop
     async def before_timedannounce(self):
         await self.bot.wait_until_ready()
 
+        for g in self.bot.guilds:
+            additonal_announcements = [{"server":g.id, "time":"08:00", "announcement":self.dailyannounce, "owner":None}]
+            if d := DBfind(ANNOUNCEMENTS_COL, {"server":g.id}): self.announcements[g.id] = d + additonal_announcements
+            else: self.announcements[g.id] = additonal_announcements
+
+    @commands.command()
+    @commands.guild_only()
+    async def addannounce(self, ctx: commands.Context, time, *, message):
+        '''
+        Adds an announcement to the announcement system [24 hr time].
+        Each user is allowed to have a maximum of one announcement.
+        '''
+        announce = {"server":ctx.guild.id, "time":time, "announcement":message, "owner":ctx.author.id}
+        DBupdate(ANNOUNCEMENTS_COL, {"server":ctx.guild.id, "owner":ctx.author.id}, announce)
+        await reactOK(ctx)
+
+    @commands.command()
+    @commands.guild_only()
+    async def removeannounce(self, ctx: commands.Context, time, *, message):
+        '''
+        Removes an announcement from the announcement system
+        '''
+        DBremove_one({"server":ctx.guild.id, "owner":ctx.author.id})
+        await reactOK(ctx)
+
     @commands.command()
     @commands.check_any(commands.is_owner(), isServerOwner())
     @commands.guild_only()
-    async def testannounce(self, ctx: commands.Context):
+    async def testannounce(self, ctx: commands.Context, time):
         '''
         Tests making an announcement
         '''
-        await self.dailyannounce(ctx.channel, DBfind_one(SERVERCFG_COL, {"_id": ctx.guild.id}))
+
+        for a in self.announcements[ctx.guild.id]:
+
+            if (time == a["time"]):
+                c = await getChannel(ctx.guild, "announcements-channel")
+
+                if hasattr(a["announcement"], "__call__"): await a["announcement"](c, ctx.guild.id) # daily announce
+                    
+                else: await c.send(a["announcement"])
 
 

@@ -1,6 +1,6 @@
 from utils.utilities import *
 from .echo_cmds import ComradeUser
-
+from utils.db_utils import *
 
 class Users(commands.Cog):
     def __init__(self, bot):
@@ -19,7 +19,7 @@ class Users(commands.Cog):
 
         if type(member) == discord.Member:
             # server environment
-            a = discord.Embed(color=discord.Color.dark_blue(), 
+            a = discord.Embed(color=member.colour, 
                             title="{}'s Avatar".format(member.display_name),
                             url=str(member.avatar_url_as(static_format="png")))
             a.set_image(url='{}'.format(member.avatar_url))
@@ -38,6 +38,7 @@ class Users(commands.Cog):
         Made by Slyflare, upgraded by itchono
         '''
         if not target: target = ctx.author
+        else: target = target[1]
 
         try:
             _ = target.display_name
@@ -82,42 +83,46 @@ class Users(commands.Cog):
         '''
         More detailed user info
         '''
+
         if not target: target = ctx.author
+        else: target = target[1]
 
-        if ctx.guild and (custom := DBfind_one(CUSTOMUSER_COL, {"name":target, "server":ctx.guild.id})):
-            e = discord.Embed(title="{} (Custom User)".format(target))
+        try:
+            _ = target.display_name
+
+            e = discord.Embed(title="Info for {}".format(target.display_name), colour=target.colour)
             e.set_author(name=f"User Info - {target}")
-            e.set_thumbnail(url=custom["url"])
-            e.set_footer(icon_url=custom["url"])
-
-            await ctx.send(embed=e)
-
-        elif member := await getUser(ctx, target):
-            e = discord.Embed(title="Info for {}".format(member.name), colour=member.colour)
-            e.set_author(name=f"User Info - {member}")
-            e.set_thumbnail(url=member.avatar_url)
+            e.set_thumbnail(url=target.avatar_url)
             e.set_footer(icon_url=ctx.author.avatar_url)
 
             if ctx.guild:
 
-                roles = [role for role in member.roles]
+                roles = [role for role in target.roles]
 
-                u = DBuser(member.id, ctx.guild.id)
+                u = DBuser(target.id, ctx.guild.id)
 
                 for c in u:
                     if c != "_id": e.add_field(name=c, value=u[c], inline=True)
                 
-                e.add_field(name=f"Roles: ({len(roles)})", value=" ".join([role.mention for role in member.roles]))
-                try: e.add_field(name="Joined Server", value=f"{member.joined_at.strftime('%B %m %Y at %I:%M:%S %p %Z')}")
+                e.add_field(name=f"Roles: ({len(roles)})", value=" ".join([role.mention for role in target.roles]))
+                try: e.add_field(name="Joined Server", value=f"{target.joined_at.strftime('%B %m %Y at %I:%M:%S %p %Z')}")
                 except: pass
-                e.add_field(name="Account Created", value=member.created_at.strftime('%B %m %Y at %I:%M:%S %p %Z'))
+                e.add_field(name="Account Created", value=target.created_at.strftime('%B %m %Y at %I:%M:%S %p %Z'))
             
             else:
-                e.add_field(name="Account Created", value=member.created_at.strftime('%B %m %Y at %I:%M:%S %p %Z'))
+                e.add_field(name="Account Created", value=target.created_at.strftime('%B %m %Y at %I:%M:%S %p %Z'))
                 e.add_field(name="No more info available", value="Comrade is in a DM environment, and therefore has no information stored. Try calling this in a server with Comrade set up.", inline=True)
 
-
             await ctx.send(embed=e)
+
+        except AttributeError:
+            # Custom User
+            e = discord.Embed(title=f"{target['name']} (Custom User)")
+            e.set_author(name=f"User Info - {target['name']}")
+            e.set_thumbnail(url=target["url"])
+            e.set_footer(icon_url=target["url"])
+            await ctx.send(embed=e)
+
             
     '''
     Random User Functions

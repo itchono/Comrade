@@ -1,6 +1,5 @@
 from utils.utilities import *
-import os
-
+from utils.db_utils import *
 
 from fuzzywuzzy import fuzz
 
@@ -62,7 +61,7 @@ class MessageHandler(commands.Cog):
 
             ctx = await self.bot.get_context(message)
 
-            if jokeMode(ctx):
+            if jokeMode(ctx) and ctx.guild:
                 await self.message_triggers(ctx)
 
                 if fuzz.token_set_ratio(message.content, "still at cb") > 90:

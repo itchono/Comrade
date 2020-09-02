@@ -1,4 +1,5 @@
 from utils.utilities import *
+from utils.db_utils import *
 
 import ast, os, sys, dotenv
 from pymongo import MongoClient
@@ -86,6 +87,7 @@ class Databases(commands.Cog):
             "meme-channel": 0,
             "vault-channel": 0,
             "log-channel": log_channel.id if log_channel else 0, # attempts to locate a log channel in the server
+            "png-channel": 0, # channel to spawn pngs in [nsfw]
             "emote-directory": emote_directory.id if emote_directory else 0, # attempts to locate an emote directory in the server
             "custom-channel-group": 0, # id of the channel category under which you want to make custom channels
             "default-daily-count": 2, # amount of daily member counts everyone starts with
