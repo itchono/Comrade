@@ -1,4 +1,5 @@
 from utils.utilities import *
+from utils.db_utils import *
 
 import json
 import io
@@ -211,8 +212,9 @@ class NSFW(commands.Cog):
                         cuttag += tags[i][j]
                 list1.append(cuttag)
             e.set_footer(text=" ".join(list1))
-            channel = self.bot.get_channel(522428899184082945)
-            await channel.send(embed = e)
+
+            pngchn = await getChannel(message.guild,"png-channel")
+            await pngchn.send(embed = e)
 
     @commands.command(aliases = ["sister"])
     @commands.guild_only()

@@ -1,5 +1,5 @@
 from utils.utilities import *
-
+from utils.db_utils import *
 
 class Vault(commands.Cog):
     def __init__(self, bot):

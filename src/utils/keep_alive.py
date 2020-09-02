@@ -6,7 +6,6 @@ import urllib.request
 
 # disable logging
 import logging
-import os
 
 logging.getLogger('werkzeug').disabled = True
 os.environ['WERKZEUG_RUN_MAIN'] = 'true'

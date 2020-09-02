@@ -1,11 +1,10 @@
 from utils.utilities import *
-
+from utils.db_utils import *
 
 
 class Moderation(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        
 
     @commands.command(aliases = ["shutup"])
     @commands.guild_only()
