@@ -496,6 +496,9 @@ class Fun(commands.Cog):
 
     @commands.command()
     async def fuckup (self, ctx: commands.Context, *, text:str = ""):
+        '''
+        ruin someone's day
+        '''
         t = text.strip()
         if len(t) == 0:
             msg = (await ctx.channel.history(limit=2).flatten())[1]
@@ -506,5 +509,35 @@ class Fun(commands.Cog):
 
         c = self.bot.get_cog("Echo")
         await c.extecho(ctx, self.konoesubaru(self.tokisakikurumi(ctx, self.nyaruko(t))), str(auth.name), deleteMsg=False)
-            
 
+    @commands.command()
+    async def futa (self, ctx: commands.Context, m: discord.Message = None):
+        '''
+        Developed by Futanari Yaoi. Search on Google to learn more about his work
+        '''
+        
+        if not m:
+            m = (await ctx.channel.history(limit=2).flatten())[1]
+
+        #spell futanari yaoi
+        await m.add_reaction(u"\U0001F1EB")
+        await m.add_reaction(u"\U0001F1FA")
+        await m.add_reaction(u"\U0001F1F9")
+        await m.add_reaction(u"\U0001F1E6")
+        await m.add_reaction(u"\U0001F1F3")
+        await m.add_reaction("🅰️")
+        await m.add_reaction(u"\U0001F1F7")
+        await m.add_reaction(u"\U0001F1EE")
+
+        await m.add_reaction("▪️")
+        
+        await m.add_reaction(u"\U0001F1FE")
+        await m.add_reaction("4️⃣")
+        await m.add_reaction("0️⃣")
+        await m.add_reaction("ℹ️")
+
+        await m.add_reaction("◼️")
+        await m.add_reaction("♀️")
+        await m.add_reaction("♂️")
+        await m.add_reaction("🍆")
+        await m.add_reaction("💦")
