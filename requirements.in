@@ -13,3 +13,5 @@ bs4
 pytz
 matplotlib
 numpy
+flask
+pillow
