@@ -1,5 +1,5 @@
-from utils.utilities import *
-from utils.emoji_converter import *
+from utils.core_dependencies.utilities import *
+from utils.additional.emoji_converter import *
 
 class Polls(commands.Cog):
     def __init__(self, bot):
