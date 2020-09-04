@@ -1,5 +1,5 @@
-from utils.utilities import *
-from utils.db_utils import *
+from utils.core_dependencies.utilities import *
+from utils.core_dependencies.db_utils import *
 
 import ast, os, sys, dotenv
 from pymongo import MongoClient
