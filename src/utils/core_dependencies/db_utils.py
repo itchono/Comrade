@@ -1,5 +1,5 @@
 ## Database utilities for Comrade
-from utils.utilities import client
+from utils.core_dependencies.utilities import client
 from cfg import *
 
 '''

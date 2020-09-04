@@ -1,6 +1,6 @@
-from utils.utilities import *
-from .echo_cmds import ComradeUser
-from utils.db_utils import *
+from utils.core_dependencies.echo_cmds import ComradeUser
+from utils.core_dependencies.utilities import *
+from utils.core_dependencies.db_utils import *
 
 class Users(commands.Cog):
     def __init__(self, bot):
