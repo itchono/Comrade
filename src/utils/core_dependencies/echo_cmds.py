@@ -1,5 +1,5 @@
-from utils.utilities import *
-from utils.db_utils import *
+from utils.core_dependencies.utilities import *
+from utils.core_dependencies.db_utils import *
 
 def isWebhook(message: discord.Message):
     '''

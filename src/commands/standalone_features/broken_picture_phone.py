@@ -1,4 +1,4 @@
-from utils.utilities import *
+from utils.core_dependencies.utilities import *
 
 class PictoChain():
     '''
