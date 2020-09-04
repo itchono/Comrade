@@ -1,8 +1,7 @@
-from utils.utilities import *
-from utils.db_utils import *
-import utils.utilities
+from utils.core_dependencies.utilities import *
+from utils.core_dependencies.db_utils import *
 
-from utils.emoji_converter import *
+from utils.additional.emoji_converter import *
 from polymorph.text_gen import *
 from polymorph.model_gen import *
 from polymorph.data_compressor import *

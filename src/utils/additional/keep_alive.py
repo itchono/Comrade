@@ -1,4 +1,4 @@
-from utils.utilities import *
+from utils.core_dependencies.utilities import *
 from flask import Flask # used to create web server to keep bot actively hosted
 from threading import Thread # used to create separate parallel process to keep bot up
 
