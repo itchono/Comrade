@@ -1,4 +1,4 @@
-from utils.utilities import *
+import asyncio
 
 # MODIFIED SYSTEM to interpret Cosmo code, in a way that works with Comrade.
 

@@ -1,85 +1,10 @@
 import discord
-from discord.ext import commands, tasks
-
-
+from discord.ext import commands
 from cfg import *
 
-import requests, asyncio, random, datetime, time, pytz, string, socket, typing, re, os
+import requests, asyncio, datetime, pytz, string, socket
 
-prefixes = (BOT_PREFIX, SECONDARY_PREFIX) if SECONDARY_PREFIX else (BOT_PREFIX,)
-
-# Bot Client
-client = commands.Bot(command_prefix=prefixes, case_insensitive=True,
-                      help_command=commands.MinimalHelpCommand(
-                          no_category="Help Command"))
-
-from utils.db_utils import getThreats, getOPS, DBcfgitem
-
-'''
-Checks
-'''
-def isOP(ctx: commands.Context):
-    '''
-    Determines whether message author is an OP
-    '''
-    if not ctx.guild: return True
-    return ctx.author.id in [i["user"] for i in getOPS(ctx.guild.id)]
-
-def isNotThreat(threatLevel:int = 0):
-    '''
-    Returns a function that checks of the message author is of a certain threat-level or higher
-    '''
-    def ret(ctx: commands.Context):
-        if not ctx.guild: return True
-        return not ctx.author.id in [i["user"] for i in getThreats(ctx.guild.id) if i["threat-level"] > threatLevel]
-    return ret
-
-def isServerOwner():
-    def predicate(ctx: commands.Context):
-        '''
-        Determines whether message author is server owner
-        '''
-        return ctx.guild and (ctx.author.id == ctx.guild.owner.id or DEVELOPMENT_MODE)
-    return commands.check(predicate)
-
-def isUser(name:str):
-    
-    def predicate(ctx: commands.Context):
-        '''
-        Determines whether message author bears the name.
-        '''
-        return ctx.author.name == name
-    return commands.check(predicate)
-
-def jokeMode(ctx: commands.Context):
-    '''
-    Determines whether Comrade should do the small jokey things.
-    '''
-    try: return bool(DBcfgitem(ctx.guild.id, "joke-mode"))
-    except: return True # this means that for DMs, this will automatically be true
-
-purgeTGT = None
-def setTGT(tgt):
-    '''
-    Sets purge target
-    '''
-    global purgeTGT
-    purgeTGT = tgt
-
-def purgeCheck(tgt):
-    '''
-    Sets purge target
-    '''
-
-    def check(message: discord.Message):
-        '''
-        Checks whether or not to delete the message
-        '''
-        return message.author == tgt
-    return check
-
-
-
+from utils.core_dependencies.db_utils import DBcfgitem
 '''
 Message Helpers
 '''
@@ -128,7 +53,7 @@ async def DM(s: str, user: discord.User, embed=None):
 Image Extractor
 '''
 
-async def getavatar(member: discord.Member):
+async def getAvatar(member: discord.Member):
     '''
     Returns file bytes of avatar
     '''
@@ -165,6 +90,7 @@ async def getChannel(guild: discord.Guild, name: str):
         if name != "log-channel": await log(guild, f"Channel not found: {name}")
         else: print("Error: (log-channel not set up); channel not found")
     else: return c
+
 '''
 logger
 '''
@@ -185,8 +111,7 @@ def getHost():
     try: 
         host_name = socket.gethostname() 
         return "{}".format(host_name)
-    except: 
-        return "IP could not be determined."
+    except: return "IP could not be determined."
 
 '''
 Roles
@@ -197,8 +122,7 @@ async def dailyRole(guild: discord.Guild):
     Returns the Comrade "Member of the Day" role for a guild, if it exists, or creates it
     '''
     for role in guild.roles:
-        if role.name == "Member of the Day":
-            return role
+        if role.name == "Member of the Day": return role
     
     return await guild.create_role(name="Member of the Day", colour=discord.Colour.from_rgb(*DAILY_MEMBER_COLOUR), mentionable=True)
 
@@ -207,8 +131,7 @@ async def mutedRole(guild: discord.Guild):
     Returns the Comrade "Comrade-Mute" role for a guild, if it exists, or creates it
     '''
     for role in guild.roles:
-        if role.name == "Comrade-Mute":
-            return role
+        if role.name == "Comrade-Mute": return role
     
     return await guild.create_role(name="Comrade-Mute")
 
@@ -217,8 +140,7 @@ async def rickRole(guild: discord.Guild):
     Returns the Comrade "Rick" role for a guild, if it exists, or creates it.
     '''
     for role in guild.roles:
-        if role.name == "Rick":
-            return role
+        if role.name == "Rick": return role
     
     return await guild.create_role(name="Rick", colour=discord.Colour.from_rgb(92, 199, 81), mentionable=True)
 
@@ -240,8 +162,4 @@ def UTCtoLocalTime(t, zone=LOCAL_TIMEZONE):
     utc = pytz.timezone("UTC").localize(t)
     return utc.astimezone(pytz.timezone(LOCAL_TIMEZONE))
     
-def match_url(url):
-    regex = re.compile(
-        "(([\w]+:)?//)?(([\d\w]|%[a-fA-f\d]{2,2})+(:([\d\w]|%[a-fA-f\d]{2,2})+)?@)?([\d\w][-\d\w]{0,253}[\d\w]\.)+[\w]{2,63}(:[\d]+)?(/([-+_~.\d\w]|%[a-fA-f\d]{2,2})*)*(\?(&?([-+_~.\d\w]|%[a-fA-f\d]{2,2})=?)*)?(#([-+_~.\d\w]|%[a-fA-f\d]{2,2})*)?"
-    )
-    return regex.match(url)
+

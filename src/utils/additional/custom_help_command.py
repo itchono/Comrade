@@ -1,4 +1,6 @@
-from utils.core_dependencies.utilities import *
+import discord
+from discord.ext import commands
+from utils import *
 
 class ComradeHelp(commands.HelpCommand):
     pass

@@ -1,11 +1,13 @@
-from utils.core_dependencies.utilities import *
+import discord
+from discord.ext import commands, tasks
+from utils import *
 from flask import Flask # used to create web server to keep bot actively hosted
 from threading import Thread # used to create separate parallel process to keep bot up
 
 import urllib.request
 
 # disable logging
-import logging
+import logging, os
 
 logging.getLogger('werkzeug').disabled = True
 os.environ['WERKZEUG_RUN_MAIN'] = 'true'

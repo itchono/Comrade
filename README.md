@@ -28,6 +28,8 @@ In the root folder of the repository, run (from terminal or cmd):
 pip install -r requirements.txt
 ```
 
+For peak performance, also run `pip install python-Levenshtein`
+
 Also make sure you are running Python 3.8+.
 
 ## STAGE 3: ENV file
@@ -92,6 +94,7 @@ ex. $c cfg "vault-channel" #meme-vault
 
 # Changlog
 Post-v3 Development
+* 3.6 - More refactoring, server activity log project
 * 3.5 - Announcements system, refactoring
 * 3.4 - Message triggers and other tweaks
 * 3.3 - List Refactor + Minor Tweaks

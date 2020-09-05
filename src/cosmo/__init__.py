@@ -1,3 +1,2 @@
-from .custom_commands import *
-from .cosmo_interp import *
-from .cosmo_parser import *
+from .custom_commands import Cosmo
+# for init within main.py

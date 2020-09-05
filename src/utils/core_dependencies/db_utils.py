@@ -1,6 +1,6 @@
 ## Database utilities for Comrade
-from utils.core_dependencies.utilities import client
 from cfg import *
+from utils.startup import *
 
 '''
 General Database
