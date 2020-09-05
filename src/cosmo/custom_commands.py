@@ -1,18 +1,17 @@
-from utils.utilities import *
-from utils.db_utils import *
+import discord
+from discord.ext import commands
+from utils import *
 
 from cosmo.cosmo_interp import *
 from cosmo.cosmo_parser import *
 
-import async_timeout
-
+import async_timeout, asyncio
 from discord.ext.commands.view import StringView
 
 class Cosmo(commands.Cog):
 
     def __init__(self, bot):
-        self.bot = bot
-        
+        self.bot = bot 
 
     @commands.command()
     @commands.check(isNotThreat())

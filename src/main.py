@@ -3,12 +3,13 @@ Comrade Bot
 
 By Mingde Yin
 '''
-import sys, dotenv
+
+import discord
+from discord.ext import commands
 from utils import *
-from polymorph import *
-from cosmo import *
-from commands import *
-from cfg import *
+from utils.startup import *
+from cogs import *
+import os, sys, dotenv, asyncio, time
 
 first_start = True
 online = False
@@ -21,7 +22,7 @@ REDUCED_INSTRUCTION_SET = [AuxilliaryListener, MessageHandler,  Databases,  Echo
 # Databases MUST load first, otherwise things will NOT work
 cogs = [ Databases, AuxilliaryListener, MessageHandler, General, Vault, Echo,
     Users, TextFilter, Fun, Announcements, Emotes, Polymorph, Moderation, Cosmo, 
-    BPC, RandomEvents, Lists, Polls, NSFW, SelfPing, TexRender, Shoujo, Graphing
+    BPC, RandomEvents, Lists, Polls, NSFW, SelfPing, TexRender, Shoujo, Graphing, ActivityTracker
 ] if not DEVELOPMENT_MODE else REDUCED_INSTRUCTION_SET # for use with development to get faster start
 
 for c in cogs: client.add_cog(c(client))
