@@ -109,3 +109,80 @@ class ActivityTracker(commands.Cog):
         plt.clf()
         await ctx.send(file=discord.File(f, "leaderboard.png"))
 
+    @commands.command()
+    @commands.guild_only()
+    async def onlinegraph(self, ctx):
+
+        await ctx.trigger_typing()
+
+        entries = DBfind("activitydata", {})
+
+        times = []
+        onlinepeople = []
+
+        tz = pytz.timezone("US/Eastern")
+
+        for t in entries:
+            times.append(md.date2num(t["time"]))
+            onlinepeople.append(t["online-members"])
+
+        fig = plt.figure()
+
+        ax = fig.add_subplot(111)
+
+        ax.set_title("Number of Online Members on Iraq BTW")
+        ax.plot_date(times, onlinepeople, "-")
+
+        ax.set_ylabel("Number of Members (Human, Online)")
+        ax.set_xlabel("Time")
+
+        xfmt = md.DateFormatter('%H:%M', tz=tz)
+        ax.xaxis.set_major_formatter(xfmt)
+
+        ax.grid()
+
+        f = io.BytesIO()
+        plt.savefig(f, format="png")
+        f.seek(0)
+        plt.clf()
+        await ctx.send(file=discord.File(f, "online.png"))
+
+    @commands.command()
+    @commands.guild_only()
+    async def messagegraph(self, ctx):
+
+        await ctx.trigger_typing()
+
+        entries = DBfind("activitydata", {})
+
+        times = []
+        messagevolume = []
+
+        tz = pytz.timezone("US/Eastern")
+
+        for t in entries:
+            times.append(md.date2num(t["time"]))
+            messagevolume.append(t["messages-sent"])
+
+        fig = plt.figure()
+
+        ax = fig.add_subplot(111)
+
+        ax.set_title("Message Volume")
+        ax.plot_date(times, messagevolume, "-")
+
+        ax.set_ylabel("Number of Messages Sent in Time Window")
+        ax.set_xlabel("Time")
+
+        xfmt = md.DateFormatter('%H:%M', tz=tz)
+        ax.xaxis.set_major_formatter(xfmt)
+
+        ax.grid()
+
+        f = io.BytesIO()
+        plt.savefig(f, format="png")
+        f.seek(0)
+        plt.clf()
+        await ctx.send(file=discord.File(f, "messages.png"))
+
+
