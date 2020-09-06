@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from utils import *
 
-import random
+import random, os
 
 from fuzzywuzzy import fuzz # NOTE: install python-Levenshtein for faster results.
 
