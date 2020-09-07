@@ -3,6 +3,8 @@ from discord.ext import commands
 
 from utils.core_dependencies.db_utils import DBcfgitem
 
+import re
+
 def jokeMode(ctx: commands.Context):
     '''
     Determines whether Comrade should do the small jokey things.
