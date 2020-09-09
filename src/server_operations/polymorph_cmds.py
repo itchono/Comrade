@@ -4,6 +4,9 @@ from utils import *
 
 from polymorph import *
 
+from collections import Counter, defaultdict # markov
+import random # markov
+
 import time, typing
 
 '''
@@ -43,6 +46,42 @@ class Polymorph(commands.Cog):
         if self.localcache[g.id]: await log(g, "Message cache loaded with {} messages.\nChannels:\n{}".format(len(self.localcache[g.id]), s))
         else: await log(g, "No message cache loaded for this server!")
 
+    @commands.command()
+    @commands.guild_only()
+    async def markov(self, ctx: commands.Context, member:discord.Member=None):
+        '''
+        Generates up to 400 chars of text using a newer, Character Based Markov Chain
+        '''
+        await ctx.trigger_typing()
+
+        if ctx.guild.id in self.localcache:
+
+            text = " ".join([m["content"] for m in self.localcache[ctx.guild.id] if m["author"] == member.id])
+
+            MODEL_LEN = 5
+
+            model = defaultdict(Counter) # calls a counter object in the event that an index doesn't exist
+
+            for i in range(len(text)-MODEL_LEN): model[text[i:(i+MODEL_LEN)]][text[i+MODEL_LEN]] += 1
+
+            selector = random.choice(list(model)) # select a starting character
+            out = selector
+
+            for i in range(400):
+                try:
+                    out += random.choices(list(model[selector]), model[selector].values())[0]
+                    selector = out[-MODEL_LEN:]
+                except: break
+                # else: 
+                #     if out[-1] == "\n": 
+                #         out = out[:-1]
+                #         break
+            await ctx.send(out)
+
+
+        else: await reactX(ctx); await ctx.send("Model could not be built - no message cache has been loaded for this server. \nUse `{}extractChannel <channel>` to load a channel".format(BOT_PREFIX))
+
+        
 
     @commands.command(aliases = ["gen"])
     @commands.guild_only()
@@ -53,8 +92,6 @@ class Polymorph(commands.Cog):
         If you want the model for a certain channel, run [buildmodel] in that channel.
         '''
         if not member: member = ctx.author
-
-        
 
         if number > 100 or number < 0: await ctx.send("No")
         else:
