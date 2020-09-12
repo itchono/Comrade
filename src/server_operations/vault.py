@@ -45,9 +45,9 @@ class Vault(commands.Cog):
         if len(ctx.message.attachments) > 0:
             u = ctx.message.attachments[0].url
         elif tgt and tgt.isnumeric():
-            u = await commands.MessageConverter().convert(tgt)
+            u = await commands.MessageConverter().convert(ctx, tgt)
             IDmode = True
-        elif u := await commands.MessageConverter().convert(tgt):
+        elif u := await commands.MessageConverter().convert(ctx, tgt):
             IDmode = True
         else: u = tgt  # URL directly
 
@@ -109,7 +109,7 @@ class Vault(commands.Cog):
                     m = await vault.send("Vault operation in progress...")
                     e = discord.Embed(title=":tomato: Echoed Vault Entry",
                                       description="See Echoed Message Below.",
-                                      colour=discord.Colour.from_rgb(*DBcfgitem(ctx.guild.id,"theme-colour")))
+                                      colour=discord.Colour.from_rgb(*DBcfgitem(user.guild.id,"theme-colour")))
                     e.add_field(name='Original Post: ', value=msg.jump_url)
                     e.set_footer(text="Sent by {}".format(msg.author))
                     c = await self.bot.get_context(m)

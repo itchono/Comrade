@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from utils import *
 
-import math, typing, string
+import math, typing, string, time
 
 from PyDictionary import PyDictionary
 import html2text
