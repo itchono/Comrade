@@ -3,11 +3,15 @@ from discord.ext import commands
 
 from terrestrial.game_objects import Game
 
+## Feature Wishlist
+# Add a thing that's like twitch plays, where you collect multiple inputs over the course, of say 5 seconds
+# Add diamond mining and house building
+
 class Terrestrial(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
     @commands.command()
-    async def startgame(self, ctx:commands.Context):
+    async def startgame(self, ctx:commands.Context, seed:int=0):
         '''
         Starts a game of terrestrial
         '''
@@ -21,8 +25,6 @@ class Terrestrial(commands.Cog):
 
         def check(reaction, user):
             return str(reaction) in ["⬅", "➡", "⬆", "⬇", "⛏", "🛑"] and user == ctx.author and reaction.message.id == m.id
-
-        # Add a thing that's like twitch plays, where you collect multiple inputs over the course, of say 5 seconds
 
         while 1:
             reaction, user = await self.bot.wait_for("reaction_add", check=check)
