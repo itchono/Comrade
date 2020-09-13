@@ -69,17 +69,19 @@ class Announcements(commands.Cog):
         '''
         servers = DBfind(SERVERCFG_COL)
 
+        now = localTime()
+
         for s in servers:
-            now = localTime()
-            for a in self.announcements[s["_id"]]:
+            try:
+                for a in self.announcements[s["_id"]]:
 
-                if (now.strftime("%H:%M") == a["time"]):
-                    c = self.bot.get_channel(s["announcements-channel"])
+                    if (now.strftime("%H:%M") == a["time"]):
+                        c = self.bot.get_channel(s["announcements-channel"])
 
-                    if c:
-                        if hasattr(a["announcement"], "__call__"): await a["announcement"](c, s["_id"]) # daily announce
-                        else: await c.send(a["announcement"])
-
+                        if c:
+                            if hasattr(a["announcement"], "__call__"): await a["announcement"](c, s["_id"]) # daily announce
+                            else: await c.send(a["announcement"])
+            except: pass
 
     @timedannounce.before_loop
     async def before_timedannounce(self):
