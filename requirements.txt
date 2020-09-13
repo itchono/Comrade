@@ -43,3 +43,4 @@ unidecode==1.1.1          # via -r requirements.in
 urllib3==1.25.10          # via requests
 werkzeug==1.0.1           # via flask
 yarl==1.5.1               # via aiohttp
+scipy==1.5.2
