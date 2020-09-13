@@ -1,4 +1,5 @@
 import numpy as np
+from collections import Counter # dictionary for inventory
 
 '''
 y,x  coordinate system
@@ -14,10 +15,13 @@ directions = delta = {"LEFT":[0, -1], "RIGHT":[0, 1], "UP":[-1, 0], "DOWN":[1, 0
 BLOCKS = {0:"🟦", 1:"🟩", 2:"🟫", 3:"🌳", 4:"🏠", 5:"💎", 6:"🔥", 7:"⬛", 98:"😳", 99:"⛏"}
 
 
-def numround(LIMIT, position):
+def numround(LIMIT, position, size = (1, 1)):
+    '''
+    rounds a coordinate down to fit correctly inside the bounding box
+    '''
     for i in range(len(position)):
         if position[i] < 0: position[i] = 0
-        elif position[i] >= LIMIT[i]: position[i] = LIMIT[i] - 1
+        elif position[i] + size[i] > LIMIT[i]: position[i] = LIMIT[i] - size[i]
 
 def TL2BL(position):
     # converts to bottom-left coordinates (np array)
@@ -29,7 +33,10 @@ class Game():
         self.camera_pos = self.player_pos - (np.array(RENDER_SIZE)/2).astype(int)
         # Camera is centered around player
 
+        self.inventory = Counter()
+
         self.state = 0 #😳
+        # player state
 
         self.seed = seed
         # terrain generation seed
@@ -40,7 +47,6 @@ class Game():
 
         self.moveplayer("UP", 0) # initialize player to valid position
 
-        
 
     # coordinates of bounding points for the renderer
     @property
@@ -67,7 +73,9 @@ class Game():
         '''
         Add flavour text
         '''
-        return f"\nx = {self.position[1]}, y = {self.position[0]}\nStanding On: {BLOCKS[self.tile_at_player]}" # player position update
+        inv = [f"{i} x {self.inventory[i]}" for i in self.inventory]
+
+        return f"\nx = {self.position[1]}, y = {self.position[0]}\nStanding On: {BLOCKS[self.tile_at_player]}\nInventory: {' '.join(inv)}" # player position update
     
     @property
     def rendered(self): return "\n".join(["".join([BLOCKS[sq] for sq in row]) for row in self.frame])
@@ -88,47 +96,69 @@ class Game():
         '''
         Generates terrain for the map
         '''
-        # random.seed(self.seed) # seed random
-
-        rng = np.random.default_rng(self.seed)
+        np.random.seed(self.seed)
+        rng = np.random.default_rng()
 
         LOWEST_TERRAIN = 11
         HIGHEST_TERRAIN = 13
 
+        ORE_VARIANCE = 2
+
         heightmap = ((HIGHEST_TERRAIN - LOWEST_TERRAIN) * rng.random((MAP_SIZE[1],)) + LOWEST_TERRAIN + 1).astype(int)
+        ore_heights = (ORE_VARIANCE * rng.random((MAP_SIZE[1],))).astype(int)
 
         NUM_TREES = int(MAP_SIZE[1]/3)
 
+        NUM_DIAMONDS = int(MAP_SIZE[1]/4)
+
+        DIAMOND_LEVEL = 4
+
         tree_locations = (MAP_SIZE[1] * rng.random((NUM_TREES,)) + 1).astype(int)
+        diamond_locations = (MAP_SIZE[1] * rng.random((NUM_TREES,)) + 1).astype(int)
 
         for i in range(MAP_SIZE[1]):
             self.map[MAP_SIZE[0]-heightmap[i]:, i].fill(2)# fill dirt
             self.map[MAP_SIZE[0]-heightmap[i]: MAP_SIZE[0]-heightmap[i] + 2, i].fill(1) # fill grass
             if i in tree_locations: self.map[MAP_SIZE[0]-heightmap[i]-1][i] = 3
+            if i in diamond_locations: self.map[MAP_SIZE[0]-DIAMOND_LEVEL + ore_heights[i]][i] = 5
 
     def frameshift(self, direction, num_steps = 1):
         '''
         Shifts the frame a number of squares in the direction specified
         '''
         self.camera_pos += num_steps * np.array(directions[direction])
-        numround(MAP_SIZE, self.camera_pos)
+        numround(MAP_SIZE, self.camera_pos, RENDER_SIZE)
 
     def moveplayer(self, direction, num_steps = 1):
         '''
         Moves the player
         '''
-        self.player_pos += num_steps * np.array(directions[direction])
-        numround(MAP_SIZE, self.player_pos)
+        old_pos = self.player_pos.copy()
 
-        # camera pushing
-        if self.RIGHT - self.player_pos[1] < CAMERA_TETHER: self.frameshift("RIGHT", num_steps)
-        elif self.player_pos[1] - self.LEFT < CAMERA_TETHER: self.frameshift("LEFT", num_steps)
-        elif self.BOTTOM - self.player_pos[0] < CAMERA_TETHER: self.frameshift("DOWN", num_steps)
-        elif self.player_pos[0] - self.TOP < CAMERA_TETHER: self.frameshift("UP", num_steps)
+        self.player_pos += num_steps * np.array(directions[direction]) 
+        numround(MAP_SIZE, self.player_pos)
 
         # position checking
         if self.tile_at_player == 0: self.moveplayer("DOWN")
         elif self.tile_at_player == 2 and self.state == 0: self.moveplayer(direction, -1)
 
+        if list(self.player_pos) != list(old_pos): 
+            # camera pushing
+            if self.RIGHT - self.player_pos[1] < CAMERA_TETHER: self.frameshift("RIGHT", num_steps)
+            elif self.player_pos[1] - self.LEFT < CAMERA_TETHER: self.frameshift("LEFT", num_steps)
+            elif self.BOTTOM - self.player_pos[0] < CAMERA_TETHER: self.frameshift("DOWN", num_steps)
+            elif self.player_pos[0] - self.TOP < CAMERA_TETHER: self.frameshift("UP", num_steps)
+            
+            self.interactions() # block interactions
+
+    def interactions(self):
+
+        square = self.map[self.player_pos[0], self.player_pos[1]]
+
         # mining
-        if self.state == 1: self.map[self.player_pos[0], self.player_pos[1]] = 7
+        if self.state == 1 and square != 7:
+            self.inventory[BLOCKS[square]] += 1
+            self.map[self.player_pos[0], self.player_pos[1]] = 7 # air
+
+
+        
