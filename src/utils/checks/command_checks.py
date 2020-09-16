@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from cfg import *
 
 from utils.core_dependencies.db_utils import getThreats, getOPS
 
