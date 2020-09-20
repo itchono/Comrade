@@ -326,4 +326,40 @@ class Users(commands.Cog):
         for g in self.bot.guilds: await self.rebuildcache(g)
         print('User Lists ready')
 
-    
+    @commands.command()
+    @commands.guild_only()
+    async def modchance(self, ctx, member:typing.Optional[discord.Member]=None):
+        '''
+        Shows the chance of a user to be member of the day [MoD]
+        '''
+
+        if not member: member = ctx.author
+
+        total = len(self.WEIGHTED_RND_USER[ctx.guild.id])
+
+        count = self.WEIGHTED_RND_USER[ctx.guild.id].count(member)
+
+        await ctx.send(f"{member.display_name}'s chance of being rolled tomorrow is {count}/{total} ({round(count/total * 100, 2)}%)")
+
+
+    @commands.command()
+    @commands.guild_only()
+    async def favcolour(self, ctx, member:typing.Optional[discord.Member]=None, colour=None):
+        '''
+        Sets a user's favourite colour. 
+        TODO: Can be either hex or a common word. If recognized, it will show up in your userinfo command.
+        can also view another user's favourite colour
+        '''
+        if member:
+            u = DBuser(member.id, ctx.guild.id)
+            await ctx.send(f"{member.display_name}'s favourite colour is {u['favourite-colour']}")
+        elif colour:
+            u = DBuser(ctx.author.id, ctx.guild.id)
+            u["favourite-colour"] = colour
+            updateDBuser(u)
+            await reactOK(ctx)
+
+        else:
+            u = DBuser(ctx.author.id, ctx.guild.id)
+            await ctx.send(f"{ctx.author.display_name}'s favourite colour is {u['favourite-colour']}")
+
