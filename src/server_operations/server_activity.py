@@ -57,7 +57,7 @@ class ActivityTracker(commands.Cog):
 
         entry = {"time":localTime(), "online-members":len(self.online_humans), "messages-sent":self.messages_sent, "quantities":self.quantities}
 
-        # DBupdate("activitydata", {"time":localTime()}, entry)
+        DBupdate("activitydata", {"time":localTime()}, entry)
         # print("Data Logged.", entry)
 
         # PREPARE NEXT CYCLE
