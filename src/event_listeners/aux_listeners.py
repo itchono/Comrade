@@ -49,9 +49,9 @@ class AuxilliaryListener(commands.Cog):
             if not message.author.bot and message.guild:
                 await log(message.guild, f"Message edited by {message.author.display_name} ({message.author}) in {message.channel.mention} [link]({message.jump_url})\nOriginal Content: ```{message.content}```")
 
-        elif not message.author.bot and message.guild:
-            message = await self.bot.get_channel(payload.channel_id).fetch_message(payload.message_id)
-            await log(message.guild, f"Message edited by {message.author.display_name} ({message.author}) in {message.channel.mention} [link]({message.jump_url})")
+            elif not message.author.bot and message.guild:
+                message = await self.bot.get_channel(payload.channel_id).fetch_message(payload.message_id)
+                await log(message.guild, f"Message edited by {message.author.display_name} ({message.author}) in {message.channel.mention} [link]({message.jump_url})")
 
     @commands.Cog.listener()
     async def on_raw_message_delete(self, payload):
@@ -98,7 +98,6 @@ class AuxilliaryListener(commands.Cog):
                 m = user.guild.get_member(i)
                 embed = discord.Embed(title=f"{user.display_name} is now {str(user.status)}.", description=str(m))
                 embed.add_field(name="Time", value=(localTime().strftime("%I:%M:%S %p %Z")))
-                print(i)
                 await DM("", m, embed)
                         
 
