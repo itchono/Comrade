@@ -92,7 +92,7 @@ $c cfg <channel name> <channel mention>
 ex. $c cfg "vault-channel" #meme-vault
 ```
 
-# Changlog
+# Changelog
 Post-v3 Development
 * 3.6 - More refactoring, server activity log project
 * 3.5 - Announcements system, refactoring
