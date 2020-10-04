@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from utils import *
 
+from utils.checks.other_checks import *
 
 import random
 
@@ -107,7 +108,9 @@ class RandomEvents(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
 
-        if message.guild and not message.author.bot: 
+        ctx = await self.bot.get_context(message)
+
+        if jokeMode(ctx) and message.guild and not message.author.bot: 
 
             r = self.roll()
 
