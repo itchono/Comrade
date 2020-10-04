@@ -64,7 +64,7 @@ You will want to run a few key commmands upon adding the bot to your server.
 
 ```
 $c resetcfg
-$c reloadusers
+$c resetusers
 ```
 
 These commands set the server-side configuration and user settings for the bot.
@@ -88,8 +88,8 @@ ex. $c cfg vault-channel 587743411499565067
 ```
 
 ```
-$c cfg <channel name> <channel mention>
-ex. $c cfg "vault-channel" #meme-vault
+$c setchannel <channel name> <channel mention>
+ex. $c setchannel "vault-channel" #meme-vault
 ```
 
 # Changelog
