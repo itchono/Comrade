@@ -120,7 +120,7 @@ class Vault(commands.Cog):
                 else:
                     # made by Slyflare
                     e = discord.Embed(title=":tomato: Vault Entry",
-                                      colour=discord.Colour.from_rgb(*DBcfgitem(ctx.guild.id,"theme-colour")))
+                                      colour=discord.Colour.from_rgb(*DBcfgitem(reaction.message.guild.id,"theme-colour")))
                     e.set_image(url=str(attachment_url))
                     e.add_field(name='Original Post: ', value=msg.jump_url)
                     e.set_footer(text="Sent by {}".format(msg.author))
