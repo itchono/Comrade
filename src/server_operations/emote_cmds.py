@@ -173,7 +173,7 @@ class Emotes(commands.Cog):
         '''
         Swaps the type of the emote
         '''
-        if e := DBcollection(EMOTES_COL).find_one({"name": re.compile('^' + e + '$', re.IGNORECASE), "server":ctx.guild.id}):
+        if e := DBcollection(EMOTES_COL).find_one({"name": re.compile('^' + name + '$', re.IGNORECASE), "server":ctx.guild.id}):
             
             newtype = {"big":"inline", "inline":"big"}[e["type"]]
 
