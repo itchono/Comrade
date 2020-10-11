@@ -366,14 +366,17 @@ class Fun(commands.Cog):
 
                 txt = None
 
-                while not txt:
+                iterations = 0
+
+                while not txt and iterations < 100:
+                    iterations += 1
                     luckyperson = random.choice(pool) # user object that we can directly call upon for all Discord functions
                     #print(luckyperson.display_name.encode("UTF-8")) #Debugging print, TODO get rid when fully deployed
                     try:
                         model = text_gen_module.models[(luckyperson.id, ctx.guild.id)]
                         txt = text(model, NUMBER)
                     except:
-                        await text_gen_module.buildModel(ctx, luckyperson.mention, silent=True)
+                        await text_gen_module.buildModel(ctx, member=luckyperson, silent=True)
                         try:
                             model = text_gen_module.models[(luckyperson.id, ctx.guild.id)]
                             txt = text(model, NUMBER)
@@ -439,8 +442,7 @@ class Fun(commands.Cog):
         else:
             auth = ctx.author
 
-        c = self.bot.get_cog("Echo")
-        await c.extecho(ctx, self.konoesubaru(t), str(auth.name), deleteMsg=False)
+        await echo(ctx, member=auth, content=self.konoesubaru(t))
 
     #emojify
     def tokisakikurumi (self, ctx, t):
@@ -460,9 +462,7 @@ class Fun(commands.Cog):
         else:
             auth = ctx.author
 
-        c = self.bot.get_cog("Echo")
-        await c.extecho(ctx, self.tokisakikurumi(ctx, t), str(auth.name), deleteMsg=False)
-
+        await echo(ctx, member=auth, content=self.tokisakikurumi(ctx, t))
     #mock
     def nyaruko (self, t):
         s = ""
@@ -488,10 +488,9 @@ class Fun(commands.Cog):
             t = msg.content
         else:
             auth = ctx.author
-              
-        c = self.bot.get_cog("Echo")
-        await c.extecho(ctx, self.nyaruko(t), str(auth.name), deleteMsg=False)
 
+        await echo(ctx, member=auth, content=self.nyaruko(t))
+    
     @commands.command()
     async def fuckup (self, ctx: commands.Context, *, text:str = ""):
         '''
@@ -505,8 +504,7 @@ class Fun(commands.Cog):
         else:
             auth = ctx.author
 
-        c = self.bot.get_cog("Echo")
-        await c.extecho(ctx, self.konoesubaru(self.tokisakikurumi(ctx, self.nyaruko(t))), str(auth.name), deleteMsg=False)
+        await echo(ctx, member=auth, content=self.konoesubaru(self.tokisakikurumi(ctx, self.nyaruko(t))))
 
     @commands.command()
     async def futa (self, ctx: commands.Context, m: discord.Message = None):

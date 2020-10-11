@@ -4,8 +4,6 @@ from utils import *
 
 import random, typing
 
-from utils.core_dependencies.echo import ComradeUser
-
 class Users(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -35,96 +33,70 @@ class Users(commands.Cog):
             await ctx.send(embed=a)
 
     @commands.group(invoke_without_command=True)
-    async def userinfo(self, ctx: commands.Context, *, target: ComradeUser = None):
+    async def userinfo(self, ctx: commands.Context, *, member:typing.Union[discord.Member, discord.User] = None):
         '''
         Displays User Information of said person
         Made by Slyflare, upgraded by itchono
         '''
-        if not target: target = ctx.author
-        else: target = target[1]
+        if not member: member = ctx.author
 
-        try:
-            _ = target.display_name
+        e = discord.Embed(title="Info for {}".format(member.display_name), colour=member.colour)
+        e.set_author(name=f"User Info - {member}")
+        e.set_thumbnail(url=member.avatar_url)
+        e.set_footer(icon_url=ctx.author.avatar_url)
 
-            e = discord.Embed(title="Info for {}".format(target.display_name), colour=target.colour)
-            e.set_author(name=f"User Info - {target}")
-            e.set_thumbnail(url=target.avatar_url)
-            e.set_footer(icon_url=ctx.author.avatar_url)
+        if ctx.guild:
 
-            if ctx.guild:
+            roles = [role for role in member.roles]
 
-                roles = [role for role in target.roles]
+            u = DBuser(member.id, ctx.guild.id)
 
-                u = DBuser(target.id, ctx.guild.id)
-
-                for c in u:
-                    if c == "daily-weight": e.add_field(name=c, value=u[c], inline=True)
-                
-                e.add_field(name=f"Roles: ({len(roles)})", value=" ".join([role.mention for role in target.roles]))
-                try: e.add_field(name="Joined Server", value=f"{target.joined_at.strftime('%B %m %Y at %I:%M:%S %p %Z')}")
-                except: pass
-                e.add_field(name="Account Created", value=target.created_at.strftime('%B %m %Y at %I:%M:%S %p %Z'))
+            for c in u:
+                if c == "daily-weight": e.add_field(name=c, value=u[c], inline=True)
             
-            else:
-                e.add_field(name="Account Created", value=target.created_at.strftime('%B %m %Y at %I:%M:%S %p %Z'))
-                e.add_field(name="No more info available", value="Comrade is in a DM environment, and therefore has no information stored. Try calling this in a server with Comrade set up.", inline=True)
+            e.add_field(name=f"Roles: ({len(roles)})", value=" ".join([role.mention for role in member.roles]))
+            try: e.add_field(name="Joined Server", value=f"{member.joined_at.strftime('%B %m %Y at %I:%M:%S %p %Z')}")
+            except: pass
+            e.add_field(name="Account Created", value=member.created_at.strftime('%B %m %Y at %I:%M:%S %p %Z'))
+        
+        else:
+            e.add_field(name="Account Created", value=member.created_at.strftime('%B %m %Y at %I:%M:%S %p %Z'))
+            e.add_field(name="No more info available", value="Comrade is in a DM environment, and therefore has no information stored. Try calling this in a server with Comrade set up.", inline=True)
 
 
-            await ctx.send(embed=e)
-
-        except:
-            # Custom User
-            e = discord.Embed(title=f"{target['name']} (Custom User)")
-            e.set_author(name=f"User Info - {target['name']}")
-            e.set_thumbnail(url=target["url"])
-            e.set_footer(icon_url=target["url"])
-            await ctx.send(embed=e)
-
+        await ctx.send(embed=e)
 
     @userinfo.command()
-    async def full(self, ctx: commands.Context, *, target: ComradeUser = None):
+    async def full(self, ctx: commands.Context, *, member:typing.Union[discord.Member, discord.User] = None):
         '''
         More detailed user info
         '''
+        if not member: member = ctx.author
 
-        if not target: target = ctx.author
-        else: target = target[1]
+        e = discord.Embed(title="Info for {}".format(member.display_name), colour=member.colour)
+        e.set_author(name=f"User Info - {member}")
+        e.set_thumbnail(url=member.avatar_url)
+        e.set_footer(icon_url=ctx.author.avatar_url)
 
-        try:
-            _ = target.display_name
+        if ctx.guild:
 
-            e = discord.Embed(title="Info for {}".format(target.display_name), colour=target.colour)
-            e.set_author(name=f"User Info - {target}")
-            e.set_thumbnail(url=target.avatar_url)
-            e.set_footer(icon_url=ctx.author.avatar_url)
+            roles = [role for role in member.roles]
 
-            if ctx.guild:
+            u = DBuser(member.id, ctx.guild.id)
 
-                roles = [role for role in target.roles]
-
-                u = DBuser(target.id, ctx.guild.id)
-
-                for c in u:
-                    if c != "_id": e.add_field(name=c, value=u[c], inline=True)
-                
-                e.add_field(name=f"Roles: ({len(roles)})", value=" ".join([role.mention for role in target.roles]))
-                try: e.add_field(name="Joined Server", value=f"{target.joined_at.strftime('%B %m %Y at %I:%M:%S %p %Z')}")
-                except: pass
-                e.add_field(name="Account Created", value=target.created_at.strftime('%B %m %Y at %I:%M:%S %p %Z'))
+            for c in u:
+                if c != "_id": e.add_field(name=c, value=u[c], inline=True)
             
-            else:
-                e.add_field(name="Account Created", value=target.created_at.strftime('%B %m %Y at %I:%M:%S %p %Z'))
-                e.add_field(name="No more info available", value="Comrade is in a DM environment, and therefore has no information stored. Try calling this in a server with Comrade set up.", inline=True)
+            e.add_field(name=f"Roles: ({len(roles)})", value=" ".join([role.mention for role in member.roles]))
+            try: e.add_field(name="Joined Server", value=f"{member.joined_at.strftime('%B %m %Y at %I:%M:%S %p %Z')}")
+            except: pass
+            e.add_field(name="Account Created", value=member.created_at.strftime('%B %m %Y at %I:%M:%S %p %Z'))
+        
+        else:
+            e.add_field(name="Account Created", value=member.created_at.strftime('%B %m %Y at %I:%M:%S %p %Z'))
+            e.add_field(name="No more info available", value="Comrade is in a DM environment, and therefore has no information stored. Try calling this in a server with Comrade set up.", inline=True)
 
-            await ctx.send(embed=e)
-
-        except AttributeError:
-            # Custom User
-            e = discord.Embed(title=f"{target['name']} (Custom User)")
-            e.set_author(name=f"User Info - {target['name']}")
-            e.set_thumbnail(url=target["url"])
-            e.set_footer(icon_url=target["url"])
-            await ctx.send(embed=e)
+        await ctx.send(embed=e)
 
             
     '''
@@ -245,15 +217,15 @@ class Users(commands.Cog):
         '''
         Adds custom user to database, which can be mentioned.
         '''
-        e =  self.bot.get_cog('Echo')
 
         if len(ctx.message.attachments): avatar = ctx.message.attachments[0].url
 
-        if u := DBfind_one(CUSTOMUSER_COL, {"name":username, "server":ctx.guild.id}): await e.extecho(ctx, "Oh hey I'm already here!", username, False)
+        if u := DBfind_one(CUSTOMUSER_COL, {"name":username, "server":ctx.guild.id}): 
+            await mimic(ctx.channel, content="Oh hey I'm already here!", username=username, avatar_url=avatar)
 
         else:
             DBupdate(CUSTOMUSER_COL, {"name": username, "server": ctx.guild.id}, {"name": username, "url": avatar, "server": ctx.guild.id})
-            await e.extecho(ctx, "I have been added.", username, False)
+            await mimic(ctx.channel, content="I have been added.", username=username, avatar_url=avatar)
 
     @commands.command(aliases = ["plasticsurgery"])
     @commands.guild_only()

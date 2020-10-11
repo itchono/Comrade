@@ -95,11 +95,10 @@ class Polymorph(commands.Cog):
 
         if number > 100 or number < 0: await ctx.send("No")
         else:
-            c = self.bot.get_cog("Echo")
 
             try:
                 model = self.models[(member.id, ctx.guild.id)]
-                await c.extecho(ctx, text(model, number), str(member.id), deleteMsg=False)
+                await echo(ctx, member=member, content=text(model, number))
 
             except:
                 await ctx.send("Model is not yet built, it will take a bit longer to produce this first iteration of text.")
@@ -108,7 +107,7 @@ class Polymorph(commands.Cog):
                 
                 try:
                     model = self.models[(member.id, ctx.guild.id)]
-                    await c.extecho(ctx, text(model, number), str(member.id), deleteMsg=False)
+                    await echo(ctx, member=member, content=text(model, number))
                 except: pass
     
     @commands.command()

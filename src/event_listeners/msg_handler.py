@@ -77,8 +77,8 @@ class MessageHandler(commands.Cog):
                     e.set_footer(text=f"Random ping by: {message.author.display_name}")
                     await message.channel.send(embed=e)
 
-                    '''c = self.bot.get_cog("Echo")
-                    await c.extecho(await self.bot.get_context(message), random.choice(list(message.guild.members)).mention, str(message.author.id), deleteMsg=False)
+                    '''
+                    echo(await self.bot.get_context(message), random.choice(list(message.guild.members)).mention, str(message.author.id), deleteMsg=False)
                     '''
                 
                 if message.guild and message.channel.id == DBcfgitem(message.guild.id,"meme-channel"):

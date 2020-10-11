@@ -7,7 +7,6 @@ import random
 class Vault(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.activeposts = {}  # active for tomato stuff
         self.vault_cache = {}
         
 
@@ -21,8 +20,8 @@ class Vault(commands.Cog):
 
         if item["type"] == "echo":
             targetmsg = await commands.MessageConverter().convert(ctx, item["data"])
-            c = self.bot.get_cog("Echo")
-            await c.extecho(ctx, targetmsg.content, str(targetmsg.author.name), deleteMsg=False)
+            await echo(ctx, member=targetmsg.author, content=targetmsg.content, file=targetmsg.file, embed=targetmsg.embed)
+        
         else:
             embed = discord.Embed()
             embed.set_image(url=item["data"])
@@ -33,12 +32,12 @@ class Vault(commands.Cog):
     async def tomato(self, ctx: commands.Context, tgt=None):
         '''
         Vaults a post. Operates in 3 modes
-        1. Vault a message sent by a user based on Message ID.
-        ex. $c 🍅 711064013387071620
+        1. Vault a message sent by a user based on Message URL.
+        ex. $c 🍅 <link to message>
         2. Vault a message with an image attachment
         ex. $c 🍅 and then upload an image with this message
         3. Vault a message with an image url
-        ex. $c 🍅 https://cdn.discordapp.com/attachments/419214713755402262/697604506975993896/2Q.png
+        ex. $c 🍅 <link to image>
         '''
         IDmode = False
 
@@ -57,12 +56,33 @@ class Vault(commands.Cog):
             "React to this message with 🍅 to vault the post {}. You have **{} seconds** to vote.".format(
                 ctx.message.jump_url if not IDmode else u.jump_url, VAULT_VOTE_DURATION), delete_after=VAULT_VOTE_DURATION)
 
-        self.activeposts[m.id] = {
-            "Message": ctx.message if not IDmode else u,
-            "Attachment URL": u if not IDmode else None
-        }
-
         await m.add_reaction("🍅")
+
+        def check(reaction, user): return reaction.emoji == "🍅" and not user.bot and ((reaction.message.id == m.id and user != ctx.author) or DEVELOPMENT_MODE)
+
+        await self.bot.wait_for("reaction_add", check=check)
+
+        vault = await getChannel(ctx.guild,"vault-channel")
+
+        if IDmode: 
+            e = discord.Embed(title=":tomato: Echoed Vault Entry", description="See Echoed Message Below.", colour=discord.Colour.from_rgb(*DBcfgitem(ctx.guild.id,"theme-colour")))
+            e.add_field(name='Original Post: ', value=ctx.message.jump_url)
+            e.set_footer(text=f"Sent by {ctx.author.display_name}")
+            m2 = await vault.send(embed=e)
+
+            await echo(await self.bot.get_context(m2), member=u.author, content=u.content, file=u.attachments[0] if u.attachments else None, embed=u.embeds[0] if u.embeds else None)
+        else:
+            e = discord.Embed(title=":tomato: Vault Entry", colour=discord.Colour.from_rgb(*DBcfgitem(ctx.guild.id,"theme-colour")))
+            e.set_image(url=u)
+            e.add_field(name='Original Post: ', value=ctx.message.jump_url)
+            e.set_footer(text=f"Sent by {ctx.author.display_name}")
+            await vault.send(embed=e)
+
+        await reactOK(ctx)
+        # rebuild vault cache
+        await self.rebuildcache(ctx.guild)
+
+        await m.edit(content="Vault operation successful.", embed=None)
 
     async def rebuildcache(self, g:discord.Guild):
         '''
@@ -81,7 +101,7 @@ class Vault(commands.Cog):
                     elif m.embeds[0].url:
                         posts.append({"type":"img", "data":m.embeds[0].url})
                     else:
-                        posts.append({"type":"echo", "data":m.embeds[0].fields[0].value})
+                        posts.append({"type":"echo", "data":m.id})
 
             self.vault_cache[g.id] = posts
             await log(g, f"Vault Cache built with {len(posts)} entries.")
@@ -92,44 +112,3 @@ class Vault(commands.Cog):
         '''
         for g in self.bot.guilds: await self.rebuildcache(g)
         print('Vault Cache Ready')
-
-    @commands.Cog.listener()
-    async def on_reaction_add(self, reaction: discord.Reaction,
-                              user: discord.Member):
-        # TODO refactor into other stuff using wait_for
-        if reaction.emoji == "🍅":
-            if reaction.count > 1 and reaction.message.id in self.activeposts and (user != self.activeposts[reaction.message.id]["Message"].author or DEVELOPMENT_MODE):
-                attachment_url = self.activeposts[reaction.message.id]["Attachment URL"]
-
-                msg = self.activeposts[reaction.message.id]["Message"]
-
-                vault = await getChannel(reaction.message.guild,"vault-channel")
-
-                if not attachment_url:
-                    m = await vault.send("Vault operation in progress...")
-                    e = discord.Embed(title=":tomato: Echoed Vault Entry",
-                                      description="See Echoed Message Below.",
-                                      colour=discord.Colour.from_rgb(*DBcfgitem(user.guild.id,"theme-colour")))
-                    e.add_field(name='Original Post: ', value=msg.jump_url)
-                    e.set_footer(text="Sent by {}".format(msg.author))
-                    c = await self.bot.get_context(m)
-                    E = self.bot.get_cog("Echo")
-                    await vault.send(embed=e)
-                    await E.extecho(c, msg.content, msg.author.display_name)
-
-                else:
-                    # made by Slyflare
-                    e = discord.Embed(title=":tomato: Vault Entry",
-                                      colour=discord.Colour.from_rgb(*DBcfgitem(reaction.message.guild.id,"theme-colour")))
-                    e.set_image(url=str(attachment_url))
-                    e.add_field(name='Original Post: ', value=msg.jump_url)
-                    e.set_footer(text="Sent by {}".format(msg.author))
-
-                    await vault.send(embed=e)
-
-                del self.activeposts[reaction.message.id]
-                await reactOK(await self.bot.get_context(reaction.message))
-                await reaction.message.edit(content="Vault operation successful.", embed=None)
-
-                # rebuild vault cache
-                await self.rebuildcache(reaction.message.guild)
