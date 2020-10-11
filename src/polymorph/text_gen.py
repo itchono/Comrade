@@ -25,9 +25,12 @@ def gen_seed(ngram_model):
     '''
     ngram_model_key_list = list(ngram_model)
     ngram = random.choice(ngram_model_key_list)
+
+    iterations = 0
     
-    while not check_open_ngram(ngram, ngram_model):
+    while not check_open_ngram(ngram, ngram_model) and iterations < 100:
         ngram = random.choice(ngram_model_key_list)
+        iterations += 1 # failsafe so it doesn't need more than 100 iterations
     return ngram
 
 def gen_next_token(current_ngram, ngram_model):

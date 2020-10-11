@@ -280,4 +280,4 @@ class Databases(commands.Cog):
                 await ctx.send("Emotes could not be found on the host computer.")
             
             em = self.bot.get_cog("Emotes")
-            await m.rebuildcache()
+            await em.rebuildcache()
