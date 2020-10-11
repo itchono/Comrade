@@ -9,42 +9,23 @@ from utils.checks.other_checks import match_url
 
 class Emotes(commands.Cog):
     '''
+    Use :emotename: to call an emote
+    Use /emotename/ to swap its type
+
+    Emotes exist as 1) Inline Discord Emoji and 2) Big Images
+    Keep wide images as big emotes, and use small square ones as inline emotes.
+    
+    CES - Comrade Emote System
     Developed by itchono and Slyflare
     '''
     def __init__(self, bot):
         self.bot = bot
-        
-    @commands.command()
-    @commands.guild_only()
-    async def addEmoji(self, ctx:commands.Context, name, url=None):
-        '''
-        Adds an emoji to the system
-        '''
-        try:
-            if not url: url = ctx.message.attachments[0].url
-        except:
-            if not match_url(url): await ctx.send("Invalid URL Provided."); return
-
-        if not DBcollection(EMOTES_COL).find_one({"name":name, "server":ctx.guild.id}):
-
-            binImage = requests.get(url).content # binaries
-
-            DBcollection(EMOTES_COL).insert_one(
-                {"name":name,
-                "server":ctx.guild.id,
-                "type":"inline",
-                "file":binImage})
-            await self.inject(ctx, name)
-        else:
-            await reactX(ctx)
-            await ctx.send('Emote `{}` already exists! Contact a mod to get this fixed.'.format(name))
-
 
     @commands.command()
     @commands.guild_only()
     async def addEmote(self, ctx: commands.Context, name, url=None):
         '''
-        Adds a custom emote to the Comrade Emote System
+        Adds a custom emote to the Comrade Emote System. Adds as a big emote by default.
         '''
         try:
             if not url: url = ctx.message.attachments[0].url
@@ -71,13 +52,12 @@ class Emotes(commands.Cog):
 
     async def inject(self, ctx:commands.Context, name):
         '''
-        Attempts to inject image into the server's list of emoji, sending it afterward
+        Attempts to inject image into the server's list of emoji, returning it afterward
         '''
 
-        if document := DBcollection(EMOTES_COL).find_one({"name": re.compile('^' + name + '$', re.IGNORECASE), "server":ctx.guild.id}):
-
+        if document := DBcollection(EMOTES_COL).find_one({"name": name, "server":ctx.guild.id}):
             LIMIT = 50
-            
+
             ## UNLOAD EMOJI
             if len(ctx.guild.emojis) >= LIMIT-1:
 
@@ -85,7 +65,6 @@ class Emotes(commands.Cog):
 
                 if not DBcollection(EMOTES_COL).find_one({"name":unload.name, "server":ctx.guild.id}):
                     # If not loaded, we must first database it
-
                     binImage = requests.get(unload.url).content # binaries
 
                     DBcollection(EMOTES_COL).insert_one(
@@ -93,17 +72,14 @@ class Emotes(commands.Cog):
                         "server":ctx.guild.id,
                         "type":"inline",
                         "file":binImage})
-                
                 await unload.delete(reason=f"Unloading emoji to make space for {name}")
 
-            ## LOAD NEW EMOJI
+             ## binary data
             data = document["file"]
-            await ctx.guild.create_custom_emoji(name=name, image=data, reason=f"Requested by user {ctx.author.display_name}")
-            ## binary data
-            e = discord.utils.get(ctx.guild.emojis, name=name)
-
-        else:
-            await ctx.send(f"Emote `{name}` was not found in the database.")
+            ## LOAD NEW EMOJI
+            return await ctx.guild.create_custom_emoji(name=document["name"], image=data, reason=f"Requested by user {ctx.author.display_name}")
+            
+        else: await ctx.send(f"Emote `{name}` was not found in the database.")
 
     @commands.command()
     @commands.guild_only()
@@ -174,20 +150,21 @@ class Emotes(commands.Cog):
         Swaps the type of the emote
         '''
         if e := DBcollection(EMOTES_COL).find_one({"name": re.compile('^' + name + '$', re.IGNORECASE), "server":ctx.guild.id}):
-            
             newtype = {"big":"inline", "inline":"big"}[e["type"]]
 
             if e["type"] == "inline":
                 emote = discord.utils.get(ctx.guild.emojis, name=name)
                 try: await emote.delete(reason=f"Unloading emoji because it changed type.")
                 except: pass
+            
+            elif (size := len(e["file"])) >= 262143:
+                await ctx.send(f"Emote `{e['name']}` is too big to become inline! ({round(size/1024)} kb vs 256 kb limit)"); return
 
-            DBcollection(EMOTES_COL).update_one({"name":name, "server":ctx.guild.id}, {"$set": {"type":newtype} })
+            DBcollection(EMOTES_COL).update_one({"name":e['name'], "server":ctx.guild.id}, {"$set": {"type":newtype}})
 
-            await ctx.send(f"Emote `{name}` is now of type `{newtype}`")
+            await ctx.send(f"Emote `{e['name']}` is now of type `{newtype}`")
 
-        else:
-            await ctx.send(f"Emote `{name}` was not found.")
+        else: await ctx.send(f"Emote `{name}` was not found.")
 
     @commands.command()
     @commands.guild_only()
@@ -195,7 +172,6 @@ class Emotes(commands.Cog):
         '''
         Sends an emote into a context, injecting first if necessary
         '''
-
         # Stage 1: Search server cache
 
         if emote := discord.utils.get(ctx.guild.emojis, name=e): 
@@ -207,17 +183,14 @@ class Emotes(commands.Cog):
 
             # 2A: inline emoji, needs to be added            
             if document["type"] == "inline": 
-                await self.inject(ctx, e)
-
-                # use emote
-                if emote := discord.utils.get(ctx.guild.emojis, name=e): 
-                    await echo(ctx, member=ctx.author, content=emote)
-                    await ctx.message.delete() # try to delete
+                emote = await self.inject(ctx, document["name"])
+                await echo(ctx, member=ctx.author, content=emote)
+                await ctx.message.delete() # try to delete
 
             # 2B: Big emoji, send as-is
             elif document["type"] == "big":
                 byts = io.BytesIO(document["file"])
-                ext = imghdr.what(None, h=byts.read())
+                ext = imghdr.what(None, h=byts.read()) # deteremine the file extension
                 f = discord.File(fp=io.BytesIO(document["file"]), filename=f"image.{ext}")
                 await mimic(ctx.channel, file=f, avatar_url=ctx.author.avatar_url, username=e)
         else:
@@ -259,8 +232,11 @@ class Emotes(commands.Cog):
         '''
         Emote listener
         '''
-        if message.content and not message.author.bot and message.guild and message.content[0] == ':' and message.content[-1] == ':' and len(message.content) > 1:
-            await self.emote(await self.bot.get_context(message), message.content.strip(':').strip(" "))
+        if message.content and not message.author.bot and message.guild: 
+            if message.content[0] == ':' and message.content[-1] == ':' and len(message.content) > 1:
+                await self.emote(await self.bot.get_context(message), message.content.strip(':').strip(" ")) # Call emote
+            elif message.content[0] == '/' and message.content[-1] == '/' and len(message.content) > 1:
+                await self.swaptype(await self.bot.get_context(message), message.content.strip('/').strip(" ")) # Swap type of emote
 
             
                     
