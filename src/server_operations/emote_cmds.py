@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from utils import *
 
-import re, requests, bson, io, time
+import re, requests, bson, io
 from fuzzywuzzy import fuzz # NOTE: install python-Levenshtein for faster results.
 
 from utils.checks.other_checks import match_url
@@ -74,11 +74,9 @@ class Emotes(commands.Cog):
         Attempts to inject image into the server's list of emoji, sending it afterward
         '''
 
-        tstart = time.perf_counter()
-
         if document := DBcollection(EMOTES_COL).find_one({"name":name, "server":ctx.guild.id}):
 
-            LIMIT = 3
+            LIMIT = 50
             
             ## UNLOAD EMOJI
             if len(ctx.guild.emojis) >= LIMIT-1:
@@ -100,17 +98,9 @@ class Emotes(commands.Cog):
 
             ## LOAD NEW EMOJI
             data = document["file"]
-
             await ctx.guild.create_custom_emoji(name=name, image=data, reason=f"Requested by user {ctx.author.display_name}")
             ## binary data
-
-            tend = time.perf_counter()
-
-            await ctx.send(f"Injection Complete in T = {round(tend - tstart, 3)}s")
-
             e = discord.utils.get(ctx.guild.emojis, name=name)
-
-            await ctx.send(f"Currently Loaded Emojis: ({len(ctx.guild.emojis)} total) {''.join([str(i) for i in ctx.guild.emojis])}")
 
         else:
             await ctx.send(f"Emote `{name}` was not found in the database.")
@@ -130,7 +120,7 @@ class Emotes(commands.Cog):
 
         inlines = "\n".join([i["name"] for i in inlineemotes])
 
-        await ctx.send(f"Big:\n{bigs}\nInlines:\n{inlines}")
+        await ctx.send(f"__Big__:\n{bigs}\n__Inlines__:\n{inlines}")
 
 
         # emotes = list(self.EMOTE_CACHE[ctx.guild.id].keys())
@@ -153,8 +143,15 @@ class Emotes(commands.Cog):
         '''
         Removes a custom emote from the Comrade Emote System
         '''
-        if DBcollection(EMOTES_COL).delete_one({"name":name, "server":ctx.guild.id}):
+        if e := DBcollection(EMOTES_COL).find_one({"name":name, "server":ctx.guild.id}):
+            DBcollection(EMOTES_COL).delete_one({"name":name, "server":ctx.guild.id})
             await ctx.send(f"Emote `{name}` was removed.")
+
+            if e["type"] == "inline":
+                emote = discord.utils.get(ctx.guild.emojis, name=name)
+                try: await emote.delete(reason=f"Unloading emoji because it was removed from the server.")
+                except: pass
+
         else:
             await ctx.send(f"Emote `{name}` was not found.")
 
@@ -169,6 +166,28 @@ class Emotes(commands.Cog):
             await ctx.send(f"Emote `{name_old}` was renamed.")
         else:
             await ctx.send(f"Emote `{name_old}` was not found.")
+
+    @commands.command()
+    @commands.guild_only()
+    async def swaptype(self, ctx: commands.Context, name):
+        '''
+        Swaps the type of the emote
+        '''
+        if e := DBcollection(EMOTES_COL).find_one({"name":name, "server":ctx.guild.id}):
+            
+            newtype = {"big":"inline", "inline":"big"}[e["type"]]
+
+            if e["type"] == "inline":
+                emote = discord.utils.get(ctx.guild.emojis, name=name)
+                try: await emote.delete(reason=f"Unloading emoji because it changed type.")
+                except: pass
+
+            DBcollection(EMOTES_COL).update_one({"name":name, "server":ctx.guild.id}, {"$set": {"type":newtype} })
+
+            await ctx.send(f"Emote `{name}` is now of type `{newtype}`")
+
+        else:
+            await ctx.send(f"Emote `{name}` was not found.")
 
     @commands.command()
     @commands.guild_only()
@@ -193,7 +212,7 @@ class Emotes(commands.Cog):
 
             # 2B: Big emoji, send as-is
             elif document["type"] == "big":
-                f = discord.File(fp=io.BytesIO(document["file"]), filename="image.png")
+                f = discord.File(fp=io.BytesIO(document["file"]), filename="image.gif")
                 await mimic(ctx.channel, file=f, avatar_url=ctx.author.avatar_url, username=e)
         else:
             await ctx.send(f"Emote `{e}` not found.")
