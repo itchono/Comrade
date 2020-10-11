@@ -18,18 +18,12 @@ online = False
 start_time = time.perf_counter()
 dotenv.load_dotenv()
 
-REDUCED_INSTRUCTION_SET = [ Databases, AuxilliaryListener, MessageHandler, General, Vault, Echo,
-    Users, TextFilter, Fun, Announcements, Emotes, Polymorph, Moderation, Cosmo, 
-    BPC, RandomEvents, Lists, Polls, SelfPing, TexRender, Shoujo, Graphing, 
-    ActivityTracker, Terrestrial
-]
-
 # Databases MUST load first, otherwise things will NOT work
 cogs = [ Databases, AuxilliaryListener, MessageHandler, General, Vault, Echo,
     Users, TextFilter, Fun, Announcements, Emotes, Polymorph, Moderation, Cosmo, 
     BPC, RandomEvents, Lists, Polls, SelfPing, TexRender, Shoujo, Graphing, 
     ActivityTracker, Terrestrial
-] if not DEVELOPMENT_MODE else REDUCED_INSTRUCTION_SET # for use with development to get faster start
+] # for use with development to get faster start
 
 for c in cogs:
     client.add_cog(c(client))

@@ -96,10 +96,10 @@ def updateDBuser(userdata):
 
     if current_user:
         # update caches on database 
-        if current_op and current_op != userdata["OP"]: 
+        if current_op != userdata["OP"]: 
             OP_CACHE[userdata["server"]] = DBfind(USER_COL, {"OP": True, "server": userdata["server"]})
             print("Rebuild OP Cache")
 
-        if current_threat and current_threat != userdata["threat-level"]: 
+        if current_threat != userdata["threat-level"]: 
             THREAT_CACHE[userdata["server"]] = DBfind(USER_COL, {"threat-level": {"$gt": 0}, "server": userdata["server"]})
             print("Rebuild Threat Cache")
