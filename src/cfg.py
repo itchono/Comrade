@@ -2,7 +2,7 @@
 VERSION = "4.0 [Build October 10]" 
 
 # set to True if you are testing the bot in a development environment, False otherwise
-DEVELOPMENT_MODE = True
+DEVELOPMENT_MODE = False
 
 # set to True if you're hosting the bot on something like repl.it or heroku and need the bot to keep alive
 SELFPING_REQUIRED = False
@@ -39,4 +39,5 @@ LIST_COL = "CustomLists"
 CACHE_COL = "ChannelCache"
 FAVOURITES_COL = "favourites"
 PNG_COL = "pngs"
+EMOTES_COL = "Emotes"
 
