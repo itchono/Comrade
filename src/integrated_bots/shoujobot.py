@@ -24,14 +24,7 @@ class Shoujo(commands.Cog):
         self.bot = bot
 
     async def shoujosend(self, ctx, content):
-
-        if not DBfind_one(CUSTOMUSER_COL,{"server":ctx.guild.id, "name":"ShoujoBot"}):
-            us = self.bot.get_cog("Users")
-            await us.addCustomUser(ctx, "ShoujoBot", avatar="https://cdn.discordapp.com/attachments/420664953435979806/749064831935447071/Annotation_2020-08-24_174359.jpg")
-
-        c = self.bot.get_cog("Echo")
-        await c.extecho(ctx, content, "ShoujoBot", deleteMsg=False)
-
+        await mimic(ctx, content=content, username="ShoujoBot",avatar_url="https://cdn.discordapp.com/attachments/420664953435979806/749064831935447071/Annotation_2020-08-24_174359.jpg")
 
     @commands.command()
     async def secret(self, ctx:commands.Context):

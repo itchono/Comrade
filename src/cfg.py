@@ -1,5 +1,5 @@
 # version of the bot
-VERSION = "3.6 [Build September 27 v1]" 
+VERSION = "4.0 [Build October 10]" 
 
 # set to True if you are testing the bot in a development environment, False otherwise
 DEVELOPMENT_MODE = False
@@ -39,4 +39,5 @@ LIST_COL = "CustomLists"
 CACHE_COL = "ChannelCache"
 FAVOURITES_COL = "favourites"
 PNG_COL = "pngs"
+EMOTES_COL = "Emotes"
 
