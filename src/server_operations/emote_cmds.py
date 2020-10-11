@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from utils import *
 
-import re, requests, bson, io
+import re, requests, bson, io, imghdr
 from fuzzywuzzy import fuzz # NOTE: install python-Levenshtein for faster results.
 
 from utils.checks.other_checks import match_url
@@ -74,7 +74,7 @@ class Emotes(commands.Cog):
         Attempts to inject image into the server's list of emoji, sending it afterward
         '''
 
-        if document := DBcollection(EMOTES_COL).find_one({"name":name, "server":ctx.guild.id}):
+        if document := DBcollection(EMOTES_COL).find_one({"name": re.compile('^' + name + '$', re.IGNORECASE), "server":ctx.guild.id}):
 
             LIMIT = 50
             
@@ -173,7 +173,7 @@ class Emotes(commands.Cog):
         '''
         Swaps the type of the emote
         '''
-        if e := DBcollection(EMOTES_COL).find_one({"name":name, "server":ctx.guild.id}):
+        if e := DBcollection(EMOTES_COL).find_one({"name": re.compile('^' + e + '$', re.IGNORECASE), "server":ctx.guild.id}):
             
             newtype = {"big":"inline", "inline":"big"}[e["type"]]
 
@@ -201,18 +201,24 @@ class Emotes(commands.Cog):
         if emote := discord.utils.get(ctx.guild.emojis, name=e): 
             await echo(ctx, member=ctx.author, content=emote)
             await ctx.message.delete() # try to delete
-        
+
         # Stage 2: Search MongoDB
-        elif document := DBcollection(EMOTES_COL).find_one({"name":e, "server":ctx.guild.id}):
+        elif document := DBcollection(EMOTES_COL).find_one({"name": re.compile('^' + e + '$', re.IGNORECASE), "server":ctx.guild.id}):
 
             # 2A: inline emoji, needs to be added            
             if document["type"] == "inline": 
                 await self.inject(ctx, e)
-                await self.emote(ctx, e) # emoji is now loaded, should be able to call directly.
+
+                # use emote
+                if emote := discord.utils.get(ctx.guild.emojis, name=e): 
+                    await echo(ctx, member=ctx.author, content=emote)
+                    await ctx.message.delete() # try to delete
 
             # 2B: Big emoji, send as-is
             elif document["type"] == "big":
-                f = discord.File(fp=io.BytesIO(document["file"]), filename="image.gif")
+                byts = io.BytesIO(document["file"])
+                ext = imghdr.what(None, h=byts.read())
+                f = discord.File(fp=io.BytesIO(document["file"]), filename=f"image.{ext}")
                 await mimic(ctx.channel, file=f, avatar_url=ctx.author.avatar_url, username=e)
         else:
             await ctx.send(f"Emote `{e}` not found.")
