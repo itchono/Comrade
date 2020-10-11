@@ -2,16 +2,14 @@ import discord
 from discord.ext import commands
 from utils import *
 
-import re, requests
+import re, requests, bson, io, time
 from fuzzywuzzy import fuzz # NOTE: install python-Levenshtein for faster results.
-
-import bson, io, time, random
 
 from utils.checks.other_checks import match_url
 
 class Emotes(commands.Cog):
     '''
-    Contributed by Slyflare
+    Developed by itchono and Slyflare
     '''
     def __init__(self, bot):
         self.bot = bot
@@ -85,7 +83,7 @@ class Emotes(commands.Cog):
             ## UNLOAD EMOJI
             if len(ctx.guild.emojis) >= LIMIT-1:
 
-                unload = random.choice(ctx.guild.emojis) # emoji to be unloaded
+                unload = ctx.guild.emojis[0] # emoji to be unloaded -- oldest one
 
                 if not DBcollection("Emotes").find_one({"name":unload.name, "server":ctx.guild.id}):
                     # If not loaded, we must first database it

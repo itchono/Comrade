@@ -1,8 +1,8 @@
 # version of the bot
-VERSION = "3.6 [Build September 27 v1]" 
+VERSION = "4.0 [Build October 10]" 
 
 # set to True if you are testing the bot in a development environment, False otherwise
-DEVELOPMENT_MODE = False
+DEVELOPMENT_MODE = True
 
 # set to True if you're hosting the bot on something like repl.it or heroku and need the bot to keep alive
 SELFPING_REQUIRED = False

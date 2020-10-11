@@ -223,7 +223,10 @@ class General(commands.Cog):
             c = self.bot.get_cog("Echo")
 
             # using monospaced font to fix spacing
-            await c.extecho(ctx, f"**```{BORDER_TOP}\n{ACCENT_BORDER}\n{content}\n{ACCENT_BORDER}\n{BORDER_BOTTOM}```**", str(ctx.author.id))
+
+            await echo(ctx, member=ctx.author, content=f"**```{BORDER_TOP}\n{ACCENT_BORDER}\n{content}\n{ACCENT_BORDER}\n{BORDER_BOTTOM}```**")
+
+
         else:
             await ctx.send(f"**```{BORDER_TOP}\n{ACCENT_BORDER}\n{content}\n{ACCENT_BORDER}\n{BORDER_BOTTOM}```**")
 

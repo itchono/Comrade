@@ -5,3 +5,4 @@ from .user_cmds import Users
 from .vault import Vault
 from .announcements import Announcements
 from .server_activity import ActivityTracker
+from .echo_cmds import Echo

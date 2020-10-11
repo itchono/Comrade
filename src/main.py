@@ -18,7 +18,11 @@ online = False
 start_time = time.perf_counter()
 dotenv.load_dotenv()
 
-REDUCED_INSTRUCTION_SET = [Databases, Terrestrial]
+REDUCED_INSTRUCTION_SET = [ Databases, AuxilliaryListener, MessageHandler, General, Vault, Echo,
+    Users, TextFilter, Fun, Announcements, Emotes, Polymorph, Moderation, Cosmo, 
+    BPC, RandomEvents, Lists, Polls, SelfPing, TexRender, Shoujo, Graphing, 
+    ActivityTracker, Terrestrial
+]
 
 # Databases MUST load first, otherwise things will NOT work
 cogs = [ Databases, AuxilliaryListener, MessageHandler, General, Vault, Echo,
