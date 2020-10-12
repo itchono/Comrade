@@ -21,7 +21,7 @@ class Echo(commands.Cog):
         >>> Impersonates itchono, sending a message with content `HELLO THERE SIR`
         '''
         if not target: target = ctx.author
-        await echo(ctx, member=target, content=text, file=ctx.message.file, embed=ctx.message.embed)
+        await echo(ctx, member=target, content=text, file=ctx.message.attachments[0] if ctx.message.attachments else None, embed=ctx.message.embeds[0] if ctx.message.embeds else None)
         await log(ctx.guild, f"Echo for {target.mention} sent by {ctx.author.mention}")
         await ctx.message.delete()
 
