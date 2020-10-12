@@ -181,7 +181,14 @@ class Emotes(commands.Cog):
         # Stage 2: Search MongoDB
         elif document := DBcollection(EMOTES_COL).find_one({"name": re.compile('^' + e + '$', re.IGNORECASE), "server":ctx.guild.id}):
 
-            # 2A: inline emoji, needs to be added            
+            # 2A: inline emoji, 
+            # first, check if it's already in the server, but someone just misspelled it
+            if emote := discord.utils.get(ctx.guild.emojis, name=document["name"]): 
+                await echo(ctx, member=ctx.author, content=emote)
+                await ctx.message.delete() # try to delete
+                return
+
+            # needs to be added            
             if document["type"] == "inline": 
                 emote = await self.inject(ctx, document["name"])
                 await echo(ctx, member=ctx.author, content=emote)
