@@ -32,7 +32,7 @@ class Emotes(commands.Cog):
         except:
             if not match_url(url): await ctx.send("Invalid URL Provided."); return
 
-        if not DBcollection(EMOTES_COL).find_one({"name":name.lower(), "server":ctx.guild.id}):
+        if not DBcollection(EMOTES_COL).find_one({"name":name, "server":ctx.guild.id}):
             # make sure it doesn't already exist
 
             binImage = requests.get(url).content # binaries
@@ -43,11 +43,11 @@ class Emotes(commands.Cog):
                 "type":"big",
                 "file":binImage})
             
-            await ctx.send(f'Emote `{name.lower()}` was added. you can call it using `:{name.lower()}:`')
+            await ctx.send(f'Emote `{name}` was added. you can call it using `:{name}:`')
         
         else:
             await reactX(ctx)
-            await ctx.send('Emote `{}` already exists! Contact a mod to get this fixed.'.format(name.lower()))
+            await ctx.send(f'Emote `{name}` already exists! Contact a mod to get this fixed.')
 
 
     async def inject(self, ctx:commands.Context, name):
@@ -99,7 +99,7 @@ class Emotes(commands.Cog):
         await ctx.send(f"__Big__:\n{bigs}\n__Inlines__:\n{inlines}")
 
 
-        # emotes = list(self.EMOTE_CACHE[ctx.guild.id].keys())
+        # emotes = list(self.EMOTE_CACHdocument[ctx.guild.id].keys())
 
         # break_lim = 30
 
@@ -107,7 +107,7 @@ class Emotes(commands.Cog):
         #     e = discord.Embed(title = "Custom Emotes for {} ({} to {})".format(ctx.guild.name, i+1, (i+1+break_lim if i+1+break_lim < len(emotes) else len(emotes))),
         #     colour=discord.Colour.from_rgb(*DBcfgitem(ctx.guild.id,"theme-colour")))
             
-        #     for k in emotes[i:i + break_lim]: e.add_field(name=k, value="[Link]({})".format(self.EMOTE_CACHE[ctx.guild.id][k]))
+        #     for k in emotes[i:i + break_lim]: e.add_field(name=k, value="[Link]({})".format(self.EMOTE_CACHdocument[ctx.guild.id][k]))
             
         #     await DM(s="", user=ctx.author, embed=e)
         # await delSend(ctx, "Check your DMs {}".format(ctx.author.mention))
@@ -128,8 +128,7 @@ class Emotes(commands.Cog):
                 try: await emote.delete(reason=f"Unloading emoji because it was removed from the server.")
                 except: pass
 
-        else:
-            await ctx.send(f"Emote `{name}` was not found.")
+        else: await ctx.send(f"Emote `{name}` was not found.")
 
     @commands.command()
     @commands.guild_only()
@@ -140,8 +139,7 @@ class Emotes(commands.Cog):
         '''
         if DBcollection(EMOTES_COL).update_one({"name":name_old, "server":ctx.guild.id}, {"$set":{"name":name_new}}):
             await ctx.send(f"Emote `{name_old}` was renamed.")
-        else:
-            await ctx.send(f"Emote `{name_old}` was not found.")
+        else: await ctx.send(f"Emote `{name_old}` was not found.")
 
     @commands.command()
     @commands.guild_only()
@@ -149,22 +147,42 @@ class Emotes(commands.Cog):
         '''
         Swaps the type of the emote
         '''
-        if e := DBcollection(EMOTES_COL).find_one({"name": re.compile('^' + name + '$', re.IGNORECASE), "server":ctx.guild.id}):
-            newtype = {"big":"inline", "inline":"big"}[e["type"]]
+        if (document := DBcollection(EMOTES_COL).find_one({"name": name, "server":ctx.guild.id})) or \
+            (document := DBcollection(EMOTES_COL).find_one({"name": re.compile('^' + name + '$', re.IGNORECASE), "server":ctx.guild.id})):
+            newtype = {"big":"inline", "inline":"big"}[document["type"]]
 
-            if e["type"] == "inline":
+            if document["type"] == "inline":
                 emote = discord.utils.get(ctx.guild.emojis, name=name)
                 try: await emote.delete(reason=f"Unloading emoji because it changed type.")
                 except: pass
             
-            elif (size := len(e["file"])) >= 262143:
-                await ctx.send(f"Emote `{e['name']}` is too big to become inline! ({round(size/1024)} kb vs 256 kb limit)"); return
+            elif (size := len(document["file"])) >= 262143:
+                await ctx.send(f"Emote `{document['name']}` is too big to become inline! ({round(size/1024)} kb vs 256 kb limit)"); return
 
-            DBcollection(EMOTES_COL).update_one({"name":e['name'], "server":ctx.guild.id}, {"$set": {"type":newtype}})
+            DBcollection(EMOTES_COL).update_one({"name":document['name'], "server":ctx.guild.id}, {"$set": {"type":newtype}})
 
-            await ctx.send(f"Emote `{e['name']}` is now of type `{newtype}`")
+            await ctx.send(f"Emote `{document['name']}` is now of type `{newtype}`")
 
         else: await ctx.send(f"Emote `{name}` was not found.")
+
+
+    async def inline(self, ctx: commands.Context, e:str):
+        '''
+        Gets an inline emote from Discord, if it exists, else it injects it and returns it
+        Similar code to emote function
+        '''
+        # Stage 1: Search server cache
+        if emote := discord.utils.get(ctx.guild.emojis, name=e): return emote
+
+        # Stage 2: Search MongoDB
+        elif ((document := DBcollection(EMOTES_COL).find_one({"name": e, "server":ctx.guild.id})) or \
+            (document := DBcollection(EMOTES_COL).find_one({"name": re.compile('^' + e + '$', re.IGNORECASE), "server":ctx.guild.id}))) and \
+            document["type"] == "inline":
+
+            # maybe they just can't spell
+            if emote := discord.utils.get(ctx.guild.emojis, name=document["name"]): return emote
+            return await self.inject(ctx, document["name"])
+        return None
 
     @commands.command()
     @commands.guild_only()
@@ -173,22 +191,21 @@ class Emotes(commands.Cog):
         Sends an emote into a context, injecting first if necessary
         '''
         # Stage 1: Search server cache
-
-        if emote := discord.utils.get(ctx.guild.emojis, name=e): 
+        if emote := discord.utils.get(ctx.guild.emojis, name=e):
             await echo(ctx, member=ctx.author, content=emote)
             await ctx.message.delete() # try to delete
 
         # Stage 2: Search MongoDB
-        elif document := DBcollection(EMOTES_COL).find_one({"name": re.compile('^' + e + '$', re.IGNORECASE), "server":ctx.guild.id}):
+        elif (document := DBcollection(EMOTES_COL).find_one({"name": e, "server":ctx.guild.id})) or \
+            (document := DBcollection(EMOTES_COL).find_one({"name": re.compile('^' + e + '$', re.IGNORECASE), "server":ctx.guild.id})):
 
             # 2A: inline emoji, 
-            # first, check if it's already in the server, but someone just misspelled it
-            if emote := discord.utils.get(ctx.guild.emojis, name=document["name"]): 
+            # maybe they just can't spell
+            if emote := discord.utils.get(ctx.guild.emojis, name=document["name"]):
                 await echo(ctx, member=ctx.author, content=emote)
                 await ctx.message.delete() # try to delete
-                return
 
-            # needs to be added            
+            # Or, it needs to be added            
             if document["type"] == "inline": 
                 emote = await self.inject(ctx, document["name"])
                 await echo(ctx, member=ctx.author, content=emote)
@@ -203,19 +220,20 @@ class Emotes(commands.Cog):
         else:
             await ctx.send(f"Emote `{e}` not found.")
 
-        # except:
-        #     await reactX(ctx)
-        #     similar = [i for i in self.EMOTE_CACHE[ctx.guild.id] if fuzz.partial_ratio(i, e) > 60]
+            '''
+            TODO Implement similar emoji
+            similar = [i for i in self.EMOTE_CACHdocument[ctx.guild.id] if fuzz.partial_ratio(i, e) > 60]
 
-        #     embed = discord.Embed(description="Emote `{}` not found. Did you mean one of the following?".format(e))
+            embed = discord.Embed(description="Emote `{}` not found. Did you mean one of the following?".format(e))
 
-        #     if similar != []:
-        #         for k in similar: embed.add_field(name="Suggestion", value=":{}:".format(k))
-        #     else:
-        #         directory = await getChannel(ctx.guild, 'emote-directory')
-        #         embed.add_field(name="Sorry, no similar results were found.", value="See {}, or type `{}listemotes` for a list of all emotes.".format(directory.mention, BOT_PREFIX))
+            if similar != []:
+                for k in similar: embed.add_field(name="Suggestion", value=":{}:".format(k))
+            else:
+                directory = await getChannel(ctx.guild, 'emote-directory')
+                embed.add_field(name="Sorry, no similar results were found.", value="See {}, or type `{}listemotes` for a list of all emotes.".format(directory.mention, BOT_PREFIX))
 
-        #     await ctx.send(embed=embed)
+            await ctx.send(embed=embed)
+            ''' 
 
     @commands.command()
     @commands.check_any(commands.is_owner(), isServerOwner())
@@ -223,7 +241,6 @@ class Emotes(commands.Cog):
         '''
         ingests emotes from channel
         '''
-
         async for e in channel.history(limit=None):
             try: 
                 name = e.content.lower().split("\n")[0]
@@ -239,10 +256,25 @@ class Emotes(commands.Cog):
         '''
         Emote listener
         '''
+        async def pullemote(matchobj):
+            return await self.inline(await self.bot.get_context(message), matchobj.group(0).strip())
+
         if message.content and not message.author.bot and message.guild: 
+
+            # if re.match(r":(.[^:]*):", message.content):
+
+            #     newcontent = re.sub(r":(.[^:]*):", pullemote, message.content)
+
+            #     await echo(await self.bot.get_context(message), member=message.author, content=newcontent, 
+            #     file=message.attachments[0] if message.attachments else None, embed=message.embeds[0] if message.embeds else None)
+
+            #     await message.delete()
+
             if message.content[0] == ':' and message.content[-1] == ':' and len(message.content) > 1:
                 await self.emote(await self.bot.get_context(message), message.content.strip(':').strip(" ")) # Call emote
-            elif message.content[0] == '/' and message.content[-1] == '/' and len(message.content) > 1:
+
+
+            if message.content[0] == '/' and message.content[-1] == '/' and len(message.content) > 1:
                 await self.swaptype(await self.bot.get_context(message), message.content.strip('/').strip(" ")) # Swap type of emote
 
             
