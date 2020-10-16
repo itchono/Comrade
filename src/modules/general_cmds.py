@@ -226,7 +226,7 @@ class General(commands.Cog):
 
             await echo(ctx, member=ctx.author, content=f"**```{BORDER_TOP}\n{ACCENT_BORDER}\n{content}\n{ACCENT_BORDER}\n{BORDER_BOTTOM}```**")
 
-
+            await ctx.message.delete()
         else:
             await ctx.send(f"**```{BORDER_TOP}\n{ACCENT_BORDER}\n{content}\n{ACCENT_BORDER}\n{BORDER_BOTTOM}```**")
 

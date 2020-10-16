@@ -250,6 +250,12 @@ class Emotes(commands.Cog):
                 await self.addEmote(ctx, name, url=url)
                 
             except: pass # dirty emote directory
+
+    # @commands.command()
+    # async def ascii(self, ctx:commands.Context, name, *, text):
+    #     '''
+    #     Sends a big form of the emote
+    #     '''
     
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
@@ -257,23 +263,22 @@ class Emotes(commands.Cog):
         Emote listener
         '''
         async def pullemote(em):
+            print(em)
             return await self.inline(await self.bot.get_context(message), em.strip(':').strip(" "))
 
         if message.content and not message.author.bot and message.guild: 
 
-            if match := re.findall(r":.[^:]*:", message.content):
+            if match := re.findall(r"(?<!\<):.[^<>:]*:", message.clean_content):
                 s = message.content
+                send = False
                 for i in match:
-                    if emote := await pullemote(i):
-                        s = s.replace(i, str(emote))
+                    if emote := await pullemote(i): send = True; s = s.replace(i, str(emote))
+                
+                if send:
+                    await echo(await self.bot.get_context(message), member=message.author, content=s, 
+                    file=await message.attachments[0].to_file() if message.attachments else None, embed=message.embeds[0] if message.embeds else None)
 
-                await echo(await self.bot.get_context(message), member=message.author, content=s, 
-                file=await message.attachments[0].to_file() if message.attachments else None, embed=message.embeds[0] if message.embeds else None)
-
-                await message.delete()
-
-            # if message.content[0] == ':' and message.content[-1] == ':' and len(message.content) > 1:
-            #     await self.emote(await self.bot.get_context(message), message.content.strip(':').strip(" ")) # Call emote
+                    await message.delete()
 
             elif message.content[0] == '/' and message.content[-1] == '/' and len(message.content) > 1:
                 await self.swaptype(await self.bot.get_context(message), message.content.strip('/').strip(" ")) # Swap type of emote
