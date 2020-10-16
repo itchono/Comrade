@@ -50,20 +50,16 @@ class Databases(commands.Cog):
 
         return {
             "user": user.id,
-            "name": user.name,
-            "nickname": user.nick if user.nick else user.name,
             "threat-level": 0, # used to control access to server
             "banned-words": {},
             "kick-votes": [],
             "mute-votes": [],
             "server": user.guild.id, # server the user account is associated with
-            "muted": False,
             "OP": False,
             "stop-pings": False,
             "stop-images": False,
             "favourite-colour": "Unknown",
             "daily-weight": daily if not user.bot else 0,
-            "bot": user.bot,
             "last-online": "Now" if str(user.status) == "online" else "Never",
             "highest-guess-streak": 0,
             "check-when-online": []
@@ -144,7 +140,7 @@ class Databases(commands.Cog):
         '''
         POTENTIALLY DESTRUCTIVE. Resets the configuration file for a server back to a default state. 
         '''
-        DBupdate(USER_COL, {"_id":ctx.guild.id}, self.setupcfg(ctx.guild))
+        DBupdate(SERVERCFG_COL, {"_id":ctx.guild.id}, self.setupcfg(ctx.guild))
         await reactOK(ctx)
 
     @commands.command()

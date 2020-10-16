@@ -72,15 +72,8 @@ class AuxilliaryListener(commands.Cog):
         '''
         Whenever a server member changes their state.
         '''
-        if (user.display_name != before.display_name):
-            # member update
-            d = DBuser(before.id, user.guild.id)
-            d["name"] = user.name
-            d["nickname"] = user.nick if user.nick else user.name
-            updateDBuser(d)
-            await log(user.guild, "Member Updated: {}".format(before.name))
 
-        elif user.status != before.status:
+        if user.status != before.status:
             # status update
 
             if str(user.status) == "offline":
@@ -99,21 +92,7 @@ class AuxilliaryListener(commands.Cog):
                 embed = discord.Embed(title=f"{user.display_name} is now {str(user.status)}.", description=str(m))
                 embed.add_field(name="Time", value=(localTime().strftime("%I:%M:%S %p %Z")))
                 await DM("", m, embed)
-                        
-
-    @commands.Cog.listener()
-    async def on_user_update(self, before, user):
-        '''
-        Whenever a general user changes their state.
-        '''
-        if (user.name != before.name):
-            # user update
-            POSSIBLES = DBfind(USER_COL, {"user":user.id})
-            for u in POSSIBLES:
-                u["name"] = user.name
-                updateDBuser(u)
-
-            await log(user.guild, "User Updated: {}".format(before.name))
+    
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, exception):

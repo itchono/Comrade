@@ -53,7 +53,7 @@ async def on_ready():
             print(f"\t{server.name} ({len(server.members)} members)")
 
         print("Loading Cogs:")
-        for name in ["Databases", "Users", "Vault", "Polymorph", "Emotes"]:  # load cogs in order
+        for name in ["Databases", "Users", "Vault", "Polymorph"]:  # load cogs in order
             try:
                 print(f"\t{name}: ", end="")
                 await client.get_cog(name).on_load()  # Initialize cogs

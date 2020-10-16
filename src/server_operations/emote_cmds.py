@@ -256,25 +256,26 @@ class Emotes(commands.Cog):
         '''
         Emote listener
         '''
-        async def pullemote(matchobj):
-            return await self.inline(await self.bot.get_context(message), matchobj.group(0).strip())
+        async def pullemote(em):
+            return await self.inline(await self.bot.get_context(message), em.strip(':').strip(" "))
 
         if message.content and not message.author.bot and message.guild: 
 
-            # if re.match(r":(.[^:]*):", message.content):
+            if match := re.findall(r":.[^:]*:", message.content):
+                s = message.content
+                for i in match:
+                    if emote := await pullemote(i):
+                        s = s.replace(i, str(emote))
 
-            #     newcontent = re.sub(r":(.[^:]*):", pullemote, message.content)
+                await echo(await self.bot.get_context(message), member=message.author, content=s, 
+                file=await message.attachments[0].to_file() if message.attachments else None, embed=message.embeds[0] if message.embeds else None)
 
-            #     await echo(await self.bot.get_context(message), member=message.author, content=newcontent, 
-            #     file=message.attachments[0] if message.attachments else None, embed=message.embeds[0] if message.embeds else None)
+                await message.delete()
 
-            #     await message.delete()
+            # if message.content[0] == ':' and message.content[-1] == ':' and len(message.content) > 1:
+            #     await self.emote(await self.bot.get_context(message), message.content.strip(':').strip(" ")) # Call emote
 
-            if message.content[0] == ':' and message.content[-1] == ':' and len(message.content) > 1:
-                await self.emote(await self.bot.get_context(message), message.content.strip(':').strip(" ")) # Call emote
-
-
-            if message.content[0] == '/' and message.content[-1] == '/' and len(message.content) > 1:
+            elif message.content[0] == '/' and message.content[-1] == '/' and len(message.content) > 1:
                 await self.swaptype(await self.bot.get_context(message), message.content.strip('/').strip(" ")) # Swap type of emote
 
             

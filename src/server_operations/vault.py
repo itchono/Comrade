@@ -41,7 +41,7 @@ class Vault(commands.Cog):
         '''
         IDmode = False
 
-        if len(ctx.message.attachments) > 0:
+        if ctx.message.attachments:
             u = ctx.message.attachments[0].url
         elif tgt and tgt.isnumeric():
             u = await commands.MessageConverter().convert(ctx, tgt)
@@ -70,7 +70,7 @@ class Vault(commands.Cog):
             e.set_footer(text=f"Sent by {ctx.author.display_name}")
             m2 = await vault.send(embed=e)
 
-            await echo(await self.bot.get_context(m2), member=u.author, content=u.content, file=u.attachments[0] if u.attachments else None, embed=u.embeds[0] if u.embeds else None)
+            await echo(await self.bot.get_context(m2), member=u.author, content=u.content, file=await u.attachments[0].to_file() if u.attachments else None, embed=u.embeds[0] if u.embeds else None)
         else:
             e = discord.Embed(title=":tomato: Vault Entry", colour=discord.Colour.from_rgb(*DBcfgitem(ctx.guild.id,"theme-colour")))
             e.set_image(url=u)

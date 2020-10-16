@@ -69,13 +69,17 @@ class ActivityTracker(commands.Cog):
     async def datalog(self):
         await self.pushdata()
 
+        # also rebuild user cache
+        server = self.bot.get_guild(SERVER)
+        for m in server.members:
+            self.id2name[m.id] = m.display_name
+
     @datalog.before_loop
     async def before_log(self):
         await self.bot.wait_until_ready()
 
         server = self.bot.get_guild(SERVER)
         self.online_humans = [m for m in server.members if (str(m.status) != "offline" and not m.bot)]
-
         for m in server.members:
             self.id2name[m.id] = m.display_name
 
