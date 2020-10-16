@@ -209,72 +209,7 @@ class Users(commands.Cog):
         '''
         async with ctx.channel.typing():
             luckyperson = random.choice(self.UNWEIGHTED_RND_USER[ctx.guild.id]) if not weighted else random.choice(self.WEIGHTED_RND_USER[ctx.guild.id])
-        await self.userinfo(ctx, target=DBuser(luckyperson.id, ctx.guild.id)["nickname"])
-
-    @commands.command(aliases = ["birth"])
-    @commands.guild_only()
-    async def addCustomUser(self, ctx: commands.Context, username, avatar=None):
-        '''
-        Adds custom user to database, which can be mentioned.
-        '''
-
-        if len(ctx.message.attachments): avatar = ctx.message.attachments[0].url
-
-        if u := DBfind_one(CUSTOMUSER_COL, {"name":username, "server":ctx.guild.id}): 
-            await mimic(ctx.channel, content="Oh hey I'm already here!", username=username, avatar_url=avatar)
-
-        else:
-            DBupdate(CUSTOMUSER_COL, {"name": username, "server": ctx.guild.id}, {"name": username, "url": avatar, "server": ctx.guild.id})
-            await mimic(ctx.channel, content="I have been added.", username=username, avatar_url=avatar)
-
-    @commands.command(aliases = ["plasticsurgery"])
-    @commands.guild_only()
-    @commands.check(isOP)
-    async def editCustomUser(self, ctx: commands.Context, username, field, value):
-        '''
-        Edits a custom user's fields
-        '''
-        u = DBfind_one(CUSTOMUSER_COL, {"name":username, "server":ctx.guild.id})
-
-        if not value:
-            try:
-                del u[field]
-                DBupdate(CUSTOMUSER_COL, {"name": u["name"], "server": u["server"]}, u, False)
-                await delSend(ctx, "User config value deleted.")
-            except:
-                await delSend(ctx, "Value was not found.")
-        
-        else:
-            u[field] = value
-            DBupdate(CUSTOMUSER_COL, {"name": u["name"], "server": u["server"]}, u, False)
-            await reactOK(ctx)
-    
-    @commands.command(aliases = ["kill"])
-    @commands.guild_only()
-    @commands.check(isOP)
-    async def removeCustomUser(self, ctx: commands.Context, username):
-        '''
-        Removes a custom user.
-        '''
-        DBremove_one(CUSTOMUSER_COL, {"name": username, "server": ctx.guild.id})
-        await reactOK(ctx)
-
-    @commands.command(aliases = ["listchildren"])
-    @commands.guild_only()
-    async def listCustomUsers(self, ctx: commands.Context):
-        '''
-        Lists all custom users
-        '''
-        u = DBfind(CUSTOMUSER_COL,{"server":ctx.guild.id}) # all custom users
-
-        s = "```Custom Users in {}".format(ctx.guild.name)
-
-        for usr in u:
-            s += "\n" + usr["name"]
-        
-        s += "```"
-
-        await ctx.send(s)
+        await self.userinfo(ctx, member=luckyperson)
 
     @commands.command()
     @commands.guild_only()

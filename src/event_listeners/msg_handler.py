@@ -52,8 +52,8 @@ class MessageHandler(commands.Cog):
         Knuckles_VD = os.listdir("vid")
         
         attach = None
-        if len(message.attachments) > 0: attach = message.attachments[0].size # this way, same video gets same hash
-        elif len(message.embeds) > 0: attach = message.embeds[0].url
+        if message.attachments: attach = message.attachments[0].size # this way, same video gets same hash
+        elif message.embeds: attach = message.embeds[0].url
         elif match_url(message.content.lower()): attach = message.content.lower()
 
         if attach:

@@ -231,9 +231,9 @@ class NSFW(commands.Cog):
         ex. `$c favourite itchono:neko:kurumi`
 
         '''
-        if url or len(ctx.message.attachments) > 0:
+        if url or ctx.message.attachments:
 
-            if len(ctx.message.attachments) > 0: url = ctx.message.attachments[0].url
+            if ctx.message.attachments: url = ctx.message.attachments[0].url
 
             tokens = imageName.split(":") # split tokens
 
