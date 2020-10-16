@@ -251,11 +251,51 @@ class Emotes(commands.Cog):
                 
             except: pass # dirty emote directory
 
-    # @commands.command()
-    # async def ascii(self, ctx:commands.Context, name, *, text):
-    #     '''
-    #     Sends a big form of the emote
-    #     '''
+    @commands.command()
+    async def ascii(self, ctx:commands.Context, name, *, text):
+        '''
+        Sends a big form of the emote in word art form
+        '''
+
+        letters = {"a":"###\n#b#\n###\n#b#\n#b#",
+                    "b":"##b\n#b#\n###\n#b#\n##b",
+                    "c":"###\n#bb\n#bb\n#bb\n###",
+                    "d":"##b\n#b#\n#b#\n#b#\n##b",
+                    "e":"###\n#bb\n###\n#bb\n###",
+                    "f":"###\n#bb\n###\n#bb\n#bb",
+                    "g":"###\n#bb\n###\n#b#\nb#b",
+                    "h":"#b#\n#b#\n###\n#b#\n#b#",
+                    "i":"###\nb#b\nb#b\nb#b\n###",
+                    "j":"###\nb#b\nb#b\nb#b\n#bb",
+                    "k":"#bb\n#bb\n#b#\n##b\n#b#",
+                    "l":"#bb\n#bb\n#bb\n#bb\n###",
+                    "m":"#b#\n###\n###\n#b#\n#b#",
+                    "n":"bbb\nbbb\n##b\n#b#\n#b#",
+                    "o":"###\n#b#\n#b#\n#b#\n###",
+                    "p":"###\n#b#\n###\n#bb\n#bb",
+                    "q":"b#b\n#b#\n#b#\nb##\nbb#",
+                    "r":"##b\n#b#\n##b\n#b#\n#b#",
+                    "s":"###\n#bb\n###\nbb#\n###",
+                    "t":"###\nb#b\nb#b\nb#b\nb#b",
+                    "u":"#b#\n#b#\n#b#\n#b#\n###",
+                    "v":"#b#\n#b#\n#b#\n#b#\nb#b",
+                    "w":"#b#\n#b#\n###\n###\n#b#",
+                    "x":"#b#\n#b#\nb#b\n#b#\n#b#",
+                    "y":"#b#\n#b#\nb#b\nb#b\nb#b",
+                    "z":"###\nbb#\nb#b\n#bb\n###"}
+        if text.isalpha():
+
+            if emote := await self.inline(ctx, name):
+                out = ""
+                for c in text.lower():
+                    ch = letters[c].replace("b",":black_small_square:").replace("#",str(emote))
+                    out += ch + "\n\n"
+                await ctx.send(out)
+            else:
+                await ctx.send("Emote not found.")
+        else:
+            await ctx.send("Text must be alphabetical only.")
+        
     
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
