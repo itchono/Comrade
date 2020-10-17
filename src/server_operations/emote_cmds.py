@@ -152,7 +152,7 @@ class Emotes(commands.Cog):
             newtype = {"big":"inline", "inline":"big"}[document["type"]]
 
             if document["type"] == "inline":
-                emote = discord.utils.get(ctx.guild.emojis, name=name)
+                emote = discord.utils.get(ctx.guild.emojis, name=document['name'])
                 try: await emote.delete(reason=f"Unloading emoji because it changed type.")
                 except: pass
             
@@ -303,7 +303,6 @@ class Emotes(commands.Cog):
         Emote listener
         '''
         async def pullemote(em):
-            print(em)
             return await self.inline(await self.bot.get_context(message), em.strip(':').strip(" "))
 
         if message.content and not message.author.bot and message.guild: 
@@ -313,6 +312,7 @@ class Emotes(commands.Cog):
                 send = False
                 for i in match:
                     if emote := await pullemote(i): send = True; s = s.replace(i, str(emote))
+                    else: await self.emote(await self.bot.get_context(message), i.strip(":").strip(" "))
                 
                 if send:
                     await echo(await self.bot.get_context(message), member=message.author, content=s, 
