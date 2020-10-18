@@ -88,7 +88,7 @@ class Emotes(commands.Cog):
         '''
         Lists all big emotes in the server, based on page
         '''
-        paginator = commands.Paginator(prefix="", suffix="", max_size=100)
+        paginator = commands.Paginator(prefix="", suffix="", max_size=200)
 
         bigemotes = DBcollection(EMOTES_COL).find({"server":ctx.guild.id, "type":"big"}, {"name":True})
 
@@ -135,7 +135,7 @@ class Emotes(commands.Cog):
         Lists all inline emotes in the server, based on page.
         NOTE: this may not include all inline emoji, especially if the bot was recently added to the server.
         '''
-        paginator = commands.Paginator(prefix="", suffix="", max_size=100)
+        paginator = commands.Paginator(prefix="", suffix="", max_size=200)
 
         bigemotes = DBcollection(EMOTES_COL).find({"server":ctx.guild.id, "type":"inline"}, {"name":True})
 
