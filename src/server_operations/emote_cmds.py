@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from utils import *
 
-import re, requests, bson, io, imghdr
+import re, requests, bson, io, imghdr, asyncio
 from fuzzywuzzy import fuzz # NOTE: install python-Levenshtein for faster results.
 
 from utils.checks.other_checks import match_url
@@ -81,36 +81,99 @@ class Emotes(commands.Cog):
             
         else: await ctx.send(f"Emote `{name}` was not found in the database.")
 
+
     @commands.command()
     @commands.guild_only()
-    async def listEmotes(self, ctx : commands.Context):
+    async def listBig(self, ctx : commands.Context, page=1):
         '''
-        Lists all emotes in the server, sent to DMs
+        Lists all big emotes in the server, based on page
         '''
+        paginator = commands.Paginator(prefix="", suffix="", max_size=100)
 
         bigemotes = DBcollection(EMOTES_COL).find({"server":ctx.guild.id, "type":"big"}, {"name":True})
 
-        bigs = "\n".join([i["name"] for i in bigemotes])
+        for i in bigemotes:
+            paginator.add_line(f"- {i['name']}")
 
-        inlineemotes = DBcollection(EMOTES_COL).find({"server":ctx.guild.id, "type":"inline"}, {"name":True})
+        pagenum = 1
 
-        inlines = "\n".join([i["name"] for i in inlineemotes])
+        pages = paginator.pages
 
-        await ctx.send(f"__Big__:\n{bigs}\n__Inlines__:\n{inlines}")
+        m = await ctx.send(f"__**Big Emotes in {ctx.guild.name} ({pagenum}/{len(pages)})**__:{pages[pagenum-1]}")
 
+        cont = True
 
-        # emotes = list(self.EMOTE_CACHdocument[ctx.guild.id].keys())
+        for r in ["⬅", "➡", "🗑️"]: await m.add_reaction(r)
 
-        # break_lim = 30
+        def check(reaction, user):
+            return str(reaction) in ["⬅", "➡", "🗑️"] and user == ctx.author and reaction.message.id == m.id
 
-        # for i in range(0, len(emotes), break_lim): # break into chunks
-        #     e = discord.Embed(title = "Custom Emotes for {} ({} to {})".format(ctx.guild.name, i+1, (i+1+break_lim if i+1+break_lim < len(emotes) else len(emotes))),
-        #     colour=discord.Colour.from_rgb(*DBcfgitem(ctx.guild.id,"theme-colour")))
-            
-        #     for k in emotes[i:i + break_lim]: e.add_field(name=k, value="[Link]({})".format(self.EMOTE_CACHdocument[ctx.guild.id][k]))
-            
-        #     await DM(s="", user=ctx.author, embed=e)
-        # await delSend(ctx, "Check your DMs {}".format(ctx.author.mention))
+        while cont:
+            try:
+                reaction, user = await self.bot.wait_for("reaction_add", check=check, timeout=180)
+
+                await m.remove_reaction(reaction, user)
+                if str(reaction) == "⬅" and pagenum > 1:
+                    pagenum -= 1
+                    await m.edit(content=f"__**Big Emotes in {ctx.guild.name} ({pagenum}/{len(pages)})**__:{pages[pagenum-1]}") 
+                elif str(reaction) == "➡" and pagenum < len(pages):
+                    pagenum += 1
+                    await m.edit(content=f"__**Big Emotes in {ctx.guild.name} ({pagenum}/{len(pages)})**__:{pages[pagenum-1]}") 
+                elif str(reaction) == "🗑️":
+                    await m.delete()
+                    cont = False
+                    continue
+
+            except asyncio.TimeoutError:
+                cont = False
+                continue
+
+    @commands.command()
+    @commands.guild_only()
+    async def listInline(self, ctx : commands.Context, page=1):
+        '''
+        Lists all inline emotes in the server, based on page.
+        NOTE: this may not include all inline emoji, especially if the bot was recently added to the server.
+        '''
+        paginator = commands.Paginator(prefix="", suffix="", max_size=100)
+
+        bigemotes = DBcollection(EMOTES_COL).find({"server":ctx.guild.id, "type":"inline"}, {"name":True})
+
+        for i in bigemotes:
+            paginator.add_line(f"- {i['name']}")
+
+        pagenum = 1
+
+        pages = paginator.pages
+
+        m = await ctx.send(f"__**Inline Emotes in {ctx.guild.name} ({pagenum}/{len(pages)})**__:{pages[pagenum-1]}")
+
+        cont = True
+
+        for r in ["⬅", "➡", "🗑️"]: await m.add_reaction(r)
+
+        def check(reaction, user):
+            return str(reaction) in ["⬅", "➡", "🗑️"] and user == ctx.author and reaction.message.id == m.id
+
+        while cont:
+            try:
+                reaction, user = await self.bot.wait_for("reaction_add", check=check, timeout=180)
+
+                await m.remove_reaction(reaction, user)
+                if str(reaction) == "⬅" and pagenum > 1:
+                    pagenum -= 1
+                    await m.edit(content=f"__**Inline Emotes in {ctx.guild.name} ({pagenum}/{len(pages)})**__:{pages[pagenum-1]}") 
+                elif str(reaction) == "➡" and pagenum < len(pages):
+                    pagenum += 1
+                    await m.edit(content=f"__**Inline Emotes in {ctx.guild.name} ({pagenum}/{len(pages)})**__:{pages[pagenum-1]}") 
+                elif str(reaction) == "🗑️":
+                    await m.delete()
+                    cont = False
+                    continue
+
+            except asyncio.TimeoutError:
+                cont = False
+                continue
 
     @commands.command()
     @commands.guild_only()
@@ -218,22 +281,15 @@ class Emotes(commands.Cog):
                 f = discord.File(fp=io.BytesIO(document["file"]), filename=f"image.{ext}")
                 await mimic(ctx.channel, file=f, avatar_url=ctx.author.avatar_url, username=e)
         else:
-            await ctx.send(f"Emote `{e}` not found.")
+            bigemotes = DBcollection(EMOTES_COL).find({"server":ctx.guild.id, "type":"big"}, {"name":True})
 
-            '''
-            TODO Implement similar emoji
-            similar = [i for i in self.EMOTE_CACHdocument[ctx.guild.id] if fuzz.partial_ratio(i, e) > 60]
+            similar = [i["name"] for i in bigemotes if fuzz.partial_ratio(i["name"], e) > 60]
 
-            embed = discord.Embed(description="Emote `{}` not found. Did you mean one of the following?".format(e))
+            embed = discord.Embed(description=f"Emote `{e}` not found. Did you mean one of the following?")
 
-            if similar != []:
-                for k in similar: embed.add_field(name="Suggestion", value=":{}:".format(k))
-            else:
-                directory = await getChannel(ctx.guild, 'emote-directory')
-                embed.add_field(name="Sorry, no similar results were found.", value="See {}, or type `{}listemotes` for a list of all emotes.".format(directory.mention, BOT_PREFIX))
+            for k in similar: embed.add_field(name="Suggestion", value=":{}:".format(k))
 
             await ctx.send(embed=embed)
-            ''' 
 
     @commands.command()
     @commands.check_any(commands.is_owner(), isServerOwner())
@@ -263,7 +319,7 @@ class Emotes(commands.Cog):
                     "d":"##b\n#b#\n#b#\n#b#\n##b",
                     "e":"###\n#bb\n###\n#bb\n###",
                     "f":"###\n#bb\n###\n#bb\n#bb",
-                    "g":"###\n#bb\n###\n#b#\nb#b",
+                    "g":"b##\n#bb\n#b#\n#b#\nb##",
                     "h":"#b#\n#b#\n###\n#b#\n#b#",
                     "i":"###\nb#b\nb#b\nb#b\n###",
                     "j":"###\nb#b\nb#b\nb#b\n#bb",
@@ -290,7 +346,9 @@ class Emotes(commands.Cog):
                 for c in text.lower():
                     ch = letters[c].replace("b",":black_small_square:").replace("#",str(emote))
                     out += ch + "\n\n"
-                await ctx.send(out)
+                if len(out) > 2000:
+                    await ctx.send(f"Text is too long! ({len(out)} vs 2000 char limit)")
+                else: await ctx.send(out)
             else:
                 await ctx.send("Emote not found.")
         else:
