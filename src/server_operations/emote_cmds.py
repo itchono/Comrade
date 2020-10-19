@@ -279,6 +279,7 @@ class Emotes(commands.Cog):
                 byts = io.BytesIO(document["file"])
                 ext = imghdr.what(None, h=byts.read()) # deteremine the file extension
                 f = discord.File(fp=io.BytesIO(document["file"]), filename=f"image.{ext}")
+                if len(e) > 32: e = e[:32]
                 await mimic(ctx.channel, file=f, avatar_url=ctx.author.avatar_url, username=e)
         else:
             bigemotes = DBcollection(EMOTES_COL).find({"server":ctx.guild.id, "type":"big"}, {"name":True})
