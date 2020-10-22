@@ -21,12 +21,13 @@ dotenv.load_dotenv()
 # Databases MUST load first, otherwise things will NOT work
 cogs = [ Databases, AuxilliaryListener, MessageHandler, General, Vault, Echo,
     Users, TextFilter, Fun, Announcements, Emotes, Polymorph, Moderation, Cosmo, 
-    BPC, RandomEvents, Lists, Polls, SelfPing, TexRender, Shoujo, Graphing, 
+    BPC, RandomEvents, Lists, Polls, TexRender, Shoujo, Graphing, 
     ActivityTracker, Terrestrial
 ] # for use with development to get faster start
 
 for c in cogs:
     client.add_cog(c(client))
+if SELFPING_REQUIRED: client.add_cog(SelfPing(client))
 print(f"Running discord.py version {discord.__version__}.")
 
 
