@@ -1,5 +1,5 @@
-ARG VERSION=0.2.10
-ARG JAR=JMusicBot-$VERSION-Linux.jar
+ARG VERSION=0.3.1
+ARG JAR=JMusicBot-$VERSION.jar
 
 FROM debian:buster-slim as linux
 ARG VERSION
@@ -18,5 +18,4 @@ ENV JAR ${JAR}
 WORKDIR /app
 COPY --from=linux /binaries/${JAR} ${JAR}
 WORKDIR /app/config
-COPY config.txt config.txt
 CMD java -Dnogui=true -jar ../${JAR}
