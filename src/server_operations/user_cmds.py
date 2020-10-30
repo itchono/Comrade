@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from utils import *
 
-import random, typing
+import random, typing, datetime
 
 class Users(commands.Cog):
     def __init__(self, bot):
