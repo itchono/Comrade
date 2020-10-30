@@ -13,7 +13,7 @@ certifi==2020.6.20        # via matplotlib, requests
 chardet==3.0.4            # via aiohttp, requests
 click==7.1.2              # via flask, pydictionary
 cycler==0.10.0            # via matplotlib
-discord.py==1.4.1         # via -r requirements.in
+discord.py==1.5.1         # via -r requirements.in
 dnspython==2.0.0          # via -r requirements.in
 flask==1.1.2              # via -r requirements.in
 futures==3.1.1            # via goslate
