@@ -54,34 +54,40 @@ class Polymorph(commands.Cog):
         '''
         await ctx.trigger_typing()
 
-        if ctx.guild.id in self.localcache:
+        if not member: member = ctx.author
 
-            text = " ".join([m["content"] for m in self.localcache[ctx.guild.id] if m["author"] == member.id])
+        def transform(message): return message.content
 
-            MODEL_LEN = 5
+        def predicate(message): return message.author == member
 
-            model = defaultdict(Counter) # calls a counter object in the event that an index doesn't exist
+        msgs = await (ctx.channel.history(limit=500).filter(predicate).map(transform)).flatten()
 
-            for i in range(len(text)-MODEL_LEN): model[text[i:(i+MODEL_LEN)]][text[i+MODEL_LEN]] += 1
+        text = " ".join(msgs)
 
+        MODEL_LEN = 5
+
+        model = defaultdict(Counter) # calls a counter object in the event that an index doesn't exist
+
+        for i in range(len(text)-MODEL_LEN): model[text[i:(i+MODEL_LEN)]][text[i+MODEL_LEN]] += 1
+
+        try:
             selector = random.choice(list(model)) # select a starting character
-            out = selector
+        except:
+            await ctx.send("It doesn't look like you've posted anything in the last 500 messages in this channel - therefore I cannot generate text for you :(")
+            return
 
-            for i in range(400):
-                try:
-                    out += random.choices(list(model[selector]), model[selector].values())[0]
-                    selector = out[-MODEL_LEN:]
-                except: break
-                # else: 
-                #     if out[-1] == "\n": 
-                #         out = out[:-1]
-                #         break
-            await ctx.send(out)
+        out = selector
 
-
-        else: await reactX(ctx); await ctx.send("Model could not be built - no message cache has been loaded for this server. \nUse `{}extractChannel <channel>` to load a channel".format(BOT_PREFIX))
-
-        
+        for i in range(400):
+            try:
+                out += random.choices(list(model[selector]), model[selector].values())[0] # generate next character
+                selector = out[-MODEL_LEN:]
+            except: break
+            # else: 
+            #     if out[-1] == "\n": 
+            #         out = out[:-1]
+            #         break
+        await ctx.send(out)    
 
     @commands.command(aliases = ["gen"])
     @commands.guild_only()
