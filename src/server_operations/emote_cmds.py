@@ -7,6 +7,17 @@ from fuzzywuzzy import fuzz # NOTE: install python-Levenshtein for faster result
 
 from utils.checks.other_checks import match_url
 
+from google.cloud import storage
+from google.oauth2 import service_account
+
+from PIL import Image
+
+
+storage_client = storage.Client.from_service_account_json("rational-armor-294302-9eb184943c69.json")
+bucket = storage_client.get_bucket('comrade_emotes')
+print("Connection to Google Cloud Storage Successful.")
+
+
 class Emotes(commands.Cog):
     '''
     Use :emotename: to call an emote
@@ -15,8 +26,9 @@ class Emotes(commands.Cog):
     Emotes exist as 1) Inline Discord Emoji and 2) Big Images
     Keep wide images as big emotes, and use small square ones as inline emotes.
     
-    CES - Comrade Emote System
+    CES - Comrade Emote System v3.0
     Developed by itchono and Slyflare
+    With testing from the rest of the Comrade team
     '''
     def __init__(self, bot):
         self.bot = bot
@@ -32,16 +44,10 @@ class Emotes(commands.Cog):
         except:
             if not match_url(url): await ctx.send("Invalid URL Provided."); return
 
+        # make sure it doesn't already exist
         if not DBcollection(EMOTES_COL).find_one({"name":name, "server":ctx.guild.id}):
-            # make sure it doesn't already exist
-
-            binImage = requests.get(url).content # binaries
-
-            DBcollection(EMOTES_COL).insert_one(
-                {"name":name,
-                "server":ctx.guild.id,
-                "type":"big",
-                "file":binImage})
+    
+            self.upload(ctx, name, url, "big") # upload as big by default
             
             await ctx.send(f'Emote `{name}` was added. you can call it using `:{name}:`')
         
@@ -50,11 +56,47 @@ class Emotes(commands.Cog):
             await ctx.send(f'Emote `{name}` already exists! Contact a mod to get this fixed.')
 
 
+    def upload(self, ctx, name, url, emote_type):
+        '''
+        Uploads an emote into CES provided a name and a url.
+        '''
+        content = requests.get(url).content
+
+        ext = imghdr.what(None, h=content) # determine the file extension
+
+        imgfile = io.BytesIO(content)
+
+        blob = storage.Blob(f"{ctx.guild.id}{name}.{ext}", bucket)
+
+        if emote_type == "big" and ext in ["jpeg", "png", "jpg"]:
+            img = Image.open(imgfile)
+
+            aspect = img.size[0]/img.size[1]
+
+            if img.size[0] > 1000:
+                img.resize((1000, round(1000/aspect)), Image.ANTIALIAS)
+
+            elif img.size[1] > 1000:
+                img.resize((round(1000*aspect), 1000), Image.ANTIALIAS)
+
+            imgfile = io.BytesIO()
+            img.save(imgfile, optimize=True, format=ext, quality=65)
+            imgfile.seek(0)
+
+        # file-like representation of the attachment
+        blob.upload_from_file(imgfile) # Upload to Google Cloud
+
+        DBcollection(EMOTES_COL).insert_one(
+            {"name":name,
+            "server":ctx.guild.id,
+            "type":emote_type,
+            "ext":ext,
+            "URL":blob.media_link})
+
     async def inject(self, ctx:commands.Context, name):
         '''
         Attempts to inject image into the server's list of emoji, returning it afterward
         '''
-
         if document := DBcollection(EMOTES_COL).find_one({"name": name, "server":ctx.guild.id}):
             LIMIT = 50
 
@@ -65,19 +107,13 @@ class Emotes(commands.Cog):
 
                 if not DBcollection(EMOTES_COL).find_one({"name":unload.name, "server":ctx.guild.id}):
                     # If not loaded, we must first database it
-                    binImage = requests.get(unload.url).content # binaries
+                    
+                    self.upload(ctx, name, unload.url, "inline")
 
-                    DBcollection(EMOTES_COL).insert_one(
-                        {"name":unload.name,
-                        "server":ctx.guild.id,
-                        "type":"inline",
-                        "file":binImage})
                 await unload.delete(reason=f"Unloading emoji to make space for {name}")
 
-             ## binary data
-            data = document["file"]
             ## LOAD NEW EMOJI
-            return await ctx.guild.create_custom_emoji(name=document["name"], image=data, reason=f"Requested by user {ctx.author.display_name}")
+            return await ctx.guild.create_custom_emoji(name=document["name"], image=requests.get(document["URL"]).content, reason=f"Requested by user {ctx.author.display_name}")
             
         else: await ctx.send(f"Emote `{name}` was not found in the database.")
 
@@ -137,9 +173,9 @@ class Emotes(commands.Cog):
         '''
         paginator = commands.Paginator(prefix="", suffix="", max_size=200)
 
-        bigemotes = DBcollection(EMOTES_COL).find({"server":ctx.guild.id, "type":"inline"}, {"name":True})
+        inlineemotes = DBcollection(EMOTES_COL).find({"server":ctx.guild.id, "type":"inline"}, {"name":True})
 
-        for i in bigemotes:
+        for i in inlineemotes:
             paginator.add_line(f"- {i['name']}")
 
         pagenum = 1
@@ -183,6 +219,12 @@ class Emotes(commands.Cog):
         Removes a custom emote from the Comrade Emote System
         '''
         if e := DBcollection(EMOTES_COL).find_one({"name":name, "server":ctx.guild.id}):
+
+            try:
+                blob = storage.Blob(f"{ctx.guild.id}{name}.{e['ext']}", bucket)
+                blob.delete()
+            except: pass
+
             DBcollection(EMOTES_COL).delete_one({"name":name, "server":ctx.guild.id})
             await ctx.send(f"Emote `{name}` was removed.")
 
@@ -212,6 +254,8 @@ class Emotes(commands.Cog):
         '''
         if (document := DBcollection(EMOTES_COL).find_one({"name": name, "server":ctx.guild.id})) or \
             (document := DBcollection(EMOTES_COL).find_one({"name": re.compile('^' + name + '$', re.IGNORECASE), "server":ctx.guild.id})):
+            # in mongodb already; most routine change
+
             newtype = {"big":"inline", "inline":"big"}[document["type"]]
 
             if document["type"] == "inline":
@@ -219,15 +263,27 @@ class Emotes(commands.Cog):
                 try: await emote.delete(reason=f"Unloading emoji because it changed type.")
                 except: pass
             
-            elif (size := len(document["file"])) >= 262143:
+            elif (size := len(requests.get(document["URL"]).content)) >= 262143:
                 await ctx.send(f"Emote `{document['name']}` is too big to become inline! ({round(size/1024)} kb vs 256 kb limit)"); return
+            
+            else: await self.inject(ctx, document['name']) # inject the emote
 
             DBcollection(EMOTES_COL).update_one({"name":document['name'], "server":ctx.guild.id}, {"$set": {"type":newtype}})
 
             await ctx.send(f"Emote `{document['name']}` is now of type `{newtype}`")
 
-        else: await ctx.send(f"Emote `{name}` was not found.")
+        elif emote := discord.utils.get(ctx.guild.emojis, name=name):
+            # in server, and not on mongodb (fringe case)
+            self.upload(ctx, name, emote.url, "big")
+            try: await emote.delete(reason=f"Unloading emoji because it changed type.")
+            except: pass
 
+            await ctx.send(f"Emote `{name}` is now of type `big` (newly uploaded)")
+
+        else: 
+            # not in mongodb or in server
+            
+            await ctx.send(f"Emote `{name}` was not found.")
 
     async def inline(self, ctx: commands.Context, e:str):
         '''
@@ -276,11 +332,11 @@ class Emotes(commands.Cog):
 
             # 2B: Big emoji, send as-is
             elif document["type"] == "big":
-                byts = io.BytesIO(document["file"])
-                ext = imghdr.what(None, h=byts.read()) # deteremine the file extension
-                f = discord.File(fp=io.BytesIO(document["file"]), filename=f"image.{ext}")
+                eb = discord.Embed()
+                eb.set_image(url=document["URL"])
                 if len(e) > 32: e = e[:32]
-                await mimic(ctx.channel, file=f, avatar_url=ctx.author.avatar_url, username=e)
+                await mimic(ctx.channel, embed=eb, avatar_url=ctx.author.avatar_url, username=e)
+        
         else:
             bigemotes = DBcollection(EMOTES_COL).find({"server":ctx.guild.id, "type":"big"}, {"name":True})
 
@@ -294,19 +350,51 @@ class Emotes(commands.Cog):
 
     @commands.command()
     @commands.check_any(commands.is_owner(), isServerOwner())
-    async def ingestfromchannel(self, ctx:commands.Context, channel:discord.TextChannel):
+    async def migrate(self, ctx:commands.Context):
         '''
-        ingests emotes from channel
+        Migrates mongodb emotes to GCS
         '''
-        async for e in channel.history(limit=None):
-            try: 
-                name = e.content.lower().split("\n")[0]
+        await ctx.send("Migration in progress. Please wait.")
+        
+        for document in DBcollection(EMOTES_COL).find({"server":ctx.guild.id}):
+            
+            DBcollection(EMOTES_COL).delete_one({"_id":document["_id"]})
+            
+            cop = document.copy()
+            
+            content = cop["file"] # bytes data
 
-                url = e.content.split("\n")[1]
+            ext = imghdr.what(None, h=content) # determine the file extension
 
-                await self.addEmote(ctx, name, url=url)
+            blob = storage.Blob(f"{ctx.guild.id}{cop['name']}.{ext}", bucket)
+
+            # file-like representation of the attachment
+            blob.upload_from_file(io.BytesIO(content)) # Upload to Google Cloud
+
+            DBcollection(EMOTES_COL).insert_one(
+                {"name":cop["name"],
+                "server":ctx.guild.id,
+                "type":cop["type"],
+                "ext":ext,
+                "URL":blob.media_link})      
+
+        await ctx.send("Migration complete.")    
+    
+    # @commands.command()
+    # @commands.check_any(commands.is_owner(), isServerOwner())
+    # async def ingestfromchannel(self, ctx:commands.Context, channel:discord.TextChannel):
+    #     '''
+    #     ingests emotes from channel
+    #     '''
+    #     async for e in channel.history(limit=None):
+    #         try: 
+    #             name = e.content.lower().split("\n")[0]
+
+    #             url = e.content.split("\n")[1]
+
+    #             await self.addEmote(ctx, name, url=url)
                 
-            except: pass # dirty emote directory
+    #         except: pass # dirty emote directory
 
     @commands.command()
     async def ascii(self, ctx:commands.Context, name, *, text):
@@ -366,7 +454,8 @@ class Emotes(commands.Cog):
 
         if message.content and not message.author.bot and message.guild: 
 
-            if match := re.findall(r"(?<!\<):.[^<>:]*:", message.clean_content):
+            if match := re.findall(r"(?<!<a):.[^<>:]*:", message.clean_content):
+                print(message.clean_content)
                 s = message.content
                 send = False
                 for i in match:
