@@ -459,7 +459,9 @@ class Emotes(commands.Cog):
 
         if message.content and not message.author.bot and message.guild: 
 
-            if match := re.findall(r"(?<!\<):.[^<>:]*:", message.clean_content):
+            servercfg = DBfind_one(SERVERCFG_COL, {"_id":message.guild.id})
+
+            if match := re.findall(r"(?<!\<):.[^<>:]*:", message.clean_content) and not "bypass-emotes" in servercfg and not servercfg["bypass-emotes"]:
                 s = message.content
                 send = False
                 for i in match:
