@@ -2,19 +2,24 @@ import discord
 from discord.ext import commands
 from utils import *
 
-import re, requests, bson, io, imghdr, asyncio
+import re, requests, bson, io, imghdr, asyncio, os
 from fuzzywuzzy import fuzz # NOTE: install python-Levenshtein for faster results.
 
 from utils.checks.other_checks import match_url
 
 from google.cloud import storage
-from google.oauth2 import service_account
+from google.oauth2 import credentials, service_account
 
 from PIL import Image
 
+with open("temp.json", "w") as f: f.write(os.environ.get('GC'))
 
-storage_client = storage.Client.from_service_account_json("rational-armor-294302-9eb184943c69.json")
+storage_client = storage.Client.from_service_account_json("temp.json")
+
+os.remove("temp.json")
+
 bucket = storage_client.get_bucket('comrade_emotes')
+
 print("Connection to Google Cloud Storage Successful.")
 
 
@@ -355,7 +360,7 @@ class Emotes(commands.Cog):
         Migrates mongodb emotes to GCS
         '''
         await ctx.send("Migration in progress. Please wait.")
-        
+
         for document in DBcollection(EMOTES_COL).find({"server":ctx.guild.id}):
             
             DBcollection(EMOTES_COL).delete_one({"_id":document["_id"]})
