@@ -414,7 +414,7 @@ class Emotes(commands.Cog):
             servercfg = DBfind_one(SERVERCFG_COL, {"_id":message.guild.id})
 
 
-            if s := await pullemote(message.content):
+            if re.match(r"^:.*:$", message.content) and (s := await pullemote(message.content)):
                 await echo(await self.bot.get_context(message), member=message.author, content=s, file=await message.attachments[0].to_file() if message.attachments else None, embed=message.embeds[0] if message.embeds else None)
                 await message.delete()
 
