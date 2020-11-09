@@ -239,7 +239,7 @@ class Databases(commands.Cog):
         s = "Comrade Configuration:\n"
         c = DBfind_one(SERVERCFG_COL, {"_id":ctx.guild.id})
         for k in c:
-            if k != "_id": s += str(k) + ": " + str(c[k]) + "\n"
+            if k != "_id" and k != "message-triggers": s += str(k) + ": " + str(c[k]) + "\n"
 
         e = discord.Embed(title="Information for {}".format(
             ctx.guild.name), description=s, colour=discord.Colour.from_rgb(*DBcfgitem(ctx.guild.id,"theme-colour")))
