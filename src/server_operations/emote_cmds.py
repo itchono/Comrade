@@ -354,54 +354,6 @@ class Emotes(commands.Cog):
             await ctx.send(embed=embed)
 
     @commands.command()
-    @commands.check_any(commands.is_owner(), isServerOwner())
-    async def migrate(self, ctx:commands.Context):
-        '''
-        Migrates mongodb emotes to GCS
-        '''
-        await ctx.send("Migration in progress. Please wait.")
-
-        for document in DBcollection(EMOTES_COL).find({"server":ctx.guild.id}):
-            
-            DBcollection(EMOTES_COL).delete_one({"_id":document["_id"]})
-            
-            cop = document.copy()
-            
-            content = cop["file"] # bytes data
-
-            ext = imghdr.what(None, h=content) # determine the file extension
-
-            blob = storage.Blob(f"{ctx.guild.id}{cop['name']}.{ext}", bucket)
-
-            # file-like representation of the attachment
-            blob.upload_from_file(io.BytesIO(content)) # Upload to Google Cloud
-
-            DBcollection(EMOTES_COL).insert_one(
-                {"name":cop["name"],
-                "server":ctx.guild.id,
-                "type":cop["type"],
-                "ext":ext,
-                "URL":blob.media_link})      
-
-        await ctx.send("Migration complete.")    
-    
-    # @commands.command()
-    # @commands.check_any(commands.is_owner(), isServerOwner())
-    # async def ingestfromchannel(self, ctx:commands.Context, channel:discord.TextChannel):
-    #     '''
-    #     ingests emotes from channel
-    #     '''
-    #     async for e in channel.history(limit=None):
-    #         try: 
-    #             name = e.content.lower().split("\n")[0]
-
-    #             url = e.content.split("\n")[1]
-
-    #             await self.addEmote(ctx, name, url=url)
-                
-    #         except: pass # dirty emote directory
-
-    @commands.command()
     async def ascii(self, ctx:commands.Context, name, *, text):
         '''
         Sends a big form of the emote in word art form
@@ -461,7 +413,12 @@ class Emotes(commands.Cog):
 
             servercfg = DBfind_one(SERVERCFG_COL, {"_id":message.guild.id})
 
-            if match := re.findall(r"(?<!\<):.[^<>:]*:", message.clean_content) and not "bypass-emotes" in servercfg and not servercfg["bypass-emotes"]:
+
+            if s := await pullemote(message.content):
+                await echo(await self.bot.get_context(message), member=message.author, content=s, file=await message.attachments[0].to_file() if message.attachments else None, embed=message.embeds[0] if message.embeds else None)
+                await message.delete()
+
+            elif match := re.findall(r"(?<!\<):.[^<>:]*:", message.clean_content) and not "bypass-emotes" in servercfg and not servercfg["bypass-emotes"]:
                 s = message.content
                 send = False
                 for i in match:
@@ -479,8 +436,50 @@ class Emotes(commands.Cog):
                 await self.swaptype(await self.bot.get_context(message), message.content.strip('/').strip(" ")) # Swap type of emote
 
             
-                    
+    # @commands.command()
+    # @commands.check_any(commands.is_owner(), isServerOwner())
+    # async def migrate(self, ctx:commands.Context):
+    #     '''
+    #     Migrates mongodb emotes to GCS
+    #     '''
+    #     await ctx.send("Migration in progress. Please wait.")
 
-
+    #     for document in DBcollection(EMOTES_COL).find({"server":ctx.guild.id}):
             
+    #         DBcollection(EMOTES_COL).delete_one({"_id":document["_id"]})
+            
+    #         cop = document.copy()
+            
+    #         content = cop["file"] # bytes data
+
+    #         ext = imghdr.what(None, h=content) # determine the file extension
+
+    #         blob = storage.Blob(f"{ctx.guild.id}{cop['name']}.{ext}", bucket)
+
+    #         # file-like representation of the attachment
+    #         blob.upload_from_file(io.BytesIO(content)) # Upload to Google Cloud
+
+    #         DBcollection(EMOTES_COL).insert_one(
+    #             {"name":cop["name"],
+    #             "server":ctx.guild.id,
+    #             "type":cop["type"],
+    #             "ext":ext,
+    #             "URL":blob.media_link})      
+
+    #     await ctx.send("Migration complete.")    
     
+    # @commands.command()
+    # @commands.check_any(commands.is_owner(), isServerOwner())
+    # async def ingestfromchannel(self, ctx:commands.Context, channel:discord.TextChannel):
+    #     '''
+    #     ingests emotes from channel
+    #     '''
+    #     async for e in channel.history(limit=None):
+    #         try: 
+    #             name = e.content.lower().split("\n")[0]
+
+    #             url = e.content.split("\n")[1]
+
+    #             await self.addEmote(ctx, name, url=url)
+                
+    #         except: pass # dirty emote directory
