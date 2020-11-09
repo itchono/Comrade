@@ -15,3 +15,4 @@ numpy
 flask
 pillow
 scipy
+google-cloud-storage

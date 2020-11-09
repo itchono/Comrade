@@ -40,10 +40,10 @@ class MessageHandler(commands.Cog):
                             "approved":"https://cdn.discordapp.com/attachments/446457522862161920/745083256210456657/meme_approved.mp4"}
         '''
         
-        try: await delSend(ctx, EXACT_TRIGGERS[ctx.message.content.lower()])
+        try: await ctx.send(EXACT_TRIGGERS[ctx.message.content.lower()])
         except:
             for t in PARTIAL_TRIGGERS:
-                if t in ctx.message.content.lower(): await delSend(ctx, PARTIAL_TRIGGERS[t])
+                if t in ctx.message.content.lower(): await ctx.send(PARTIAL_TRIGGERS[t])
 
     async def meme_review(self, message):
         '''
@@ -51,14 +51,8 @@ class MessageHandler(commands.Cog):
         '''
         Knuckles_VD = os.listdir("vid")
         
-        attach = None
-        if message.attachments: attach = message.attachments[0].size # this way, same video gets same hash
-        elif message.embeds: attach = message.embeds[0].url
-        elif match_url(message.content.lower()): attach = message.content.lower()
-
-        if attach:
-            with open(f"vid/{Knuckles_VD[hash(attach) % len(Knuckles_VD)]}", "rb") as f:
-                await message.channel.send(file=discord.File(f,"meme review.mp4"))
+        with open(f"vid/{random.choice(Knuckles_VD)}", "rb") as f:
+            await message.channel.send(file=discord.File(f,"meme review.mp4"))
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
@@ -81,7 +75,7 @@ class MessageHandler(commands.Cog):
                     echo(await self.bot.get_context(message), random.choice(list(message.guild.members)).mention, str(message.author.id), deleteMsg=False)
                     '''
                 
-                if message.guild and message.channel.id == DBcfgitem(message.guild.id,"meme-channel"):
+                if message.guild and message.channel.id == DBcfgitem(message.guild.id,"meme-channel") and "review" in message.content.lower:
                     await self.meme_review(message)
                             
             if not isNotThreat(1)(await self.bot.get_context(message)) and (len(

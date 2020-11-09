@@ -95,19 +95,16 @@ async def on_disconnect():
         print("WARN: Bot has disconnected from Discord.")
         try:
             start_time = time.perf_counter()
-            # online = False
-            # await client.wait_for("connect", timeout=300.0)
-            # await client.wait_for("ready")
-            # print(f"Bot reconnected after {time.perf_counter() - start_time} of downtime.")
-            # await DM(f"Bot reconnected after {time.perf_counter() - start_time} of downtime.", (await client.application_info()).owner)
-            # online = True
-            # TODO re-enable once docker host comes back online
+            online = False
+            await client.wait_for("connect", timeout=300.0)
+            await client.wait_for("ready")
+            print(f"Bot reconnected after {time.perf_counter() - start_time} of downtime.")
+            await DM(f"Bot reconnected after {time.perf_counter() - start_time} of downtime.", (await client.application_info()).owner)
+            online = True
         except asyncio.TimeoutError:
             sys.exit(0)
 
 # Users with threat-level >2 cannot use Comrade's features.
-
-
 @client.check_once
 async def globalcheck(ctx): return isNotThreat(2)(ctx)
 
