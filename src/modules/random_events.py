@@ -4,7 +4,7 @@ from utils import *
 
 from utils.checks.other_checks import *
 
-import random
+import random, asyncio
 
 class RandomEvents(commands.Cog):
     '''
@@ -66,25 +66,25 @@ class RandomEvents(commands.Cog):
         await ctx.author.edit(roles=roles)
         await ctx.send(f"{ctx.author.mention} got rick roled.")
 
+    @commands.command()
     async def nameswap(self, ctx:commands.Context):
         '''
         Changes the nickname of the above person
         '''
-        e = discord.Embed()
-        e.set_image(url="https://i.kym-cdn.com/entries/icons/original/000/026/104/marioTestRender2.jpg")
-
-        await ctx.send(f"__**~RANDOM EVENT~**__\nThe person above (Current name: {ctx.author.display_name}) will have their name changed to the first thing that the next person below says.", embed=e)
+        await ctx.send(f"__**~NAMESWAP~**__\nThe person above (Current name: {ctx.author.display_name}) will have their name changed to the first thing that the next person below says.", embed=e)
 
         def check(m): return not m.author.bot and m.content and m.author != ctx.author and m.channel == ctx.channel
 
-        msg = await client.wait_for('message', check=check)
+        msg = await client.wait_for('message', check=check, timeout=120)
 
         try:    
             await ctx.author.edit(nick=msg.content[:32], reason="Comrade name change") # Note: must be less than 32 char
             await ctx.send(f"{ctx.author.mention}, your name has been changed to `{msg.content}`!")
         except Exception as e:
             await ctx.send(f"{ctx.author.mention}, you must change your name to `{msg.content}`!")
-            await ctx.send(e)
+        except asyncio.TimeoutError:
+            await ctx.send("Nameswap aborted (120s timeout).")
+
 
     @commands.command()
     async def previousrolls(self, ctx:commands.Context):
