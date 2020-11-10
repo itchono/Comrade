@@ -5,6 +5,9 @@
 ![Publish Docker image](https://github.com/itchono/Comrade/workflows/Publish%20Docker%20image/badge.svg?branch=master)
 
 Comrade is a Discord bot for my personal server, but available to use for anyone who would like a multipurpose bot!
+Comrade is written mainly in Python using `discord.py`, and partially in Go using `discordgo`
+
+Version 4.4 [November 9]
 
 Check out the wiki page for more details!
 https://github.com/itchono/Comrade/wiki
