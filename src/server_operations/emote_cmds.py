@@ -52,7 +52,7 @@ class Emotes(commands.Cog):
         # make sure it doesn't already exist
         if not DBcollection(EMOTES_COL).find_one({"name":name, "server":ctx.guild.id}):
     
-            self.upload(ctx, name, url, "big") # upload as big by default
+            await self.upload(ctx, name, url, "big") # upload as big by default
             
             await ctx.send(f'Emote `{name}` was added. you can call it using `:{name}:`')
         
@@ -61,7 +61,7 @@ class Emotes(commands.Cog):
             await ctx.send(f'Emote `{name}` already exists! Contact a mod to get this fixed.')
 
 
-    def upload(self, ctx, name, url, emote_type):
+    async def upload(self, ctx, name, url, emote_type):
         '''
         Uploads an emote into CES provided a name and a url.
         '''
@@ -113,7 +113,7 @@ class Emotes(commands.Cog):
                 if not DBcollection(EMOTES_COL).find_one({"name":unload.name, "server":ctx.guild.id}):
                     # If not loaded, we must first database it
                     
-                    self.upload(ctx, name, unload.url, "inline")
+                    await self.upload(ctx, unload.name, unload.url, "inline") # upload the about-to-be-destroyed emoji
 
                 await unload.delete(reason=f"Unloading emoji to make space for {name}")
 
@@ -279,7 +279,7 @@ class Emotes(commands.Cog):
 
         elif emote := discord.utils.get(ctx.guild.emojis, name=name):
             # in server, and not on mongodb (fringe case)
-            self.upload(ctx, name, emote.url, "big")
+            await self.upload(ctx, name, emote.url, "big")
             try: await emote.delete(reason=f"Unloading emoji because it changed type.")
             except: pass
 
