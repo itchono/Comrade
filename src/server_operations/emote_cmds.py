@@ -418,19 +418,18 @@ class Emotes(commands.Cog):
                 await echo(await self.bot.get_context(message), member=message.author, content=s, file=await message.attachments[0].to_file() if message.attachments else None, embed=message.embeds[0] if message.embeds else None)
                 await message.delete()
 
-            elif match := re.findall(r"(?<!\<):.[^<>:]*:", message.clean_content) and "bypass-emotes" in servercfg and not servercfg["bypass-emotes"]:
+            elif match := re.findall(r"(?<!\<):.[^<>:]*:", message.clean_content) and not servercfg["bypass-emotes"]:
                 s = message.content
                 send = False
                 for i in match:
                     if emote := await pullemote(i): send = True; s = s.replace(i, str(emote))
                     else: await self.emote(await self.bot.get_context(message), i.strip(":").strip(" "))
                 
-                # if send:
-                #     await echo(await self.bot.get_context(message), member=message.author, content=s, 
-                #     file=await message.attachments[0].to_file() if message.attachments else None, embed=message.embeds[0] if message.embeds else None)
+                if send:
+                    await echo(await self.bot.get_context(message), member=message.author, content=s, 
+                    file=await message.attachments[0].to_file() if message.attachments else None, embed=message.embeds[0] if message.embeds else None)
 
-                #     await message.delete()
-                # TODO fix
+                    await message.delete()
 
             elif message.content[0] == '/' and message.content[-1] == '/' and len(message.content) > 1:
                 await self.swaptype(await self.bot.get_context(message), message.content.strip('/').strip(" ")) # Swap type of emote
