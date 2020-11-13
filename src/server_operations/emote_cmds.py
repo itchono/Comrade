@@ -424,7 +424,7 @@ class Emotes(commands.Cog):
                 send = False
                 for i in match:
                     if emote := await pullemote(i): send = True; s = s.replace(i, str(emote))
-                    else: await self.emote(await self.bot.get_context(message), i.strip(":").strip(" "))
+                    # else: await self.emote(await self.bot.get_context(message), i.strip(":").strip(" "))
                 
                 if send and len(match) >= 2:
                     await echo(await self.bot.get_context(message), member=message.author, content=s, 
