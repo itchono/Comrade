@@ -52,6 +52,8 @@ class Emotes(commands.Cog):
 
         # make sure it doesn't already exist
         if not DBcollection(EMOTES_COL).find_one({"name":name, "server":ctx.guild.id}):
+
+            await ctx.trigger_typing()
     
             await self.upload(ctx, name, url, "big") # upload as big by default
             
