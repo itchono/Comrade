@@ -4,15 +4,11 @@ python-dotenv
 requests
 unidecode
 html2text
-dnspython
 PyDictionary
 pymongo
-pybooru
 bs4
 pytz
 matplotlib
 numpy
-flask
-pillow
 scipy
 google-cloud-storage
