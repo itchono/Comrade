@@ -12,5 +12,6 @@ bs4
 pytz
 matplotlib
 numpy
+pillow
 scipy
 google-cloud-storage
