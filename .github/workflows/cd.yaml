@@ -22,7 +22,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Set value for tag
-        run: echo "::set-env name=TAG::sha-${GITHUB_SHA:0:7}"
+        run: echo "TAG=sha-${GITHUB_SHA:0:7}" >> $GITHUB_ENV
       - name: Build and tag image
         run: |
             docker build \
