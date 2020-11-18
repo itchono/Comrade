@@ -37,7 +37,7 @@ markupsafe==1.1.1         # via jinja2
 matplotlib==3.3.3         # via -r requirements.in
 multidict==4.7.6          # via aiohttp, yarl
 numpy==1.19.4             # via -r requirements.in, matplotlib, scipy
-pillow==8.0.1             # via matplotlib
+pillow==8.0.1             # via -r requirements.in, matplotlib
 protobuf==3.14.0          # via google-api-core, googleapis-common-protos
 pyasn1-modules==0.2.8     # via google-auth
 pyasn1==0.4.8             # via pyasn1-modules, rsa
