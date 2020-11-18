@@ -1,4 +1,5 @@
 discord.py
+dnspython
 fuzzywuzzy
 flask
 python-dotenv
