@@ -4,6 +4,7 @@ from utils import *
 
 import ast, os, sys, dotenv
 from pymongo import MongoClient
+## **VERY IMPORTANT: dnspython NEEDS TO BE INSTALLED.
 
 class Databases(commands.Cog):
     def __init__(self, bot):
