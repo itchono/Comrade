@@ -1,5 +1,6 @@
 discord.py
 fuzzywuzzy
+flask
 python-dotenv
 requests
 unidecode
