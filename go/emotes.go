@@ -20,9 +20,11 @@ func Emote(s *discordgo.Session, m *discordgo.MessageCreate, emotecollection *mo
 	var emotedata bson.M
 
 	numericguild, _ := strconv.ParseInt(m.GuildID, 10, 64)
+	msgContent := m.Content
+	msgLength := len(msgContent)
 
-	if len(m.Content) > 0 && m.Content[0] == ':' && m.Content[len(m.Content)-1] == ':' {
-		query := strings.Trim(m.Content, ": ") // trim learing and trailing : and spaces
+	if msgLength > 0 && msgContent[0] == ':' && msgContent[msgLength-1] == ':' {
+		query := strings.Trim(msgContent, ": ") // trim learing and trailing : and spaces
 
 		err := emotecollection.FindOne(ctx, bson.M{"server": numericguild, "name": query, "type": "big"}).Decode(&emotedata)
 
