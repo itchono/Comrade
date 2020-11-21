@@ -33,14 +33,18 @@ class Polls(commands.Cog):
             for i in range(len(options)): await msg.add_reaction(textToEmoji(reacts[i]))
             await msg.add_reaction("🛑")
 
+
+            def check(reaction, user):
+                return reaction.message.id == msg.id and not user.bot
+
             while cont:
                 ## Await Responses
                 try:
-                    reaction, user = await self.bot.wait_for('reaction_add', timeout=60 * timeout)
+                    reaction, user = await self.bot.wait_for('reaction_add', timeout=60 * timeout, check=check)
 
                     if reaction.emoji == "🛑" and user == ctx.author: raise asyncio.TimeoutError
 
-                    e = discord.Embed(title=f"**__RESULTS__**")
+                    e = discord.Embed()
 
                     for i in range(len(options)):
 
@@ -51,6 +55,8 @@ class Polls(commands.Cog):
                         people = " ".join(users)
 
                         e.add_field(name=f"{i+1}) {options[i]}: {len(users)}", value = people if people else "No one", inline=False)
+
+                    e.set_footer(text=f"Updated {localTime().strftime('%I:%M:%S %p %Z')}")
 
                     await msg.edit(embed=e)
 
@@ -69,6 +75,9 @@ class Polls(commands.Cog):
 
                         e.add_field(name=f"{i+1}) {options[i]}: {len(users)}", value = people if people else "No one", inline=False)
 
-                    await msg.edit(content = "", embed=e)
+                    e.set_footer(text=f"Updated {localTime().strftime('%I:%M:%S %p %Z')}")
 
+                    await msg.edit(content = "", embed=e)
+                    await ctx.send(embed=e)
+                    
         else: await ctx.send("Sorry, you can only choose up to 35 options at a time.")   
