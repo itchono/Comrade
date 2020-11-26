@@ -70,14 +70,13 @@ func main() {
 	})
 
 	fmt.Printf("Starting server at port 8080\n")
+	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal(err)
 	}
 
 	doEvery(5*time.Second, helloworld)
-
 	// Wait here until CTRL-C or other term signal is received.
-	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc

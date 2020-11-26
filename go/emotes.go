@@ -29,6 +29,14 @@ func Emote(s *discordgo.Session, m *discordgo.MessageCreate, emotecollection *mo
 		err := emotecollection.FindOne(ctx, bson.M{"server": numericguild, "name": query, "type": "big"}).Decode(&emotedata)
 
 		if err != nil {
+
+			// try again with case insensitivity
+			err = emotecollection.FindOne(ctx, bson.M{"server": numericguild, "name": bson.M{"$regex": "^" + query + "$", "$options": "i"}, "type": "big"}).Decode(&emotedata)
+
+			if err != nil {
+				return
+			}
+
 			return
 		}
 
