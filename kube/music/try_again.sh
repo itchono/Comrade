@@ -1,4 +1,4 @@
-docker image build -t music-bot ./
-docker save music-bot
+docker image build -t seendsouza/music-bot .
+docker push seendsouza/music-bot
 kubectl apply -f deploy.yaml
 kubectl get pod --namespace=music-bot
