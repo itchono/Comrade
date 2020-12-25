@@ -7,6 +7,7 @@ from numpy import log, log10, log1p, log2, logaddexp, logaddexp2, exp, exp2, sqr
 import matplotlib.pyplot as plt
 import parser
 import io
+import re
 
 
 class Graphing(commands.Cog):
