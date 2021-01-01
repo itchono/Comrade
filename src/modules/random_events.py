@@ -16,16 +16,17 @@ class RandomEvents(commands.Cog):
         self.probabilities = {"nameswap":0.001, "rickroll":0.002}
 
     @commands.command()
-    @commands.check_any(commands.is_owner(), isServerOwner())
+    @commands.check(isOP)
+    @commands.guild_only()
     async def triggerevent(self, ctx:commands.Context, event_name):
         '''
         Manually triggers an event for testing
         '''
-
         await getattr(self, event_name)(ctx)
 
     @commands.command()
-    @commands.check_any(commands.is_owner(), isUser("littlebear"))
+    @commands.check(isOP)
+    @commands.guild_only()
     async def probability(self, ctx:commands.Context, event_name:str, probability:float=None):
         '''
         Changes the probability of an event, or displays it if there is no second argument.
@@ -71,7 +72,7 @@ class RandomEvents(commands.Cog):
         '''
         Changes the nickname of the above person
         '''
-        await ctx.send(f"__**~NAMESWAP~**__\nThe person above (Current name: {ctx.author.display_name}) will have their name changed to the first thing that the next person below says.", embed=e)
+        await ctx.send(f"__**~NAMESWAP~**__\nThe person above (Current name: {ctx.author.display_name}) will have their name changed to the first thing that the next person below says.")
 
         def check(m): return not m.author.bot and m.content and m.author != ctx.author and m.channel == ctx.channel
 
