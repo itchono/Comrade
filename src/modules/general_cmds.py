@@ -141,19 +141,11 @@ class General(commands.Cog):
         await ctx.send(f"DM sent to {user.display_name if ctx.guild else user.name}", delete_after=10)
 
     @commands.command()
-    async def msgInfo(self, ctx: commands.Context, msgid):
-        '''
-        Gets information about a specific message given an ID.
-        '''
-        msg = await ctx.channel.fetch_message(msgid)
-        await ctx.send("Author: {}".format(msg.author))
-
-    @commands.command()
     async def dateof(self, ctx: commands.Context,*, thing: typing.Union[discord.TextChannel, discord.User, discord.VoiceChannel, discord.Message]):
         '''
         Gets the creation time of a Channel, User, or Message.
         '''
-        await ctx.send(f"{thing} was created on {UTCtoLocalTime(thing.created_at).strftime('%B %m %Y at %I:%M:%S %p %Z')}")
+        await ctx.send(f"Created on {UTCtoLocalTime(thing.created_at).strftime('%B %m %Y at %I:%M:%S %p %Z')}")
 
     @commands.command()
     async def staleness(self, ctx: commands.Context, channel: discord.TextChannel):
