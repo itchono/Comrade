@@ -12,7 +12,7 @@ class Databases(commands.Cog):
         try:
             self.client = MongoClient(os.environ.get('MONGOKEY')) # Load atlas with pre-loaded password
         except:
-            print("MongoDB could not be connected. Terminating program...\nCheck internet connection and/or MongoDB Key")
+            print("MongoDB could not be connected. Terminating program...\nCheck internet connection and/or MongoDB Key -- MAKE SURE dnspython IS INSTALLED")
             sys.exit(0) 
 
         # This will terminate the bot automatically 
