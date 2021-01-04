@@ -1,8 +1,5 @@
-
 .env
-*.pyc
 *.pyc
 *.swp
 *.json
 *.dat
-extras/names

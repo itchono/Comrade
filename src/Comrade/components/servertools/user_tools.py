@@ -1,0 +1,173 @@
+import discord
+from discord.ext import commands
+
+import typing
+import datetime
+
+from db import collection
+from utils.utilities import ufil
+from utils.users import (weighted_member_id_from_server, rebuild_weight_table,
+                         weight_table)
+from utils.checks import isOP
+
+
+class Users(commands.Cog):
+    '''
+    A set of commands for inspecting and working with
+    Discord users
+    '''
+
+    def __init__(self, bot):
+        self.bot: commands.Bot = bot
+
+    @commands.command()
+    async def userinfo(self, ctx: commands.Context, *,
+                       member: typing.Union[discord.Member,
+                                            discord.User] = None):
+        '''
+        Displays User Information of said person
+        Developed by Slyflare
+        '''
+        if not member:
+            member = ctx.author
+
+        e = discord.Embed(colour=member.colour)
+        e.set_author(name=f"{member.display_name} ({member})",
+                     icon_url=ctx.author.avatar_url)
+        e.set_thumbnail(url=member.avatar_url)
+        e.set_footer(text=f"ID: {member.id}")
+
+        e.add_field(name="Account Created",
+                    value=member.created_at.strftime(
+                        '%B %m %Y at %I:%M:%S %p %Z'))
+
+        if ctx.guild:
+            user_information = collection(
+                "users").find_one(ufil(member, ctx.guild))
+
+            e.add_field(name="Joined Server",
+                        value=member.joined_at.strftime(
+                            '%B %m %Y at %I:%M:%S %p %Z'))
+
+            if w := user_information["daily-weight"]:
+                e.add_field(name="Daily Weight", value=w)
+
+            # Show stack of roles
+            e.add_field(name=f"Roles ({len(member.roles)})",
+                        value="\n".join([
+                            role.mention for role in member.roles]),
+                        inline=False)
+
+            e.add_field(name="On Mobile",
+                        value=member.is_on_mobile())
+
+        e.add_field(name="Is Human",
+                    value=not member.bot)
+
+        e.add_field(name="Status",
+                    value=member.status)
+
+        await ctx.send(embed=e)
+
+    @commands.command()
+    @commands.guild_only()
+    async def rolluser(self, ctx: commands.Context):
+        '''
+        Rolls a random user in the server, either weighted or unweighted
+        '''
+        mem = ctx.guild.get_member(
+            await weighted_member_id_from_server(ctx.guild))
+        await self.userinfo(ctx, member=mem)
+
+    @commands.command()
+    @commands.guild_only()
+    async def track(self, ctx: commands.Context, *, member: discord.Member):
+        '''
+        Makes it so that when a user changes status, you are notified.
+        This command is a toggle.
+        '''
+        notifiees = collection(
+            "users").find_one(ufil(member, ctx.guild))["notify-status"]
+
+        if member.id in notifiees:
+            collection("users").update_one(
+                ufil(member, ctx.guild),
+                {"$pull": {"notify-status": member.id}})
+            await ctx.send(
+                f"You will no longer be notified by when {member.display_name} changes their status.")
+        else:
+            collection("users").update_one(
+                ufil(member, ctx.guild),
+                {"$push": {"notify-status": member.id}})
+            await ctx.send(
+                f"You will now be notified by when {member.display_name} changes their status.")
+
+    @commands.command()
+    @commands.guild_only()
+    async def requiem(self, ctx: commands.Context,
+                      day: int =30, trim = False):
+        '''
+        Generates a list of users who have not talked in the past x days
+        '''
+        threshold = datetime.datetime.now() - datetime.timedelta(day)
+
+        active_author_ids = set()
+
+        for channel in ctx.guild.text_channels:
+
+            active_ids_in_channel = await channel.history(
+                limit=None, after=threshold).filter(
+                    lambda msg: msg.type == discord.MessageType.default
+                ).map(lambda msg: msg.author.id).flatten()
+
+            active_author_ids += set(active_ids_in_channel)
+
+        inactive_author_ids = set(
+            [member.id for member in ctx.guild.members]) - active_author_ids
+
+        await ctx.send(
+            f"{len(inactive_author_ids)} members detected to have not posted in the past {day} days.")
+
+        OP = isOP()(ctx)  # check before trimming
+
+        s = "```"
+        for member in [
+                await ctx.guild.get_member(
+                    idd) for idd in inactive_author_ids]:
+            s += member.display_name + "\n"
+
+            if trim and OP:
+                collection("users").update_one(
+                    ufil(member, ctx.guild), {"$set": {"daily-weight": 0}})
+        s += "```"
+        await ctx.send(s)
+
+        if trim:
+            await rebuild_weight_table(ctx.guild)
+            await ctx.send("Users above have been removed from the daily member pool.")
+
+    @commands.command()
+    @commands.guild_only()
+    async def modchance(self, ctx,
+                        member: typing.Optional[discord.Member] = None):
+        '''
+        Shows the chance of a user to be member of the day [MoD]
+        '''
+        if not member:
+            member = ctx.author
+
+        _, weights = weight_table(ctx.guild.id)
+
+        sum_of_weights = sum(weights)
+
+        count = collection(
+            "users").find_one(ufil(member, ctx.guild))["daily-weight"]
+
+        await ctx.send(
+            f"{member.display_name}'s chance of being rolled tomorrow is {count}/{sum_of_weights} ({round(count/sum_of_weights * 100, 2)}%)")
+
+
+    @commands.Cog.listener()
+    async def on_member_join():
+        # Must invalidate the lru cache since a new member came in
+        await rebuild_weight_table()
