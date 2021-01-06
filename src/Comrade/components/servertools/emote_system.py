@@ -134,6 +134,8 @@ class Emotes(commands.Cog):
     async def emote(self, ctx: commands.Context, e: str):
         '''
         Sends an emote into a context, injecting first if necessary
+
+        Subcommands: add, remove, rename
         '''
         if ctx.invoked_subcommand is None:
 
@@ -427,7 +429,7 @@ class Emotes(commands.Cog):
         '''
         async def pullemote(em):
             return await inline(await self.bot.get_context(message),
-                                     em.strip(':').strip(" "))
+                                em.strip(':').strip(" "))
 
         if message.content and not message.author.bot and message.guild:
             if re.match(r"^:.*:$", message.content) and \

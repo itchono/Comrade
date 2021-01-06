@@ -399,7 +399,7 @@ class Fun(commands.Cog):
             await ctx.send("Text must be alphabetical only.")
 
     @commands.command()
-    async def secret(self, ctx:commands.Context):
+    async def secret(self, ctx: commands.Context):
         '''
         Sends all your deepest, darkest secrets into a black hole
         '''
@@ -421,12 +421,15 @@ class Fun(commands.Cog):
         if '{}' in feelings:
             friend = ctx.message.author.display_name
 
-            shoujo_role_exists = 'Shoujotard' in [r.name for r in ctx.guild.roles]
-            author_has_shoujo_role = shoujo_role_exists and 'Shoujotard' in [r.name for r in ctx.author.roles]
+            shoujo_role_exists = 'Shoujotard' in [
+                r.name for r in ctx.guild.roles]
+            author_has_shoujo_role = shoujo_role_exists and 'Shoujotard' in [
+                r.name for r in ctx.author.roles]
 
-            ## in the case that the Shoujotard role doesn't exist, call everyone chan
-            ## Else, only call those who have the Shoujotard role chan
-            if (author_has_shoujo_role or not shoujo_role_exists): friend += '-chan'
+            # in the case that the Shoujotard role doesn't exist, call everyone chan
+            # Else, only call those who have the Shoujotard role chan
+            if (author_has_shoujo_role or not shoujo_role_exists):
+                friend += '-chan'
             feelings = feelings.replace('{}', friend)
 
         if message:
@@ -436,7 +439,7 @@ class Fun(commands.Cog):
 
             try:
                 await ctx.message.delete()
-            except:
+            except BaseException:
                 pass
             await shoujosend(ctx, sparklyMessage)
 
@@ -455,4 +458,4 @@ class Fun(commands.Cog):
             f.seek(0)
 
             await shoujosend(ctx, content=feelings,
-                             file = discord.File(f, 'sparklified.png'))
+                             file=discord.File(f, 'sparklified.png'))

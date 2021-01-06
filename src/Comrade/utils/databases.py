@@ -47,7 +47,7 @@ def new_server(guild: discord.Guild):
                 "log": log.id if log else 0,
                 "custom": 0,
 
-            },
+        },
 
         "durations":
             {
@@ -55,9 +55,9 @@ def new_server(guild: discord.Guild):
                 # time to vote for ZA HANDO, in seconds
                 "vault": 180
                 # time to vote for Vault post, in seconds
-            }
-
         }
+
+    }
 
 
 def new_user(user: discord.Member):
@@ -86,7 +86,7 @@ def new_user(user: discord.Member):
         "guessing-game":
             {
                 "highest-streak": 0
-            },
+        },
 
         "moderation":
             {
@@ -96,8 +96,8 @@ def new_user(user: discord.Member):
                 "kick-votes": [],
                 "mute-votes": [],
                 "threat-level": 0
-            },
-        }
+        },
+    }
 
 
 def rebuild_server_cfgs(guilds: list):
@@ -116,5 +116,5 @@ def rebuild_user_profiles(guild: discord.Guild):
     '''
     for member in guild.members:
         if not collection("users").find_one(
-                ufil(member, guild)):
+                ufil(member)):
             collection("users").insert_one(new_user(member))

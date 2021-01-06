@@ -6,7 +6,6 @@ import typing
 from utils.utilities import (get_uptime, get_host, dm_channel,
                              local_time, utc_to_local_time, bot_prefix)
 from config import cfg
-from utils.checks import isServerOwner
 
 
 class General(commands.Cog):
@@ -28,14 +27,6 @@ class General(commands.Cog):
                        f"server(s)\n**Host**: {get_host()}\n"
                        f"**API Latency**: {round(self.bot.latency, 4)}s\n"
                        f"Running discord.py version {discord.__version__}")
-
-    @commands.command()
-    @commands.check_any(commands.is_owner(), isServerOwner())
-    async def shutdown(self, ctx: commands.Context):
-        '''
-        Logs out the user.
-        '''
-        await self.bot.close()
 
     @commands.command()
     async def dm(self, ctx: commands.Context, user:

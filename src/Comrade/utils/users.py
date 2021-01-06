@@ -79,7 +79,7 @@ async def rebuild_weight_table(guild: discord.Guild):
                 active_ids_in_channel = await channel.history(
                     limit=None, after=threshold).filter(
                         lambda msg: msg.type == discord.MessageType.default
-                    ).map(lambda msg: msg.author.id).flatten()
+                ).map(lambda msg: msg.author.id).flatten()
 
                 active_author_ids += set(active_ids_in_channel)
         else:
@@ -87,13 +87,13 @@ async def rebuild_weight_table(guild: discord.Guild):
 
         for member in guild.members:
             if not member.bot or not bool(
-                    cfg["Settings"]["exclude-bots-from-daily"])\
-                        or member.id not in active_author_ids:
+                cfg["Settings"]["exclude-bots-from-daily"])\
+                    or member.id not in active_author_ids:
                 daily = server_cfg["default-daily-count"]
             else:
                 daily = 0
 
             collection("users").update_one(
-                ufil(member, guild), {"$set": {"daily-weight": daily}})
+                ufil(member), {"$set": {"daily-weight": daily}})
 
     weight_table.cache_clear()  # invalidate cache

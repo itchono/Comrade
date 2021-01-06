@@ -14,6 +14,7 @@ class Echo(commands.Cog):
     '''
     Send messages as another person, pretend to be someone else
     '''
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -37,7 +38,8 @@ class Echo(commands.Cog):
                    content=text,
                    file=ctx.message.attachments[0] if ctx.message.attachments else None,
                    embed=ctx.message.embeds[0] if ctx.message.embeds else None)
-        # await log(ctx.guild, f"Echo for {target.mention} sent by {ctx.author.mention}")
+        # await log(ctx.guild, f"Echo for {target.mention} sent by
+        # {ctx.author.mention}")
         await ctx.message.delete()
 
     @commands.command()
@@ -91,7 +93,7 @@ class Echo(commands.Cog):
 
         if count > int(cfg["Performance"]["everyonesays-limit"]):
             await ctx.send(ctx,
-                f"That's too many members! Limit is {cfg['Performance']['everyonesays-limit']}")
+                           f"That's too many members! Limit is {cfg['Performance']['everyonesays-limit']}")
         else:
             for m in random.sample(humans, count):
                 await echo(ctx, content=text, member=m)

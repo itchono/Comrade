@@ -8,7 +8,7 @@ async def DM(s: str, user: discord.User, embed=None):
     '''
     DMs a person
     '''
-    userChannel = dm_channel(user)
+    userChannel = await dm_channel(user)
     await userChannel.send(content=s, embed=embed)
 
 

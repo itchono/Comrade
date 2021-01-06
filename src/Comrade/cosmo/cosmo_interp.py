@@ -2,17 +2,20 @@ import asyncio
 
 # MODIFIED SYSTEM to interpret Cosmo code, in a way that works with Comrade.
 
-INTERP_TIMEOUT = 0.5 # number of seconds allowed for parser to operate before terminating
+INTERP_TIMEOUT = 0.5  # number of seconds allowed for parser to operate before terminating
 
 CMD_STACK = []
+
 
 def fill_env(env):
     for var in env:
         env[var] = input()
 
-async def interp(AST, env, extCall = False):
 
-    if extCall: CMD_STACK.clear() # putput system
+async def interp(AST, env, extCall=False):
+
+    if extCall:
+        CMD_STACK.clear()  # putput system
 
     AST_type = AST["type"]
 
@@ -23,7 +26,9 @@ async def interp(AST, env, extCall = False):
     else:
         raise SyntaxError("Invalid AST type in interp: " + AST_type)
 
-    if extCall: return CMD_STACK
+    if extCall:
+        return CMD_STACK
+
 
 async def interp_struct(AST, env):
     stype = AST["stype"]
@@ -45,11 +50,11 @@ async def interp_struct(AST, env):
 
         for item in items:
             env[var] = item
-            
+
             for element in AST["iter"]:
                 await asyncio.wait_for(interp(element, env), timeout=INTERP_TIMEOUT)
 
-        if already_exists == True:
+        if already_exists:
             env[var] = temp
     elif stype == "While":
         loop_bool = interp_bool(AST["cond"], env)
@@ -68,6 +73,7 @@ async def interp_struct(AST, env):
     else:
         raise SyntaxError("Invalid struct type in interp_struct: " + stype)
 
+
 async def interp_action(action, env):
     atype = action["atype"]
     if atype == "Print":
@@ -75,13 +81,14 @@ async def interp_action(action, env):
     elif atype == "Set":
         env[action["args"][0]] = interp_atom(action["args"][1], env)
     elif atype == "Add" or atype == "Sub" or atype == "Mul" or atype == "Div":
-        env[action["args"][0]] = bin_op(interp_atom(action["args"][1], env), interp_atom(action["args"][2], env), atype)
-    
-    
+        env[action["args"][0]] = bin_op(interp_atom(
+            action["args"][1], env), interp_atom(action["args"][2], env), atype)
+
     elif atype == "Call":
         await asyncio.wait_for(interp_call(action["args"], env), timeout=INTERP_TIMEOUT)
-    else: 
+    else:
         raise SyntaxError("Invalid action type in interp_action: " + atype)
+
 
 def interp_atom(atom, env):
     if atom == "" or atom is None:
@@ -100,6 +107,7 @@ def interp_atom(atom, env):
         return str(res)
     """
 
+
 def bin_op(a, b, op):
     if op == "Add":
         return str(int(a) + int(b))
@@ -110,15 +118,16 @@ def bin_op(a, b, op):
     elif op == "Div":
         return str(int(a) / int(b))
 
+
 def interp_bool(bool_stmt, env):
     if len(bool_stmt) == 3:
 
         """try: a = ast.literal_eval(bool_stmt[0])
-        except: 
+        except:
 
         try: b = ast.literal_eval(bool_stmt[2])
         except: """
-        
+
         a = bool_stmt[0]
         b = bool_stmt[2]
         c = bool_stmt[1]
@@ -136,7 +145,8 @@ def interp_bool(bool_stmt, env):
         elif c == "<=":
             return interp_atom(a, env) >= interp_atom(b, env)
         else:
-            raise SyntaxError("not a valid boolean comparison in interp_bool: " + c)
+            raise SyntaxError(
+                "not a valid boolean comparison in interp_bool: " + c)
     elif len(bool_stmt) == 1:
         bool_val = interp_atom(bool_stmt[0], env)
 
@@ -145,9 +155,13 @@ def interp_bool(bool_stmt, env):
         elif bool_val == "false":
             return False
         else:
-            raise SyntaxError("Not a valid boolean value in interp_bool: " + bool_val)
+            raise SyntaxError(
+                "Not a valid boolean value in interp_bool: " + bool_val)
     else:
-        raise SyntaxError("Not a valid set of boolean arguments in interp_bool: " + str(bool_stmt))
+        raise SyntaxError(
+            "Not a valid set of boolean arguments in interp_bool: " +
+            str(bool_stmt))
+
 
 async def interp_call(d_call, env):
     '''

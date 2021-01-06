@@ -44,6 +44,7 @@ class Hosting(commands.Cog):
     '''
     Module to manage Comrade's remote hosting
     '''
+
     def __init__(self, bot):
         self.bot = bot
         self.lastping = None
@@ -63,8 +64,9 @@ class Hosting(commands.Cog):
                 response = urllib.request.urlopen(request)
 
                 if url == me:
-                    self.lastping = {"message": response.read().decode("utf-8"),
-                                     "time": local_time()}
+                    self.lastping = {
+                        "message": response.read().decode("utf-8"),
+                        "time": local_time()}
             except Exception as ex:
                 print(f"ERROR pinging {url}: {ex}")
 

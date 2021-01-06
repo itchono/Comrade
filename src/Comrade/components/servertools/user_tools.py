@@ -4,11 +4,14 @@ from discord.ext import commands
 import typing
 import datetime
 
+from discord.ext.commands import bot
+
 from db import collection
-from utils.utilities import ufil
+from utils.utilities import ufil, local_time, dm_channel, bot_prefix
 from utils.users import (weighted_member_id_from_server, rebuild_weight_table,
                          weight_table)
 from utils.checks import isOP
+from utils.databases import rebuild_user_profiles
 
 
 class Users(commands.Cog):
@@ -37,35 +40,40 @@ class Users(commands.Cog):
         e.set_thumbnail(url=member.avatar_url)
         e.set_footer(text=f"ID: {member.id}")
 
+        e.add_field(name="Is Human",
+                    value=not member.bot)
+
         e.add_field(name="Account Created",
                     value=member.created_at.strftime(
-                        '%B %m %Y at %I:%M:%S %p %Z'))
+                        '%B %m %Y at %I:%M:%S %p %Z'), inline=False)
 
         if ctx.guild:
             user_information = collection(
-                "users").find_one(ufil(member, ctx.guild))
+                "users").find_one(ufil(member))
 
             e.add_field(name="Joined Server",
                         value=member.joined_at.strftime(
-                            '%B %m %Y at %I:%M:%S %p %Z'))
+                            '%B %m %Y at %I:%M:%S %p %Z'), inline=False)
 
             if w := user_information["daily-weight"]:
                 e.add_field(name="Daily Weight", value=w)
+
+            e.add_field(name="Status",
+                        value=member.status)
+
+            e.add_field(name="On Mobile",
+                        value=member.is_on_mobile())
+
+            e.add_field(name="Last Online",
+                        value=collection(
+                            "users").find_one(
+                            ufil(member))["last-online"])
 
             # Show stack of roles
             e.add_field(name=f"Roles ({len(member.roles)})",
                         value="\n".join([
                             role.mention for role in member.roles]),
-                        inline=False)
-
-            e.add_field(name="On Mobile",
-                        value=member.is_on_mobile())
-
-        e.add_field(name="Is Human",
-                    value=not member.bot)
-
-        e.add_field(name="Status",
-                    value=member.status)
+                            inline=False)
 
         await ctx.send(embed=e)
 
@@ -87,17 +95,17 @@ class Users(commands.Cog):
         This command is a toggle.
         '''
         notifiees = collection(
-            "users").find_one(ufil(member, ctx.guild))["notify-status"]
+            "users").find_one(ufil(member))["notify-status"]
 
         if member.id in notifiees:
             collection("users").update_one(
-                ufil(member, ctx.guild),
+                ufil(member),
                 {"$pull": {"notify-status": member.id}})
             await ctx.send(
                 f"You will no longer be notified by when {member.display_name} changes their status.")
         else:
             collection("users").update_one(
-                ufil(member, ctx.guild),
+                ufil(member),
                 {"$push": {"notify-status": member.id}})
             await ctx.send(
                 f"You will now be notified by when {member.display_name} changes their status.")
@@ -105,7 +113,7 @@ class Users(commands.Cog):
     @commands.command()
     @commands.guild_only()
     async def requiem(self, ctx: commands.Context,
-                      day: int =30, trim = False):
+                      day: int = 30, trim=False):
         '''
         Generates a list of users who have not talked in the past x days
         '''
@@ -118,7 +126,7 @@ class Users(commands.Cog):
             active_ids_in_channel = await channel.history(
                 limit=None, after=threshold).filter(
                     lambda msg: msg.type == discord.MessageType.default
-                ).map(lambda msg: msg.author.id).flatten()
+            ).map(lambda msg: msg.author.id).flatten()
 
             active_author_ids += set(active_ids_in_channel)
 
@@ -138,7 +146,7 @@ class Users(commands.Cog):
 
             if trim and OP:
                 collection("users").update_one(
-                    ufil(member, ctx.guild), {"$set": {"daily-weight": 0}})
+                    ufil(member), {"$set": {"daily-weight": 0}})
         s += "```"
         await ctx.send(s)
 
@@ -161,13 +169,73 @@ class Users(commands.Cog):
         sum_of_weights = sum(weights)
 
         count = collection(
-            "users").find_one(ufil(member, ctx.guild))["daily-weight"]
+            "users").find_one(ufil(member))["daily-weight"]
 
         await ctx.send(
             f"{member.display_name}'s chance of being rolled tomorrow is {count}/{sum_of_weights} ({round(count/sum_of_weights * 100, 2)}%)")
 
+    @commands.Cog.listener()
+    async def on_member_join(self, member: discord.Member):
+        '''
+        When a member joins the server.
+        '''
+        try:
+            announcements_channel_id = collection(
+                "servers").find_one(
+                    member.guild.id)["channels"]["announcements"]
+            channel = member.guild.get_channel(announcements_channel_id)
+            await channel.send(f"Welcome {member.display_name}!")
+        except Exception:
+            pass
+
+        rebuild_user_profiles(member.guild)
+        # Rebuild user profiles
+
+        await rebuild_weight_table()
+        # Must invalidate the lru cache since a new member came in
 
     @commands.Cog.listener()
-    async def on_member_join():
-        # Must invalidate the lru cache since a new member came in
-        await rebuild_weight_table()
+    async def on_member_remove(self, member: discord.Member):
+        '''
+        When a member leaves the server
+        '''
+        announcements_channel_id = collection(
+            "servers").find_one(member.guild.id)["channels"]["announcements"]
+
+        channel = member.guild.get_channel(announcements_channel_id)
+
+        await channel.send(f":door: {member.display_name} has left.")
+
+    @commands.Cog.listener()
+    async def on_member_update(self,
+                               before: discord.Member, after: discord.Member):
+        '''
+        Whenever a server member changes their state.
+        '''
+        if after.status != before.status:
+            # status update
+
+            if str(after.status) == "offline":
+
+                collection("users").update_one(
+                    ufil(after),
+                    {"$set": {
+                        "last-online":
+                        local_time().strftime("%I:%M:%S %p %Z")}})
+            else:
+                collection("users").update_one(
+                    ufil(after),
+                    {"$set": {
+                        "last-online": "Now"}})
+
+            for mem_id in collection(
+                    "users").find_one(
+                        ufil(after))["notify-status"]:
+                mem = after.guild.get_member(mem_id)
+
+                embed = discord.Embed(description = local_time().strftime("%I:%M:%S %p %Z"))
+                embed.set_author(name=f"{after.display_name} ({str(after)}) is now {str(after.status)}.",
+                    icon_url=after.avatar_url)
+                embed.set_footer(
+                    text=f"To unsubscribe, type [{bot_prefix}track {after.display_name}] in {after.guild.name}")
+                await (await dm_channel(mem)).send(embed=embed)

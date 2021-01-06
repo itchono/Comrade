@@ -19,6 +19,7 @@ import urllib.request
 from utils.utilities import webscrape_header, local_time
 from utils.echo import echo
 from utils.emoji_converter import textToEmoji
+from db import collection
 
 transformations = standard_transformations + \
     (implicit_multiplication_application,) + (factorial_notation,) + (convert_xor,)
@@ -244,8 +245,9 @@ class Tools(commands.Cog):
                     name=f"{i+1}) {options[i]}: 0",
                     value="No one",
                     inline=False)
-            e.set_author(name=f"{ctx.author.display_name}, react to this post with 🛑 to stop the poll.",
-                            icon_url=ctx.author.avatar_url)
+            e.set_author(
+                name=f"{ctx.author.display_name}, react to this post with 🛑 to stop the poll.",
+                icon_url=ctx.author.avatar_url)
             e.set_footer(
                 text=f"Updated {local_time().strftime('%I:%M:%S %p %Z')}")
 
@@ -301,8 +303,9 @@ class Tools(commands.Cog):
                             name=f"{i+1}) {options[i]}: {len(users)}",
                             value=people if people else "No one",
                             inline=False)
-                    e.set_author(name=f"{ctx.author.display_name}, react to this post with 🛑 to stop the poll.",
-                            icon_url=ctx.author.avatar_url)
+                    e.set_author(
+                        name=f"{ctx.author.display_name}, react to this post with 🛑 to stop the poll.",
+                        icon_url=ctx.author.avatar_url)
                     e.set_footer(
                         text=f"Updated {local_time().strftime('%I:%M:%S %p %Z')}")
 

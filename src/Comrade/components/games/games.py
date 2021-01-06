@@ -10,7 +10,7 @@ from .broken_picture_phone import BPCGame
 from .terrestrial import TerrestrialGame
 from utils.users import random_member_from_server
 from utils.utilities import bot_prefix, ufil
-from components.textgen.text_gen import generate_text, text_model
+from components.tools.text_gen import generate_text, text_model
 
 from db import collection
 
@@ -94,7 +94,7 @@ class Games(commands.Cog):
                 "⛏",
                 "🛑"] and user == ctx.author and reaction.message.id == m.id
 
-        while 1:
+        while True:
             try:
                 reaction, user = await self.bot.wait_for("reaction_add", check=check, timeout=300)
                 # cleans up games after 5 minutes
@@ -149,8 +149,8 @@ class Games(commands.Cog):
                 count += 1
             await ctx.send(questions[element + counter])
 
-            if " A" in questions[element + counter + \
-                1] or " A" in questions[element + counter + 2]:
+            if " A" in questions[element + counter +
+                                 1] or " A" in questions[element + counter + 2]:
                 answer = "1️⃣"
             elif " B" in questions[element + counter + 1] or " B" in questions[element + counter + 2]:
                 answer = "2️⃣"
@@ -168,7 +168,7 @@ class Games(commands.Cog):
 
             async def capturereacts():
 
-                while 1:
+                while True:
 
                     def checker(
                         reaction,
@@ -254,12 +254,12 @@ class Games(commands.Cog):
                     await ctx.send(out)
 
                     udict = collection("users").find_one(
-                        ufil(ctx.author, ctx.guild))
-                    
+                        ufil(ctx.author))
+
                     if self.streak[ctx.author.id] > udict["guessing-game"]["highest-streak"]:
-                        collection("users").update_one(ufil(ctx.author, ctx.guild),
-                            {"$set":{"guessing-game.highest-streak":self.streak[ctx.author.id]}})
-  
+                        collection("users").update_one(ufil(ctx.author),
+                                                       {"$set": {"guessing-game.highest-streak": self.streak[ctx.author.id]}})
+
                         await ctx.send(f"{ctx.author.mention} has achieved a new high score: {self.streak[ctx.author.id]}")
 
                 else:
@@ -314,7 +314,7 @@ class Games(commands.Cog):
         Stats for guess
         '''
         highscore = collection("users").find_one(
-            ufil(ctx.author, ctx.guild))["guessing-game"]["highest-streak"]
+            ufil(ctx.author))["guessing-game"]["highest-streak"]
         currscore = self.streak[ctx.author.id]
 
         await ctx.send(f"**Info for {ctx.author.display_name}**\nCurrent Streak: {currscore}\nHighest Streak: {highscore}")

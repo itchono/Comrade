@@ -15,6 +15,7 @@ class Announcements(commands.Cog):
     '''
     Add timed announcements, delivered in the announcements channel
     '''
+
     def __init__(self, bot):
         self.bot: commands.Bot = bot
         self.announcements = {}
@@ -39,7 +40,7 @@ class Announcements(commands.Cog):
                 await weighted_member_id_from_server(channel.guild)):
 
             collection("users").update_one(
-                ufil(luckyperson, channel.guild),
+                ufil(luckyperson),
                 {"$inc": {"daily-weight": -1}})
 
             dailyrole = await role(channel.guild, "Member of the Day")
@@ -82,7 +83,7 @@ class Announcements(commands.Cog):
                             # daily announce
                             if hasattr(a["announcement"], "__call__"):
                                 await a["announcement"](c)
-                            else: 
+                            else:
                                 await c.send(a["announcement"])
             except Exception:
                 pass

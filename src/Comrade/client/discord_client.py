@@ -14,7 +14,13 @@ else:
 
 intents = discord.Intents.all()
 
-client = commands.Bot(command_prefix=prefixes, case_insensitive=True,
-                      help_command=PrettyHelp(
-                          no_category="Help Command",
-                          color=discord.Colour.from_rgb(215, 52, 42)), intents=intents)
+client = commands.Bot(
+    command_prefix=prefixes,
+    case_insensitive=True,
+    help_command=PrettyHelp(
+        no_category="Help Command",
+        color=discord.Colour.from_rgb(
+            215,
+            52,
+            42)),
+    intents=intents)

@@ -78,9 +78,9 @@ def is_url(url):
         return False
 
 
-def ufil(member: discord.Member, guild: discord.Guild) -> dict:
+def ufil(member: discord.Member) -> dict:
     # Conveience method to get filter when querying user collection
-    return {"user": member.id, "server": guild.id}
+    return {"user": member.id, "server": member.guild.id}
 
 
 async def role(guild: discord.Guild, name: str):

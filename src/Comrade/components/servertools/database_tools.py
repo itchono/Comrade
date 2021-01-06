@@ -8,6 +8,7 @@ from db import collection
 from utils.checks import isServerOwner
 from utils.reactions import reactOK, reactX
 from utils.utilities import ufil
+from utils.databases import rebuild_server_cfgs
 
 
 class Databases(commands.Cog):
@@ -97,7 +98,7 @@ class Databases(commands.Cog):
         if value is None:
             try:
                 collection("users").update_one(
-                    ufil(member, ctx.guild),
+                    ufil(member),
                     {"$unset": {index: ""}}
                 )
             except Exception as ex:
@@ -106,7 +107,7 @@ class Databases(commands.Cog):
         else:
             try:
                 collection("users").update_one(
-                    ufil(member, ctx.guild),
+                    ufil(member),
                     {"$set": {index: literal_eval(value)}}
                 )
             except Exception as ex:
@@ -179,3 +180,19 @@ class Databases(commands.Cog):
                 await ctx.send(f"Error: {ex}")
 
         await reactOK(ctx)
+
+    @commands.Cog.listener()
+    async def on_guild_join(self, guild: discord.Guild):
+        '''
+        When the bot joins a server.
+        '''
+        rebuild_server_cfgs(self.bot.guilds)
+        # Rebuild server cfgs
+
+    @commands.Cog.listener()
+    async def on_guild_remove(self, guild: discord.Guild):
+        '''
+        When the bot leaves a server.
+        '''
+        pass
+        # I've been kicked etc

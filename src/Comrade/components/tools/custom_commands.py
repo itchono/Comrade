@@ -12,7 +12,7 @@ from utils.checks import isNotThreat, isOP
 class CustomCommands(commands.Cog):
 
     def __init__(self, bot):
-        self.bot = bot 
+        self.bot = bot
 
     @commands.command()
     @commands.check(isNotThreat())
@@ -20,7 +20,7 @@ class CustomCommands(commands.Cog):
         '''
         Macro runner for Comrade.
 
-        Split command queries by comma. 
+        Split command queries by comma.
         SPECIAL COMMANDS:
         use "wait" to delay execution of a function by a set time
         use "say" to send a message with some content
@@ -39,7 +39,8 @@ class CustomCommands(commands.Cog):
                     else:
                         i = BOT_PREFIX + i
                         view = StringView(i)
-                        ctx2 = commands.Context(prefix=BOT_PREFIX, view=view, bot=self.bot, message=ctx.message)
+                        ctx2 = commands.Context(
+                            prefix=BOT_PREFIX, view=view, bot=self.bot, message=ctx.message)
                         view.skip_string(BOT_PREFIX)
 
                         invoker = view.get_word()
@@ -50,7 +51,7 @@ class CustomCommands(commands.Cog):
                 except (asyncio.CancelledError, asyncio.TimeoutError):
                     await ctx.send(f"Command execution timed out after {MACRO_TIMEOUT} seconds.")
                     break
-                except: 
+                except BaseException:
                     await ctx.send(f"Input {i} could not be processed.")
                     break
 
@@ -61,12 +62,20 @@ class CustomCommands(commands.Cog):
         '''
         Lists all Cosmo scripts in the server
         '''
-        e = discord.Embed(title=f"Scripts for {ctx.guild.name}", colour=discord.Colour.from_rgb(*DBcfgitem(ctx.guild.id,"theme-colour")))
+        e = discord.Embed(
+            title=f"Scripts for {ctx.guild.name}",
+            colour=discord.Colour.from_rgb(
+                *
+                DBcfgitem(
+                    ctx.guild.id,
+                    "theme-colour")))
 
-        scrs = DBfind(CMD_COL, {"server":ctx.guild.id})
+        scrs = DBfind(CMD_COL, {"server": ctx.guild.id})
 
-        e.add_field(name="Cosmo Scripts", value=", ".join([i["name"] for i in scrs if i["type"] == "cosmo"]), inline=True)
-        e.add_field(name="Macros", value=", ".join([i["name"] for i in scrs if i["type"] == "macro"]), inline=True)
+        e.add_field(name="Cosmo Scripts", value=", ".join(
+            [i["name"] for i in scrs if i["type"] == "cosmo"]), inline=True)
+        e.add_field(name="Macros", value=", ".join(
+            [i["name"] for i in scrs if i["type"] == "macro"]), inline=True)
         await ctx.send(embed=e)
 
     @commands.command()
@@ -76,9 +85,8 @@ class CustomCommands(commands.Cog):
         '''
         Deletes a Cosmo script
         '''
-        DBremove_one(CMD_COL, {"server":ctx.guild.id, "name":name})
+        DBremove_one(CMD_COL, {"server": ctx.guild.id, "name": name})
         await reactOK(ctx)
-
 
     @commands.command()
     @commands.guild_only()
@@ -87,11 +95,11 @@ class CustomCommands(commands.Cog):
         '''
         Shows a Cosmos script
         '''
-        if c := DBfind_one(CMD_COL, {"server":ctx.guild.id, "name":name}):
+        if c := DBfind_one(CMD_COL, {"server": ctx.guild.id, "name": name}):
 
             (cmd, cmdType) = c["cmd"], c["type"]
             if cmdType == "cosmo":
-                await ctx.send(f"```{cmd}```") 
+                await ctx.send(f"```{cmd}```")
             else:
                 # macro
                 await ctx.send(f"`{cmd}`")
@@ -99,7 +107,6 @@ class CustomCommands(commands.Cog):
         else:
             await reactX(ctx)
             await ctx.send(f"No script with name {name} was found.", delete_after=10)
-
 
     @commands.command()
     @commands.guild_only()
@@ -114,9 +121,9 @@ class CustomCommands(commands.Cog):
         '''
         args = args.split(" ")
         name = args.pop(0)
-        args = "".join([i.strip(" ") for i in args]).split(",") # strip spaces
+        args = "".join([i.strip(" ") for i in args]).split(",")  # strip spaces
 
-        if c := DBfind_one(CMD_COL, {"server":ctx.guild.id, "name":name}):
+        if c := DBfind_one(CMD_COL, {"server": ctx.guild.id, "name": name}):
 
             (cmd, cmdType) = c["cmd"], c["type"]
 
@@ -127,30 +134,35 @@ class CustomCommands(commands.Cog):
                 try:
                     if splt_line_lst[0][-1] == "]" and splt_line_lst[0][0] == "[":
 
-                        params = [i.strip(" ") for i in splt_line_lst[0].strip("[").strip("]").split(",")]
+                        params = [
+                            i.strip(" ") for i in splt_line_lst[0].strip("[").strip("]").split(",")]
                         # inject args
 
                         if len(args) == len(params):
-                            splt_line_lst[0] = str([f'{params[i]}={args[i]}' for i in range(len(args))]).replace("'","")
+                            splt_line_lst[0] = str(
+                                [f'{params[i]}={args[i]}' for i in range(len(args))]).replace("'", "")
                         else:
                             await ctx.send(f"Not enough arguments for this script. Needs to be of form `{BOT_PREFIX}run {name} {splt_line_lst[0].strip('[').strip(']')}`")
                             return
 
-                except: pass
+                except BaseException:
+                    pass
 
-                #get env from first line
+                # get env from first line
                 env = get_env(splt_line_lst)
-                #parse program
+                # parse program
                 ast = parse(splt_line_lst)
-                #interp ast with given env
+                # interp ast with given env
 
                 try:
                     cmds = await asyncio.wait_for(interp(ast, env, extCall=True), timeout=INTERP_TIMEOUT)
                     await self.macro(ctx, cmds=",".join(cmds))
 
-                except asyncio.TimeoutError: await ctx.send(f"Program interpretation failed. Check to see if you have any infinite loops running.")
-            
-            else: await self.macro(ctx, cmds=cmd) # Raw macro
+                except asyncio.TimeoutError:
+                    await ctx.send(f"Program interpretation failed. Check to see if you have any infinite loops running.")
+
+            else:
+                await self.macro(ctx, cmds=cmd)  # Raw macro
         else:
             await reactX(ctx)
             await ctx.send(f"No script with name {name} was found.", delete_after=10)
@@ -165,9 +177,15 @@ class CustomCommands(commands.Cog):
         OR $c newscript <command name> <MACRO goes here>
 
         '''
-        if command[:3] == "```" and command[-3:] == "```": DBupdate(CMD_COL, {"server":ctx.guild.id, "name":command_name}, {"server":ctx.guild.id, "name":command_name,"cmd":command.strip("```"), "type":"cosmo"})
-        else: DBupdate(CMD_COL, {"server":ctx.guild.id, "name":command_name}, {"server":ctx.guild.id, "name":command_name,"cmd":command, "type":"macro"})
+        if command[:3] == "```" and command[-3:] == "```":
+            DBupdate(CMD_COL,
+                     {"server": ctx.guild.id,
+                      "name": command_name},
+                     {"server": ctx.guild.id,
+                      "name": command_name,
+                      "cmd": command.strip("```"),
+                      "type": "cosmo"})
+        else:
+            DBupdate(CMD_COL, {"server": ctx.guild.id, "name": command_name}, {
+                     "server": ctx.guild.id, "name": command_name, "cmd": command, "type": "macro"})
         await reactOK(ctx)
-
-
-    

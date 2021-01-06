@@ -88,6 +88,7 @@ class Textgen(commands.Cog):
     Text generator, based off of what each user has said in
     a given text channel.
     '''
+
     def __init__(self, bot):
         self.bot: commands.Bot = bot
 
@@ -167,5 +168,5 @@ class Textgen(commands.Cog):
         Shows status of LRU cache
         '''
         await ctx.send(text_model.cache_info())
-    
+
 # TODO: Background generation of models?
