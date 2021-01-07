@@ -7,6 +7,7 @@ from client import client as bot
 from db import collection
 from config import cfg
 from utils.utilities import ufil
+from utils.logger import logger
 
 
 def random_member_from_server(
@@ -38,7 +39,7 @@ def weight_table(guild_id) -> tuple:
     return member_ids, weights
 
 
-async def weighted_member_id_from_server(guild: discord.Guild):
+async def weighted_member_id_from_server(guild: discord.Guild) -> int:
     '''
     Yield the id of a random member from a guild,
     assuming the database is correctly defined
@@ -59,8 +60,14 @@ async def rebuild_weight_table(guild: discord.Guild):
 
     sum_of_weights = sum(weights)
 
+    logger.info(
+            f"{guild.name}: Rebuilding weight table...")
+
     if sum_of_weights == 0:
         # Must reconstruct cache
+
+        logger.warning(
+            f"{guild.name}: Cache is being reconstructed. This will take a while.")
 
         # Attempt to set default daily count
         server_cfg: dict = collection("servers").find_one(guild.id)
@@ -81,14 +88,14 @@ async def rebuild_weight_table(guild: discord.Guild):
                         lambda msg: msg.type == discord.MessageType.default
                 ).map(lambda msg: msg.author.id).flatten()
 
-                active_author_ids += set(active_ids_in_channel)
+                active_author_ids.update(active_ids_in_channel)
         else:
             active_author_ids = set([member.id for member in guild.members])
 
         for member in guild.members:
-            if not member.bot or not bool(
-                cfg["Settings"]["exclude-bots-from-daily"])\
-                    or member.id not in active_author_ids:
+            if (not member.bot or not bool(
+                cfg["Settings"]["exclude-bots-from-daily"]))\
+                    and member.id in active_author_ids:
                 daily = server_cfg["default-daily-count"]
             else:
                 daily = 0
@@ -96,4 +103,8 @@ async def rebuild_weight_table(guild: discord.Guild):
             collection("users").update_one(
                 ufil(member), {"$set": {"daily-weight": daily}})
 
+        logger.info(
+            f"{guild.name}: Rebuilt weights for users in past {staleness} days")
+
     weight_table.cache_clear()  # invalidate cache
+    logger.info(f"{guild.name}: Weight table DONE")

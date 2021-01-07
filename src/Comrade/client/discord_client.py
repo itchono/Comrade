@@ -22,5 +22,6 @@ client = commands.Bot(
         color=discord.Colour.from_rgb(
             215,
             52,
-            42)),
+            42),
+        sort_commands=False),
     intents=intents)

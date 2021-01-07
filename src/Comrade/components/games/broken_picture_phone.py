@@ -1,4 +1,5 @@
 import discord
+from discord.ext import commands
 import asyncio
 
 from utils.utilities import dm_channel

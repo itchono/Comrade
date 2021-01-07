@@ -27,6 +27,8 @@ $c lists
 import discord
 from discord.ext import commands
 
+from collections import defaultdict
+
 
 class CustomList():
 
@@ -72,9 +74,11 @@ class CustomList():
 class Lists(commands.Cog):
     '''
     Lists for writing things down
+    NOT IMPLEMENTED YET
     '''
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: commands.Bot = bot
+        self.active = defaultdict(lambda: defaultdict(CustomList))
 
     @commands.command()
     @commands.guild_only()

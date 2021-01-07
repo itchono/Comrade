@@ -6,10 +6,13 @@ import os
 import components
 from client import client as bot
 from config import cfg
-from utils.utilities import set_start_time, get_uptime, local_time
+from utils.utilities import set_start_time, get_uptime
 from utils.databases import rebuild_server_cfgs
+from utils.users import rebuild_weight_table
 from db import gc_startup, mongo_startup
 from hosting.keep_alive import keep_alive
+from utils.logger import logger
+
 
 dotenv.load_dotenv()  # Load .env file, prior to components loading
 
@@ -32,7 +35,8 @@ async def on_connect():
     global online
     await bot.change_presence(status=discord.Status.online,
                               activity=discord.Game(cfg["Settings"]["Status"]))
-    print(f"{bot.user} is logged into {len(bot.guilds)} server(s).")
+    logger.info(
+        f"{bot.user} is online, logged into {len(bot.guilds)} server(s).")
     online = True
 
 
@@ -43,13 +47,16 @@ async def on_ready():
     '''
     rebuild_server_cfgs(bot.guilds)
 
-    print("Server List:"
+    print("Server List:\n",
           "\n".join(
               f"\t{server.name} "
               f"({len(server.members)} members)"
-              for server in bot.guilds) +
-          f"\nStartup completed in {round(get_uptime(),3)}s ("
-          f"{local_time().strftime('%I:%M:%S %p %Z')})")
+              for server in bot.guilds))
+
+    logger.info(f"Startup completed in {round(get_uptime(),3)}s")
+
+    for guild in bot.guilds:
+        await rebuild_weight_table(guild)
 
 if bool(cfg["Hosting"]["ping"]):
     keep_alive()

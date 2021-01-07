@@ -5,6 +5,7 @@ import os
 from google.cloud import storage
 
 from config import cfg
+from utils.logger import logger
 
 storage_client = None
 bucket = None
@@ -24,4 +25,4 @@ def startup():
     os.remove("temp.json")
 
     bucket = storage_client.get_bucket(cfg["GoogleCloud"]["bucket"])
-    print(f"Google Cloud storage connected to: {bucket.name}")
+    logger.info(f"Google Cloud storage connected to: {bucket.name}")

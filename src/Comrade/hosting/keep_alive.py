@@ -5,15 +5,16 @@ from threading import Thread
 # used to create separate parallel process to keep bot up
 
 import urllib.request
+import logging
+import os
 
 from config import cfg
 from utils.utilities import local_time, get_uptime, webscrape_header
+from utils.logger import logger
 
-# # disable logging
-# import logging, os
-
-# logging.getLogger('werkzeug').disabled = True
-# os.environ['WERKZEUG_RUN_MAIN'] = 'true'
+# disable flask dumb logging
+logging.getLogger('werkzeug').disabled = True
+os.environ['WERKZEUG_RUN_MAIN'] = 'true'
 
 app = Flask('')
 
@@ -30,6 +31,7 @@ def run():
 def keep_alive():
     server = Thread(target=run)
     server.start()
+    logger.info("Flask server started.")
 
 
 '''
@@ -46,7 +48,7 @@ class Hosting(commands.Cog):
     '''
 
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: commands.Bot = bot
         self.lastping = None
 
         self.selfping.start()
@@ -75,7 +77,8 @@ class Hosting(commands.Cog):
         '''
         Shows when the bot last pinged itself
         '''
-        await ctx.send(f"Last ping was at {self.lastping['time'].strftime('%I:%M:%S %p %Z')}\nResponse:`{self.lastping['message']}`")
+        await ctx.send(
+            f"Last ping was at {self.lastping['time'].strftime('%I:%M:%S %p %Z')}\nResponse:`{self.lastping['message']}`")
 
     @commands.command()
     @commands.check_any(commands.is_owner())

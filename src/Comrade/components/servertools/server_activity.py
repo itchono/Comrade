@@ -52,7 +52,7 @@ def interpdays(times, values):
 
 class ActivityTracker(commands.Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: commands.Bot = bot
 
         self.online_humans = []
         self.messages_sent = 0

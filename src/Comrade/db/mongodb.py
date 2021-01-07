@@ -7,6 +7,7 @@ import pymongo
 from pymongo.collection import Collection
 
 from config import cfg
+from utils.logger import logger
 
 mongo_client = None
 db = None
@@ -21,24 +22,15 @@ def startup():
     try:
         mongo_client = pymongo.MongoClient(os.environ.get("MONGOKEY"))
     except Exception:
-        print("MongoDB Could not be connected. Check that you have "
-              "the correct MongoDB key in your .env file, and "
-              "the that you have dnspython installed"
-              "\nTerminating program...")
+        logger.critical("MongoDB Could not be connected. Check that you have "
+                        "the correct MongoDB key in your .env file, and "
+                        "the that you have dnspython installed"
+                        "\nTerminating program...")
         sys.exit(1)  # Exit with error
 
     db = mongo_client[mongo_client.list_database_names()[0]]
-    print("MongoDB Atlas connected to: "
-          f"{mongo_client.list_database_names()[0]}")
-
-    # Scan collections to make sure they all exist, creating them if not
-    for collection_name in cfg["MongoDB"]:
-        try:
-            _ = db[collection_name]
-        except Exception:
-            db.create_collection(collection_name)
-            print("MONGODB: Create new collection in "
-                  f"{mongo_client.list_database_names()[0]}:{collection_name}")
+    logger.info("MongoDB Atlas connected to: "
+                f"{mongo_client.list_database_names()[0]}")
 
 
 # Convenience method to return collection by name in configuration

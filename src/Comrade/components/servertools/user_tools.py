@@ -4,8 +4,6 @@ from discord.ext import commands
 import typing
 import datetime
 
-from discord.ext.commands import bot
-
 from db import collection
 from utils.utilities import ufil, local_time, dm_channel, bot_prefix
 from utils.users import (weighted_member_id_from_server, rebuild_weight_table,
@@ -171,8 +169,29 @@ class Users(commands.Cog):
         count = collection(
             "users").find_one(ufil(member))["daily-weight"]
 
-        await ctx.send(
-            f"{member.display_name}'s chance of being rolled tomorrow is {count}/{sum_of_weights} ({round(count/sum_of_weights * 100, 2)}%)")
+        if sum_of_weights > 0:
+            await ctx.send(
+                f"{member.display_name}'s chance of being rolled tomorrow is {count}/{sum_of_weights} ({round(count/sum_of_weights * 100, 2)}%)")
+        else:
+            await ctx.send("Daily weight cache is currently unavailable (may be being rebuilt).")
+
+    @commands.command()
+    @commands.guild_only()
+    async def modweights(self, ctx):
+        '''
+        Shows relative weights of daily member table.
+        '''
+        member_ids, weights = weight_table(ctx.guild.id)
+
+        pg = commands.Paginator()
+
+        for i in range(len(weights)):
+            pg.add_line(
+                f"{ctx.guild.get_member(member_ids[i]).display_name}: {weights[i]}")
+        pg.add_line(f"Total: {sum(weights)} entries.")
+
+        for page in pg.pages:
+            await ctx.send(page)
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
@@ -191,7 +210,7 @@ class Users(commands.Cog):
         rebuild_user_profiles(member.guild)
         # Rebuild user profiles
 
-        await rebuild_weight_table()
+        await rebuild_weight_table(member.guild)
         # Must invalidate the lru cache since a new member came in
 
     @commands.Cog.listener()

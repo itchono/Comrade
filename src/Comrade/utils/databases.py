@@ -7,6 +7,7 @@ import discord
 from db import collection
 from config import cfg
 from utils.utilities import ufil
+from utils.logger import logger
 
 
 def new_server(guild: discord.Guild):
@@ -104,10 +105,13 @@ def rebuild_server_cfgs(guilds: list):
     '''
     Rebuilds server configuration
     '''
+    logger.info("Scanning for new servers...")
     for guild in guilds:
         if not collection("servers").find_one({"_id": guild.id}):
+            logger.info(f"New Server Found: {guild.name}")
             collection("servers").insert_one(new_server(guild))
         rebuild_user_profiles(guild)  # check users too
+    logger.info("Server scan DONE")
 
 
 def rebuild_user_profiles(guild: discord.Guild):
@@ -117,4 +121,5 @@ def rebuild_user_profiles(guild: discord.Guild):
     for member in guild.members:
         if not collection("users").find_one(
                 ufil(member)):
+            logger.info(f"New Member Found in {guild.name}: {str(member)}")
             collection("users").insert_one(new_user(member))

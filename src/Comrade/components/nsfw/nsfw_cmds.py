@@ -27,7 +27,7 @@ class NSFW(commands.Cog):
     '''
 
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: commands.Bot = bot
 
         self.last_search = ""
         self.cur_page = 0

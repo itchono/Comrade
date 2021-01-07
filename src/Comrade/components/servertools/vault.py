@@ -7,6 +7,7 @@ from async_lru import alru_cache
 from db import collection
 from utils.echo import echo
 from utils.reactions import reactOK
+from config import cfg
 
 
 # Janky workaround of cacheing stuff properly, but oh well
@@ -17,7 +18,7 @@ async def vault_posts(guild_id: int):
 
 class Vault(commands.Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: commands.Bot = bot
 
     @commands.command()
     @commands.guild_only()
@@ -36,17 +37,17 @@ class Vault(commands.Cog):
             embed.set_image(url=item["data"])
             await ctx.send(embed=embed)
 
-    @commands.command(name=u"\U0001F345", aliases=["vault"])
+    @commands.command(aliases=[u"\U0001F345"])
     @commands.guild_only()
-    async def tomato(self, ctx: commands.Context, tgt=None):
+    async def vault(self, ctx: commands.Context, tgt=None):
         '''
         Vaults a post. Operates in 3 modes
         1. Vault a message sent by a user based on Message URL.
-        ex. $c 🍅 <link to message>
+        ex. $c vault <link to message>
         2. Vault a message with an image attachment
-        ex. $c 🍅 and then upload an image with this message
+        ex. $c vault and then upload an image with this message
         3. Vault a message with an image url
-        ex. $c 🍅 <link to image>
+        ex. $c vault <link to image>
         '''
         IDmode = False
 
@@ -60,31 +61,29 @@ class Vault(commands.Cog):
         else:
             u = tgt  # URL directly
 
-        VAULT_VOTE_DURATION = collection("servers").find_one(ctx.guild.id)[
+        duration = collection("servers").find_one(ctx.guild.id)[
             "durations"]["vault"]
 
         m = await ctx.send(
-            "React to this message with 🍅 to vault the post {}. You have **{} seconds** to vote.".format(
-                ctx.message.jump_url if not IDmode else u.jump_url, VAULT_VOTE_DURATION), delete_after=VAULT_VOTE_DURATION)
+            f"React to this message with 🍅 to vault the post {ctx.message.jump_url if not IDmode else u.jump_url}. You have **{duration} seconds** to vote.",
+            delete_after=duration)
 
         await m.add_reaction("🍅")
 
-        def check(reaction, user): return reaction.emoji == "🍅" and not user.bot and (
-            (reaction.message.id == m.id and user != ctx.author) or DEVELOPMENT_MODE)
+        def check(reaction, user):
+            return reaction.emoji == "🍅" and not user.bot and (
+                (reaction.message.id == m.id and user != ctx.author)
+                or bool(cfg["Settings"]["development-mode"]))
 
-        await self.bot.wait_for("reaction_add", check=check)
+        await self.bot.wait_for("reaction_add", check=check, timeout=duration)
 
-        vault = await getChannel(ctx.guild, "vault-channel")
+        vault = ctx.guild.get_channel(
+            collection("servers").find_one(ctx.guild.id)["channels"]["vault"])
 
         if IDmode:
             e = discord.Embed(
                 title=":tomato: Echoed Vault Entry",
-                description="See Echoed Message Below.",
-                colour=discord.Colour.from_rgb(
-                    *
-                    DBcfgitem(
-                        ctx.guild.id,
-                        "theme-colour")))
+                description="See Echoed Message Below.")
             e.add_field(name='Original Post: ', value=ctx.message.jump_url)
             e.set_footer(text=f"Sent by {ctx.author.display_name}")
             m2 = await vault.send(embed=e)
@@ -92,12 +91,7 @@ class Vault(commands.Cog):
             await echo(await self.bot.get_context(m2), member=u.author, content=u.content, file=await u.attachments[0].to_file() if u.attachments else None, embed=u.embeds[0] if u.embeds else None)
         else:
             e = discord.Embed(
-                title=":tomato: Vault Entry",
-                colour=discord.Colour.from_rgb(
-                    *
-                    DBcfgitem(
-                        ctx.guild.id,
-                        "theme-colour")))
+                title=":tomato: Vault Entry")
             e.set_image(url=u)
             e.add_field(name='Original Post: ', value=ctx.message.jump_url)
             e.set_footer(text=f"Sent by {ctx.author.display_name}")

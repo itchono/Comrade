@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 
 import typing
+import io
 
 from utils.utilities import (get_uptime, get_host, dm_channel,
                              local_time, utc_to_local_time, bot_prefix)
@@ -98,9 +99,9 @@ class General(commands.Cog):
                     value=len(ctx.guild.roles))
 
         e.add_field(name="Server Icon", value=f"[Link]({ctx.guild.icon_url})")
-        e.add_field(name="ID", value=ctx.guild.id)
         e.add_field(name="Owner", value=ctx.guild.owner.mention)
 
+        e.set_footer(text=f"ID: {ctx.guild.id}")
         await ctx.send(embed=e)
 
     @commands.command()
@@ -144,3 +145,11 @@ class General(commands.Cog):
             return (message.content and message.content.startswith(bot_prefix)) or \
                     message.author == self.bot.user
         await ctx.channel.purge(check=check, bulk=True)
+
+    @commands.command()
+    async def getlog(self, ctx: commands.Context):
+        '''
+        Uploads Comrade's log file for analysis
+        '''
+        with open("comrade.log", "rb") as f:
+            await ctx.send(file=discord.File(f, filename="comrade_log.txt"))
