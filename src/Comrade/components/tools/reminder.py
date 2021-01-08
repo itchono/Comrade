@@ -1,3 +1,5 @@
+import discord
+from discord import message
 from discord.ext import commands, tasks
 
 import datetime
@@ -27,10 +29,6 @@ class Reminders(commands.Cog):
         Supports minutes, hours, days.
         Defaults to hours if no unit given.
         '''
-        now = local_time()
-        logger.info(now)
-
-
         if time[-1] == "d":
             advance = datetime.timedelta(days=float(time[:-1].strip()))
         elif time[-1] == "m":
@@ -38,26 +36,24 @@ class Reminders(commands.Cog):
         else:
             advance = datetime.timedelta(hours=float(time[:-1].strip()))
 
-        remind_time = now + advance
-        logger.info(remind_time)
-
         reminder = {
             "server": ctx.guild is not None,
             "message": message,
-            "time": remind_time,
+            "time": datetime.datetime.utcnow() + advance,
             "user": ctx.author.id,
-            "channel": ctx.channel.id if ctx.guild else 0
+            "channel": ctx.channel.id if ctx.guild else 0,
+            "jumpurl": ctx.message.jump_url
         }
 
         collection("reminders").insert_one(reminder)
 
         await ctx.send(
-            f"I will remind you at {remind_time.strftime('%B %m %Y at %I:%M %p %Z')}.")
+            f"I will remind you on {(local_time() + advance).strftime('%B %d %Y at %I:%M %p %Z')}.")
 
     @tasks.loop(minutes=1.0)
     async def send_reminders(self):
         reminders = collection(
-            "reminders").find({"time": {"$lte": local_time()}})
+            "reminders").find({"time": {"$lte": datetime.datetime.utcnow()}})
 
         for r in reminders:
             target = self.bot.get_user(r["user"])
@@ -65,8 +61,18 @@ class Reminders(commands.Cog):
             if r["server"]:
                 channel = self.bot.get_channel(r["channel"])
             else:
-                channel = dm_channel(target)
+                channel = await dm_channel(target)
 
-            await channel.send(f"{target.mention}: {r['message']}")
+            logger.info(f"Reminded {target}")
+
+            embed = discord.Embed(description=r["message"])
+            embed.set_author(name=f"Reminder for {target.display_name}",
+                             url=r["jumpurl"], icon_url=target.avatar_url)
+
+            await channel.send(content=target.mention, embed=embed)
 
             collection("reminders").delete_one(r)
+
+    @send_reminders.before_loop
+    async def before_reminder(self):
+        await self.bot.wait_until_ready()

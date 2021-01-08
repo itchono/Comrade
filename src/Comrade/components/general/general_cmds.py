@@ -48,7 +48,7 @@ class General(commands.Cog):
         Gets the creation time of basically any Discord object.
         '''
         await ctx.send(f"That was created on "
-                       f"{utc_to_local_time(thing.created_at).strftime('%B %m %Y at %I:%M:%S %p %Z')}")
+                       f"{utc_to_local_time(thing.created_at).strftime('%B %d %Y at %I:%M:%S %p %Z')}")
 
     @commands.command(aliases=["lastmsg", "staleness"])
     @commands.guild_only()
@@ -63,7 +63,7 @@ class General(commands.Cog):
         difference = (local_time() - t0).days
 
         await ctx.send(f"Last message in {channel.mention} was sent on"
-                       f" {t0.strftime('%B %m %Y at %I:%M:%S %p %Z')} by "
+                       f" {t0.strftime('%B %d %Y at %I:%M:%S %p %Z')} by "
                        f"`{msg.author.display_name}` ({difference} days ago.)")
 
     @commands.group(invoke_without_command=True)
@@ -78,7 +78,7 @@ class General(commands.Cog):
                      icon_url=ctx.guild.icon_url)
 
         e.add_field(name="Time of Creation",
-                    value=ctx.guild.created_at.strftime('%B %m %Y at %I:%M:%S %p %Z'),
+                    value=ctx.guild.created_at.strftime('%B %d %Y at %I:%M:%S %p %Z'),
                     inline=False)
 
         e.add_field(name="Text Channels",

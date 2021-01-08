@@ -43,7 +43,7 @@ class Users(commands.Cog):
 
         e.add_field(name="Account Created",
                     value=member.created_at.strftime(
-                        '%B %m %Y at %I:%M:%S %p %Z'), inline=False)
+                        '%B %d %Y at %I:%M:%S %p %Z'), inline=False)
 
         if ctx.guild:
             user_information = collection(
@@ -51,7 +51,7 @@ class Users(commands.Cog):
 
             e.add_field(name="Joined Server",
                         value=member.joined_at.strftime(
-                            '%B %m %Y at %I:%M:%S %p %Z'), inline=False)
+                            '%B %d %Y at %I:%M:%S %p %Z'), inline=False)
 
             if w := user_information["daily-weight"]:
                 e.add_field(name="Daily Weight", value=w)
