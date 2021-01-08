@@ -141,7 +141,7 @@ class Tools(commands.Cog):
 
             try:
                 approx = exp.evalf()
-                await ctx.send(f"```{pretty(exp, use_unicode = False)}```= {approx}")
+                await ctx.send(f"```{pretty(exp, use_unicode = False)}```= `{approx}`")
 
             except Exception as ex:
                 await ctx.send(f"```{pretty(exp, use_unicode = False)}```")

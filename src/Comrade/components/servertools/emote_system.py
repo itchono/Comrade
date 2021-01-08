@@ -262,6 +262,16 @@ class Emotes(commands.Cog):
                 {"name": name_old, "server": ctx.guild.id},
                 {"$set": {"name": name_new}}):
             await ctx.send(f"Emote `{name_old}` was renamed.")
+
+            if e := collection("emotes").find_one(
+                {"name": name_old, "server": ctx.guild.id}):
+
+                if e["type"] == "inline":
+                    emote = discord.utils.get(ctx.guild.emojis, name=name_old)
+                    try:
+                        await emote.edit(name = name_new)
+                    except BaseException:
+                        pass
         else:
             await ctx.send(f"Emote `{name_old}` was not found.")
 

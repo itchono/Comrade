@@ -5,6 +5,8 @@ import datetime
 from utils.utilities import local_time, dm_channel
 from db import collection
 
+from utils.logger import logger
+
 
 class Reminders(commands.Cog):
     '''
@@ -26,6 +28,8 @@ class Reminders(commands.Cog):
         Defaults to hours if no unit given.
         '''
         now = local_time()
+        logger.info(now)
+
 
         if time[-1] == "d":
             advance = datetime.timedelta(days=float(time[:-1].strip()))
@@ -35,6 +39,7 @@ class Reminders(commands.Cog):
             advance = datetime.timedelta(hours=float(time[:-1].strip()))
 
         remind_time = now + advance
+        logger.info(remind_time)
 
         reminder = {
             "server": ctx.guild is not None,

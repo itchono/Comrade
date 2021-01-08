@@ -34,7 +34,7 @@ class Users(commands.Cog):
 
         e = discord.Embed(colour=member.colour)
         e.set_author(name=f"{member.display_name} ({member})",
-                     icon_url=ctx.author.avatar_url)
+                     icon_url=member.avatar_url)
         e.set_thumbnail(url=member.avatar_url)
         e.set_footer(text=f"ID: {member.id}")
 
