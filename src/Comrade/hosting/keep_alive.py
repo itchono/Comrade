@@ -49,6 +49,7 @@ def run():
 
 def keep_alive():
     server = Thread(target=run)
+    server.daemon = True
     server.start()
     logger.info("Flask server started.")
 

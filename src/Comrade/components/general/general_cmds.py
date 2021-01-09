@@ -171,4 +171,6 @@ class General(commands.Cog):
         '''
         Restarts the bot on the remote host
         '''
+        await self.bot.change_presence(status=discord.Status.offline)
+        await self.bot.logout()
         sys.exit(0)
