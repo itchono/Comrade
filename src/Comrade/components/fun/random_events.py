@@ -22,12 +22,17 @@ class RandomEvents(commands.Cog):
         '''
         Changes the nickname of the above person
         '''
-        await ctx.send(f"__**~NAMESWAP~**__\nThe person above (Current name: {ctx.author.display_name}) will have their name changed to the first thing that the next person below says.")
+        await ctx.send(
+            f"__**~NAMESWAP~**__\nThe person above (Current name: {ctx.author.display_name}) will have their name changed to the first thing that the next person below says.",
+            delete_after=120)
 
         def check(m):
             return not m.author.bot and m.content and m.author != ctx.author and m.channel == ctx.channel
 
-        msg = await self.bot.wait_for('message', check=check, timeout=120)
+        try:
+            msg = await self.bot.wait_for('message', check=check, timeout=120)
+        except asyncio.TimeoutError:
+            await ctx.send("Nameswap aborted (120s timeout).")
 
         try:
             await ctx.author.edit(nick=msg.content[:32], reason="Comrade name change")
@@ -38,8 +43,6 @@ class RandomEvents(commands.Cog):
             # Mission permissions
             await ctx.send(
                 f"{ctx.author.mention}, you must change your name to `{msg.content}`!")
-        except asyncio.TimeoutError:
-            await ctx.send("Nameswap aborted (120s timeout).")
 
     async def rickroll(self, ctx: commands.Context):
         '''

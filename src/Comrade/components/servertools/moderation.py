@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import typing
 
-from utils.checks import isOP
+from utils.checks import isOP, op_list, threat_list
 from utils.utilities import role, ufil
 from db import collection
 from config import cfg
@@ -201,6 +201,25 @@ class Moderation(commands.Cog):
                     {"$set": {f"global-banned-words.{word}": threshold}})
                 await ctx.send(
                     f"Word has been added to {member.display_name}'s set of personal banned words.\nActivation threshold: {threshold}%")
+
+    @commands.command()
+    @commands.check(isOP())
+    async def op(self, *, member: discord.Member):
+
+        op_list.cache_clear()
+        pass
+
+    @commands.command()
+    @commands.check(isOP())
+    async def deop(self, *, member: discord.Member):
+        op_list.cache_clear()
+        pass
+
+    @commands.command()
+    @commands.check(isOP())
+    async def threat(self, level: int, *, member: discord.Member):
+        threat_list.cache_clear()
+        pass
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):

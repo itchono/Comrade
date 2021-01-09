@@ -7,7 +7,8 @@ from discord.ext import commands, tasks
 from utils.utilities import local_time, ufil, role
 from utils.checks import isServerOwner
 from utils.reactions import reactOK
-from utils.users import weighted_member_id_from_server, rebuild_weight_table
+from utils.users import (weighted_member_from_server,
+                         rebuild_weight_table, sum_of_weights)
 from db import collection
 
 
@@ -37,7 +38,7 @@ class Announcements(commands.Cog):
         ctx = await self.bot.get_context(m)
 
         if luckyperson := channel.guild.get_member(
-                await weighted_member_id_from_server(channel.guild)):
+                await weighted_member_from_server(channel.guild)):
 
             collection("users").update_one(
                 ufil(luckyperson),
@@ -60,7 +61,9 @@ class Announcements(commands.Cog):
             general_cog = self.bot.get_cog("General")
             await general_cog.avatar(ctx, member=luckyperson)
 
-            await rebuild_weight_table(channel.guild)
+            if not sum_of_weights(channel.guild):
+                # rebuild if necessary
+                await rebuild_weight_table(channel.guild)
 
     @tasks.loop(minutes=1.0)
     async def timedannounce(self):

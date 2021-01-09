@@ -8,10 +8,6 @@ class ErrorHandler(commands.Cog):
         self.bot: commands.Bot = bot
 
     @commands.Cog.listener()
-    async def on_error(event, *args, **kwargs):
-        logger.exception(event)
-
-    @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, exception):
         # When a command fails to execute
         await ctx.send(f"Error: {exception}")

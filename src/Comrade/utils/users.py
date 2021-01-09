@@ -24,13 +24,12 @@ def random_member_from_server(
     return random.choice(members)
 
 
-@lru_cache()
-def weight_table(guild_id) -> tuple:
+def weight_table(guild: discord.Guild) -> tuple:
     '''
     returns ids, weights of members in a server,
     for daily member roll.
     '''
-    doc = collection("users").find({"server": guild_id})
+    doc = collection("users").find({"server": guild.id})
 
     weights = [m["daily-weight"] for m in doc]
     doc.rewind()
@@ -39,72 +38,69 @@ def weight_table(guild_id) -> tuple:
     return member_ids, weights
 
 
-async def weighted_member_id_from_server(guild: discord.Guild) -> int:
+def sum_of_weights(guild: discord.Guild) -> int:
+    '''
+    Returns sum of weights in weight table
+    '''
+    _, weights = weight_table(guild)
+    return sum(weights)
+
+
+async def weighted_member_from_server(guild: discord.Guild) -> int:
     '''
     Yield the id of a random member from a guild,
     assuming the database is correctly defined
     '''
-    return random.choices(*weight_table(guild.id))[0]
+    return random.choices(*weight_table(guild))[0]
 
 
 async def rebuild_weight_table(guild: discord.Guild):
     '''
-    Update the daily weights in a given server
-    Assumes user profiles are updated correctly.
-
-    Operates in two modes:
-    - If list is not empty: invalidates LRU cache
-    - If list is empty: rebuilds all weights and resets cache
+    Refills the daily member counts according to staleness rules.
     '''
-    _, weights = weight_table(guild.id)
+    # Attempt to set default daily count
+    server_cfg: dict = collection("servers").find_one(guild.id)
 
-    sum_of_weights = sum(weights)
+    if server_cfg["default-daily-count"] == 0:
+        # Daily member turned off
+        for member in guild.members:
+            collection("users").update_one(
+                ufil(member), {"$set": {"daily-weight": 0}})
+        return
+
+    logger.warning(
+        f"{guild.name}: Cache is being reconstructed. This will take a while.")
+
+    # Process staleness
+    staleness = server_cfg["daily-member-staleness"]
+
+    if staleness >= 0:
+        threshold = datetime.datetime.now() - \
+            datetime.timedelta(staleness)
+
+        active_author_ids = set()
+
+        for channel in guild.text_channels:
+
+            active_ids_in_channel = await channel.history(
+                limit=None, after=threshold).filter(
+                    lambda msg: msg.type == discord.MessageType.default
+            ).map(lambda msg: msg.author.id).flatten()
+
+            active_author_ids.update(active_ids_in_channel)
+    else:
+        active_author_ids = set([member.id for member in guild.members])
+
+    for member in guild.members:
+        if (not member.bot or not bool(
+            cfg["Settings"]["exclude-bots-from-daily"]))\
+                and member.id in active_author_ids:
+            daily = server_cfg["default-daily-count"]
+        else:
+            daily = 0
+
+        collection("users").update_one(
+            ufil(member), {"$set": {"daily-weight": daily}})
 
     logger.info(
-            f"{guild.name}: Rebuilding weight table...")
-
-    if sum_of_weights == 0:
-        # Must reconstruct cache
-
-        logger.warning(
-            f"{guild.name}: Cache is being reconstructed. This will take a while.")
-
-        # Attempt to set default daily count
-        server_cfg: dict = collection("servers").find_one(guild.id)
-
-        # Process staleness
-        staleness = server_cfg["daily-member-staleness"]
-
-        if staleness >= 0:
-            threshold = datetime.datetime.now() - \
-                datetime.timedelta(staleness)
-
-            active_author_ids = set()
-
-            for channel in guild.text_channels:
-
-                active_ids_in_channel = await channel.history(
-                    limit=None, after=threshold).filter(
-                        lambda msg: msg.type == discord.MessageType.default
-                ).map(lambda msg: msg.author.id).flatten()
-
-                active_author_ids.update(active_ids_in_channel)
-        else:
-            active_author_ids = set([member.id for member in guild.members])
-
-        for member in guild.members:
-            if (not member.bot or not bool(
-                cfg["Settings"]["exclude-bots-from-daily"]))\
-                    and member.id in active_author_ids:
-                daily = server_cfg["default-daily-count"]
-            else:
-                daily = 0
-
-            collection("users").update_one(
-                ufil(member), {"$set": {"daily-weight": daily}})
-
-        logger.info(
-            f"{guild.name}: Rebuilt weights for users in past {staleness} days")
-
-    weight_table.cache_clear()  # invalidate cache
-    logger.info(f"{guild.name}: Weight table DONE")
+        f"{guild.name}: Rebuilt weights for users in past {staleness} days")

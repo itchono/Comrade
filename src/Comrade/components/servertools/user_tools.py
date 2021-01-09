@@ -1,4 +1,5 @@
 import discord
+from discord import user
 from discord.ext import commands
 
 import typing
@@ -6,10 +7,10 @@ import datetime
 
 from db import collection
 from utils.utilities import ufil, local_time, dm_channel, bot_prefix
-from utils.users import (weighted_member_id_from_server, rebuild_weight_table,
-                         weight_table)
+from utils.users import random_member_from_server, weight_table
 from utils.checks import isOP
-from utils.databases import rebuild_user_profiles
+from utils.databases import new_user
+from utils.logger import logger
 
 
 class Users(commands.Cog):
@@ -71,7 +72,7 @@ class Users(commands.Cog):
             e.add_field(name=f"Roles ({len(member.roles)})",
                         value="\n".join([
                             role.mention for role in member.roles]),
-                            inline=False)
+                        inline=False)
 
         await ctx.send(embed=e)
 
@@ -81,8 +82,7 @@ class Users(commands.Cog):
         '''
         Rolls a random user in the server, either weighted or unweighted
         '''
-        mem = ctx.guild.get_member(
-            await weighted_member_id_from_server(ctx.guild))
+        mem = random_member_from_server(ctx.guild)
         await self.userinfo(ctx, member=mem)
 
     @commands.command()
@@ -149,7 +149,6 @@ class Users(commands.Cog):
         await ctx.send(s)
 
         if trim:
-            await rebuild_weight_table(ctx.guild)
             await ctx.send("Users above have been removed from the daily member pool.")
 
     @commands.command()
@@ -205,25 +204,28 @@ class Users(commands.Cog):
             channel = member.guild.get_channel(announcements_channel_id)
             await channel.send(f"Welcome {member.display_name}!")
         except Exception:
-            pass
+            logger.exception("Member join")
 
-        rebuild_user_profiles(member.guild)
-        # Rebuild user profiles
-
-        await rebuild_weight_table(member.guild)
-        # Must invalidate the lru cache since a new member came in
+        collection("users").insert_one(new_user(member))
+        # New user entry in DB
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member):
         '''
         When a member leaves the server
         '''
-        announcements_channel_id = collection(
-            "servers").find_one(member.guild.id)["channels"]["announcements"]
+        try:
+            announcements_channel_id = collection(
+                "servers").find_one(member.guild.id)["channels"]["announcements"]
 
-        channel = member.guild.get_channel(announcements_channel_id)
+            channel = member.guild.get_channel(announcements_channel_id)
 
-        await channel.send(f":door: {member.display_name} has left.")
+            await channel.send(f":door: {member.display_name} has left.")
+        except Exception:
+            logger.exception("Member leave")
+
+        collection("users").delete_one(ufil(member))
+        # Delete DB entry
 
     @commands.Cog.listener()
     async def on_member_update(self,

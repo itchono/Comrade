@@ -9,6 +9,7 @@ import os
 from utils.utilities import get_uptime, get_host
 from utils.logger import logger
 from client import client as bot
+import datetime
 
 # disable flask dumb logging
 logging.getLogger('werkzeug').disabled = True
@@ -19,15 +20,25 @@ app = Flask('')
 
 @app.route('/')
 def main():
-    return render_template("index.html", uptime=round(get_uptime()),
+
+    with open("comrade.log", "r", encoding="utf-8") as f:
+        content = f.read().splitlines()
+
+    uptime = datetime.timedelta(seconds=round(get_uptime()))
+
+    return render_template("index.html", uptime=str(uptime),
                            host=get_host(), numservers=len(bot.guilds),
-                           user=str(bot.user))
+                           user=str(bot.user), serverlist=[f"{server.name} "
+                           f"({len(server.members)} members)"
+                               for server in bot.guilds],
+                               loglines=content)
 
 
 @app.route('/log')
 def downloadFile():
     path = "comrade.log"
-    return send_file(path, as_attachment=True)
+    return send_file(path, as_attachment=True,
+                     attachment_filename='comrade_log.txt')
 
 
 def run():

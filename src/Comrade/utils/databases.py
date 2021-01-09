@@ -6,7 +6,6 @@ import discord
 
 from db import collection
 from config import cfg
-from utils.utilities import ufil
 from utils.logger import logger
 
 
@@ -15,8 +14,8 @@ def new_server(guild: discord.Guild):
     Configures a new server for use, returns a dictionary ready to be updated
     '''
     # Attempt to locate channels automatically
-    log = discord.utils.find(
-        lambda c: "log" in c.name, guild.text_channels)
+    vault = discord.utils.find(
+        lambda c: "vault" in c.name, guild.text_channels)
     announcements = discord.utils.find(
         lambda c: "announcements" in c.name, guild.text_channels)
 
@@ -43,11 +42,9 @@ def new_server(guild: discord.Guild):
 
         "channels":
             {
-                "vault": 0,
+                "vault": vault.id if vault else 0,
                 "announcements": announcements.id if announcements else 0,
-                "log": log.id if log else 0,
-                "custom": 0,
-
+                "custom": 0
         },
 
         "durations":
@@ -106,11 +103,25 @@ def rebuild_server_cfgs(guilds: list):
     Rebuilds server configuration
     '''
     logger.info("Scanning for new servers...")
+
+    DB_guilds = collection("servers").find()
+
+    guild_ids = [g["_id"] for g in DB_guilds]
+
+    actual_guild_ids = [g.id for g in guilds]
+
     for guild in guilds:
-        if not collection("servers").find_one({"_id": guild.id}):
+        if guild.id not in guild_ids:
             logger.info(f"New Server Found: {guild.name}")
             collection("servers").insert_one(new_server(guild))
         rebuild_user_profiles(guild)  # check users too
+
+    for g_id in guild_ids:
+        if g_id not in actual_guild_ids:
+            logger.info("Deleting Old Server")
+            collection("servers").delete_one({"_id": g_id})
+            collection("users").delete_many({"server": g_id})
+
     logger.info("Server scan DONE")
 
 
@@ -118,8 +129,23 @@ def rebuild_user_profiles(guild: discord.Guild):
     '''
     Rebuilds user profiles within a given server
     '''
+    logger.info(f"{guild.name}: Scanning for new members...")
+
+    DB_members = collection("users").find({"server": guild.id})
+
+    member_ids = [m["user"] for m in DB_members]
+
+    actual_member_ids = [m.id for m in guild.members]
+
+    # Scan to add new
     for member in guild.members:
-        if not collection("users").find_one(
-                ufil(member)):
+        if member.id not in member_ids:
             logger.info(f"New Member Found in {guild.name}: {str(member)}")
             collection("users").insert_one(new_user(member))
+
+    # Scan to remove old
+    for mem_id in member_ids:
+        if mem_id not in actual_member_ids:
+            logger.info(f"Deleting Old Member Found in {guild.name}")
+            collection("users").delete_one(
+                {"server": guild.id, "user": mem_id})

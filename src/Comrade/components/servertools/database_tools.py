@@ -8,7 +8,7 @@ from db import collection
 from utils.checks import isServerOwner
 from utils.reactions import reactOK, reactX
 from utils.utilities import ufil
-from utils.databases import rebuild_server_cfgs
+from utils.databases import new_server, rebuild_user_profiles
 
 
 class Databases(commands.Cog):
@@ -31,7 +31,7 @@ class Databases(commands.Cog):
         Sets a channel with the given name into the Database.
         Leave channel blank to unset (delete)
         '''
-        if channel_name not in ["vault", "announcements", "log", "custom"]:
+        if channel_name not in ["vault", "announcements", "custom"]:
             await reactX(ctx)
             return
 
@@ -186,13 +186,15 @@ class Databases(commands.Cog):
         '''
         When the bot joins a server.
         '''
-        rebuild_server_cfgs(self.bot.guilds)
-        # Rebuild server cfgs
+        collection("servers").insert_one(new_server(guild))
+        rebuild_user_profiles(guild)
+        # Add new server entry
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: discord.Guild):
         '''
         When the bot leaves a server.
         '''
-        pass
+        collection("servers").delete_one({"_id": guild.id})
+        collection("users").delete_many({"server": guild.id})
         # I've been kicked etc

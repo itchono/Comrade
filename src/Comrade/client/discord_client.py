@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from config import cfg
 from pretty_help import PrettyHelp
+from utils.logger import logger
 
 # Map prefixes
 if cfg["Settings"]["secondary-prefix"]:
@@ -25,3 +26,11 @@ client = commands.Bot(
             42),
         sort_commands=False),
     intents=intents)
+
+
+@client.event
+async def on_error(event, *args, **kwargs):
+    try:
+        raise event
+    except Exception:
+        logger.exception(event)

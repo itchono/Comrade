@@ -22,7 +22,7 @@
             <div class="row">
                 <div class="col-sm">
                     <h3>Bot Uptime</h3>
-                    <p>{{ uptime }} seconds</p>
+                    <p>{{ uptime }}</p>
 
                 </div>
 
@@ -33,25 +33,28 @@
                 </div>
 
                 <div class="col-sm">
-                    <h3>Number of Servers</h3>
-                    <p>{{ numservers }}</p>
+                    <h3>Server List ({{ numservers }})</h3>
+                    <p>
+                        {% for para in serverlist %}
+                            {{para}}<br>
+                        {% endfor %}</p>
 
                 </div>
                 
             </div>
-
-            <div class="row">
-                <div class="col-sm">
-                    <h3>Bot Log</h3>
-                    <a href="/log">
-                        <button>Download</button>
-                     </a>
-
-                </div>
-                
-            </div>
-
             
+            <h3>Bot Log</h3>
+
+            <a href="/log">
+                <button>Download</button>
+            </a>
+
+            <p>
+                {% for para in loglines %}
+                    {{para}}<br>
+                {% endfor %}
+            </p>
+  
         </div>
 
 
