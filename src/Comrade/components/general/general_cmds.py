@@ -2,11 +2,12 @@ import discord
 from discord.ext import commands
 
 import typing
-import io
 
 from utils.utilities import (get_uptime, get_host, dm_channel,
                              local_time, utc_to_local_time, bot_prefix)
+
 from config import cfg
+import sys
 
 
 class General(commands.Cog):
@@ -163,3 +164,13 @@ class General(commands.Cog):
             await ctx.send(url)
         else:
             await ctx.send("The owner has not configured a hosting website")
+
+    @commands.command()
+    @commands.is_owner()
+    async def restart(self, ctx: commands.Context):
+        '''
+        Restarts the bot on the remote host
+        '''
+        await ctx.send()
+        await self.bot.close()
+        sys.exit(0)
