@@ -33,8 +33,9 @@ def new_server(guild: discord.Guild):
 
         "global-banned-words": {},
 
-        "default-daily-count": 2,
+        "default-daily-count": 0,
         # amount of daily member counts everyone starts with
+        # Set to 0 by default.
 
         "daily-member-staleness": 15,
         # only users active in the last n days are considered
@@ -66,8 +67,7 @@ def new_user(user: discord.Member):
     # Attempt to set default daily count
     server_cfg: dict = collection("servers").find_one(user.guild.id)
 
-    if not user.bot or not bool(
-            cfg["Settings"]["exclude-bots-from-daily"]):
+    if not user.bot or cfg["Settings"]["exclude-bots-from-daily"] == "False":
         daily = server_cfg["default-daily-count"]
     else:
         daily = 0

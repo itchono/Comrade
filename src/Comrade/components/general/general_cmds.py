@@ -153,3 +153,13 @@ class General(commands.Cog):
         '''
         with open("comrade.log", "rb") as f:
             await ctx.send(file=discord.File(f, filename="comrade_log.txt"))
+
+    @commands.command()
+    async def website(self, ctx: commands.Context):
+        '''
+        Pastes in Comrade's website, if the owner configured it
+        '''
+        if url := cfg["Hosting"]["host-url"]:
+            await ctx.send(url)
+        else:
+            await ctx.send("The owner has not configured a hosting website")

@@ -73,7 +73,7 @@ class Vault(commands.Cog):
         def check(reaction, user):
             return reaction.emoji == "🍅" and not user.bot and (
                 (reaction.message.id == m.id and user != ctx.author)
-                or bool(cfg["Settings"]["development-mode"]))
+                or cfg["Settings"]["development-mode"] == "True")
 
         await self.bot.wait_for("reaction_add", check=check, timeout=duration)
 

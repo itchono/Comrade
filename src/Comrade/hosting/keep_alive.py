@@ -10,6 +10,7 @@ from utils.utilities import get_uptime, get_host
 from utils.logger import logger
 from client import client as bot
 import datetime
+from config import cfg
 
 # disable flask dumb logging
 logging.getLogger('werkzeug').disabled = True
@@ -30,8 +31,9 @@ def main():
                            host=get_host(), numservers=len(bot.guilds),
                            user=str(bot.user), serverlist=[f"{server.name} "
                            f"({len(server.members)} members)"
-                               for server in bot.guilds],
-                               loglines=content)
+                                                           for server in bot.guilds],
+                           loglines=content,
+                           version=cfg["Information"]["version"])
 
 
 @app.route('/log')

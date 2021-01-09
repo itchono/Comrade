@@ -104,9 +104,6 @@ Once the bot has started up, you can do some things to configure the bot for you
 ### Channel Mappings
 Comrade relies on the server owner to feed text channels into Comrade for some of its funtionality. This includes:
 - announcements-channel: A place for the bot to make daily announcements
-- log-channel: A place for the bot to log internal status
-- meme-channel: A place in which all newly posted image or videos are "reviewed"
-- png-channel: A channel to spawn pngs
 - vault-channel: A place where users can vote to "pin" a message. Make this restricted such that only Comrade can post.
 - custom-channel-group: (Optional) category under which custom channels can be created
 
@@ -121,3 +118,95 @@ You can also host Comrade externally on sites like repl.it. As an example, you c
 
 Comrade features tools to automatically keep the repl alive (repl.it tries to kill your code if it is running for too long)
 
+### External Setup Procedures
+1. Create a `cfg.ini` and `.env` file, according to steps 1 to 4 above.
+2. Make a repl which runs shell script. In your `main.sh` file, set its contents to be the following:
+```
+rm -rf Comrade
+git clone https://github.com/itchono/Comrade
+cp -a Comrade/src/Comrade/. .
+pip install -r requirements.txt
+python main.py
+```
+3. Use a website like uptimerobot or something similar to make HTTP requests to your repl so that it stays up.
+
+
+## Example Config File
+```
+[Information]
+version = 5.0b [January 6]
+
+[Settings]
+prefix = "$c "
+# prefix for the bot
+
+secondary-prefix = ".c "
+# a secondary prefix, if you want it to be easier to call the bot on mobile, for example
+# you can delete the prefix, if you only want a single prefix.
+
+# Note: The prefix can be specially defined with or without quotes; I put quotes in so that you can clearly tell that there is a space trailing the prefix.
+# However, feel free to change it to something like {prefix = !}
+
+status = [$c ] Mechanizing Communism
+# status shown on the bot
+
+timezone = Canada/Eastern
+# the local timezone of wherever you want the bot to operate
+
+development-mode = False
+# bypasses checks and provides more verbose logging
+
+notify-on-startup = True
+# sends the bot owner a DM when the bot starts up
+
+exclude-bots-from-daily = True
+# exclude bots from daily member pool
+
+[Performance]
+text-model-limit = 64
+# maximum number of text generation models which can be stored (RAM sensitive)
+
+everyonesays-limit = 10
+# maxinum number of everyonesays messages sent in a single burst
+
+moderation-buffer-limit = 10
+# maximum number of messages kept per user in message buffer for moderation purposes
+
+macro-timeout = 15
+# maximum number of seconds allowed for execution of custom commands and macros
+
+[Modules]
+# enable or disable modules here
+NSFW = True
+General = True
+TextGen = True
+Fun = True
+RandomEvents = True
+Tools = True
+Games = True
+Waifu = True
+
+[MongoDB]
+# these entries map the names of collections in the MongoDB database to the variables called in code. These can be left alone.
+users = UserData
+servers = cfg
+announcements = announcements
+commands = CustomCommands
+lists = CustomLists
+favouritensfw = favourites
+emotes = Emotes
+triggers = messagetriggers
+reminders = reminders
+activitydata = activitydata
+
+[GoogleCloud]
+# the name of the bucket in which Comrade's emotes are to be stored
+bucket = comrade_emotes
+
+[Hosting]
+# if you will ping the bot to keep it alive on a host like repl.it
+ping = True
+# makes it so that if you request the monitoring link, it will return this.
+host-url = https://comradepreview.itchono.repl.co
+
+```

@@ -59,12 +59,12 @@ async def on_ready():
         if sum_of_weights(guild) == 0:
             await rebuild_weight_table(guild)
 
-    if cfg["Settings"]["notify-on-startup"]:
+    if cfg["Settings"]["notify-on-startup"] == "True":
         owner = (await bot.application_info()).owner
         owner_dm_channel = await dm_channel(owner)
         await owner_dm_channel.send("Bot is online.")
 
-if bool(cfg["Hosting"]["ping"]):
+if cfg["Hosting"]["ping"] == "True":
     keep_alive()
 
 bot.run(os.environ.get("TOKEN"))  # Run bot with loaded password
