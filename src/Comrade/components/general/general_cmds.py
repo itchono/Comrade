@@ -171,6 +171,4 @@ class General(commands.Cog):
         '''
         Restarts the bot on the remote host
         '''
-        await ctx.send("Be back in a sec.")
-        await self.bot.close()
         sys.exit(0)
