@@ -161,7 +161,7 @@ class Users(commands.Cog):
         if not member:
             member = ctx.author
 
-        _, weights = weight_table(ctx.guild.id)
+        _, weights = weight_table(ctx.guild)
 
         sum_of_weights = sum(weights)
 
@@ -180,7 +180,7 @@ class Users(commands.Cog):
         '''
         Shows relative weights of daily member table.
         '''
-        member_ids, weights = weight_table(ctx.guild.id)
+        member_ids, weights = weight_table(ctx.guild)
 
         pg = commands.Paginator()
 
