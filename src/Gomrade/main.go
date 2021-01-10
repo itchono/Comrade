@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -14,6 +13,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -24,11 +24,12 @@ var (
 	MDB       string
 	client    *mongo.Client
 	comradeDB *mongo.Database
+	prefix    string
 )
 
 // init is called before main
 func init() {
-
+	prefix = "$h "
 	if err := godotenv.Load(); err != nil {
 		fmt.Println("No .env file found")
 	}
@@ -42,7 +43,10 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	_ = client.Connect(ctx)
-	comradeDB = client.Database("comradeDB")
+
+	dblist, _ := client.ListDatabases(ctx, bson.D{})
+
+	comradeDB = client.Database(dblist.Databases[0].Name)
 
 	// Create a new Discord session using the provided login information.
 	dg, err := discordgo.New("Bot " + Token)
@@ -54,7 +58,6 @@ func main() {
 	dg.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
 
 	dg.AddHandler(messageCreate)
-	dg.AddHandler(messageReactionAdd)
 
 	// START BOT
 	// Open a websocket connection to Discord and begin listening.
@@ -74,8 +77,6 @@ func main() {
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal(err)
 	}
-
-	doEvery(5*time.Second, helloworld)
 	// Wait here until CTRL-C or other term signal is received.
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
@@ -98,50 +99,12 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if strings.ToLower(m.Content) == "hello ground dragon" {
 		s.ChannelMessageSend(m.ChannelID, "hello")
 
-	} else if strings.HasPrefix(strings.ToLower(m.Content), "!") {
-		success := Command(s, m)
+	} else if strings.HasPrefix(strings.ToLower(m.Content), prefix) {
+		success := NSFWCommand(s, m)
 		if success != 0 {
 			fmt.Println("COMMAND ERROR")
 		}
 	}
-
+	NSFWHandler(s, m)
 	Emote(s, m, comradeDB.Collection("Emotes"))
-}
-
-func messageReactionAdd(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
-	r := m.Emoji.Name
-
-	ch, _ := s.Channel(m.ChannelID)
-
-	if ch != nil {
-
-		fmt.Printf("Emote %s detected in channel %s\n", r, ch.Name)
-
-	}
-}
-
-func doEvery(d time.Duration, f func(time.Time)) {
-	for x := range time.Tick(d) {
-		f(x)
-	}
-}
-
-func helloworld(t time.Time) {
-	resp, err := http.Get("https://GroundDragon.itchono.repl.co")
-
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	log.Println(string(body))
-
-	fmt.Printf("%v: Executed Ping\n", t)
 }

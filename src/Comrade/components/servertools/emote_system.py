@@ -17,9 +17,6 @@ import requests
 import asyncio
 from google.cloud import storage
 
-from fuzzywuzzy import fuzz
-# NOTE: install python-Levenshtein for faster results.
-
 from db import gc_bucket, collection
 from utils.utilities import is_url, bot_prefix
 from utils.reactions import reactX
@@ -158,7 +155,7 @@ class Emotes(commands.Cog):
                     await ctx.message.delete()  # try to delete
 
                 # Or, it needs to be added
-                if document["type"] == "inline":
+                elif document["type"] == "inline":
                     emote = await inject(ctx, document["name"])
                     await echo(ctx, member=ctx.author, content=emote)
                     await ctx.message.delete()  # try to delete
@@ -174,25 +171,9 @@ class Emotes(commands.Cog):
                                 avatar_url=ctx.author.avatar_url,
                                 username=e)
 
-            else:
-                bigemotes = collection("emotes").find(
-                    {"server": ctx.guild.id, "type": "big"}, {"name": True})
-
-                similar = [
-                    i["name"] for i in bigemotes if fuzz.partial_ratio(
-                        i["name"], e) > 60]
-
-                embed = discord.Embed(
-                    description=f"Emote `{e}` not found. Did you mean one of the following?")
-
-                for k in similar:
-                    embed.add_field(name="Suggestion", value=":{}:".format(k))
-
-                await ctx.send(embed=embed)
-
     @emote.command()
     @commands.guild_only()
-    async def add(self, ctx: commands.Context, name, url=None):
+    async def add(self, ctx: commands.Context, name: str, url=None):
         '''
         Adds a custom emote to the Comrade Emote System.
         Adds as a big emote by default.
@@ -204,6 +185,14 @@ class Emotes(commands.Cog):
             if not is_url(url):
                 await ctx.send("Invalid URL Provided.")
                 return
+
+        # Validate Name
+        if not name.isalnum():
+            await ctx.send("Name must be alphanumeric!")
+            return
+        elif len(name) > 32:
+            await ctx.send("Max Name Length is 32 Chars.")
+            return
 
         # make sure it doesn't already exist
         if not collection("emotes").find_one(
@@ -459,8 +448,8 @@ class Emotes(commands.Cog):
                     if emote := await pullemote(i):
                         send = True
                         s = s.replace(i, str(emote))
-                    # else: await self.emote(await
-                    # self.bot.get_context(message), i.strip(":").strip(" "))
+                    # else:
+                    # Handled by Go Module
 
                 if send and len(match) >= 2:
                     await echo(await self.bot.get_context(message),
