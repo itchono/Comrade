@@ -3,7 +3,7 @@ from collections import Counter  # dictionary for inventory
 
 # Feature Wishlist
 # Add a thing that's like twitch plays, where you collect multiple inputs over the course, of say 5 seconds
-# Add diamond mining and house building
+# Add house building
 
 '''
 y,x  coordinate system

@@ -1,8 +1,16 @@
+'''
+Kevin Hu's work
+
+Not implemented yet.
+'''
+
 import discord
 from discord.ext import commands, tasks
 from utils import *
 
 import random
+
+raise NotImplementedError
 
 NAMES = ["Apple", "Banana", "Cow", "DNA", "E"]
 

@@ -1,5 +1,5 @@
 from .general_cmds import General
-from .message_triggers import MessageTriggers
+from .macros import Macros
 from .error_handler import ErrorHandler
 
-__all__ = ["General", "MessageTriggers", "ErrorHandler"]
+__all__ = ["General", "Macros", "ErrorHandler"]

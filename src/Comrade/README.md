@@ -134,7 +134,7 @@ python main.py
 ## Example Config File
 ```
 [Information]
-version = 5.0b [January 6]
+version = 5.0c [January 8]
 
 [Settings]
 prefix = "$c "
@@ -191,11 +191,11 @@ Waifu = True
 users = UserData
 servers = cfg
 announcements = announcements
-commands = CustomCommands
-lists = CustomLists
+macros = macros
+lists = lists
 favouritensfw = favourites
+pngnsfw = pngs
 emotes = Emotes
-triggers = messagetriggers
 reminders = reminders
 activitydata = activitydata
 
@@ -207,6 +207,6 @@ bucket = comrade_emotes
 # if you will ping the bot to keep it alive on a host like repl.it
 ping = True
 # makes it so that if you request the monitoring link, it will return this.
-host-url = https://comradepreview.itchono.repl.co
+host-url =
 
 ```

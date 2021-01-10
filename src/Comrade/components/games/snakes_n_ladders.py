@@ -1,5 +1,10 @@
-import random
+'''
+Just an idea.
+'''
+
 import numpy as np
+
+raise NotImplementedError
 
 BLOCKS = {0: "🟦", 1: "🟩", 2: "🟫", 3: "🌳", 4: "🏠",
           5: "💎", 6: "🔥", 7: "⬛", 98: "😳", 99: "⛏"}

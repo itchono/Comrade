@@ -28,17 +28,17 @@ import discord
 from discord.ext import commands
 
 from collections import defaultdict
+from db import collection
 
 
 class CustomList():
 
     def __init__(self, json):
-        self.name = json["name"]
-        self.arr = json["list"]
+        self.name: str = json["name"]
+        self.arr: list = json["list"]
         self.owner = json["owner"]
         self.server = json["server"]
         self.private = json["private"]
-        self.create_time = json["creation-time"]
 
     def __repr__(self):
         s = f"**__{self.name}__:**\n"
@@ -52,7 +52,9 @@ class CustomList():
 
         return s
 
-    def add(self, item): self.arr.append(item)
+    def add(self, item):
+        self.arr.append(item)
+        self.arr.sort()
 
     def remove(self, item):
         try:
@@ -67,8 +69,7 @@ class CustomList():
                 "list": self.arr,
                 "owner": self.owner,
                 "server": self.server,
-                "private": self.private,
-                "creation-time": self.create_time}
+                "private": self.private}
 
 
 class Lists(commands.Cog):
@@ -86,6 +87,17 @@ class Lists(commands.Cog):
         '''
         Shows all lists in this server.
         '''
+        all_lists = collection("lists").find({"server": ctx.guild.id})
+
+        names = ["- " + L["name"] for L in all_lists]
+
+        embed = discord.Embed("\n".join(names))
+
+        embed.set_author(
+            name=f"Lists in {ctx.guild.name}", icon_url=ctx.guild.icon_url)
+
+        await ctx.send(embed=embed)
+
 
     @commands.group(invoke_without_subcommand=True, name="list")
     @commands.guild_only()
@@ -96,6 +108,17 @@ class Lists(commands.Cog):
 
         Opens a new list if you already have one open
         '''
+        if L := collection("lists").find_one(
+            {"server": ctx.guild.id, "name": list_name}):
+            self.active[ctx.guild.id][ctx.author.id] = CustomList(L)
+
+            # You have opened it!
+        else:
+            L = {}
+            collection("lists").insert_one(L)
+            self.active[ctx.guild.id][ctx.author.id] = CustomList(L)
+            # New list
+
 
     @custom_list.group()
     @commands.guild_only()
@@ -111,7 +134,7 @@ class Lists(commands.Cog):
         '''
         Adds a single item to the currently open list
         '''
-        pass
+        self.active[ctx.guild.id][ctx.author.id].add(content)
 
     @add.command(name="many")
     @commands.guild_only()
@@ -119,7 +142,8 @@ class Lists(commands.Cog):
         '''
         Adds multiple items to the currently open list
         '''
-        pass
+        for item in items:
+            self.active[ctx.guild.id][ctx.author.id].add(item)
 
     @custom_list.group()
     @commands.guild_only()
@@ -127,7 +151,7 @@ class Lists(commands.Cog):
         '''
         Removes a single item from the currently open list
         '''
-        pass
+        self.active[ctx.guild.id][ctx.author.id].remove(content)
 
     @remove.command(name="many")
     @commands.guild_only()
@@ -135,7 +159,8 @@ class Lists(commands.Cog):
         '''
         Removes multiple items from the currently open list
         '''
-        pass
+        for item in items:
+            self.active[ctx.guild.id][ctx.author.id].remove(item)
 
     @custom_list.command()
     @commands.guild_only()
@@ -143,7 +168,9 @@ class Lists(commands.Cog):
         '''
         Removes this list from the database
         '''
-        pass
+        collection("lists").delete_one(
+            {"server": ctx.guild.id, "name": self.active[ctx.guild.id][ctx.author.id].name,
+            "owner": ctx.author.id})
 
     @custom_list.command()
     @commands.guild_only()

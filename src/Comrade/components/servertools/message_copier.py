@@ -1,5 +1,4 @@
 # Message Copier; Unchanged from 4.0
-
 import discord
 from discord.ext import commands
 import asyncio
@@ -17,7 +16,9 @@ class Copier(commands.Cog):
     @commands.command()
     @commands.guild_only()
     @commands.check_any(commands.is_owner(), isServerOwner())
-    async def copymessages(self, ctx: commands.Context, source: discord.TextChannel, destination: discord.TextChannel):
+    async def copymessages(self, ctx: commands.Context,
+                           source: discord.TextChannel,
+                           destination: discord.TextChannel):
         '''
         Exports channel texts to another channel
         '''
@@ -46,4 +47,5 @@ class Copier(commands.Cog):
         except asyncio.TimeoutError:
             await ctx.send("Tranfer aborted.")
         else:
-            await ctx.send(f"Transfer from {source.mention} to {destination.mention} completed successfully.")
+            await ctx.send(
+                f"Transfer from {source.mention} to {destination.mention} completed successfully.")

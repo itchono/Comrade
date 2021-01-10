@@ -7,7 +7,6 @@ import typing
 import asyncio
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-
 from sympy import pretty, sympify
 from sympy.parsing.sympy_parser import (implicit_multiplication_application,
                                         factorial_notation, convert_xor,
@@ -21,6 +20,7 @@ from utils.echo import echo
 from utils.emoji_converter import textToEmoji
 from db import collection
 
+
 transformations = standard_transformations + \
     (implicit_multiplication_application,) + (factorial_notation,) + (convert_xor,)
 
@@ -28,6 +28,8 @@ transformations = standard_transformations + \
 with open("static/news_border.txt", "r", encoding="utf-8") as f:
     BORDER_TOP, ACCENT_BORDER, BORDER_BOTTOM = f.read().splitlines()
     len_border = len(BORDER_TOP)
+
+
 
 
 class Tools(commands.Cog):

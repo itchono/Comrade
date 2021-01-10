@@ -1,7 +1,11 @@
 '''
 Experimental file
-'''
 
+Used to log activity data of server users over a period of about 4 months.
+
+Code maintained here only as reference.
+'''
+raise NotImplementedError
 
 from typing import Collection
 import discord

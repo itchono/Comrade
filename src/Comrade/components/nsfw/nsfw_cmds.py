@@ -5,19 +5,18 @@ Credits to Sunekku (Nuha Sahraoui).
 
 import discord
 from discord.ext import commands
-from utils import *
 
-import json
-import io
 import aiohttp
 import re
+import io
 import urllib.request
-import math
-import random
 import requests
 from bs4 import BeautifulSoup
 from random import randrange
-from utils.checks.other_checks import *
+
+from utils.utilities import webscrape_header
+from utils.reactions import reactOK
+from db import collection
 
 
 class NSFW(commands.Cog):
@@ -35,24 +34,17 @@ class NSFW(commands.Cog):
         self.extensions = None
         self.prev_tag = ""
 
-        self.last_image = None
-        self.last_tags = None
-        self.last_number = None
-        self.last_post = None
-
     @commands.command()
     @commands.is_nsfw()
     async def nsearch(self, ctx: commands.Context, *, args: str = "small breasts"):
         '''
         Searches for a hentai on nhentai.net
         '''
-        user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
-        headers = {'User-Agent': user_agent, }
         tags = re.split(r"\s", args)
         url = 'https://nhentai.net/search/?q='
         for i in range(len(tags)):
             url += (tags[i] + '+')
-        request = urllib.request.Request(url, None, headers)
+        request = urllib.request.Request(url, None, webscrape_header)
         try:
             response = urllib.request.urlopen(request)
         except ValueError:
@@ -81,7 +73,7 @@ class NSFW(commands.Cog):
             num_pages = num // 25
         page = randrange(1, num_pages + 1)
         url2 = url + '&page={page}'.format(page=page)
-        request = urllib.request.Request(url2, None, headers)
+        request = urllib.request.Request(url2, None, webscrape_header)
         response = urllib.request.urlopen(request)
         data = response.read()
         soup = BeautifulSoup(data, 'html.parser')
@@ -100,6 +92,15 @@ class NSFW(commands.Cog):
 
         await self.nhentai(ctx=ctx, args=search)
 
+        def check(message):
+            return message.channel == ctx.channel and \
+                message.content in ("next", "favourite") and \
+                not message.author.bot
+
+        message = await self.bot.wait_for("message", check=check, timeout=30)
+
+        await self.nsearch(ctx=await self.bot.get_context(message), args=self.prev_tag)
+
     @commands.command()
     @commands.is_nsfw()
     async def nhentai(self, ctx: commands.Context, args: int = 185217):
@@ -107,10 +108,8 @@ class NSFW(commands.Cog):
         Fetches a hentai from nhentai.net, by ID.
         '''
         self.cur_page = 0
-        user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
-        headers = {'User-Agent': user_agent, }
         url = 'https://nhentai.net/g/{num}/'.format(num=args)
-        request = urllib.request.Request(url, None, headers)
+        request = urllib.request.Request(url, None, webscrape_header)
         try:
             response = urllib.request.urlopen(request)
         except BaseException:
@@ -172,178 +171,147 @@ class NSFW(commands.Cog):
         await ctx.send(embed=e)
         self.prev_search = gallerynumber
 
-    @commands.Cog.listener()
-    async def on_message(self, message: discord.message):
-        if (not message.guild or message.channel.is_nsfw()
-            ) and not message.author.bot and message.content:
-            if message.content.lower() == "next":
-                await self.hentai(ctx=await self.bot.get_context(message), args=self.last_search)
-            if message.content.lower() == "retry":
-                await self.nsearch(ctx=await self.bot.get_context(message), args=self.prev_tag)
-            if message.content.split()[0] == "favourite" and len(
-                    message.content.split()) > 1 and self.last_image:
-                await self.favourite(ctx=await self.bot.get_context(message), imageName="".join(message.content.split()[1:]), url=self.last_image)
-            elif message.content.split()[0] == "favourite" and len(message.content.split()) > 1:
-                await message.channel.send("No previous picture was sent!")
 
-            if message.content.lower() == "np":
-                ctx = await self.bot.get_context(message)
-                self.cur_page += 1
-                img_url = 'https://i.nhentai.net/galleries/{gallerynumber}/{page}.'.format(
-                    gallerynumber=self.prev_search, page=self.cur_page) + self.extensions[self.cur_page]
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(img_url) as resp:
-                        if resp.status != 200:
-                            await ctx.send(
-                                'You have reached the end of this work.')
-                        else:
-                            self.last_image = img_url
-                            data = io.BytesIO(await resp.read())
-                            await ctx.send(
-                                file=discord.File(data, img_url))
-        if random.randint(1, 100) < 5 and not message.author.bot:
-            url_base = 'https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1'
-            url_base = url_base + '&tags=-webm+sort%3arandom+'
-            post = requests.get(url_base).json()
-            self.last_post = post
-            img_url = post[0]['file_url']
-            self.last_tags = post[0]['tags']
-            self.last_number = int(len(post[0]['tags']) / 200 + 3)
-            e = discord.Embed(
-                description=f":camera_with_flash: **A PNG HAS SPAWNED, NAME {self.last_number} OF ITS TAGS TO CLAIM IT**",
-                color=0xfecbed)
-            e.set_image(url=img_url)
-            list1 = []
-            tags = self.last_tags.split()
-            for i in range(len(tags)):
-                cuts = random.sample(
-                    range(len(tags[i])), int(len(tags[i]) / 2))
-                cuttag = ""
-                for j in range(len(tags[i])):
-                    if j in cuts:
-                        cuttag += "_"
-                    else:
-                        cuttag += tags[i][j]
-                list1.append(cuttag)
-            e.set_footer(text=" ".join(list1))
+        def check(message):
+            return message.channel == ctx.channel and \
+                message.content == "np" and \
+                not message.author.bot
 
-            pngchn = await getChannel(message.guild, "png-channel")
-            await pngchn.send(embed=e)
+        message = await self.bot.wait_for("message", check=check, timeout=300)
 
-    @commands.command(aliases=["sister"])
+        ctx = await self.bot.get_context(message)
+        self.cur_page += 1
+        img_url = 'https://i.nhentai.net/galleries/{gallerynumber}/{page}.'.format(gallerynumber=self.prev_search, page=self.cur_page) + self.extensions[self.cur_page]
+        async with aiohttp.ClientSession() as session:
+            async with session.get(img_url) as resp:
+                if resp.status != 200:
+                    await ctx.send(
+                        'You have reached the end of this work.')
+                else:
+                    self.last_image = img_url
+                    data = io.BytesIO(await resp.read())
+                    await ctx.send(
+                        file=discord.File(data, img_url))
+
+
+
+    @commands.group(invoke_without_command=True)
     @commands.guild_only()
     @commands.is_nsfw()
     async def favourite(self, ctx: commands.Context, imageName: str, url: str = None):
         '''
-        Adds an image to the favourites list, or retrieves a favourite based on ID
+        Adds an image to the favourites list
 
         Category naming system:
         type as `$c favourite category:name <URL>`
-        ex. `$c favourite neko:kurumi <URL>` saves an entry under the "neko" category, titled "kurumi"
-
-        To view a post, you can either specify a name, category, or both.
-        ex. `$c favourite neko:kurumi` or `$c favourite kurumi` will get you identical results,
-        UNLESS you have multiple posts under different catergories with the same name, in which case it will be based on the most recent entry.
-
-        You can view other people's favourites by specifying their name when you call the command.
-        ex. `$c favourite itchono:neko:kurumi`
+        ex. `$c favourite neko:kurumi <URL>` saves an entry under the "neko" category, titled "kurumi
 
         '''
-        if url or ctx.message.attachments:
-
+        if ctx.invoked_subcommand is None:
             if ctx.message.attachments:
                 url = ctx.message.attachments[0].url
 
             tokens = imageName.split(":")  # split tokens
 
             if len(tokens) > 1:
-                DBupdate(FAVOURITES_COL,
-                         {"imageID": tokens[1],
-                          "server": ctx.guild.id,
-                          "user": ctx.author.id,
-                          "category": tokens[0]},
-                         {"imageID": tokens[1],
+                collection("favouritensfw").insert_one(
+                    {"imageID": tokens[1],
                              "URL": url,
                              "server": ctx.guild.id,
                              "user": ctx.author.id,
-                             "category": tokens[0]})
+                             "category": tokens[0]}
+                )
                 fullname = f"{tokens[0]}:{tokens[1]}"
             else:
-                DBupdate(FAVOURITES_COL,
-                         {"imageID": tokens[0],
-                          "server": ctx.guild.id,
-                          "user": ctx.author.id,
-                          "category": ""},
-                         {"imageID": imageName,
+
+                collection("favouritensfw").insert_one(
+                     {"imageID": imageName,
                           "URL": url,
                           "server": ctx.guild.id,
                           "user": ctx.author.id,
-                          "category": ""})
+                          "category": ""}
+                )
                 fullname = f"{tokens[0]}"
-
-            await reactOK(ctx)
             await ctx.send(f"Image favourited as `{fullname}`.")
-        else:
-            try:
-                tokens = imageName.split(":")  # split tokens
 
-                fav = None
 
-                if len(tokens) == 1:
-
-                    if fav := DBfind_one(FAVOURITES_COL,
-                                         {"server": ctx.guild.id,
-                                          "imageID": tokens[0],
-                                             "user": ctx.author.id,
-                                             "category": ""}):
-                        pass
-                    else:
-                        fav = DBfind_one(
-                            FAVOURITES_COL, {
-                                "server": ctx.guild.id, "imageID": tokens[0], "user": ctx.author.id})
-
-                elif len(tokens) == 2:
-
-                    if fav := DBfind_one(FAVOURITES_COL,
-                                         {"server": ctx.guild.id,
-                                          "imageID": tokens[1],
-                                             "user": ctx.author.id,
-                                             "category": tokens[0]}):
-                        pass
-                    else:
-                        fav = DBfind_one(FAVOURITES_COL, {"server": ctx.guild.id, "imageID": tokens[1], "user": (await getUser(ctx, tokens[0])).id})
-
-                elif len(tokens) == 3:
-
-                    fav = DBfind_one(FAVOURITES_COL, {"server": ctx.guild.id, "imageID": tokens[2], "user": (await getUser(ctx, tokens[0])).id, "category": tokens[1] if tokens[1] else ""})
-
-                e = discord.Embed()
-                e.set_image(url=fav["URL"])
-                await ctx.send(embed=e)
-            except BaseException:
-                await delSend(ctx, "Image not found.")
-
-    @commands.command(aliases=["turnout"])
+    @favourite.command()
     @commands.guild_only()
     @commands.is_nsfw()
-    async def unfavourite(self, ctx: commands.Context, imageName: str):
+    async def view(self, ctx: commands.Context, imageName: str):
+        '''
+        Retrieves a favourite based on ID
+        To view a post, you can either specify a name, category, or both.
+        ex. `$c favourite neko:kurumi` or `$c favourite kurumi` will get you identical results,
+        UNLESS you have multiple posts under different catergories with the same name, in which case it will be based on the most recent entry.
+
+        You can view other people's favourites by specifying their name when you call the command.
+        ex. `$c favourite itchono:neko:kurumi`
+        '''
+        try:
+            tokens = imageName.split(":")  # split tokens
+
+            fav = None
+
+            if len(tokens) == 1:
+
+                if fav := collection(
+                    "favouritensfw").find_one({"server": ctx.guild.id,
+                                               "imageID": tokens[0],
+                                               "user": ctx.author.id,
+                                               "category": ""}):
+                    pass
+                else:
+                    fav = collection(
+                            "favouritensfw").find_one({
+                            "server": ctx.guild.id, "imageID": tokens[0], "user": ctx.author.id})
+
+            elif len(tokens) == 2:
+
+                if fav := collection(
+                            "favouritensfw").find_one({"server": ctx.guild.id,
+                                        "imageID": tokens[1],
+                                            "user": ctx.author.id,
+                                            "category": tokens[0]}):
+                    pass
+                else:
+                    member = ctx.guild.get_member(tokens[0])
+
+                    fav = collection(
+                    "favouritensfw").find_one({"server": ctx.guild.id, "imageID": tokens[1], "user": member.id})
+
+            elif len(tokens) == 3:
+
+                member = ctx.guild.get_member(tokens[0])
+
+                fav = collection(
+                    "favouritensfw").find_one({"server": ctx.guild.id, "imageID": tokens[2], "user": await member.id, "category": tokens[1] if tokens[1] else ""})
+
+            e = discord.Embed()
+            e.set_image(url=fav["URL"])
+            await ctx.send(embed=e)
+        except BaseException:
+            await ctx.send("Image not found.")
+
+
+    @favourite.command()
+    @commands.guild_only()
+    @commands.is_nsfw()
+    async def remove(self, ctx: commands.Context, imageName: str):
         '''
         removes an image from the favourites list
         '''
-
         try:
             tokens = imageName.split(":")  # split tokens
 
             if len(tokens) > 1:
-                DBremove_one(FAVOURITES_COL,
-                             {"server": ctx.guild.id,
+                collection("favouritensfw").delete_one({"server": ctx.guild.id,
                               "imageID": tokens[1],
                                  "user": ctx.author.id,
                                  "category": tokens[0]})
                 fullname = f"{tokens[1]}:{tokens[0]}"
             else:
-                DBremove_one(FAVOURITES_COL,
-                             {"server": ctx.guild.id,
+                collection("favouritensfw").delete_one({"server": ctx.guild.id,
                               "imageID": tokens[0],
                                  "user": ctx.author.id,
                                  "category": ""})
@@ -353,12 +321,13 @@ class NSFW(commands.Cog):
             await ctx.send(f"`{fullname}` has been removed.", delete_after=10)
 
         except BaseException:
-            await delSend(ctx, "Image not found.")
+            await ctx.send("Image not found.")
 
-    @commands.command()
+    @favourite.command()
     @commands.guild_only()
     @commands.is_nsfw()
-    async def rename(self, ctx: commands.Context, oldimageName: str, newimageName: str):
+    async def rename(self, ctx: commands.Context,
+                     oldimageName: str, newimageName: str):
         '''
         renames an image in the favourites list
         '''
@@ -367,26 +336,24 @@ class NSFW(commands.Cog):
         fav = None
 
         if len(tokens) == 1:
-            fav = DBfind_one(FAVOURITES_COL,
-                             {"server": ctx.guild.id,
+            fav = collection("favouritensfw").find_one({"server": ctx.guild.id,
                               "imageID": tokens[0],
                                  "user": ctx.author.id,
                                  "category": ""})
         elif len(tokens) == 2:
-            fav = DBfind_one(FAVOURITES_COL,
-                             {"server": ctx.guild.id,
+            fav = collection("favouritensfw").find_one({"server": ctx.guild.id,
                               "imageID": tokens[1],
                                  "user": ctx.author.id,
                                  "category": tokens[0]})
-
         if fav:
             await self.unfavourite(ctx, oldimageName)
             await self.favourite(ctx, newimageName, fav["URL"])
 
-    @commands.command(aliases=["viewstable"])
+    @commands.command()
     @commands.guild_only()
     @commands.is_nsfw()
-    async def favourites(self, ctx: commands.Context, user: discord.Member = None, category: str = None):
+    async def favourites(self, ctx: commands.Context,
+                         user: discord.Member = None, category: str = None):
         '''
         Lists all favourited images. Can specify another user, or a category.
         '''
@@ -396,12 +363,10 @@ class NSFW(commands.Cog):
             user = ctx.author
 
         if category:
-            favs = DBfind(
-                FAVOURITES_COL, {
+            favs = collection("favouritensfw").find({
                     "server": ctx.guild.id, "user": user.id, "category": category})
         else:
-            favs = DBfind(
-                FAVOURITES_COL, {
+            favs = collection("favouritensfw").find({
                     "server": ctx.guild.id, "user": user.id})
 
         # Sort favourites by category
@@ -458,153 +423,7 @@ class NSFW(commands.Cog):
         for e in embeds:
             await ctx.send(embed=e)
 
-    '''@commands.command()
-    @commands.is_nsfw()
-    async def spawnpng(self, ctx: commands.Context):
-        url_base = 'https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1'
-        url_base = url_base + '&sort:random+'
-        post = requests.get(url_base).json()
-        self.last_post = post
-        img_url = post[0]['file_url']
-        postid = post[0]['id']
-        self.last_tags = post[0]['tags']
-        self.last_number = int(len(post[0]['tags'])/200 + 3)
-        e = discord.Embed(
-            title="A PNG HAS SPAWNED, NAME " + str(self.last_number) + " OF ITS TAGS TO CLAIM IT!",
-            url=img_url,
-            color=0xfecbed)
-        e.set_author(name='Retrieved from Gelbooru')
-        e.set_image(url=img_url)
-
-        if img_url.endswith(".webm"):
-            async with aiohttp.ClientSession() as session:
-                async with session.get(img_url) as resp:
-                    if resp.status != 200:
-                        await ctx.send('Could not download file.')
-                    else:
-                        data = io.BytesIO(await resp.read())
-                        e.set_thumbnail(url='https://img.icons8.com/cotton/2x/movie-beginning.png')
-                        await ctx.send(embed=e)
-                        await ctx.send(file=discord.File(data, img_url))
-        else:
-            e.set_thumbnail(url='https://vectorified.com/images/image-gallery-icon-21.png')
-            await ctx.send(embed=e)
-
     @commands.command()
-    @commands.is_nsfw()
-    async def listtags(self, ctx: commands.Context, *, args:int = ""):
-        for i in range(min(len(self.last_tags.split()),args,50)):
-            await ctx.send(self.last_tags.split()[i])'''
-
-    @commands.command()
-    @commands.is_nsfw()
-    async def claimpng(self, ctx: commands.Context, *tags):
-        # Claim a png
-        claim = True
-        user = ctx.author
-        if self.last_number and len(tags) >= self.last_number:
-            for i in tags:
-                if i not in self.last_tags:
-                    claim = False
-            if claim:
-                await ctx.send("Congratulations, you've claimed the last png!")
-                DBupdate(PNG_COL,
-                         {"imageID": self.last_post[0]['id'],
-                          "server": ctx.guild.id,
-                          "user": ctx.author.id,
-                          "URL": self.last_post[0]['file_url'],
-                          "claim_tags": tags,
-                          "number": len(DBfind(PNG_COL,
-                                               {"server": ctx.guild.id,
-                                                "user": user.id}))},
-                         {"imageID": self.last_post[0]['id'],
-                             "server": ctx.guild.id,
-                             "user": ctx.author.id,
-                             "URL": self.last_post[0]['file_url'],
-                             "claim_tags": tags,
-                             "number": len(DBfind(PNG_COL,
-                                                  {"server": ctx.guild.id,
-                                                   "user": user.id}))},
-                         True)
-                self.last_post = None
-                self.last_number = None
-                self.last_tags = None
-            else:
-                await ctx.send("You've got the tags wrong son, try again.")
-        else:
-            await ctx.send("You're gonna need more tags there son.")
-
-    @commands.command()
-    @commands.is_nsfw()
-    async def listpngs(self, ctx: commands.Context, *, args: int = 1):
-        # List your pngs
-        user = ctx.author
-        pages = math.ceil(
-            len(DBfind(PNG_COL, {"server": ctx.guild.id, "user": user.id})) / 10)
-        if 0 < args <= pages:
-            def construct(
-                pngs): return f"{pngs['number']+1}. **[{pngs['imageID']}]({pngs['URL']})**\n"
-            s = ""
-
-            pngs = DBfind(PNG_COL, {"server": ctx.guild.id, "user": user.id})
-
-            terms = ""
-
-            for i in range(
-                    len(pngs) - 10 * args + 1,
-                    len(pngs) - 10 * args + 11):
-                if 0 < i:
-                    s = construct(pngs[i - 1])
-                    terms = s + terms
-
-            e = discord.Embed(
-                title=f"Page {args} of {pages} for {user.display_name}'s PNGs in {ctx.guild}",
-                description=terms)
-            await ctx.send(embed=e)
-        else:
-            await ctx.send("Please enter a valid page number.")
-
-    @commands.command()
-    @commands.is_nsfw()
-    async def viewpng(self, ctx: commands.Context, args: int = ""):
-        # View your pngs
-        if 0 < args <= len(
-            DBfind(
-                PNG_COL, {
-                "server": ctx.guild.id, "user": ctx.author.id})):
-            post = requests.get(
-                "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&id=" + str(
-                    DBfind(
-                        PNG_COL, {
-                            "server": ctx.guild.id, "user": ctx.author.id, "number": (
-                                args - 1)})[0]['imageID'])).json()
-            score = post[0]['score']
-            postid = post[0]['id']
-            tag_string = post[0]['tags']
-            e = discord.Embed(
-                title=str(args), description='ID: {postid}'.format(
-                    postid=postid), url=DBfind(
-                    PNG_COL, {
-                        "server": ctx.guild.id, "user": ctx.author.id, "number": (
-                            args - 1)})[0]['URL'], color=0xfecbed)
-            e.set_author(name='Retrieved from Gelbooru')
-            e.add_field(name='score',
-                        value=post[0]['score'],
-                        inline=True)
-            e.add_field(name='rating',
-                        value=post[0]['rating'],
-                        inline=True)
-            e.set_footer(text=tag_string)
-            e.set_image(
-                url=DBfind(
-                    PNG_COL, {
-                        "server": ctx.guild.id, "user": ctx.author.id, "number": (
-                            args - 1)})[0]['URL'])
-            await ctx.send(embed=e)
-        else:
-            await ctx.send("Please enter a valid PNG number.")
-
-    @commands.command(aliases=["find"])
     @commands.is_nsfw()
     async def hentai(self, ctx: commands.Context, *, args: str = ""):
         '''
@@ -636,7 +455,7 @@ class NSFW(commands.Cog):
             await ctx.send("Can you calm your genitals")
         else:
             if "clear" in tag_list:
-                await ctx.channel.purge(check=purgeCheck(self.bot.user), bulk=True)
+                await ctx.channel.purge(check=lambda m: m.author == self.bot.user, bulk=True)
             else:
                 url_base = 'https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1'
                 url_base = url_base + \
@@ -670,8 +489,6 @@ class NSFW(commands.Cog):
                             count = 0
                 for i in range(len(posts)):
                     img_url = posts[i]['file_url']
-
-                    score = posts[i]['score']
                     postid = posts[i]['id']
                     tags = ""
                     for k in range(len(tag_list)):
@@ -679,7 +496,7 @@ class NSFW(commands.Cog):
                     tag_string = posts[i]['tags']
                     e = discord.Embed(
                         title=tags,
-                        description='ID: {postid}'.format(postid=postid),
+                        description=f'ID: {postid}',
                         url=img_url,
                         color=0xfecbed)
                     e.set_author(name='Retrieved from Gelbooru')
@@ -696,18 +513,8 @@ class NSFW(commands.Cog):
                     self.last_image = img_url
 
                     if img_url.endswith(".webm"):
-                        async with aiohttp.ClientSession() as session:
-                            async with session.get(img_url) as resp:
-                                if resp.status != 200:
-                                    await ctx.send(
-                                        'Could not download file.')
-                                else:
-                                    data = io.BytesIO(await resp.read())
-                                    e.set_thumbnail(
-                                        url='https://img.icons8.com/cotton/2x/movie-beginning.png')
-                                    await ctx.send(embed=e)
-                                    await ctx.send(
-                                        file=discord.File(data, img_url))
+                        pass
+                        # Abort
                     else:
                         e.set_thumbnail(
                             url='https://vectorified.com/images/image-gallery-icon-21.png')
@@ -717,3 +524,18 @@ class NSFW(commands.Cog):
                     for k in range(len(args)):
                         s = s + args[k] + " "
                     self.last_search = s
+
+        def check(message):
+            return message.channel == ctx.channel and \
+                message.content in ("next", "favourite") and \
+                not message.author.bot
+
+        message = await self.bot.wait_for("message", check=check, timeout=30)
+
+        # TODO make this a repeatable loop
+
+        if message.content == "next":
+            await self.hentai(ctx=await self.bot.get_context(message), args=self.last_search)
+        else:
+            await self.favourite(ctx=await self.bot.get_context(message), imageName="".join(message.content.split()[1:]), url=self.last_image)
+

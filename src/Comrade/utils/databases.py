@@ -140,7 +140,7 @@ def rebuild_user_profiles(guild: discord.Guild):
     # Scan to add new
     for member in guild.members:
         if member.id not in member_ids:
-            logger.info(f"New Member Found in {guild.name}: {str(member)}")
+            logger.info(f"New Member Found in {guild.name}")
             collection("users").insert_one(new_user(member))
 
     # Scan to remove old

@@ -5,7 +5,8 @@ from .announcements import Announcements
 from .vault import Vault
 from .moderation import Moderation
 from .text_filter import TextFilter
+from .message_copier import Copier
 
 __all__ = ["Databases", "Emotes", "Users",
            "Announcements", "Vault", "Moderation",
-           "TextFilter"]
+           "TextFilter", "Copier"]
