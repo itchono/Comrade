@@ -3,6 +3,7 @@ Hentai.
 Credits to Sunekku (Nuha Sahraoui).
 '''
 
+import asyncio
 import discord
 from discord.ext import commands
 
@@ -17,6 +18,7 @@ from random import randrange
 from utils.utilities import webscrape_header
 from utils.reactions import reactOK
 from db import collection
+from utils.utilities import bot_prefix
 
 
 class NSFW(commands.Cog):
@@ -28,11 +30,8 @@ class NSFW(commands.Cog):
     def __init__(self, bot):
         self.bot: commands.Bot = bot
 
-        self.last_search = ""
-        self.cur_page = 0
-        self.prev_search = None
-        self.extensions = None
-        self.prev_tag = ""
+        self.active_hentai = None
+        self.active_nhentai = None
 
     @commands.command()
     @commands.is_nsfw()
@@ -92,22 +91,13 @@ class NSFW(commands.Cog):
 
         await self.nhentai(ctx=ctx, args=search)
 
-        def check(message):
-            return message.channel == ctx.channel and \
-                message.content in ("next", "favourite") and \
-                not message.author.bot
-
-        message = await self.bot.wait_for("message", check=check, timeout=30)
-
-        await self.nsearch(ctx=await self.bot.get_context(message), args=self.prev_tag)
-
     @commands.command()
     @commands.is_nsfw()
     async def nhentai(self, ctx: commands.Context, args: int = 185217):
         '''
         Fetches a hentai from nhentai.net, by ID.
         '''
-        self.cur_page = 0
+        cur_page = 0
         url = 'https://nhentai.net/g/{num}/'.format(num=args)
         request = urllib.request.Request(url, None, webscrape_header)
         try:
@@ -148,7 +138,6 @@ class NSFW(commands.Cog):
             if re.search('/{}/'.format(gallerynumber), s):
                 y = re.split(r"\.", x)
             imgs.append(y[len(y) - 1])
-        self.extensions = imgs
 
         if araragi_san:
             araragi_san.pop(0)
@@ -169,29 +158,35 @@ class NSFW(commands.Cog):
                     inline=True)
         e.set_image(url=img_url)
         await ctx.send(embed=e)
-        self.prev_search = gallerynumber
-
 
         def check(message):
             return message.channel == ctx.channel and \
-                message.content == "np" and \
+                (message.content == "np" or message.content.startswith(bot_prefix)) and \
                 not message.author.bot
 
-        message = await self.bot.wait_for("message", check=check, timeout=300)
+        while 1:
+            try:
+                message = await self.bot.wait_for("message", check=check, timeout=300)
 
-        ctx = await self.bot.get_context(message)
-        self.cur_page += 1
-        img_url = 'https://i.nhentai.net/galleries/{gallerynumber}/{page}.'.format(gallerynumber=self.prev_search, page=self.cur_page) + self.extensions[self.cur_page]
-        async with aiohttp.ClientSession() as session:
-            async with session.get(img_url) as resp:
-                if resp.status != 200:
-                    await ctx.send(
-                        'You have reached the end of this work.')
-                else:
-                    self.last_image = img_url
-                    data = io.BytesIO(await resp.read())
-                    await ctx.send(
-                        file=discord.File(data, img_url))
+                if message.content.startswith(bot_prefix):
+                    return # cancel
+
+                ctx = await self.bot.get_context(message)
+                cur_page += 1
+                img_url = 'https://i.nhentai.net/galleries/{gallerynumber}/{page}.'.format(gallerynumber=gallerynumber, page=cur_page) + imgs[cur_page]
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(img_url) as resp:
+                        if resp.status != 200:
+                            await ctx.send(
+                                'You have reached the end of this work.')
+                            return
+                        else:
+                            self.last_image = img_url
+                            data = io.BytesIO(await resp.read())
+                            await ctx.send(
+                                file=discord.File(data, img_url))
+            except asyncio.TimeoutError:
+                pass
 
 
 
@@ -455,7 +450,7 @@ class NSFW(commands.Cog):
             await ctx.send("Can you calm your genitals")
         else:
             if "clear" in tag_list:
-                await ctx.channel.purge(check=lambda m: m.author == self.bot.user, bulk=True)
+                m = await ctx.channel.purge(check=lambda m: m.author == self.bot.user, bulk=True)
             else:
                 url_base = 'https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1'
                 url_base = url_base + \
@@ -490,7 +485,7 @@ class NSFW(commands.Cog):
                 for i in range(len(posts)):
                     img_url = posts[i]['file_url']
                     postid = posts[i]['id']
-                    tags = ""
+                    tags = "Hentai: "
                     for k in range(len(tag_list)):
                         tags += " " + tag_list[k]
                     tag_string = posts[i]['tags']
@@ -518,24 +513,29 @@ class NSFW(commands.Cog):
                     else:
                         e.set_thumbnail(
                             url='https://vectorified.com/images/image-gallery-icon-21.png')
-                        await ctx.send(embed=e)
+                        m = await ctx.send(embed=e)
 
                     s = ""
                     for k in range(len(args)):
                         s = s + args[k] + " "
-                    self.last_search = s
 
         def check(message):
             return message.channel == ctx.channel and \
-                message.content in ("next", "favourite") and \
+                (message.content in ("next", "favourite") or message.content.startswith(bot_prefix)) and \
                 not message.author.bot
+        
+        while 1:
+            try:
 
-        message = await self.bot.wait_for("message", check=check, timeout=30)
+                message = await self.bot.wait_for("message", check=check, timeout=30)
 
-        # TODO make this a repeatable loop
+                if message.content.startswith(bot_prefix):
+                    return # abort
 
-        if message.content == "next":
-            await self.hentai(ctx=await self.bot.get_context(message), args=self.last_search)
-        else:
-            await self.favourite(ctx=await self.bot.get_context(message), imageName="".join(message.content.split()[1:]), url=self.last_image)
-
+                if message.content == "next":
+                    await self.hentai(ctx=await self.bot.get_context(message), args=s)
+                else:
+                    await self.favourite(ctx=await self.bot.get_context(message), imageName="".join(message.content.split()[1:]), url=img_url)
+            
+            except asyncio.TimeoutError:
+                pass
