@@ -283,6 +283,9 @@ class Emotes(commands.Cog):
         bigemotes = collection("emotes").find(
             {"server": ctx.guild.id, "type": "big"}, {"name": True})
 
+        if not bigemotes:
+            return  # empty
+
         for i in bigemotes:
             paginator.add_line(f"- {i['name']}")
 
@@ -337,6 +340,9 @@ class Emotes(commands.Cog):
 
         inlineemotes = collection("emotes").find(
             {"server": ctx.guild.id, "type": "inline"}, {"name": True})
+
+        if not inlineemotes:
+            return  # empty
 
         for i in inlineemotes:
             paginator.add_line(f"- {i['name']}")

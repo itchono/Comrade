@@ -51,7 +51,9 @@ async def weighted_member_from_server(guild: discord.Guild) -> int:
     Yield the id of a random member from a guild,
     assuming the database is correctly defined
     '''
-    return random.choices(*weight_table(guild))[0]
+    if sum_of_weights(guild) > 0:
+        return random.choices(*weight_table(guild))[0]
+    return 0
 
 
 async def rebuild_weight_table(guild: discord.Guild):
