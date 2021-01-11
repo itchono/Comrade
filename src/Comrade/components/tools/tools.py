@@ -20,6 +20,7 @@ from utils.echo import echo
 from utils.emoji_converter import textToEmoji
 from db import collection
 
+mpl.use('agg')  # Prevent tkinter backend from starting which kills webserver
 
 transformations = standard_transformations + \
     (implicit_multiplication_application,) + (factorial_notation,) + (convert_xor,)
@@ -28,8 +29,6 @@ transformations = standard_transformations + \
 with open("static/news_border.txt", "r", encoding="utf-8") as f:
     BORDER_TOP, ACCENT_BORDER, BORDER_BOTTOM = f.read().splitlines()
     len_border = len(BORDER_TOP)
-
-
 
 
 class Tools(commands.Cog):
