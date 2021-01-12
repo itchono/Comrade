@@ -37,20 +37,21 @@ async def upload(ctx, name, url, emote_type):
 
     blob = storage.Blob(f"{ctx.guild.id}{name}.{ext}", gc_bucket)
 
-    if emote_type == "big" and ext in ["jpeg", "png", "jpg"]:
-        img = Image.open(imgfile)
+    # if emote_type == "big" and ext in ["jpeg", "png", "jpg"]:
+    #     img = Image.open(imgfile)
 
-        aspect = img.size[0] / img.size[1]
+    #     aspect = img.size[0] / img.size[1]
 
-        if img.size[0] > 1000:
-            img.resize((1000, round(1000 / aspect)), Image.ANTIALIAS)
+    #     if img.size[0] > 1000:
+    #         img.resize((1000, round(1000 / aspect)), Image.ANTIALIAS)
 
-        elif img.size[1] > 1000:
-            img.resize((round(1000 * aspect), 1000), Image.ANTIALIAS)
+    #     elif img.size[1] > 1000:
+    #         img.resize((round(1000 * aspect), 1000), Image.ANTIALIAS)
 
-        imgfile = io.BytesIO()
-        img.save(imgfile, optimize=True, format=ext, quality=65)
-        imgfile.seek(0)
+    #     imgfile = io.BytesIO()
+    #     img.save(imgfile, optimize=True, format=ext, quality=65)
+    #     imgfile.seek(0)
+    # JAN 11: Disable compression for now
 
     # file-like representation of the attachment
     blob.upload_from_file(imgfile)
