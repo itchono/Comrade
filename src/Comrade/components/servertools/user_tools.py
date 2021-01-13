@@ -95,16 +95,16 @@ class Users(commands.Cog):
         notifiees = collection(
             "users").find_one(ufil(member))["notify-status"]
 
-        if member.id in notifiees:
+        if ctx.author.id in notifiees:
             collection("users").update_one(
                 ufil(member),
-                {"$pull": {"notify-status": member.id}})
+                {"$pull": {"notify-status": ctx.author.id}})
             await ctx.send(
                 f"You will no longer be notified by when {member.display_name} changes their status.")
         else:
             collection("users").update_one(
                 ufil(member),
-                {"$push": {"notify-status": member.id}})
+                {"$push": {"notify-status": ctx.author.id}})
             await ctx.send(
                 f"You will now be notified by when {member.display_name} changes their status.")
 
