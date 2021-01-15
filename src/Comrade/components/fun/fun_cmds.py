@@ -95,10 +95,13 @@ async def shoujosend(ctx: commands.Context, content,
     '''
     Send the message, except as a cute anime girl
     '''
-    await mimic(ctx.channel, content=content,
-                username="Yuki Chan",
-                avatar_url="https://cdn.discordapp.com/attachments/420664953435979806/749064831935447071/Annotation_2020-08-24_174359.jpg",
-                file=file, embed=embed, tts=tts)
+    if ctx.guild:
+        await ctx.send(content=content, file=file, embed=embed, tts=tts)
+    else:
+        await mimic(ctx.channel, content=content,
+                    username="Yuki Chan",
+                    avatar_url="https://cdn.discordapp.com/attachments/420664953435979806/749064831935447071/Annotation_2020-08-24_174359.jpg",
+                    file=file, embed=embed, tts=tts)
 
 
 class Fun(commands.Cog):
@@ -264,7 +267,10 @@ class Fun(commands.Cog):
         else:
             auth = ctx.author
 
-        await echo(ctx, member=auth, content=self.owoify(t))
+        if ctx.guild:
+            await echo(ctx, member=auth, content=owoify(t))
+        else:
+            await ctx.send(owoify(t))
 
     @commands.command(name="emojify")
     @commands.guild_only()
@@ -298,7 +304,10 @@ class Fun(commands.Cog):
         else:
             auth = ctx.author
 
-        await echo(ctx, member=auth, content=mock(t))
+        if ctx.guild:
+            await echo(ctx, member=auth, content=mock(t))
+        else:
+            await ctx.send(mock(t))
 
     @commands.command()
     @commands.guild_only()
@@ -314,7 +323,8 @@ class Fun(commands.Cog):
         else:
             auth = ctx.author
 
-        await echo(ctx, member=auth, content=owoify(emojify(ctx.guild, mock(t))))
+        await echo(ctx, member=auth,
+                   content=owoify(emojify(ctx.guild, mock(t))))
 
     @commands.command()
     async def futa(self, ctx: commands.Context, m: discord.Message = None):
@@ -353,6 +363,9 @@ class Fun(commands.Cog):
         '''
         Sends a big form of a character in word art form. Can use emojis too.
         '''
+        if ctx.guild and (
+                e := discord.utils.get(ctx.guild.emojis, name=character)):
+            character = str(e)
 
         letters = {"a": "###\n#b#\n###\n#b#\n#b#",
                    "b": "##b\n#b#\n###\n#b#\n##b",
