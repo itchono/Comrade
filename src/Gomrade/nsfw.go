@@ -225,9 +225,9 @@ func NSFWHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	prevQ, ok := prevQuery[m.ChannelID]
 	_, ok2 := prevNH[m.ChannelID]
 
-	if m.Content == "next" && ok {
+	if strings.ToLower(m.Content) == "next" && ok {
 		Hentai(s, m, prevQ)
-	} else if m.Content == "np" && ok2 {
+	} else if strings.ToLower(m.Content) == "np" && ok2 {
 		NHentaiNext(s, m)
 	}
 }
