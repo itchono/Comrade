@@ -80,6 +80,7 @@ def new_user(user: discord.Member):
         "daily-weight": daily,
         "notify-status": [],
 
+        "identity": "",
 
         "guessing-game":
             {

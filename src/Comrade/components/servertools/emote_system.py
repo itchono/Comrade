@@ -12,7 +12,8 @@ from discord.ext import commands
 import imghdr
 import io
 import re
-from PIL import Image
+# from PIL import Image
+# JAN 11: Disable compression for now
 import requests
 import asyncio
 from google.cloud import storage

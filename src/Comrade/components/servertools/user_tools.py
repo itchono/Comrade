@@ -1,9 +1,9 @@
 import discord
-from discord import user
 from discord.ext import commands
 
 import typing
 import datetime
+import re
 
 from db import collection
 from utils.utilities import ufil, local_time, dm_channel, bot_prefix
@@ -107,6 +107,23 @@ class Users(commands.Cog):
                 {"$push": {"notify-status": ctx.author.id}})
             await ctx.send(
                 f"You will now be notified by when {member.display_name} changes their status.")
+
+    # @commands.command()
+    # @commands.guild_only()
+    # async def identity(self, ctx: commands.Context,
+    #                    member: typing.Optional[discord.Member], *, name: typing.Optional[str]):
+    #     '''
+    #     Looks up user with real identity
+    #     '''
+    #     if real_user := collection(
+    #         "users").find_one(
+    #             {"identity": re.compile('^' + name + '$', re.IGNORECASE)}):
+
+    #         user = ctx.guild.get_member(real_user["user"])
+
+    #         await self.userinfo(ctx, user)
+
+    #     elif name:
 
     @commands.command()
     @commands.guild_only()
@@ -254,9 +271,17 @@ class Users(commands.Cog):
                         ufil(after))["notify-status"]:
                 mem = after.guild.get_member(mem_id)
 
-                embed = discord.Embed(description = local_time().strftime("%I:%M:%S %p %Z"))
-                embed.set_author(name=f"{after.display_name} ({str(after)}) is now {str(after.status)}.",
+                embed = discord.Embed(
+                    description=
+                    f"{str(before.status)} -> {str(after.status)} @ {local_time().strftime('%I:%M:%S %p %Z')}")
+
+                embed.set_author(
+                    name=
+                    f"{after.display_name} ({str(after)}) is now {str(after.status)}.",
                     icon_url=after.avatar_url)
                 embed.set_footer(
-                    text=f"To unsubscribe, type [{bot_prefix}track {after.display_name}] in {after.guild.name}")
-                await (await dm_channel(mem)).send(embed=embed)
+                    text=
+                    f"To unsubscribe, type [{bot_prefix}track {after.display_name}] in {after.guild.name}")
+
+                channel = await dm_channel(mem)
+                await channel.send(embed=embed)

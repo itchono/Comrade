@@ -137,15 +137,20 @@ class General(commands.Cog):
                        f"{len(ctx.guild.emojis)} emojis:\n{emoji}")
 
     @commands.command()
-    @commands.guild_only()
     async def clear(self, ctx: commands.Context):
         '''
-        Clears bot commands and messages from bot in the last 100 messages
+        Clears bot commands (server-only) and messages
+        from bot in the last 100 messages
         '''
-        def check(message):
-            return (message.content and message.content.startswith(bot_prefix)) or \
-                    message.author == self.bot.user
-        await ctx.channel.purge(check=check, bulk=True)
+        if ctx.guild:
+            def check(message):
+                return (message.content and message.content.startswith(bot_prefix)) or \
+                        message.author == self.bot.user
+            await ctx.channel.purge(check=check, bulk=True)
+        else:
+            async for msg in ctx.channel.history(limit=100):
+                if msg.author == self.bot.user:
+                    await msg.delete()
 
     @commands.command()
     async def getlog(self, ctx: commands.Context):

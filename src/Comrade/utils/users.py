@@ -1,8 +1,6 @@
 import discord
 import random
-from functools import lru_cache
 import datetime
-
 from client import client as bot
 from db import collection
 from config import cfg
