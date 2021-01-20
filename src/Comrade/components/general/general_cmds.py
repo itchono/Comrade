@@ -105,7 +105,7 @@ class General(commands.Cog):
         e.set_footer(text=f"ID: {ctx.guild.id}")
         await ctx.send(embed=e)
 
-    @commands.command()
+    @commands.command(aliases=["pfp"])
     async def avatar(self, ctx: commands.Context, *,
                      member: typing.Union[discord.Member,
                                           discord.User] = None):
@@ -137,18 +137,18 @@ class General(commands.Cog):
                        f"{len(ctx.guild.emojis)} emojis:\n{emoji}")
 
     @commands.command()
-    async def clear(self, ctx: commands.Context):
+    async def clear(self, ctx: commands.Context, amount: typing.Optional[int] = 50):
         '''
         Clears bot commands (server-only) and messages
-        from bot in the last 100 messages
+        from bot in the last 50 messages or otherwise specified
         '''
         if ctx.guild:
             def check(message):
                 return (message.content and message.content.startswith(bot_prefix)) or \
                         message.author == self.bot.user
-            await ctx.channel.purge(check=check, bulk=True)
+            await ctx.channel.purge(check=check, bulk=True, limit=amount)
         else:
-            async for msg in ctx.channel.history(limit=100):
+            async for msg in ctx.channel.history(limit=amount):
                 if msg.author == self.bot.user:
                     await msg.delete()
 

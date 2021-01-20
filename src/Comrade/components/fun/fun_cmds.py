@@ -252,6 +252,9 @@ class Fun(commands.Cog):
             await asyncio.sleep(1)
             await msg.edit(content=f"```{frames[i]}```")
 
+        await asyncio.sleep(10)
+        await msg.delete()
+
     @commands.command(name="owoify")
     async def cmdowoify(self, ctx: commands.Context, *, text: str = ""):
         '''
@@ -377,7 +380,7 @@ class Fun(commands.Cog):
                    "h": "#b#\n#b#\n###\n#b#\n#b#",
                    "i": "###\nb#b\nb#b\nb#b\n###",
                    "j": "###\nb#b\nb#b\nb#b\n#bb",
-                   "k": "#bb\n#bb\n#b#\n##b\n#b#",
+                   "k": "#bb\n#b#\n#b#\n#b#\n#b#",
                    "l": "#bb\n#bb\n#bb\n#bb\n###",
                    "m": "#b#\n###\n###\n#b#\n#b#",
                    "n": "bbb\nbbb\n##b\n#b#\n#b#",
@@ -392,13 +395,17 @@ class Fun(commands.Cog):
                    "w": "#b#\n#b#\n###\n###\n#b#",
                    "x": "#b#\n#b#\nb#b\n#b#\n#b#",
                    "y": "#b#\n#b#\nb#b\nb#b\nb#b",
-                   "z": "###\nbb#\nb#b\n#bb\n###"}
-        if text.isalpha():
+                   "z": "###\nbb#\nb#b\n#bb\n###",
+                   " ": "bbb\nbbb\nbbb\nbbb\nbbb"}
+        try:
             out = ""
             for c in text.lower():
+                if c not in letters:
+                    raise Exception
                 ch = letters[c].replace(
                     "b", ":black_small_square:").replace("#", character)
                 out += ch + "\n\n"
+
             if len(out) > 2000:
                 pg = commands.Paginator(prefix="", suffix="")
                 for line in out.splitlines():
@@ -408,7 +415,7 @@ class Fun(commands.Cog):
                     await ctx.send(page)
             else:
                 await ctx.send(out)
-        else:
+        except Exception:
             await ctx.send("Text must be alphabetical only.")
 
     @commands.command()

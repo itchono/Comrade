@@ -22,7 +22,7 @@ class Users(commands.Cog):
     def __init__(self, bot):
         self.bot: commands.Bot = bot
 
-    @commands.command()
+    @commands.command(aliases=["profile"])
     async def userinfo(self, ctx: commands.Context, *,
                        member: typing.Union[discord.Member,
                                             discord.User] = None):
