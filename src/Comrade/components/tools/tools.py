@@ -184,8 +184,11 @@ class Tools(commands.Cog):
         '''
         Inline calculator
         '''
-        if message.content and not message.author.bot and message.content[0] == "=":
-            await self.calculate(await self.bot.get_context(message), expression=message.content[1:])
+        if message.content and \
+                not message.author.bot and message.content[:2] == "==":
+            await self.calculate(
+                await self.bot.get_context(message),
+                expression=message.content[2:])
 
     @commands.command()
     async def news(self, ctx: commands.Context, *, content):

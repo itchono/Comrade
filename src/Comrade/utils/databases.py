@@ -118,8 +118,9 @@ def rebuild_server_cfgs(guilds: list):
         rebuild_user_profiles(guild)  # check users too
 
     for g_id in guild_ids:
-        if g_id not in actual_guild_ids:
-            logger.info("Deleting Old Server")
+        if g_id not in actual_guild_ids and \
+                cfg["Settings"]["development-mode"] == "False":
+            logger.info("Deleting Old Server & Members")
             collection("servers").delete_one({"_id": g_id})
             collection("users").delete_many({"server": g_id})
 

@@ -30,18 +30,25 @@ from discord.ext import commands
 from collections import defaultdict
 from db import collection
 
+from utils.utilities import bot_prefix
+
 
 class CustomList():
 
     def __init__(self, json):
-        self.name: str = json["name"]
-        self.arr: list = json["list"]
-        self.owner = json["owner"]
-        self.server = json["server"]
-        self.private = json["private"]
+        if json:
+            self.name: str = json["name"]
+            self.arr: list = json["list"]
+            self.author = json["author"]
+            self.server = json["server"]
+        else:
+            self.name: str = ""
+            self.arr: list = []
+            self.author = None
+            self.server = None
 
     def __repr__(self):
-        s = f"**__{self.name}__:**\n"
+        s = f"**__{self.name}__**\n"
 
         if not len(self.arr):
             s += "*(Empty)*"
@@ -67,19 +74,17 @@ class CustomList():
     def todict(self):
         return {"name": self.name,
                 "list": self.arr,
-                "owner": self.owner,
-                "server": self.server,
-                "private": self.private}
+                "author": self.author,
+                "server": self.server}
 
 
 class Lists(commands.Cog):
     '''
     Lists for writing things down
-    NOT IMPLEMENTED YET
     '''
     def __init__(self, bot):
         self.bot: commands.Bot = bot
-        self.active = defaultdict(lambda: defaultdict(CustomList))
+        self.active = defaultdict(lambda: defaultdict(lambda: CustomList({})))
 
     @commands.command()
     @commands.guild_only()
@@ -91,7 +96,7 @@ class Lists(commands.Cog):
 
         names = ["- " + L["name"] for L in all_lists]
 
-        embed = discord.Embed("\n".join(names))
+        embed = discord.Embed(description="\n".join(names))
 
         embed.set_author(
             name=f"Lists in {ctx.guild.name}", icon_url=ctx.guild.icon_url)
@@ -99,28 +104,41 @@ class Lists(commands.Cog):
         await ctx.send(embed=embed)
 
 
-    @commands.group(invoke_without_subcommand=True, name="list")
+    @commands.group(invoke_without_command=True, name="list")
     @commands.guild_only()
     async def custom_list(self, ctx: commands.Context, list_name: str):
         '''
         Displays a list with the given name, opening it for editing.
         Creates a new list if the name doesn't exist.
-
         Opens a new list if you already have one open
         '''
-        if L := collection("lists").find_one(
-            {"server": ctx.guild.id, "name": list_name}):
-            self.active[ctx.guild.id][ctx.author.id] = CustomList(L)
+        if ctx.invoked_subcommand is None:
+            if self.active[ctx.guild.id][ctx.author.id]:
+                await self.close(ctx)  # close list
 
-            # You have opened it!
-        else:
-            L = {}
-            collection("lists").insert_one(L)
-            self.active[ctx.guild.id][ctx.author.id] = CustomList(L)
-            # New list
+            if L := collection("lists").find_one(
+                    {"server": ctx.guild.id, "name": list_name}):
+                self.active[ctx.guild.id][ctx.author.id] = CustomList(L)
 
+                await self.print_list(ctx)
+                await ctx.send(
+                    f"You have opened the list `{list_name}`.\nMake sure to `{bot_prefix}list close` to save your list.")
+            else:
+                # New list
+                L = {
+                    "server": ctx.guild.id,
+                    "name": list_name, "author": ctx.author.id, "list": []}
+                self.active[ctx.guild.id][ctx.author.id] = CustomList(L)
+                collection("lists").insert_one(L)
+                await ctx.send(
+                    f"You have created the list `{list_name}`.\nMake sure to `{bot_prefix}list close` to save your list.")
+
+    async def print_list(self, ctx):
+        await ctx.send(str(self.active[ctx.guild.id][ctx.author.id]) +
+                f"\n(Author: {ctx.guild.get_member(self.active[ctx.guild.id][ctx.author.id].author)})")
 
     @custom_list.group()
+    @commands.after_invoke(print_list)
     @commands.guild_only()
     async def all(self, ctx: commands.Context, *, content: str):
         '''
@@ -129,6 +147,7 @@ class Lists(commands.Cog):
         await self.lists(ctx)
 
     @custom_list.group()
+    @commands.after_invoke(print_list)
     @commands.guild_only()
     async def add(self, ctx: commands.Context, *, content: str):
         '''
@@ -137,6 +156,7 @@ class Lists(commands.Cog):
         self.active[ctx.guild.id][ctx.author.id].add(content)
 
     @add.command(name="many")
+    @commands.after_invoke(print_list)
     @commands.guild_only()
     async def add_many(self, ctx: commands.Context, *items):
         '''
@@ -146,6 +166,7 @@ class Lists(commands.Cog):
             self.active[ctx.guild.id][ctx.author.id].add(item)
 
     @custom_list.group()
+    @commands.after_invoke(print_list)
     @commands.guild_only()
     async def remove(self, ctx: commands.Context, *, content: str):
         '''
@@ -154,6 +175,7 @@ class Lists(commands.Cog):
         self.active[ctx.guild.id][ctx.author.id].remove(content)
 
     @remove.command(name="many")
+    @commands.after_invoke(print_list)
     @commands.guild_only()
     async def remove_many(self, ctx: commands.Context, *items):
         '''
@@ -168,15 +190,25 @@ class Lists(commands.Cog):
         '''
         Removes this list from the database
         '''
-        collection("lists").delete_one(
+        result = collection("lists").delete_one(
             {"server": ctx.guild.id, "name": self.active[ctx.guild.id][ctx.author.id].name,
-            "owner": ctx.author.id})
+            "author": ctx.author.id})
+        await ctx.send(result)
 
     @custom_list.command()
+    @commands.after_invoke(print_list)
     @commands.guild_only()
     async def close(self, ctx: commands.Context):
         '''
-        Closes the currently open list
-        Might be a useless function
+        Closes the currently open list and saves it to MongoDB
         '''
-        pass
+        if self.active[ctx.guild.id][ctx.author.id] and self.active[ctx.guild.id][ctx.author.id].arr:
+
+            collection("lists").update_one(
+                {"server": ctx.guild.id, "name": self.active[ctx.guild.id][ctx.author.id].name},
+                {"$set":{"list":self.active[ctx.guild.id][ctx.author.id].arr}})
+
+            await ctx.send(f"`{self.active[ctx.guild.id][ctx.author.id].name}` saved.")
+            self.active[ctx.guild.id][ctx.author.id] = None
+        else:
+            await ctx.send("You do not have a list currently open.")

@@ -49,7 +49,7 @@ class General(commands.Cog):
         Gets the creation time of basically any Discord object.
         '''
         await ctx.send(f"That was created on "
-                       f"{utc_to_local_time(thing.created_at).strftime('%B %d %Y at %I:%M:%S %p %Z')}")
+                       f"{utc_to_local_time(thing.created_at).strftime('%B %d %Y at %I:%M:%S.$f %p %Z')}")
 
     @commands.command(aliases=["lastmsg", "staleness"])
     @commands.guild_only()
@@ -176,6 +176,10 @@ class General(commands.Cog):
         '''
         Restarts the bot on the remote host
         '''
+        await ctx.send("Restarting...")
+        with open("restart.cfg", "w") as f:
+            f.write(str(ctx.channel.id))
+            # pointer for bot restart
         await self.bot.change_presence(status=discord.Status.offline)
         await self.bot.logout()
         sys.exit(0)

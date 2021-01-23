@@ -1,6 +1,5 @@
 import time
 import dotenv
-import discord
 import os
 
 import components
@@ -32,12 +31,8 @@ async def on_connect():
     '''
     Connected to Discord
     '''
-    global online
-    await bot.change_presence(status=discord.Status.online,
-                              activity=discord.Game(cfg["Settings"]["Status"]))
     logger.info(
         f"{bot.user} is online, logged into {len(bot.guilds)} server(s).")
-    online = True
 
 
 @bot.event
@@ -63,6 +58,18 @@ async def on_ready():
         owner = (await bot.application_info()).owner
         owner_dm_channel = await dm_channel(owner)
         await owner_dm_channel.send("Bot is online.")
+
+    # startup notify
+    try:
+        with open("restart.cfg", "r") as f:
+            channel_id = int(f.read())
+            channel = bot.get_channel(channel_id)
+            await channel.send("Restart completed.")
+
+        os.remove("restart.cfg")
+        logger.info("Restart reminder found. Notifying channel.")
+    except FileNotFoundError:
+        pass
 
 if cfg["Hosting"]["ping"] == "True":
     keep_alive()

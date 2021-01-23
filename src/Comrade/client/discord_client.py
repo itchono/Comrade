@@ -25,7 +25,9 @@ client = commands.Bot(
             52,
             42),
         sort_commands=False),
-    intents=intents)
+    intents=intents,
+    status=discord.Status.online,
+    activity=discord.Game(cfg["Settings"]["Status"]))
 
 
 @client.event

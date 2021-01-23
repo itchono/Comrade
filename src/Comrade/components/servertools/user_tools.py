@@ -1,3 +1,4 @@
+from utils.reactions import reactOK
 import discord
 from discord.ext import commands
 
@@ -57,16 +58,20 @@ class Users(commands.Cog):
             if w := user_information["daily-weight"]:
                 e.add_field(name="Daily Weight", value=w)
 
+            if w := user_information["identity"]:
+                e.add_field(name="Identity", value=w)
+            else:
+                e.add_field(name="Identity", value="Unknown")
+
             e.add_field(name="Status",
                         value=member.status)
 
             e.add_field(name="On Mobile",
                         value=member.is_on_mobile())
 
-            e.add_field(name="Last Online",
-                        value=collection(
-                            "users").find_one(
-                            ufil(member))["last-online"])
+            if w := user_information["last-online"]:
+                e.add_field(name="Last Online",
+                            value=w)
 
             # Show stack of roles
             e.add_field(name=f"Roles ({len(member.roles)})",
@@ -108,22 +113,33 @@ class Users(commands.Cog):
             await ctx.send(
                 f"You will now be notified by when {member.display_name} changes their status.")
 
-    # @commands.command()
-    # @commands.guild_only()
-    # async def identity(self, ctx: commands.Context,
-    #                    member: typing.Optional[discord.Member], *, name: typing.Optional[str]):
-    #     '''
-    #     Looks up user with real identity
-    #     '''
-    #     if real_user := collection(
-    #         "users").find_one(
-    #             {"identity": re.compile('^' + name + '$', re.IGNORECASE)}):
+    @commands.command()
+    @commands.guild_only()
+    async def identity(self, ctx: commands.Context,
+                       member: typing.Optional[discord.Member] = None, *,
+                       name: typing.Optional[str] = None):
+        '''
+        Looks up user with real identity, or sets their identity.
+        '''
+        if name and member:
+            # Case: assign name to member
+            collection(
+                "users").update_one(
+                    ufil(member),
+                    {"$set": {"identity": name}})
+            await reactOK(ctx)
+        elif name and (real_user := collection(
+            "users").find_one(
+                {"identity": re.compile('^' + name + '$', re.IGNORECASE)})):
+            # Case: find unknown user
+            user = ctx.guild.get_member(real_user["user"])
+            await self.userinfo(ctx, member=user)
 
-    #         user = ctx.guild.get_member(real_user["user"])
-
-    #         await self.userinfo(ctx, user)
-
-    #     elif name:
+        elif member:
+            await ctx.send(collection(
+                "users").find_one(ufil(member))["identity"])
+        else:
+            await ctx.send("No identity listed")
 
     @commands.command()
     @commands.guild_only()

@@ -20,6 +20,8 @@ from utils.emoji_converter import emojiToText, textToEmoji
 from utils.echo import echo, mimic
 from utils.utilities import webscrape_header
 
+from utils.logger import logger
+
 # Static dependencies
 with open("static/space.txt", "r", encoding="utf-8") as f:
     space = f.read()
@@ -161,7 +163,8 @@ class Fun(commands.Cog):
 
         if len(holyText) > 10000:
             holyText = holyText[:10000]
-            await ctx.send("(Text was trimmed to first 10000 characters for being too long.)")
+            await ctx.send(
+                "(Text was trimmed to first 10000 characters for being too long.)")
 
         paginator = commands.Paginator(prefix="", suffix="")
 
@@ -221,9 +224,9 @@ class Fun(commands.Cog):
         await ctx.channel.set_permissions(ctx.guild.default_role, overwrite=current_permissions)
 
         await announcement_msg.edit(content=f"*Time has begun to move again.*\n(Time stopped by {ctx.author.mention})", suppress=False)
-        # await utils.utilities.log(ctx.guild, f"Timestop in
-        # {ctx.channel.mention} lasting {time} seconds, performed by
-        # {ctx.author.mention}")
+
+        logger.info(ctx.guild,
+                    f"Timestop in {ctx.channel.name} lasting {time} seconds")
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -400,9 +403,10 @@ class Fun(commands.Cog):
         try:
             out = ""
 
-            def divide_chunks(l, n):
-                for i in range(0, len(l), n):
-                    yield l[i:i + n]
+            # TO FIX
+            def divide_chunks(lst, n):
+                for i in range(0, len(lst), n):
+                    yield lst[i:i + n]
 
             for c in text.lower():
                 if c not in letters:
@@ -414,22 +418,27 @@ class Fun(commands.Cog):
             if len(out) > 2000:
                 pg = commands.Paginator(prefix="", suffix="")
 
+                count_so_far = 0
+
                 for chunk in divide_chunks(out.splitlines(), 6):
 
                     # start new page if next chunk is too big
                     chunk_length = sum([len(ln) for ln in chunk])
 
-                    if pg.pages and len(pg.pages[-1]) + chunk_length > 2000:
+                    if count_so_far + chunk_length > 2000:
                         pg.close_page()
+                        count_so_far = 0
 
                     for line in chunk:
                         pg.add_line(line)
+
+                    count_so_far += chunk_length
 
                 for page in pg.pages:
                     await ctx.send(page)
             else:
                 await ctx.send(out)
-        except Exception:
+        except KeyError:
             await ctx.send("Text must be alphabetical only.")
 
     @commands.command()

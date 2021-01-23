@@ -14,6 +14,8 @@ from utils.checks import isNotThreat
 from utils.utilities import is_url, bot_prefix
 from config import cfg
 from client import client as bot
+import json
+
 
 MACRO_TIMEOUT = int(cfg["Performance"]["macro-timeout"])
 
@@ -25,16 +27,23 @@ async def process_macro(message: discord.message):
     if message.author.bot or not message.content:
         return
 
-    # Parse message into name and arguments
-    args = message.content.split()
-    name = args.pop(0)
+    macros = collection("macros")
 
-    cmds = collection(
-            "macros").find_one({"server": message.guild.id, "name": name})
+    # First, try fast loop for simple macros
+    cmds = macros.find_one(
+        {"server": message.guild.id, "name": message.content})
+    args = []
 
-    # Not found
     if not cmds:
-        return 1
+        # Parse message into name and arguments
+        args = message.content.split()
+        name = args.pop(0)
+
+        cmds = macros.find_one({"server": message.guild.id, "name": name})
+
+        # Not found
+        if not cmds:
+            return 1
 
     cmds: str = cmds["macro"]
 
@@ -138,7 +147,7 @@ class Macros(commands.Cog):
             if result == 1:
                 await ctx.send(f"Macro `{name}` not found.")
 
-    @commands.command()
+    @commands.command(aliases=["addtrigger"])
     @commands.guild_only()
     async def addmacro(self, ctx: commands.Context, name: str, *, macro):
         '''
@@ -152,19 +161,17 @@ class Macros(commands.Cog):
             Pass in variables using %1, %2, %3...
 
         Example: a macro called tomato
-        \```
+
         ascii 🍅 b
         wait 5
         $1 is the best game
         \defaultdance
         anime
         defaultdance
-        \```
 
         call it using `tomato minecraft`
 
         output:
-        \```
         🍅🍅
         🍅  🍅
         🍅🍅
@@ -192,10 +199,9 @@ class Macros(commands.Cog):
         ⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀⠀⣿⣿
         ⠀⠀⠀⠀⣛⠀⠀⠀⠀⠀⠀⠛⠿⠿⠿
         ⠀⠀⠀⠛⠛
-        \```
 
         TIP: use shift+enter to make new lines
-        TIP: OR use ``` ``` on Discord to help format your command
+        TIP: OR use \`\`\` \`\`\` on Discord to help format your command
         '''
         cmds = collection(
             "macros").find_one({"server": ctx.guild.id, "name": name})
@@ -208,8 +214,7 @@ class Macros(commands.Cog):
             "macros").insert_one(
                 {"server": ctx.guild.id,
                  "name": name,
-                 "macro": macro.strip("```").strip("\n"),
-                 "user": ctx.author.id}
+                 "macro": macro.strip("```").strip("\n")}
                 )
         await reactOK(ctx)
 
@@ -233,10 +238,10 @@ class Macros(commands.Cog):
     @commands.guild_only()
     async def removemacro(self, ctx: commands.Context, name):
         '''
-        Deletes a macro if you own it
+        Deletes a macro
         '''
         collection("macros").delete_one(
-            {"server": ctx.guild.id, "name": name, "user": ctx.author.id})
+            {"server": ctx.guild.id, "name": name})
         await reactOK(ctx)
 
     @commands.command()
@@ -250,4 +255,14 @@ class Macros(commands.Cog):
         if not cmds:
             await ctx.send("Macro not found.")
             return
-        await ctx.send(f"Created by: {cmds['user']}\n```{cmds['macro']}```")
+        await ctx.send(
+            f"```{cmds['macro']}```")
+
+    @commands.command()
+    @commands.is_owner()
+    async def load_from_ext(self, ctx):
+        with open("triggers.json", "r", encoding="utf-8") as f:
+            x = json.loads(f.read())
+
+            for name in x:
+                await self.addmacro(ctx, name, macro=x[name])

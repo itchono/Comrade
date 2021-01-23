@@ -266,6 +266,64 @@ class Emotes(commands.Cog):
         else:
             await ctx.send(f"Emote `{name_old}` was not found.")
 
+    @emote.command()
+    @commands.guild_only()
+    async def gallery(self, ctx: commands.Context, start_position = 1):
+        '''
+        Gallery of all big emotes in server
+        Can specify starting position to skip ahead
+        '''
+        bigemotes = collection("emotes").find(
+            {"server": ctx.guild.id, "type": "big"})
+
+        if not bigemotes:
+            return  # empty
+        bigemotes = list(bigemotes)
+
+        pagenum = start_position-1
+
+        def em_embed(pagenum):
+            e = discord.Embed()
+            e.set_author(name=bigemotes[pagenum]["name"],
+                         url=bigemotes[pagenum]["URL"])
+            e.set_image(url=bigemotes[pagenum]["URL"])
+            e.set_footer(text=f"{pagenum+1}/{len(bigemotes)}")
+            return e
+
+        m = await ctx.send(embed=em_embed(pagenum))
+
+        cont = True
+
+        for r in ["⬅", "➡", "🗑️"]:
+            await m.add_reaction(r)
+
+        def check(reaction, user):
+            return str(reaction) in [
+                "⬅", "➡", "🗑️"] and reaction.message.id == m.id \
+                    and not user.bot
+
+        while cont:
+            try:
+                reaction, user = await self.bot.wait_for(
+                    "reaction_add", check=check, timeout=180)
+
+                await m.remove_reaction(reaction, user)
+                if str(reaction) == "⬅" and pagenum > 0:
+                    pagenum -= 1
+                    await m.edit(embed=em_embed(pagenum))
+                elif str(reaction) == "➡" and pagenum < len(bigemotes):
+                    pagenum += 1
+                    await m.edit(embed=em_embed(pagenum))
+                elif str(reaction) == "🗑️":
+                    await m.delete()
+                    cont = False
+                    continue
+
+            except asyncio.TimeoutError:
+                await m.delete()
+                cont = False
+                continue
+
     @emote.group()
     @commands.guild_only()
     async def list(self, ctx: commands.Context):
