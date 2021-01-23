@@ -399,6 +399,11 @@ class Fun(commands.Cog):
                    " ": "bbb\nbbb\nbbb\nbbb\nbbb"}
         try:
             out = ""
+
+            def divide_chunks(l, n):
+                for i in range(0, len(l), n):
+                    yield l[i:i + n]
+
             for c in text.lower():
                 if c not in letters:
                     raise Exception
@@ -408,8 +413,17 @@ class Fun(commands.Cog):
 
             if len(out) > 2000:
                 pg = commands.Paginator(prefix="", suffix="")
-                for line in out.splitlines():
-                    pg.add_line(line)
+
+                for chunk in divide_chunks(out.splitlines(), 6):
+
+                    # start new page if next chunk is too big
+                    chunk_length = sum([len(ln) for ln in chunk])
+
+                    if pg.pages and len(pg.pages[-1]) + chunk_length > 2000:
+                        pg.close_page()
+
+                    for line in chunk:
+                        pg.add_line(line)
 
                 for page in pg.pages:
                     await ctx.send(page)
