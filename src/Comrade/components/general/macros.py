@@ -14,7 +14,6 @@ from utils.checks import isNotThreat
 from utils.utilities import is_url, bot_prefix
 from config import cfg
 from client import client as bot
-import json
 
 
 MACRO_TIMEOUT = int(cfg["Performance"]["macro-timeout"])
@@ -257,12 +256,3 @@ class Macros(commands.Cog):
             return
         await ctx.send(
             f"```{cmds['macro']}```")
-
-    @commands.command()
-    @commands.is_owner()
-    async def load_from_ext(self, ctx):
-        with open("triggers.json", "r", encoding="utf-8") as f:
-            x = json.loads(f.read())
-
-            for name in x:
-                await self.addmacro(ctx, name, macro=x[name])

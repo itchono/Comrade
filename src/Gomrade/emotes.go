@@ -62,6 +62,12 @@ func Emote(s *discordgo.Session, m *discordgo.MessageCreate, emotecollection *mo
 						emb.Description += "- " + result["name"].(string) + "\n"
 					}
 				}
+
+				if emb.Description == "" {
+					emb.Title = "Emote not found."
+					emb.Description = "`$c emote list big` will return a list of allowable emotes"
+				}
+
 				s.ChannelMessageSendEmbed(m.ChannelID, &emb)
 				return
 			}
