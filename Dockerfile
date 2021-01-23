@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y \
     apt-get clean
 
 
-COPY requirements.txt requirements.txt
+COPY src/Comrade/requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
 WORKDIR /app
