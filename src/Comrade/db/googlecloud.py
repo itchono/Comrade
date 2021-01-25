@@ -26,3 +26,7 @@ def startup():
 
     bucket = storage_client.get_bucket(cfg["GoogleCloud"]["bucket"])
     logger.info(f"Google Cloud storage connected to: {bucket.name}")
+
+
+def gc_bucket():
+    return bucket
