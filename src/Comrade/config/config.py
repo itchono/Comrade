@@ -1,7 +1,5 @@
 import configparser
 
-from discord.file import File
-
 '''
 Loads the configuration file for Comrade.
 If you are looking for the configuration file,
@@ -16,3 +14,6 @@ except FileNotFoundError:
 
 cfg = configparser.ConfigParser()
 cfg.read("cfg.ini")
+
+with open("VERSION", "r", encoding="utf-8") as f:
+    version = f.read()

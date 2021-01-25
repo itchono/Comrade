@@ -1,3 +1,3 @@
-from .config import cfg
+from .config import cfg, version
 
-__all__ = ["cfg"]
+__all__ = ["cfg", "version"]

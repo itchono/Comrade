@@ -6,7 +6,7 @@ import typing
 from utils.utilities import (get_uptime, get_host, dm_channel,
                              local_time, utc_to_local_time, bot_prefix)
 
-from config import cfg
+from config import cfg, version
 import sys
 
 
@@ -24,7 +24,7 @@ class General(commands.Cog):
         Shows the current status of the bot
         '''
         await ctx.send(f"**Uptime**: {round(get_uptime(), 1)}s\n"
-                       f"**Version**: {cfg['Information']['Version']}\n"
+                       f"**Version**: {version}\n"
                        f"Currently Connected to **{len(self.bot.guilds)}** "
                        f"server(s)\n**Host**: {get_host()}\n"
                        f"**API Latency**: {round(self.bot.latency, 4)}s\n"
