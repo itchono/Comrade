@@ -33,12 +33,19 @@ async def process_macro(message: discord.message):
         {"server": message.guild.id, "name": message.content})
     args = []
 
+    # Try lowercase as well
+    if not cmds:
+        cmds = macros.find_one(
+            {"server": message.guild.id, "name": message.content.lower()})
+
     if not cmds:
         # Parse message into name and arguments
         args = message.content.split()
         name = args.pop(0)
 
-        cmds = macros.find_one({"server": message.guild.id, "name": name})
+        cmds = macros.find_one(
+            {"server": message.guild.id, "name": name, "macro": "/%/"})
+        # only macros with arguments in them
 
         # Not found
         if not cmds:
