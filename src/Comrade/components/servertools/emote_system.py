@@ -36,7 +36,7 @@ async def upload(ctx, name, url, emote_type):
 
     imgfile = io.BytesIO(content)
 
-    blob = storage.Blob(f"{ctx.guild.id}{name}.{ext}", gc_bucket)
+    blob = storage.Blob(f"{ctx.guild.id}{name}.{ext}", gc_bucket())
 
     # if emote_type == "big" and ext in ["jpeg", "png", "jpg"]:
     #     img = Image.open(imgfile)
@@ -66,7 +66,7 @@ async def upload(ctx, name, url, emote_type):
          "URL": blob.media_link})
 
 
-async def inject(self, ctx: commands.Context, name):
+async def inject(ctx: commands.Context, name):
     '''
     Attempts to inject image into the server's list of emoji,
     returning it afterward
@@ -224,7 +224,7 @@ class Emotes(commands.Cog):
 
             try:
                 blob = storage.Blob(
-                    f"{ctx.guild.id}{name}.{e['ext']}", gc_bucket)
+                    f"{ctx.guild.id}{name}.{e['ext']}", gc_bucket())
                 blob.delete()
             except BaseException:
                 pass
@@ -363,7 +363,8 @@ class Emotes(commands.Cog):
 
         def check(reaction, user):
             return str(reaction) in [
-                "⬅", "➡", "🗑️"] and reaction.message.id == m.id
+                "⬅", "➡", "🗑️"] and reaction.message.id == m.id \
+                    and not user.bot
 
         while cont:
             try:
@@ -419,8 +420,9 @@ class Emotes(commands.Cog):
             await m.add_reaction(r)
 
         def check(reaction, user):
-            return str(reaction) in [
-                "⬅", "➡", "🗑️"] and user == ctx.author and reaction.message.id == m.id
+           return str(reaction) in [
+                "⬅", "➡", "🗑️"] and reaction.message.id == m.id \
+                    and not user.bot
 
         while cont:
             try:
