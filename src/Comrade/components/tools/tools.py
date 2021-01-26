@@ -362,7 +362,7 @@ class Tools(commands.Cog):
         server_cfg: dict = collection("servers").find_one(ctx.guild.id)
 
         try:
-            custom_group = server_cfg["custom-channel-group"]
+            custom_group = server_cfg["channels"]["custom"]
         except Exception:
             if ctx.channel.category:
                 custom_group = ctx.channel.category.id
