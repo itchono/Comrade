@@ -499,17 +499,10 @@ class Emotes(commands.Cog):
                                 em.strip(':').strip(" "))
 
         if message.content and not message.author.bot and message.guild:
-            if re.match(r"^:.*:$", message.content) and \
-                    (s := await pullemote(message.content)):
-                await echo(await self.bot.get_context(message),
-                           member=message.author, content=s,
-                           file=await message.attachments[0].to_file()
-                           if message.attachments else None,
-                           embed=message.embeds[0] if message.embeds else None)
-                await message.delete()
 
+            # scan for inline emotes
             if match := re.findall(
-                    r"(?<!\<):.[^<>:]*:", message.clean_content):
+                    r":\s*(?:[^:\s]+)+\s*:(?!\d+>)", message.clean_content):
                 s = message.content
                 send = False
                 for i in match:
@@ -519,7 +512,7 @@ class Emotes(commands.Cog):
                     # else:
                     # Handled by Go Module
 
-                if send and len(match) >= 2:
+                if send:
                     await echo(await self.bot.get_context(message),
                                member=message.author, content=s,
                                file=await message.attachments[0].to_file()
@@ -529,6 +522,7 @@ class Emotes(commands.Cog):
 
                     await message.delete()
 
+            # scan for changing emotes
             elif message.content[0] == '/' and message.content[-1] == '/' and \
                     len(message.content) > 1:
                 # Swap type of emote

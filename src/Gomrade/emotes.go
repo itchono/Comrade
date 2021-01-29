@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/texttheater/golang-levenshtein/levenshtein"
@@ -27,6 +28,13 @@ func Emote(s *discordgo.Session, m *discordgo.MessageCreate, emotecollection *mo
 	if msgLength > 0 && msgContent[0] == ':' && msgContent[msgLength-1] == ':' {
 		query := strings.Trim(msgContent, ": ") // trim learing and trailing : and spaces
 
+		// detect waste nonalphanumeric strings
+		for _, r := range query {
+			if !unicode.IsLetter(r) && !unicode.IsNumber(r) {
+				return
+			}
+		}
+
 		err := emotecollection.FindOne(context.Background(), bson.M{"server": numericguild, "name": query, "type": "big"}).Decode(&emotedata)
 		if err != nil {
 
@@ -42,7 +50,7 @@ func Emote(s *discordgo.Session, m *discordgo.MessageCreate, emotecollection *mo
 				}
 
 				// otherwise, the user made a typo and we want to find similar emotes
-				cur, err := emotecollection.Find(context.Background(), bson.M{"server": numericguild, "type": "big"}, options.Find().SetProjection(bson.D{{"name", 1}, {"_id", 0}}))
+				cur, err := emotecollection.Find(context.Background(), bson.M{"server": numericguild}, options.Find().SetProjection(bson.D{{"name", 1}, {"type", 1}, {"_id", 0}}))
 				if err != nil {
 					return
 				}
@@ -59,14 +67,27 @@ func Emote(s *discordgo.Session, m *discordgo.MessageCreate, emotecollection *mo
 					similarity := levenshtein.RatioForStrings([]rune(query), []rune(result["name"].(string)), levenshtein.DefaultOptions)
 
 					if similarity >= 0.6 {
-						emb.Description += "- " + result["name"].(string) + "\n"
+
+						if result["type"].(string) == "big" {
+							emb.Description += "[B] "
+
+						} else {
+							emb.Description += "[I]"
+						}
+
+						emb.Description += result["name"].(string) + "\n"
+
 					}
 				}
 
 				if emb.Description == "" {
 					emb.Title = "Emote not found."
 					emb.Description = "`$c emote list big` will return a list of allowable emotes"
+				} else {
+					emb.Description = "__[I] = Inline, [B] =  Big__\n\n" + emb.Description
 				}
+
+				emb.Footer = &discordgo.MessageEmbedFooter{Text: "Emotes with a 60%+ similarity are included in suggestions"}
 
 				s.ChannelMessageSendEmbed(m.ChannelID, &emb)
 				return
