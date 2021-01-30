@@ -7,6 +7,7 @@ from async_lru import alru_cache
 from db import collection
 from utils.echo import echo
 from utils.reactions import reactOK
+from utils.checks import isOP
 from config import cfg
 
 
@@ -66,14 +67,15 @@ class Vault(commands.Cog):
 
         m = await ctx.send(
             f"React to this message with 🍅 to vault the post {ctx.message.jump_url if not IDmode else u.jump_url}. You have **{duration} seconds** to vote.",
-            delete_after=duration)
+            delete_after=duration, embed=None)
 
         await m.add_reaction("🍅")
 
         def check(reaction, user):
             return reaction.emoji == "🍅" and not user.bot and (
                 (reaction.message.id == m.id and user != ctx.author)
-                or cfg["Settings"]["development-mode"] == "True")
+                or cfg["Settings"]["development-mode"] == "True"
+                or isOP()(ctx))
 
         await self.bot.wait_for("reaction_add", check=check, timeout=duration)
 

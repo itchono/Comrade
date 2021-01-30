@@ -2,7 +2,7 @@ from discord.ext import commands
 
 from functools import lru_cache
 from db import collection
-
+from utils.logger import logger
 
 @lru_cache()
 def op_list(guild_id: int):
@@ -34,7 +34,10 @@ def isOP():
     def predicate(ctx: commands.Context):
         if not ctx.guild:
             return True
-        return ctx.author.id not in op_list(ctx.guild.id)
+        ops = op_list(ctx.guild.id)
+        logger.debug(
+            f"OP Check for {ctx.author.id}\nCache Status: {op_list.cache_info()}")
+        return ctx.author.id in ops
     return predicate
 
 
@@ -46,7 +49,10 @@ def isNotThreat(threat_level: int = 1):
     def predicate(ctx: commands.Context):
         if not ctx.guild:
             return True
-        return ctx.author.id not in threat_list(ctx.guild.id, threat_level)
+        threats = threat_list(ctx.guild.id, threat_level)
+        logger.debug(
+            f"Threat Check for {ctx.author.id}\nCache Status: {threat_list.cache_info()}")
+        return ctx.author.id not in threats
     return predicate
 
 

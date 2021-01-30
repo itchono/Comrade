@@ -129,6 +129,9 @@ class Macros(commands.Cog):
                     text=f"Random ping by: {message.author.display_name}")
                 await message.channel.send(embed=e)
 
+            if message.content.lower() == "hello comrade":
+                await message.channel.send("Henlo")
+
             if not isNotThreat(2)(
                 await self.bot.get_context(message)) and (len(
                     message.attachments) + len(

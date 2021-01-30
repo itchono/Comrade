@@ -12,7 +12,6 @@ from db import collection
 class NSFW(commands.Cog):
     '''
     NSFW Commands
-    (Hentai, lewd doujins)
     '''
     def __init__(self, bot):
         self.bot: commands.Bot = bot

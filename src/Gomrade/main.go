@@ -54,9 +54,7 @@ func main() {
 		fmt.Println("error creating Discord session,", err)
 		return
 	}
-
-	dg.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
-
+	dg.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsNone)
 	dg.AddHandler(messageCreate)
 
 	// START BOT
@@ -66,6 +64,7 @@ func main() {
 		fmt.Println("error opening connection,", err)
 		return
 	}
+	dg.UpdateGameStatus(0, "["+prefix+"] Accelerating Communism")
 
 	// SERVER
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

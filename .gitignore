@@ -3,3 +3,5 @@
 *.swp
 *.json
 *.dat
+*.log
+src/Comrade/cfg.ini

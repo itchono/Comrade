@@ -54,9 +54,8 @@ async def upload(ctx, name, url, emote_type):
 
     blob = storage.Blob(f"{ctx.guild.id}{name}.{ext}", gc_bucket())
 
-    # if emote_type == "big" and ext in ["jpeg", "png", "jpg"]:
-    #     imgfile  = compress(imgfile, ext)
-    # Disable compression for now
+    if emote_type == "big" and ext in ["jpeg", "png", "jpg"]:
+        imgfile = compress(imgfile, ext)
 
     # file-like representation of the attachment
     blob.upload_from_file(imgfile)
@@ -301,13 +300,15 @@ class Emotes(commands.Cog):
 
         cont = True
 
-        for r in ["⬅", "➡", "🗑️"]:
+        for r in ["⬅", "➡", "⏪", "⏩", "🗑️"]:
             await m.add_reaction(r)
 
         def check(reaction, user):
             return str(reaction) in [
-                "⬅", "➡", "🗑️"] and reaction.message.id == m.id \
+                "⬅", "➡", "⏪", "⏩", "🗑️"] and reaction.message.id == m.id \
                     and not user.bot
+
+        BIGSTEP = round(len(bigemotes)/10)
 
         while cont:
             try:
@@ -315,17 +316,32 @@ class Emotes(commands.Cog):
                     "reaction_add", check=check, timeout=180)
 
                 await m.remove_reaction(reaction, user)
-                if str(reaction) == "⬅" and pagenum > 0:
+                if str(reaction) == "⬅":
                     pagenum -= 1
-                    await m.edit(embed=em_embed(pagenum))
-                elif str(reaction) == "➡" and pagenum < len(bigemotes):
+                    if pagenum < 0:
+                        pagenum += len(bigemotes)
+
+                elif str(reaction) == "➡":
                     pagenum += 1
-                    await m.edit(embed=em_embed(pagenum))
+                    if pagenum >= len(bigemotes):
+                        pagenum -= len(bigemotes)
+
+                elif str(reaction) == "⏩":
+                    pagenum += BIGSTEP
+                    if pagenum >= len(bigemotes):
+                        pagenum -= len(bigemotes)
+
+                elif str(reaction) == "⏪":
+                    pagenum -= BIGSTEP
+                    if pagenum < 0:
+                        pagenum += len(bigemotes)
+
                 elif str(reaction) == "🗑️":
                     await m.delete()
                     cont = False
                     continue
-
+                
+                await m.edit(embed=em_embed(pagenum))
             except asyncio.TimeoutError:
                 await m.delete()
                 cont = False
@@ -366,13 +382,15 @@ class Emotes(commands.Cog):
 
         cont = True
 
-        for r in ["⬅", "➡", "🗑️"]:
+        for r in ["⬅", "➡", "⏪", "⏩", "🗑️"]:
             await m.add_reaction(r)
 
         def check(reaction, user):
             return str(reaction) in [
-                "⬅", "➡", "🗑️"] and reaction.message.id == m.id \
+                "⬅", "➡", "⏪", "⏩", "🗑️"] and reaction.message.id == m.id \
                     and not user.bot
+
+        BIGSTEP = round(len(pages)/5)
 
         while cont:
             try:
@@ -380,18 +398,35 @@ class Emotes(commands.Cog):
                     "reaction_add", check=check, timeout=180)
 
                 await m.remove_reaction(reaction, user)
-                if str(reaction) == "⬅" and pagenum > 1:
+                if str(reaction) == "⬅":
                     pagenum -= 1
-                    await m.edit(content=f"__**Big Emotes in {ctx.guild.name}"
-                                 f" ({pagenum}/{len(pages)})**__:{pages[pagenum-1]}")
-                elif str(reaction) == "➡" and pagenum < len(pages):
+
+                    if pagenum < 1:
+                        pagenum += len(pages) - 1
+
+                elif str(reaction) == "⏪":
+                    pagenum -= BIGSTEP
+
+                    if pagenum < 1:
+                        pagenum += len(pages) - 1
+
+                elif str(reaction) == "➡":
                     pagenum += 1
-                    await m.edit(content=f"__**Big Emotes in {ctx.guild.name} "
-                                 f"({pagenum}/{len(pages)})**__:{pages[pagenum-1]}")
+                    if pagenum >= len(pages):
+                        pagenum -= len(pages) - 1
+
+                elif str(reaction) == "⏩":
+                    pagenum += BIGSTEP
+                    if pagenum >= len(pages):
+                        pagenum -= len(pages) - 1
+
                 elif str(reaction) == "🗑️":
                     await m.delete()
                     cont = False
                     continue
+
+                await m.edit(content=f"__**Big Emotes in {ctx.guild.name} "
+                             f"({pagenum}/{len(pages)})**__:{pages[pagenum-1]}")
 
             except asyncio.TimeoutError:
                 cont = False
@@ -425,30 +460,50 @@ class Emotes(commands.Cog):
 
         cont = True
 
-        for r in ["⬅", "➡", "🗑️"]:
+        for r in ["⬅", "➡", "⏪", "⏩", "🗑️"]:
             await m.add_reaction(r)
 
         def check(reaction, user):
            return str(reaction) in [
-                "⬅", "➡", "🗑️"] and reaction.message.id == m.id \
+                "⬅", "➡", "⏪", "⏩", "🗑️"] and reaction.message.id == m.id \
                     and not user.bot
+
+        BIGSTEP = round(len(pages)/5)
 
         while cont:
             try:
                 reaction, user = await self.bot.wait_for("reaction_add", check=check, timeout=180)
 
                 await m.remove_reaction(reaction, user)
-                if str(reaction) == "⬅" and pagenum > 1:
+
+                if str(reaction) == "⬅":
                     pagenum -= 1
-                    await m.edit(content=f"__**Inline Emotes in {ctx.guild.name} ({pagenum}/{len(pages)})**__:{pages[pagenum-1]}")
-                elif str(reaction) == "➡" and pagenum < len(pages):
+
+                    if pagenum < 1:
+                        pagenum += len(pages) - 1
+
+                elif str(reaction) == "⏪":
+                    pagenum -= BIGSTEP
+
+                    if pagenum < 1:
+                        pagenum += len(pages) - 1
+
+                elif str(reaction) == "➡":
                     pagenum += 1
-                    await m.edit(content=f"__**Inline Emotes in {ctx.guild.name} ({pagenum}/{len(pages)})**__:{pages[pagenum-1]}")
+                    if pagenum >= len(pages):
+                        pagenum -= len(pages) - 1
+
+                elif str(reaction) == "⏩":
+                    pagenum += BIGSTEP
+                    if pagenum >= len(pages):
+                        pagenum -= len(pages) - 1
+
                 elif str(reaction) == "🗑️":
                     await m.delete()
                     cont = False
                     continue
 
+                await m.edit(content=f"__**Inline Emotes in {ctx.guild.name} ({pagenum}/{len(pages)})**__:{pages[pagenum-1]}")
             except asyncio.TimeoutError:
                 cont = False
                 continue
@@ -511,7 +566,8 @@ class Emotes(commands.Cog):
 
             # scan for inline emotes
             if match := re.findall(
-                    r":\s*(?:[^:\s]+)+\s*:(?!\d+>)", message.clean_content):
+                    r"(?<!<):\s*[0-9A-z]+\s*:(?!\d+>)",
+                    message.clean_content):
                 s = message.content
                 send = False
                 for i in match:

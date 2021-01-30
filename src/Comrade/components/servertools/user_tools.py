@@ -58,6 +58,12 @@ class Users(commands.Cog):
             if w := user_information["daily-weight"]:
                 e.add_field(name="Daily Weight", value=w)
 
+            if w := user_information["OP"]:
+                e.add_field(name="OP", value=w)
+
+            if (w := user_information["moderation"]["threat-level"]):
+                e.add_field(name="Threat Level", value=w)
+
             if w := user_information["identity"]:
                 e.add_field(name="Identity", value=w)
             else:

@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import typing
 
-from utils.checks import isOP, op_list, threat_list
+from utils.checks import isOP, op_list, threat_list, isServerOwner
 from utils.utilities import role, ufil
 from db import collection
 from config import cfg
@@ -203,23 +203,36 @@ class Moderation(commands.Cog):
                     f"Word has been added to {member.display_name}'s set of personal banned words.\nActivation threshold: {threshold}%")
 
     @commands.command()
-    @commands.check(isOP())
-    async def op(self, *, member: discord.Member):
-
+    @commands.check_any(commands.check(isOP()), isServerOwner())
+    async def op(self, ctx, *, member: discord.Member):
+        '''
+        OPs a member
+        '''
+        collection("users").update_one(ufil(member), {"$set": {"OP": True}})
         op_list.cache_clear()
-        pass
+        await ctx.send(f"{member.display_name} is now OP.")
 
     @commands.command()
     @commands.check(isOP())
-    async def deop(self, *, member: discord.Member):
+    async def deop(self, ctx, *, member: discord.Member):
+        '''
+        de-OPs a member
+        '''
+        collection("users").update_one(ufil(member), {"$set": {"OP": False}})
         op_list.cache_clear()
-        pass
+        await ctx.send(f"{member.display_name} is no longer OP.")
 
     @commands.command()
     @commands.check(isOP())
-    async def threat(self, level: int, *, member: discord.Member):
+    async def threat(self, ctx, level: int, *, member: discord.Member):
+        '''
+        sets a member's threat level
+        '''
+        collection(
+            "users").update_one(
+                ufil(member), {"$set": {"moderation.threat-level": level}})
         threat_list.cache_clear()
-        pass
+        await ctx.send(f"{member.display_name} is now threat level `{level}`")
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
@@ -231,7 +244,7 @@ class Moderation(commands.Cog):
             if len(args) > 2 and args[2].isnumeric():
                 amount = int(args[2])
 
-            if amount > 200 and not isOP(await self.bot.get_context(message)):
+            if amount > 200 and not isOP()(await self.bot.get_context(message)):
                 await message.channel.send("No")
             else:
                 duration = collection(
