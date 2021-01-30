@@ -72,7 +72,7 @@ func Emote(s *discordgo.Session, m *discordgo.MessageCreate, emotecollection *mo
 							emb.Description += "[B] "
 
 						} else {
-							emb.Description += "[I]"
+							emb.Description += "[I] "
 						}
 
 						emb.Description += result["name"].(string) + "\n"

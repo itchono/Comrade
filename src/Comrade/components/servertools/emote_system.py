@@ -12,8 +12,7 @@ from discord.ext import commands
 import imghdr
 import io
 import re
-# from PIL import Image
-# JAN 11: Disable compression for now
+from PIL import Image
 import requests
 import asyncio
 from google.cloud import storage
@@ -23,6 +22,23 @@ from utils.utilities import is_url, bot_prefix
 from utils.reactions import reactX
 from utils.echo import echo, mimic
 from utils.checks import isOP
+
+
+def compress(imgfile, ext):
+    img = Image.open(imgfile)
+
+    aspect = img.size[0] / img.size[1]
+
+    if img.size[0] > 1000:
+        img.resize((1000, round(1000 / aspect)), Image.ANTIALIAS)
+
+    elif img.size[1] > 1000:
+        img.resize((round(1000 * aspect), 1000), Image.ANTIALIAS)
+
+    imgfile = io.BytesIO()
+    img.save(imgfile, optimize=True, format=ext, quality=65)
+    imgfile.seek(0)
+    return imgfile
 
 
 async def upload(ctx, name, url, emote_type):
@@ -39,20 +55,8 @@ async def upload(ctx, name, url, emote_type):
     blob = storage.Blob(f"{ctx.guild.id}{name}.{ext}", gc_bucket())
 
     # if emote_type == "big" and ext in ["jpeg", "png", "jpg"]:
-    #     img = Image.open(imgfile)
-
-    #     aspect = img.size[0] / img.size[1]
-
-    #     if img.size[0] > 1000:
-    #         img.resize((1000, round(1000 / aspect)), Image.ANTIALIAS)
-
-    #     elif img.size[1] > 1000:
-    #         img.resize((round(1000 * aspect), 1000), Image.ANTIALIAS)
-
-    #     imgfile = io.BytesIO()
-    #     img.save(imgfile, optimize=True, format=ext, quality=65)
-    #     imgfile.seek(0)
-    # JAN 11: Disable compression for now
+    #     imgfile  = compress(imgfile, ext)
+    # Disable compression for now
 
     # file-like representation of the attachment
     blob.upload_from_file(imgfile)
@@ -107,7 +111,9 @@ async def inline(ctx: commands.Context, e: str):
         return emote
 
     # Stage 2: Search MongoDB
-    elif ((document := collection("emotes").find_one({"name": e, "server": ctx.guild.id})) or
+    elif (
+        (document := collection("emotes").find_one(
+            {"name": e, "server": ctx.guild.id})) or
             (document := collection("emotes").find_one({"name": re.compile('^' + e + '$', re.IGNORECASE), "server": ctx.guild.id}))) and \
             document["type"] == "inline":
 
@@ -268,13 +274,14 @@ class Emotes(commands.Cog):
 
     @emote.command()
     @commands.guild_only()
-    async def gallery(self, ctx: commands.Context, start_position = 1):
+    async def gallery(self, ctx: commands.Context, start_position: int = 1):
         '''
         Gallery of all big emotes in server
         Can specify starting position to skip ahead
         '''
         bigemotes = collection("emotes").find(
-            {"server": ctx.guild.id, "type": "big"})
+            {"server": ctx.guild.id, "type": "big"}).sort(
+                "name", 1)
 
         if not bigemotes:
             return  # empty
@@ -328,8 +335,8 @@ class Emotes(commands.Cog):
     @commands.guild_only()
     async def list(self, ctx: commands.Context):
         if ctx.invoked_subcommand is None:
-            await ctx.send(f"Run `{bot_prefix} list big` or "
-                           f"`{bot_prefix}list inline` to see a list "
+            await ctx.send(f"Run `{bot_prefix}emote list big` or "
+                           f"`{bot_prefix}emote list inline` to see a list "
                            "or big and inline emotes respectively")
 
     @list.command()
@@ -341,7 +348,8 @@ class Emotes(commands.Cog):
         paginator = commands.Paginator(prefix="", suffix="", max_size=200)
 
         bigemotes = collection("emotes").find(
-            {"server": ctx.guild.id, "type": "big"}, {"name": True})
+            {"server": ctx.guild.id, "type": "big"}, {"name": True}).sort(
+                "name", 1)
 
         if not bigemotes:
             return  # empty
@@ -400,7 +408,8 @@ class Emotes(commands.Cog):
         paginator = commands.Paginator(prefix="", suffix="", max_size=200)
 
         inlineemotes = collection("emotes").find(
-            {"server": ctx.guild.id, "type": "inline"}, {"name": True})
+            {"server": ctx.guild.id, "type": "inline"}, {"name": True}).sort(
+                "name", 1)
 
         if not inlineemotes:
             return  # empty

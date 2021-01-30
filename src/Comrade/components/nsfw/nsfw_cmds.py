@@ -2,23 +2,11 @@
 Hentai.
 Credits to Sunekku (Nuha Sahraoui).
 '''
-
-import asyncio
 import discord
 from discord.ext import commands
 
-import aiohttp
-import re
-import io
-import urllib.request
-import requests
-from bs4 import BeautifulSoup
-from random import randrange
-
-from utils.utilities import webscrape_header
 from utils.reactions import reactOK
 from db import collection
-from utils.utilities import bot_prefix
 
 
 class NSFW(commands.Cog):
@@ -26,174 +14,14 @@ class NSFW(commands.Cog):
     NSFW Commands
     (Hentai, lewd doujins)
     '''
-
     def __init__(self, bot):
         self.bot: commands.Bot = bot
-
-        self.active_hentai = None
-        self.active_nhentai = None
-
-    @commands.command()
-    @commands.is_nsfw()
-    async def nsearch(self, ctx: commands.Context, *, args: str = "small breasts"):
-        '''
-        Searches for a hentai on nhentai.net
-        '''
-        tags = re.split(r"\s", args)
-        url = 'https://nhentai.net/search/?q='
-        for i in range(len(tags)):
-            url += (tags[i] + '+')
-        request = urllib.request.Request(url, None, webscrape_header)
-        try:
-            response = urllib.request.urlopen(request)
-        except ValueError:
-            await ctx.send(
-                "No results found. Please try another tag.")
-            return
-
-        data = response.read()
-        soup = BeautifulSoup(data, 'html.parser')
-        num_results = re.findall(r'(?<=/i> ).*?(?= r)', str(soup.h1))[0]
-        num_results = re.split(r'\,', num_results)
-        if 'No' in (num_results):
-            await ctx.send(
-                "No results found. Please try another tag.")
-            return
-
-        self.prev_tag = args
-
-        num = ""
-        for k in range(len(num_results)):
-            num += num_results[k]
-        num = int(num)
-        if num % 25 != 0:
-            num_pages = num // 25 + 1
-        else:
-            num_pages = num // 25
-        page = randrange(1, num_pages + 1)
-        url2 = url + '&page={page}'.format(page=page)
-        request = urllib.request.Request(url2, None, webscrape_header)
-        response = urllib.request.urlopen(request)
-        data = response.read()
-        soup = BeautifulSoup(data, 'html.parser')
-
-        list_nums = []
-        for j in range(len(soup.find_all('a'))):
-            entry = soup.find_all('a')[j]
-            thing = BeautifulSoup(str(entry))
-
-            thing2 = thing.a['href']
-            if re.search(r"^/g/\d+", thing2):
-                search_number = int(re.findall(r"g/(\d+)/", thing2)[0])
-                list_nums.append(search_number)
-
-        search = list_nums[randrange(len(list_nums))]
-
-        await self.nhentai(ctx=ctx, args=search)
-
-    @commands.command()
-    @commands.is_nsfw()
-    async def nhentai(self, ctx: commands.Context, args: int = 185217):
-        '''
-        Fetches a hentai from nhentai.net, by ID.
-        '''
-        cur_page = 0
-        url = 'https://nhentai.net/g/{num}/'.format(num=args)
-        request = urllib.request.Request(url, None, webscrape_header)
-        try:
-            response = urllib.request.urlopen(request)
-        except BaseException:
-            await ctx.send(
-                "No results found. Please try another entry.")
-            return
-
-        data = response.read()
-        soup = BeautifulSoup(data, 'html.parser')
-        thing = soup.find_all('meta')[3]
-        thing = str(thing)
-        title = soup.find_all('meta')[2]
-        title = str(title)
-        title = re.findall(r'(?<=").*?(?=")', title)[0]
-
-        araragi_san = []
-
-        wot = str(soup.find_all('section')[1])
-        wot = BeautifulSoup(wot)
-        hi = wot.find_all('a')
-        for k in range(len(hi)):
-            penis_birth = hi[k]
-            nipple_birth = BeautifulSoup(str(penis_birth))
-            ntr = nipple_birth.a['href']
-            if re.search('/artist/', ntr):
-                araragi_san = re.findall(r'(?<=/).*?(?=/)', ntr)
-
-        gallerynumber = int(re.findall(r"galleries/(\d+)/cover.", thing)[0])
-
-        imgs = []
-        for i in range(len(soup.find_all('noscript'))):
-            s = soup.find_all('noscript')[i]
-            s = str(s)
-            new_soup = BeautifulSoup(s)
-            x = new_soup.img['src']
-            if re.search('/{}/'.format(gallerynumber), s):
-                y = re.split(r"\.", x)
-            imgs.append(y[len(y) - 1])
-
-        if araragi_san:
-            araragi_san.pop(0)
-            value = araragi_san[0]
-        else:
-            value = "N/A"
-
-        img_url = 'https://t.nhentai.net/galleries/{gallerynumber}/cover.'.format(
-            gallerynumber=gallerynumber) + imgs[0]
-        self.last_image = img_url
-        e = discord.Embed(
-            title=title,
-            description='ID: {postid}'.format(postid=args),
-            url=url,
-            color=0xfecbed)
-        e.add_field(name='artist',
-                    value=value,
-                    inline=True)
-        e.set_image(url=img_url)
-        await ctx.send(embed=e)
-
-        def check(message):
-            return message.channel == ctx.channel and \
-                (message.content == "np" or message.content.startswith(bot_prefix)) and \
-                not message.author.bot
-
-        while 1:
-            try:
-                message = await self.bot.wait_for("message", check=check, timeout=300)
-
-                if message.content.startswith(bot_prefix):
-                    return # cancel
-
-                ctx = await self.bot.get_context(message)
-                cur_page += 1
-                img_url = 'https://i.nhentai.net/galleries/{gallerynumber}/{page}.'.format(gallerynumber=gallerynumber, page=cur_page) + imgs[cur_page]
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(img_url) as resp:
-                        if resp.status != 200:
-                            await ctx.send(
-                                'You have reached the end of this work.')
-                            return
-                        else:
-                            self.last_image = img_url
-                            data = io.BytesIO(await resp.read())
-                            await ctx.send(
-                                file=discord.File(data, img_url))
-            except asyncio.TimeoutError:
-                pass
-
-
 
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
     @commands.is_nsfw()
-    async def favourite(self, ctx: commands.Context, imageName: str, url: str = None):
+    async def favourite(
+            self, ctx: commands.Context, imageName: str, url: str = None):
         '''
         Adds an image to the favourites list
 
@@ -228,7 +56,6 @@ class NSFW(commands.Cog):
                 )
                 fullname = f"{tokens[0]}"
             await ctx.send(f"Image favourited as `{fullname}`.")
-
 
     @favourite.command()
     @commands.guild_only()
@@ -287,7 +114,6 @@ class NSFW(commands.Cog):
             await ctx.send(embed=e)
         except BaseException:
             await ctx.send("Image not found.")
-
 
     @favourite.command()
     @commands.guild_only()
@@ -417,125 +243,3 @@ class NSFW(commands.Cog):
 
         for e in embeds:
             await ctx.send(embed=e)
-
-    @commands.command()
-    @commands.is_nsfw()
-    async def hentai(self, ctx: commands.Context, *, args: str = ""):
-        '''
-        Fetches a number of posts from Danbooru given a series of tags.
-        Ex. $c hentai arms_up solo 2
-
-        User $c hentai clear to purge all hentai messages
-
-        Creds to Sunekku on Github
-        '''
-
-        # Made by Sunekku
-        # Nuha Sahraoui
-        # I'm not a hentai addict
-        args = args.split()
-
-        limit = 1
-        tag_list = []
-        if len(args) > 0:
-            if args[len(args) - 1].isnumeric():
-                limit = int(args[len(args) - 1])
-                for i in range(len(args) - 1):
-                    tag_list.append(args[i])
-            else:
-                for i in range(len(args)):
-                    tag_list.append(args[i])
-
-        if limit > 20:
-            await ctx.send("Can you calm your genitals")
-        else:
-            if "clear" in tag_list:
-                m = await ctx.channel.purge(check=lambda m: m.author == self.bot.user, bulk=True)
-            else:
-                url_base = 'https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1'
-                url_base = url_base + \
-                    '&limit={limit}&tags=-rating%3asafe+-webm+sort%3arandom+'.format(limit=limit)
-                for i in range(len(tag_list)):
-                    url_base = url_base + '{tag}+'.format(tag=tag_list[i])
-
-                try:
-                    posts = requests.get(url_base).json()
-                except ValueError:
-                    await ctx.send(
-                        "No results found. Please try another tag.")
-                    return
-
-                if len(tag_list) == 0:
-                    count = "N/A"
-                else:
-                    new_tag = tag_list[0]
-                    if tag_list[0].endswith('*'):
-                        new_tag = tag_list[0][:len(tag_list[0]) - 1]
-                    try:
-                        num_results = requests.get(
-                            'https://gelbooru.com/index.php?page=dapi&s=tag&q=index&json=1&name={tags}'
-                            .format(tags=new_tag)).json()
-                    except BaseException:
-                        count = "N/A"
-                    else:
-                        if len(num_results) != 0:
-                            count = num_results[0]['count']
-                        else:
-                            count = 0
-                for i in range(len(posts)):
-                    img_url = posts[i]['file_url']
-                    postid = posts[i]['id']
-                    tags = "Hentai: "
-                    for k in range(len(tag_list)):
-                        tags += " " + tag_list[k]
-                    tag_string = posts[i]['tags']
-                    e = discord.Embed(
-                        title=tags,
-                        description=f'ID: {postid}',
-                        url=img_url,
-                        color=0xfecbed)
-                    e.set_author(name='Retrieved from Gelbooru')
-                    e.add_field(name='score',
-                                value=posts[i]['score'],
-                                inline=True)
-                    e.add_field(name='rating',
-                                value=posts[i]['rating'],
-                                inline=True)
-                    e.add_field(name='hit count', value=count, inline=True)
-                    e.set_footer(text=tag_string)
-                    e.set_image(url=img_url)
-
-                    self.last_image = img_url
-
-                    if img_url.endswith(".webm"):
-                        pass
-                        # Abort
-                    else:
-                        e.set_thumbnail(
-                            url='https://vectorified.com/images/image-gallery-icon-21.png')
-                        m = await ctx.send(embed=e)
-
-                    s = ""
-                    for k in range(len(args)):
-                        s = s + args[k] + " "
-
-        def check(message):
-            return message.channel == ctx.channel and \
-                (message.content in ("next", "favourite") or message.content.startswith(bot_prefix)) and \
-                not message.author.bot
-        
-        while 1:
-            try:
-
-                message = await self.bot.wait_for("message", check=check, timeout=30)
-
-                if message.content.startswith(bot_prefix):
-                    return # abort
-
-                if message.content == "next":
-                    await self.hentai(ctx=await self.bot.get_context(message), args=s)
-                else:
-                    await self.favourite(ctx=await self.bot.get_context(message), imageName="".join(message.content.split()[1:]), url=img_url)
-            
-            except asyncio.TimeoutError:
-                pass

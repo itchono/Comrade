@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -91,6 +93,11 @@ func NHentaiStart(s *discordgo.Session, m *discordgo.MessageCreate, tag string) 
 
 // NHentaiNext gets the next hentai page if a session has already started
 func NHentaiNext(s *discordgo.Session, m *discordgo.MessageCreate) int {
+
+	if _, ok := prevNH[m.ChannelID]; !ok {
+		return -1
+	}
+
 	// next hentai page
 	prevNH[m.ChannelID].Page++
 
@@ -98,9 +105,10 @@ func NHentaiNext(s *discordgo.Session, m *discordgo.MessageCreate) int {
 
 	response, err := http.Get(imgURL)
 
-	if err != nil {
+	if err != nil || response.StatusCode != 200 {
 		s.ChannelMessageSend(m.ChannelID, "You have reached the end of this work.")
 		prevNH[m.ChannelID] = nil // unset previous session
+		return -1
 	}
 
 	defer response.Body.Close()
@@ -111,6 +119,72 @@ func NHentaiNext(s *discordgo.Session, m *discordgo.MessageCreate) int {
 	messagesend := &discordgo.MessageSend{Files: []*discordgo.File{attachment}}
 
 	s.ChannelMessageSendComplex(m.ChannelID, messagesend)
+
+	return 0
+}
+
+// NSearch searches for a hentai on nhentai.net
+func NSearch(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int {
+	urlBase := "https://nhentai.net/search/?q=" + strings.Join(args, "+")
+
+	// QUERY
+	resp, err := soup.Get(urlBase)
+	if err != nil {
+		// if HTTP request fails
+		return -1
+	}
+
+	// SCRAPE Nhentai
+	// preliminary scan to determine number of pages
+	doc := soup.HTMLParse(resp)
+
+	results := doc.FindAll("h1")[0].Text()
+	// currently, this is a string, which may say
+	// "8,045 results"
+	// "No results found"
+
+	results = strings.Trim(results, " ")
+	results = strings.Replace(results, ",", "", -1)
+
+	if strings.Contains(results, "No") {
+		s.ChannelMessageSend(m.ChannelID, "No results found. Please try another tag.")
+		return 1
+	}
+
+	// otherwise, we're good
+	// so now, let's convert this into a number
+	numResults, err := strconv.ParseInt(strings.Split(results, " ")[0], 10, 64)
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "No results found. Please try another tag.")
+		return -1
+	}
+
+	numPages := (int)(numResults/25 + 1) // truncating division
+
+	// CHOOSE A PAGE
+	urlBase = urlBase + fmt.Sprintf("&page=%d", 1+rand.Intn(numPages))
+
+	// QUERY
+	page, err := http.Get(urlBase)
+	if err != nil {
+		// if HTTP request fails
+		return -1
+	}
+	defer page.Body.Close()
+
+	// SCRAPE Nhentai
+	// this time get our result
+	pageText, err := ioutil.ReadAll(page.Body)
+	if err != nil {
+		// read fails
+		return -1
+	}
+
+	re := regexp.MustCompile(`g/(\d+)/`)
+
+	hentais := re.FindAllStringSubmatch(string(pageText), -1)
+
+	NHentaiStart(s, m, hentais[rand.Intn(len(hentais))][1])
 
 	return 0
 }
@@ -296,6 +370,19 @@ func NSFWCommand(s *discordgo.Session, m *discordgo.MessageCreate) int {
 			return NHentaiStart(s, m, fields[1])
 		}
 		s.ChannelMessageSend(m.ChannelID, "Please Provide gallery number.")
+
+	case "nsearch":
+		if len(fields) == 1 {
+			return NSearch(s, m, make([]string, 0))
+		}
+		return NSearch(s, m, fields[1:])
+
+	case "help":
+		s.ChannelMessageSend(m.ChannelID, "`hentai [tags]` -- searches for hentai posts via Gelbooru\n"+
+			"	next -- next hentai post with same tags\n"+
+			"`nhentai <gallery number>` -- displays a nhentai work\n"+
+			"	np -- next page of the work\n"+
+			"`nsearch [tags]` -- search nhentai for matching works")
 
 	}
 
