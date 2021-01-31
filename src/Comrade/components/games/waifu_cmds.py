@@ -5,12 +5,11 @@ Not implemented yet.
 '''
 
 import discord
-from discord.ext import commands, tasks
-from utils import *
+from discord.ext import commands
 
 import random
 
-raise NotImplementedError
+## Not implemented yet
 
 NAMES = ["Apple", "Banana", "Cow", "DNA", "E"]
 
@@ -41,21 +40,21 @@ class Waifu(commands.Cog):
         '''
         gives u a random waifu
         '''
-        NotImplemented
+        pass
 
     @commands.command()
     async def wlistwaifus(self, ctx: commands.Context, user: discord.Member = None):
         '''
         lists your waifus
         '''
-        NotImplemented
+        pass
 
     @commands.command()
     async def wtradewaifus(self, ctx: commands.Context, *, user):
         '''
         Trade with someone?? idk how this would work tbh
         '''
-        NotImplemented
+        pass
 
     '''
     Timer based thing

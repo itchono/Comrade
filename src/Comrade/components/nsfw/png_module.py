@@ -10,8 +10,8 @@ from db import collection
 ACTIVE_SERVER = 419214713252216848
 PNG_CHANNEL_ID = 522428899184082945
 
-raise NotImplementedError
-
+# depreciated
+'''
 class PNGS(commands.Cog):
 
     def __init__(self, bot):
@@ -161,3 +161,4 @@ class PNGS(commands.Cog):
     async def on_message(self, message: discord.message):
         if random.randint(1, 100) < 5 and not message.author.bot:
             await self.spawn_png(message)
+'''

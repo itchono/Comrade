@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>Comrade.components.general API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>Comrade.components.general</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from .general_cmds import General
+from .macros import Macros
+from .go_tunnel import Go
+from .music import Music
+
+__all__ = [&#34;General&#34;, &#34;Macros&#34;, &#34;Go&#34;, &#34;Music&#34;]</code></pre>
+</details>
+</section>
+<section>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+<dl>
+<dt><code class="name"><a title="Comrade.components.general.general_cmds" href="general_cmds.html">Comrade.components.general.general_cmds</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="Comrade.components.general.go_tunnel" href="go_tunnel.html">Comrade.components.general.go_tunnel</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="Comrade.components.general.macros" href="macros.html">Comrade.components.general.macros</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="Comrade.components.general.music" href="music.html">Comrade.components.general.music</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="Comrade.components.general.General"><code class="flex name class">
+<span>class <span class="ident">General</span></span>
+<span>(</span><span>bot)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>General purpose commands for checking on the status of the bot,
+and various utilites like fetching avatars.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class General(commands.Cog):
+    &#39;&#39;&#39;
+    General purpose commands for checking on the status of the bot,
+    and various utilites like fetching avatars.
+    &#39;&#39;&#39;
+    def __init__(self, bot):
+        self.bot: commands.Bot = bot
+
+    @commands.command()
+    async def status(self, ctx: commands.Context):
+        &#39;&#39;&#39;
+        Shows the current status of the bot
+        &#39;&#39;&#39;
+        await ctx.send(f&#34;**Uptime**: {round(get_uptime(), 1)}s\n&#34;
+                       f&#34;**Version**: {version}\n&#34;
+                       f&#34;Currently Connected to **{len(self.bot.guilds)}** &#34;
+                       f&#34;server(s)\n**Host**: {get_host()}\n&#34;
+                       f&#34;**API Latency**: {round(self.bot.latency, 4)}s\n&#34;
+                       f&#34;Running discord.py version {discord.__version__}&#34;)
+
+    @commands.command()
+    async def dm(self, ctx: commands.Context, user:
+                 typing.Union[discord.Member, discord.User] = None,
+                 *, message: str):
+        &#39;&#39;&#39;
+        Sends a direct message to a given user via the bot
+        &#39;&#39;&#39;
+        await user.send(message)
+
+    @commands.command()
+    async def dateof(self, ctx: commands.Context, *, thing:
+                     typing.Union[discord.TextChannel, discord.User,
+                                  discord.VoiceChannel, discord.Message,
+                                  discord.Role, discord.Guild]):
+        &#39;&#39;&#39;
+        Gets the creation time of basically any Discord object.
+        &#39;&#39;&#39;
+        await ctx.send(f&#34;That was created on &#34;
+                       f&#34;{utc_to_local_time(thing.created_at).strftime(&#39;%B %d %Y at %I:%M:%S.%f %p %Z&#39;)}&#34;)
+
+    @commands.command(aliases=[&#34;lastmsg&#34;, &#34;staleness&#34;])
+    @commands.guild_only()
+    async def lastmessage(self, ctx: commands.Context,
+                          channel: discord.TextChannel):
+        &#39;&#39;&#39;
+        Checks when the last message was sent in a channel
+        &#39;&#39;&#39;
+        msg = (await channel.history(limit=1).flatten()).pop()
+
+        t0 = utc_to_local_time(msg.created_at)
+        difference = (local_time() - t0).days
+
+        await ctx.send(f&#34;Last message in {channel.mention} was sent on&#34;
+                       f&#34; {t0.strftime(&#39;%B %d %Y at %I:%M:%S %p %Z&#39;)} by &#34;
+                       f&#34;`{msg.author.display_name}` ({difference} days ago.)&#34;)
+
+    @commands.group(invoke_without_command=True)
+    @commands.guild_only()
+    async def serverinfo(self, ctx: commands.Context):
+        &#39;&#39;&#39;
+        Gets information about the server.
+        &#39;&#39;&#39;
+        e = discord.Embed(colour=ctx.guild.roles[-1].colour)
+        e.set_thumbnail(url=ctx.guild.icon_url)
+        e.set_author(name=f&#34;Information for {ctx.guild.name}&#34;,
+                     icon_url=ctx.guild.icon_url)
+
+        e.add_field(name=&#34;Time of Creation&#34;,
+                    value=ctx.guild.created_at.strftime(&#39;%B %d %Y at %I:%M:%S %p %Z&#39;),
+                    inline=False)
+
+        e.add_field(name=&#34;Text Channels&#34;,
+                    value=len(ctx.guild.text_channels))
+        e.add_field(name=&#34;Voice Channels&#34;,
+                    value=len(ctx.guild.voice_channels))
+        e.add_field(name=&#34;Channel Categories&#34;,
+                    value=len(ctx.guild.categories))
+
+        e.add_field(name=&#34;Total Members&#34;,
+                    value=ctx.guild.member_count)
+        e.add_field(name=&#34;Human Members&#34;,
+                    value=len([i for i in ctx.guild.members if not i.bot]))
+
+        e.add_field(name=&#34;Emojis&#34;,
+                    value=len(ctx.guild.emojis))
+        e.add_field(name=&#34;Roles&#34;,
+                    value=len(ctx.guild.roles))
+
+        e.add_field(name=&#34;Server Icon&#34;, value=f&#34;[Link]({ctx.guild.icon_url})&#34;)
+        e.add_field(name=&#34;Owner&#34;, value=ctx.guild.owner.mention)
+
+        e.set_footer(text=f&#34;ID: {ctx.guild.id}&#34;)
+        await ctx.send(embed=e)
+
+    @commands.command(aliases=[&#34;pfp&#34;])
+    async def avatar(self, ctx: commands.Context, *,
+                     member: typing.Union[discord.Member,
+                                          discord.User] = None):
+        &#39;&#39;&#39;
+        Displays the avatar of a target user, or yourself by default
+        Made by Slyflare, PhtephenLuu
+        &#39;&#39;&#39;
+        if not member:
+            member = ctx.author
+
+        col = member.colour if type(member) == discord.Member \
+            else discord.Color.dark_blue()
+
+        a = discord.Embed(color=col,
+                          title=f&#34;{member.display_name}&#39;s Avatar&#34;,
+                          url=str(member.avatar_url_as(static_format=&#34;png&#34;)))
+
+        a.set_image(url=member.avatar_url)
+        await ctx.send(embed=a)
+
+    @commands.command()
+    @commands.guild_only()
+    async def emoji(self, ctx: commands.Context):
+        &#39;&#39;&#39;
+        Shows all emoji in the server
+        &#39;&#39;&#39;
+        emoji = &#34;&#34;.join([str(e) for e in ctx.guild.emojis])
+        await ctx.send(f&#34;{ctx.guild.name} has &#34;
+                       f&#34;{len(ctx.guild.emojis)} emojis:\n{emoji}&#34;)
+
+    @commands.command()
+    async def clear(self, ctx: commands.Context, amount: typing.Optional[int] = 50):
+        &#39;&#39;&#39;
+        Clears bot commands (server-only) and messages
+        from bot in the last 50 messages or otherwise specified
+        &#39;&#39;&#39;
+        if ctx.guild:
+            def check(message):
+                return (message.content and message.content.startswith(bot_prefix)) or \
+                        message.author == self.bot.user
+            await ctx.channel.purge(check=check, bulk=True, limit=amount)
+        else:
+            async for msg in ctx.channel.history(limit=amount):
+                if msg.author == self.bot.user:
+                    await msg.delete()
+
+    @commands.command()
+    async def getlog(self, ctx: commands.Context):
+        &#39;&#39;&#39;
+        Uploads Comrade&#39;s log file for analysis
+        &#39;&#39;&#39;
+        with open(&#34;comrade.log&#34;, &#34;rb&#34;) as f:
+            await ctx.send(file=discord.File(f, filename=&#34;comrade_log.txt&#34;))
+
+    @commands.command()
+    async def website(self, ctx: commands.Context):
+        &#39;&#39;&#39;
+        Pastes in Comrade&#39;s website, if the owner configured it
+        &#39;&#39;&#39;
+        if url := cfg[&#34;Hosting&#34;][&#34;host-url&#34;]:
+            await ctx.send(url)
+        else:
+            await ctx.send(&#34;The owner has not configured a hosting website&#34;)
+
+    @commands.command()
+    @commands.is_owner()
+    async def restart(self, ctx: commands.Context):
+        &#39;&#39;&#39;
+        Restarts the bot on the remote host
+        &#39;&#39;&#39;
+        await ctx.send(&#34;Restarting...&#34;)
+        with open(&#34;restart.cfg&#34;, &#34;w&#34;) as f:
+            f.write(str(ctx.channel.id))
+            # pointer for bot restart
+        await self.bot.change_presence(status=discord.Status.offline)
+        await self.bot.logout()
+        sys.exit(0)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>discord.ext.commands.cog.Cog</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="Comrade.components.general.General.avatar"><code class="name">var <span class="ident">avatar</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.general.General.clear"><code class="name">var <span class="ident">clear</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.general.General.dateof"><code class="name">var <span class="ident">dateof</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.general.General.dm"><code class="name">var <span class="ident">dm</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.general.General.emoji"><code class="name">var <span class="ident">emoji</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.general.General.getlog"><code class="name">var <span class="ident">getlog</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.general.General.lastmessage"><code class="name">var <span class="ident">lastmessage</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.general.General.restart"><code class="name">var <span class="ident">restart</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.general.General.serverinfo"><code class="name">var <span class="ident">serverinfo</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.general.General.status"><code class="name">var <span class="ident">status</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.general.General.website"><code class="name">var <span class="ident">website</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="Comrade.components.general.Go"><code class="flex name class">
+<span>class <span class="ident">Go</span></span>
+<span>(</span><span>bot)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Communicates with Gomrade to serve as a data relay between the two</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Go(commands.Cog):
+    &#39;&#39;&#39;
+    Communicates with Gomrade to serve as a data relay between the two
+    &#39;&#39;&#39;
+    def __init__(self, bot):
+        self.bot: commands.Bot = bot
+
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        if message.author.id == GO_ID:
+            logger.info(message.content)
+
+    @commands.command()
+    async def go(self, ctx: commands.Context, *, message):
+        &#39;&#39;&#39;
+        Sends a message to the go bot
+        &#39;&#39;&#39;
+        gobot: discord.Member = ctx.guild.get_member(GO_ID)
+        dmchannel = await gobot.create_dm()
+        await dmchannel.send(message)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>discord.ext.commands.cog.Cog</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="Comrade.components.general.Go.go"><code class="name">var <span class="ident">go</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="Comrade.components.general.Go.on_message"><code class="name flex">
+<span>async def <span class="ident">on_message</span></span>(<span>self, message: discord.message.Message)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@commands.Cog.listener()
+async def on_message(self, message: discord.Message):
+    if message.author.id == GO_ID:
+        logger.info(message.content)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="Comrade.components.general.Macros"><code class="flex name class">
+<span>class <span class="ident">Macros</span></span>
+<span>(</span><span>bot)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the bot to say something whenever you type a certain
+message in chat.</p>
+<p>Can write more advanced macros to execute scripts</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Macros(commands.Cog):
+    &#39;&#39;&#39;
+    Set the bot to say something whenever you type a certain
+    message in chat.
+
+    Can write more advanced macros to execute scripts
+    &#39;&#39;&#39;
+    def __init__(self, bot):
+        self.bot: commands.Bot = bot
+
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.message):
+        if not message.author.bot and message.guild:
+            await process_macro(message)
+
+            # Fun features
+            if &#34;@someone&#34; in message.content.lower():
+                e = discord.Embed(color=0xd7342a,
+                    description=random_member_from_server(message.guild.id, True).mention)
+                e.set_footer(
+                    text=f&#34;Random ping by: {message.author.display_name}&#34;)
+                await message.channel.send(embed=e)
+
+            if message.content.lower() == &#34;hello comrade&#34;:
+                await message.channel.send(&#34;Henlo&#34;)
+            # TODO: Re-add meme review in some capacity
+
+    @commands.command()
+    @commands.guild_only()
+    async def macro(self, ctx: commands.Context, name: str, *args):
+        &#39;&#39;&#39;
+        Runs a macro, with arguments
+        &#39;&#39;&#39;
+        if ctx.invoked_subcommand is None:
+            result = await process_macro(ctx.message)
+            if result == 1:
+                await ctx.send(f&#34;Macro `{name}` not found.&#34;)
+
+    @commands.command(aliases=[&#34;addtrigger&#34;])
+    @commands.guild_only()
+    async def addmacro(self, ctx: commands.Context, name: str, *, macro):
+        &#39;&#39;&#39;
+        Adds a macro; a sequence of commands and text callable when a user types a message.
+        At the most basic level, you can input text, which will be said when it&#39;s called.
+        You can also call commands by specifying the command name.
+
+        Special Things:
+            Use `\` to escape calling commands.
+            Use `wait` to delay execution of a function by number of seconds.
+            Pass in variables using %1, %2, %3...
+
+        Example: a macro called tomato
+
+        ascii 🍅 b
+        wait 5
+        $1 is the best game
+        \defaultdance
+        anime
+        defaultdance
+
+        call it using `tomato minecraft`
+
+        output:
+        🍅🍅
+        🍅  🍅
+        🍅🍅
+        🍅  🍅
+        🍅🍅
+        minecraft is the best game
+        defaultdance
+        anime
+        ⠀⠀⠀⠀⣀⣤
+        ⠀⠀⠀⠀⣿⠿⣶
+        ⠀⠀⠀⠀⣿⣿⣀
+        ⠀⠀⠀⣶⣶⣿⠿⠛⣶
+        ⠤⣀⠛⣿⣿⣿⣿⣿⣿⣭⣿⣤
+        ⠒⠀⠀⠀⠉⣿⣿⣿⣿⠀⠀⠉⣀
+        ⠀⠤⣤⣤⣀⣿⣿⣿⣿⣀⠀⠀⣿
+        ⠀⠀⠛⣿⣿⣿⣿⣿⣿⣿⣭⣶⠉
+        ⠀⠀⠀⠤⣿⣿⣿⣿⣿⣿⣿
+        ⠀⠀⠀⣭⣿⣿⣿⠀⣿⣿⣿
+        ⠀⠀⠀⣉⣿⣿⠿⠀⠿⣿⣿
+        ⠀⠀⠀⠀⣿⣿⠀⠀⠀⣿⣿⣤
+        ⠀⠀⠀⣀⣿⣿⠀⠀⠀⣿⣿⣿
+        ⠀⠀⠀⣿⣿⣿⠀⠀⠀⣿⣿⣿
+        ⠀⠀⠀⣿⣿⠛⠀⠀⠀⠉⣿⣿
+        ⠀⠀⠀⠉⣿⠀⠀⠀⠀⠀⠛⣿
+        ⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀⠀⣿⣿
+        ⠀⠀⠀⠀⣛⠀⠀⠀⠀⠀⠀⠛⠿⠿⠿
+        ⠀⠀⠀⠛⠛
+
+        TIP: use shift+enter to make new lines
+        TIP: OR use \`\`\` \`\`\` on Discord to help format your command
+        &#39;&#39;&#39;
+        cmds = collection(
+            &#34;macros&#34;).find_one({&#34;server&#34;: ctx.guild.id, &#34;name&#34;: name})
+
+        if cmds:
+            await ctx.send(f&#34;Macro with name `{name}` already exists!&#34;)
+            return
+
+        collection(
+            &#34;macros&#34;).insert_one(
+                {&#34;server&#34;: ctx.guild.id,
+                 &#34;name&#34;: name,
+                 &#34;macro&#34;: macro.strip(&#34;```&#34;).strip(&#34;\n&#34;)}
+                )
+        await reactOK(ctx)
+
+    @commands.command(aliases=[&#34;listmacros&#34;, &#34;macrolist&#34;, &#34;macros&#34;])
+    @commands.guild_only()
+    async def listmacro(self, ctx: commands.context):
+        &#39;&#39;&#39;
+        Lists all macros in the server
+        &#39;&#39;&#39;
+        macros = collection(
+            &#34;macros&#34;).find({&#34;server&#34;: ctx.guild.id})
+        if macros:
+            e = discord.Embed(color=0xd7342a,
+                title=f&#34;Macros for {ctx.guild.name}&#34;,
+                description=&#34;\n&#34;.join(i[&#34;name&#34;] for i in macros))
+            await ctx.send(embed=e)
+        else:
+            await ctx.send(f&#34;No macros found in {ctx.guild.name}&#34;)
+
+    @commands.command()
+    @commands.guild_only()
+    async def removemacro(self, ctx: commands.Context, name):
+        &#39;&#39;&#39;
+        Deletes a macro
+        &#39;&#39;&#39;
+        collection(&#34;macros&#34;).delete_one(
+            {&#34;server&#34;: ctx.guild.id, &#34;name&#34;: name})
+        await reactOK(ctx)
+
+    @commands.command()
+    @commands.guild_only()
+    async def showmacro(self, ctx: commands.Context, name):
+        &#39;&#39;&#39;
+        Show the script content of a macro
+        &#39;&#39;&#39;
+        cmds = collection(
+            &#34;macros&#34;).find_one({&#34;server&#34;: ctx.guild.id, &#34;name&#34;: name})
+        if not cmds:
+            await ctx.send(&#34;Macro not found.&#34;)
+            return
+        await ctx.send(
+            f&#34;```{cmds[&#39;macro&#39;]}```&#34;)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>discord.ext.commands.cog.Cog</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="Comrade.components.general.Macros.addmacro"><code class="name">var <span class="ident">addmacro</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.general.Macros.listmacro"><code class="name">var <span class="ident">listmacro</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.general.Macros.macro"><code class="name">var <span class="ident">macro</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.general.Macros.removemacro"><code class="name">var <span class="ident">removemacro</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.general.Macros.showmacro"><code class="name">var <span class="ident">showmacro</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="Comrade.components.general.Macros.on_message"><code class="name flex">
+<span>async def <span class="ident">on_message</span></span>(<span>self, message: <module 'discord.message' from 'c:\\python38\\lib\\site-packages\\discord\\message.py'>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@commands.Cog.listener()
+async def on_message(self, message: discord.message):
+    if not message.author.bot and message.guild:
+        await process_macro(message)
+
+        # Fun features
+        if &#34;@someone&#34; in message.content.lower():
+            e = discord.Embed(color=0xd7342a,
+                description=random_member_from_server(message.guild.id, True).mention)
+            e.set_footer(
+                text=f&#34;Random ping by: {message.author.display_name}&#34;)
+            await message.channel.send(embed=e)
+
+        if message.content.lower() == &#34;hello comrade&#34;:
+            await message.channel.send(&#34;Henlo&#34;)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="Comrade.components.general.Music"><code class="flex name class">
+<span>class <span class="ident">Music</span></span>
+<span>(</span><span>bot)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Copied line for line from the discord.py</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Music(commands.Cog):
+    &#39;&#39;&#39;
+    Copied line for line from the discord.py
+    &#39;&#39;&#39;
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.command()
+    async def join(self, ctx, *, channel: discord.VoiceChannel):
+        &#34;&#34;&#34;Joins a voice channel&#34;&#34;&#34;
+
+        if ctx.voice_client is not None:
+            return await ctx.voice_client.move_to(channel)
+
+        await channel.connect()
+
+    @commands.command()
+    async def play(self, ctx, *, url):
+        &#34;&#34;&#34;Plays from a url (almost anything youtube_dl supports)&#34;&#34;&#34;
+
+        async with ctx.typing():
+            player = await YTDLSource.from_url(url, loop=self.bot.loop)
+            ctx.voice_client.play(player, after=lambda e: print(&#39;Player error: %s&#39; % e) if e else None)
+
+        await ctx.send(&#39;Now playing: {}&#39;.format(player.title))
+
+    @commands.command()
+    async def stream(self, ctx, *, url):
+        &#34;&#34;&#34;Streams from a url (same as yt, but doesn&#39;t predownload)&#34;&#34;&#34;
+
+        async with ctx.typing():
+            player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
+            ctx.voice_client.play(player, after=lambda e: print(&#39;Player error: %s&#39; % e) if e else None)
+
+        await ctx.send(&#39;Now playing: {}&#39;.format(player.title))
+
+    @commands.command()
+    async def volume(self, ctx, volume: int):
+        &#34;&#34;&#34;Changes the player&#39;s volume&#34;&#34;&#34;
+
+        if ctx.voice_client is None:
+            return await ctx.send(&#34;Not connected to a voice channel.&#34;)
+
+        ctx.voice_client.source.volume = volume / 100
+        await ctx.send(&#34;Changed volume to {}%&#34;.format(volume))
+
+    @commands.command()
+    async def stop(self, ctx):
+        &#34;&#34;&#34;Stops and disconnects the bot from voice&#34;&#34;&#34;
+
+        await ctx.voice_client.disconnect()
+
+    @play.before_invoke
+    @stream.before_invoke
+    async def ensure_voice(self, ctx):
+        if ctx.voice_client is None:
+            if ctx.author.voice:
+                await ctx.author.voice.channel.connect()
+            else:
+                await ctx.send(&#34;You are not connected to a voice channel.&#34;)
+                raise commands.CommandError(&#34;Author not connected to a voice channel.&#34;)
+        elif ctx.voice_client.is_playing():
+            ctx.voice_client.stop()</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>discord.ext.commands.cog.Cog</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="Comrade.components.general.Music.join"><code class="name">var <span class="ident">join</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.general.Music.play"><code class="name">var <span class="ident">play</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.general.Music.stop"><code class="name">var <span class="ident">stop</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.general.Music.stream"><code class="name">var <span class="ident">stream</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.general.Music.volume"><code class="name">var <span class="ident">volume</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="Comrade.components.general.Music.ensure_voice"><code class="name flex">
+<span>async def <span class="ident">ensure_voice</span></span>(<span>self, ctx)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@play.before_invoke
+@stream.before_invoke
+async def ensure_voice(self, ctx):
+    if ctx.voice_client is None:
+        if ctx.author.voice:
+            await ctx.author.voice.channel.connect()
+        else:
+            await ctx.send(&#34;You are not connected to a voice channel.&#34;)
+            raise commands.CommandError(&#34;Author not connected to a voice channel.&#34;)
+    elif ctx.voice_client.is_playing():
+        ctx.voice_client.stop()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="Comrade.components" href="../index.html">Comrade.components</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="Comrade.components.general.general_cmds" href="general_cmds.html">Comrade.components.general.general_cmds</a></code></li>
+<li><code><a title="Comrade.components.general.go_tunnel" href="go_tunnel.html">Comrade.components.general.go_tunnel</a></code></li>
+<li><code><a title="Comrade.components.general.macros" href="macros.html">Comrade.components.general.macros</a></code></li>
+<li><code><a title="Comrade.components.general.music" href="music.html">Comrade.components.general.music</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="Comrade.components.general.General" href="#Comrade.components.general.General">General</a></code></h4>
+<ul class="two-column">
+<li><code><a title="Comrade.components.general.General.avatar" href="#Comrade.components.general.General.avatar">avatar</a></code></li>
+<li><code><a title="Comrade.components.general.General.clear" href="#Comrade.components.general.General.clear">clear</a></code></li>
+<li><code><a title="Comrade.components.general.General.dateof" href="#Comrade.components.general.General.dateof">dateof</a></code></li>
+<li><code><a title="Comrade.components.general.General.dm" href="#Comrade.components.general.General.dm">dm</a></code></li>
+<li><code><a title="Comrade.components.general.General.emoji" href="#Comrade.components.general.General.emoji">emoji</a></code></li>
+<li><code><a title="Comrade.components.general.General.getlog" href="#Comrade.components.general.General.getlog">getlog</a></code></li>
+<li><code><a title="Comrade.components.general.General.lastmessage" href="#Comrade.components.general.General.lastmessage">lastmessage</a></code></li>
+<li><code><a title="Comrade.components.general.General.restart" href="#Comrade.components.general.General.restart">restart</a></code></li>
+<li><code><a title="Comrade.components.general.General.serverinfo" href="#Comrade.components.general.General.serverinfo">serverinfo</a></code></li>
+<li><code><a title="Comrade.components.general.General.status" href="#Comrade.components.general.General.status">status</a></code></li>
+<li><code><a title="Comrade.components.general.General.website" href="#Comrade.components.general.General.website">website</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="Comrade.components.general.Go" href="#Comrade.components.general.Go">Go</a></code></h4>
+<ul class="">
+<li><code><a title="Comrade.components.general.Go.go" href="#Comrade.components.general.Go.go">go</a></code></li>
+<li><code><a title="Comrade.components.general.Go.on_message" href="#Comrade.components.general.Go.on_message">on_message</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="Comrade.components.general.Macros" href="#Comrade.components.general.Macros">Macros</a></code></h4>
+<ul class="two-column">
+<li><code><a title="Comrade.components.general.Macros.addmacro" href="#Comrade.components.general.Macros.addmacro">addmacro</a></code></li>
+<li><code><a title="Comrade.components.general.Macros.listmacro" href="#Comrade.components.general.Macros.listmacro">listmacro</a></code></li>
+<li><code><a title="Comrade.components.general.Macros.macro" href="#Comrade.components.general.Macros.macro">macro</a></code></li>
+<li><code><a title="Comrade.components.general.Macros.on_message" href="#Comrade.components.general.Macros.on_message">on_message</a></code></li>
+<li><code><a title="Comrade.components.general.Macros.removemacro" href="#Comrade.components.general.Macros.removemacro">removemacro</a></code></li>
+<li><code><a title="Comrade.components.general.Macros.showmacro" href="#Comrade.components.general.Macros.showmacro">showmacro</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="Comrade.components.general.Music" href="#Comrade.components.general.Music">Music</a></code></h4>
+<ul class="two-column">
+<li><code><a title="Comrade.components.general.Music.ensure_voice" href="#Comrade.components.general.Music.ensure_voice">ensure_voice</a></code></li>
+<li><code><a title="Comrade.components.general.Music.join" href="#Comrade.components.general.Music.join">join</a></code></li>
+<li><code><a title="Comrade.components.general.Music.play" href="#Comrade.components.general.Music.play">play</a></code></li>
+<li><code><a title="Comrade.components.general.Music.stop" href="#Comrade.components.general.Music.stop">stop</a></code></li>
+<li><code><a title="Comrade.components.general.Music.stream" href="#Comrade.components.general.Music.stream">stream</a></code></li>
+<li><code><a title="Comrade.components.general.Music.volume" href="#Comrade.components.general.Music.volume">volume</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>

@@ -5,327 +5,327 @@ Used to log activity data of server users over a period of about 4 months.
 
 Code maintained here only as reference.
 '''
-raise NotImplementedError
-
-from typing import Collection
-import discord
-from discord.ext import commands, tasks
-
-import pytz
-import io
-from matplotlib import pyplot as plt
-from scipy.interpolate import interp1d
-import matplotlib.dates as md
-import numpy as np
-
-from utils.utilities import local_time
-from db import collection
-
-SERVER = 419214713252216848
-
-
-def interpdays(times, values):
-    '''
-    Returns an averaged graph of all the days
-    '''
-    fc = interp1d(times, values)
-
-    DAY_MIN = int(times[0])
-    DAY_MAX = int(times[-1])
-
-    if DAY_MIN == DAY_MAX:
-        return (times, values)  # can't do anything with this
-    else:
-        sampletimes = np.linspace(
-            times[0], times[0] + 1, 100)  # 24 hour period
-        onlines = []
-
-        for time in sampletimes:
-            s = 0
-            avgcount = 0
-            for day in range(DAY_MAX - DAY_MIN):
-                try:
-                    s += fc(time + day)
-                    avgcount += 1
-                except BaseException:
-                    pass  # if the date doesn't exist in the domain
-
-            onlines.append(s / avgcount)
-        return (sampletimes, np.array(onlines))
-
-
-class ActivityTracker(commands.Cog):
-    def __init__(self, bot):
-        self.bot: commands.Bot = bot
 
-        self.online_humans = []
-        self.messages_sent = 0
-        self.quantities = {}
 
-        self.datalog.start()
+# from typing import Collection
+# import discord
+# from discord.ext import commands, tasks
+
+# import pytz
+# import io
+# from matplotlib import pyplot as plt
+# from scipy.interpolate import interp1d
+# import matplotlib.dates as md
+# import numpy as np
+
+# from utils.utilities import local_time
+# from db import collection
+
+# SERVER = 419214713252216848
+
+
+# def interpdays(times, values):
+#     '''
+#     Returns an averaged graph of all the days
+#     '''
+#     fc = interp1d(times, values)
+
+#     DAY_MIN = int(times[0])
+#     DAY_MAX = int(times[-1])
+
+#     if DAY_MIN == DAY_MAX:
+#         return (times, values)  # can't do anything with this
+#     else:
+#         sampletimes = np.linspace(
+#             times[0], times[0] + 1, 100)  # 24 hour period
+#         onlines = []
+
+#         for time in sampletimes:
+#             s = 0
+#             avgcount = 0
+#             for day in range(DAY_MAX - DAY_MIN):
+#                 try:
+#                     s += fc(time + day)
+#                     avgcount += 1
+#                 except BaseException:
+#                     pass  # if the date doesn't exist in the domain
+
+#             onlines.append(s / avgcount)
+#         return (sampletimes, np.array(onlines))
+
 
-        self.id2name = {}
+# class ActivityTracker(commands.Cog):
+#     def __init__(self, bot):
+#         self.bot: commands.Bot = bot
 
-    async def pushdata(self):
-        '''
-        Logs activity from all online members and pushes to remote
-        '''
-        server = self.bot.get_guild(SERVER)
+#         self.online_humans = []
+#         self.messages_sent = 0
+#         self.quantities = {}
 
-        entry = {"time": local_time(),
-                 "online-members": len(self.online_humans),
-                 "messages-sent": self.messages_sent,
-                 "quantities": self.quantities}
-        collection("activitydata").insert_one(entry)
-        # print("Data Logged.", entry)
-
-        # PREPARE NEXT CYCLE
-        self.online_humans = [m for m in server.members if (
-            str(m.status) != "offline" and not m.bot)]
-        self.messages_sent = 0
-        self.quantities = {}
+#         self.datalog.start()
 
-    @tasks.loop(minutes=10)
-    async def datalog(self):
-        await self.pushdata()
+#         self.id2name = {}
 
-        # also rebuild user cache
-        server = self.bot.get_guild(SERVER)
-        for m in server.members:
-            self.id2name[m.id] = m.display_name
+#     async def pushdata(self):
+#         '''
+#         Logs activity from all online members and pushes to remote
+#         '''
+#         server = self.bot.get_guild(SERVER)
 
-    @datalog.before_loop
-    async def before_log(self):
-        await self.bot.wait_until_ready()
+#         entry = {"time": local_time(),
+#                  "online-members": len(self.online_humans),
+#                  "messages-sent": self.messages_sent,
+#                  "quantities": self.quantities}
+#         collection("activitydata").insert_one(entry)
+#         # print("Data Logged.", entry)
+
+#         # PREPARE NEXT CYCLE
+#         self.online_humans = [m for m in server.members if (
+#             str(m.status) != "offline" and not m.bot)]
+#         self.messages_sent = 0
+#         self.quantities = {}
 
-        server = self.bot.get_guild(SERVER)
-        self.online_humans = [m for m in server.members if (
-            str(m.status) != "offline" and not m.bot)]
-        for m in server.members:
-            self.id2name[m.id] = m.display_name
+#     @tasks.loop(minutes=10)
+#     async def datalog(self):
+#         await self.pushdata()
 
-    @commands.Cog.listener()
-    async def on_message(self, message: discord.message):
-        '''
-        Listens from messages from invisible users
-        '''
-        if not message.author.bot:
-            self.messages_sent += 1
+#         # also rebuild user cache
+#         server = self.bot.get_guild(SERVER)
+#         for m in server.members:
+#             self.id2name[m.id] = m.display_name
 
-            try:
-                self.quantities[str(message.author.id)] += 1
-            except BaseException:
-                self.quantities[str(message.author.id)] = 1
+#     @datalog.before_loop
+#     async def before_log(self):
+#         await self.bot.wait_until_ready()
 
-            if message.author not in self.online_humans:
-                self.online_humans.append(message.author)
+#         server = self.bot.get_guild(SERVER)
+#         self.online_humans = [m for m in server.members if (
+#             str(m.status) != "offline" and not m.bot)]
+#         for m in server.members:
+#             self.id2name[m.id] = m.display_name
 
-    @commands.command()
-    @commands.guild_only()
-    async def leaderboard(self, ctx, limit: int = 10):
-        '''
-        Pulls up the leaderboard for the server.
-        '''
-        await ctx.trigger_typing()
+#     @commands.Cog.listener()
+#     async def on_message(self, message: discord.message):
+#         '''
+#         Listens from messages from invisible users
+#         '''
+#         if not message.author.bot:
+#             self.messages_sent += 1
 
-        entries = collection("activitydata").find()
+#             try:
+#                 self.quantities[str(message.author.id)] += 1
+#             except BaseException:
+#                 self.quantities[str(message.author.id)] = 1
 
-        times = []
-        bars = {}
+#             if message.author not in self.online_humans:
+#                 self.online_humans.append(message.author)
 
-        tz = pytz.timezone("US/Eastern")
+#     @commands.command()
+#     @commands.guild_only()
+#     async def leaderboard(self, ctx, limit: int = 10):
+#         '''
+#         Pulls up the leaderboard for the server.
+#         '''
+#         await ctx.trigger_typing()
 
-        for t in entries:
-            times.append(md.date2num(t["time"]))
+#         entries = collection("activitydata").find()
 
-            for person in t["quantities"]:
-                try:
-                    bars[person] += t["quantities"][person]
-                except BaseException:
-                    bars[person] = t["quantities"][person]
-        fig = plt.figure()
+#         times = []
+#         bars = {}
 
-        ax = fig.add_subplot(111)
+#         tz = pytz.timezone("US/Eastern")
 
-        limit = len(bars) if limit > len(bars) else limit
+#         for t in entries:
+#             times.append(md.date2num(t["time"]))
 
-        xs = np.arange(limit)
+#             for person in t["quantities"]:
+#                 try:
+#                     bars[person] += t["quantities"][person]
+#                 except BaseException:
+#                     bars[person] = t["quantities"][person]
+#         fig = plt.figure()
 
-        sorted_keys = [e for _, e in sorted(zip(bars.values(), bars.keys()))]
+#         ax = fig.add_subplot(111)
 
-        ax.set_title(f"Number of Messages by Person (Top {limit})")
+#         limit = len(bars) if limit > len(bars) else limit
 
-        ax.barh(xs, sorted(list(bars.values()))[-limit:])
+#         xs = np.arange(limit)
 
-        ax.set_yticks(np.arange(limit))
-        ax.set_yticklabels([self.id2name[int(i)] if int(
-            i) in self.id2name else i for i in sorted_keys][-limit:])
+#         sorted_keys = [e for _, e in sorted(zip(bars.values(), bars.keys()))]
 
-        ax.set_xticks([])
+#         ax.set_title(f"Number of Messages by Person (Top {limit})")
 
-        plt.subplots_adjust(left=0.4)
+#         ax.barh(xs, sorted(list(bars.values()))[-limit:])
 
-        f = io.BytesIO()
-        plt.savefig(f, format="png")
-        f.seek(0)
-        plt.clf()
-        await ctx.send(file=discord.File(f, "leaderboard.png"))
+#         ax.set_yticks(np.arange(limit))
+#         ax.set_yticklabels([self.id2name[int(i)] if int(
+#             i) in self.id2name else i for i in sorted_keys][-limit:])
 
-    @commands.group(invoke_without_command=True)
-    @commands.guild_only()
-    async def onlinegraph(self, ctx):
-        '''
-        Displays a graph of the average number of people online at a given time over a single day
-        '''
-        await ctx.trigger_typing()
+#         ax.set_xticks([])
 
-        entries = collection("activitydata").find()
+#         plt.subplots_adjust(left=0.4)
 
-        times = []
-        onlinepeople = []
+#         f = io.BytesIO()
+#         plt.savefig(f, format="png")
+#         f.seek(0)
+#         plt.clf()
+#         await ctx.send(file=discord.File(f, "leaderboard.png"))
 
-        tz = pytz.timezone("US/Eastern")
+#     @commands.group(invoke_without_command=True)
+#     @commands.guild_only()
+#     async def onlinegraph(self, ctx):
+#         '''
+#         Displays a graph of the average number of people online at a given time over a single day
+#         '''
+#         await ctx.trigger_typing()
 
-        for t in entries:
-            times.append(md.date2num(t["time"]))
-            onlinepeople.append(t["online-members"])
+#         entries = collection("activitydata").find()
 
-        times, onlinepeople = interpdays(times, onlinepeople)
+#         times = []
+#         onlinepeople = []
 
-        fig = plt.figure()
+#         tz = pytz.timezone("US/Eastern")
 
-        ax = fig.add_subplot(111)
+#         for t in entries:
+#             times.append(md.date2num(t["time"]))
+#             onlinepeople.append(t["online-members"])
 
-        ax.set_title("Avg. Number of Online Members on Iraq BTW")
-        ax.plot_date(times, onlinepeople, "-")
+#         times, onlinepeople = interpdays(times, onlinepeople)
 
-        ax.set_ylabel("Number of Members (Human, Online)")
-        ax.set_xlabel("Time")
+#         fig = plt.figure()
 
-        xfmt = md.DateFormatter('%H:%M', tz=tz)
-        ax.xaxis.set_major_formatter(xfmt)
+#         ax = fig.add_subplot(111)
 
-        ax.grid()
+#         ax.set_title("Avg. Number of Online Members on Iraq BTW")
+#         ax.plot_date(times, onlinepeople, "-")
 
-        f = io.BytesIO()
-        plt.savefig(f, format="png")
-        f.seek(0)
-        plt.clf()
-        await ctx.send(file=discord.File(f, "online.png"))
+#         ax.set_ylabel("Number of Members (Human, Online)")
+#         ax.set_xlabel("Time")
 
-    @onlinegraph.command(name="all")
-    @commands.guild_only()
-    async def allonline(self, ctx: commands.Context):
-        '''
-        Displays a graph of all logged online times
-        '''
-        await ctx.trigger_typing()
+#         xfmt = md.DateFormatter('%H:%M', tz=tz)
+#         ax.xaxis.set_major_formatter(xfmt)
 
-        entries = collection("activitydata").find()
+#         ax.grid()
 
-        times = []
-        onlinepeople = []
+#         f = io.BytesIO()
+#         plt.savefig(f, format="png")
+#         f.seek(0)
+#         plt.clf()
+#         await ctx.send(file=discord.File(f, "online.png"))
 
-        tz = pytz.timezone("US/Eastern")
+#     @onlinegraph.command(name="all")
+#     @commands.guild_only()
+#     async def allonline(self, ctx: commands.Context):
+#         '''
+#         Displays a graph of all logged online times
+#         '''
+#         await ctx.trigger_typing()
 
-        for t in entries:
-            times.append(md.date2num(t["time"]))
-            onlinepeople.append(t["online-members"])
+#         entries = collection("activitydata").find()
 
-        fig = plt.figure()
+#         times = []
+#         onlinepeople = []
 
-        ax = fig.add_subplot(111)
+#         tz = pytz.timezone("US/Eastern")
 
-        ax.set_title("Number of Online Members on Iraq BTW")
-        ax.plot_date(times, onlinepeople, "-")
+#         for t in entries:
+#             times.append(md.date2num(t["time"]))
+#             onlinepeople.append(t["online-members"])
 
-        ax.set_ylabel("Number of Members (Human, Online)")
-        ax.set_xlabel("Time")
+#         fig = plt.figure()
 
-        xfmt = md.DateFormatter('%H:%M', tz=tz)
-        ax.xaxis.set_major_formatter(xfmt)
+#         ax = fig.add_subplot(111)
 
-        ax.grid()
+#         ax.set_title("Number of Online Members on Iraq BTW")
+#         ax.plot_date(times, onlinepeople, "-")
 
-        f = io.BytesIO()
-        plt.savefig(f, format="png")
-        f.seek(0)
-        plt.clf()
-        await ctx.send(file=discord.File(f, "online.png"))
+#         ax.set_ylabel("Number of Members (Human, Online)")
+#         ax.set_xlabel("Time")
 
-    @commands.group(invoke_without_command=True)
-    @commands.guild_only()
-    async def messagegraph(self, ctx):
+#         xfmt = md.DateFormatter('%H:%M', tz=tz)
+#         ax.xaxis.set_major_formatter(xfmt)
 
-        await ctx.trigger_typing()
+#         ax.grid()
 
-        entries = collection("activitydata").find()
+#         f = io.BytesIO()
+#         plt.savefig(f, format="png")
+#         f.seek(0)
+#         plt.clf()
+#         await ctx.send(file=discord.File(f, "online.png"))
 
-        times = []
-        messagevolume = []
+#     @commands.group(invoke_without_command=True)
+#     @commands.guild_only()
+#     async def messagegraph(self, ctx):
 
-        tz = pytz.timezone("US/Eastern")
+#         await ctx.trigger_typing()
 
-        for t in entries:
-            times.append(md.date2num(t["time"]))
-            messagevolume.append(t["messages-sent"])
+#         entries = collection("activitydata").find()
 
-        fig = plt.figure()
+#         times = []
+#         messagevolume = []
 
-        times, messagevolume = interpdays(times, messagevolume)
+#         tz = pytz.timezone("US/Eastern")
 
-        ax = fig.add_subplot(111)
+#         for t in entries:
+#             times.append(md.date2num(t["time"]))
+#             messagevolume.append(t["messages-sent"])
 
-        ax.set_title("Message Volume")
-        ax.plot_date(times, messagevolume, "-")
+#         fig = plt.figure()
 
-        ax.set_ylabel("Avg. Number of Messages Sent in Time Window")
-        ax.set_xlabel("Time")
+#         times, messagevolume = interpdays(times, messagevolume)
 
-        xfmt = md.DateFormatter('%H:%M', tz=tz)
-        ax.xaxis.set_major_formatter(xfmt)
+#         ax = fig.add_subplot(111)
 
-        ax.grid()
+#         ax.set_title("Message Volume")
+#         ax.plot_date(times, messagevolume, "-")
 
-        f = io.BytesIO()
-        plt.savefig(f, format="png")
-        f.seek(0)
-        plt.clf()
-        await ctx.send(file=discord.File(f, "messages.png"))
+#         ax.set_ylabel("Avg. Number of Messages Sent in Time Window")
+#         ax.set_xlabel("Time")
 
-    @messagegraph.command(name="all")
-    @commands.guild_only()
-    async def allmessage(self, ctx: commands.Context):
-        await ctx.trigger_typing()
+#         xfmt = md.DateFormatter('%H:%M', tz=tz)
+#         ax.xaxis.set_major_formatter(xfmt)
 
-        entries = collection("activitydata").find()
+#         ax.grid()
 
-        times = []
-        messagevolume = []
+#         f = io.BytesIO()
+#         plt.savefig(f, format="png")
+#         f.seek(0)
+#         plt.clf()
+#         await ctx.send(file=discord.File(f, "messages.png"))
 
-        tz = pytz.timezone("US/Eastern")
+#     @messagegraph.command(name="all")
+#     @commands.guild_only()
+#     async def allmessage(self, ctx: commands.Context):
+#         await ctx.trigger_typing()
 
-        for t in entries:
-            times.append(md.date2num(t["time"]))
-            messagevolume.append(t["messages-sent"])
+#         entries = collection("activitydata").find()
 
-        fig = plt.figure()
+#         times = []
+#         messagevolume = []
 
-        ax = fig.add_subplot(111)
+#         tz = pytz.timezone("US/Eastern")
 
-        ax.set_title("Message Volume")
-        ax.plot_date(times, messagevolume, "-")
+#         for t in entries:
+#             times.append(md.date2num(t["time"]))
+#             messagevolume.append(t["messages-sent"])
 
-        ax.set_ylabel("Number of Messages Sent in Time Window")
-        ax.set_xlabel("Time")
+#         fig = plt.figure()
 
-        xfmt = md.DateFormatter('%H:%M', tz=tz)
-        ax.xaxis.set_major_formatter(xfmt)
+#         ax = fig.add_subplot(111)
 
-        ax.grid()
+#         ax.set_title("Message Volume")
+#         ax.plot_date(times, messagevolume, "-")
 
-        f = io.BytesIO()
-        plt.savefig(f, format="png")
-        f.seek(0)
-        plt.clf()
-        await ctx.send(file=discord.File(f, "messages.png"))
+#         ax.set_ylabel("Number of Messages Sent in Time Window")
+#         ax.set_xlabel("Time")
+
+#         xfmt = md.DateFormatter('%H:%M', tz=tz)
+#         ax.xaxis.set_major_formatter(xfmt)
+
+#         ax.grid()
+
+#         f = io.BytesIO()
+#         plt.savefig(f, format="png")
+#         f.seek(0)
+#         plt.clf()
+#         await ctx.send(file=discord.File(f, "messages.png"))

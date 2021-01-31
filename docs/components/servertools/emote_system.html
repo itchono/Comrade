@@ -1,0 +1,1414 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>Comrade.components.servertools.emote_system API documentation</title>
+<meta name="description" content="Emotes exist as 1) Inline Discord Emoji and 2) Big Images
+Keep wide images as big emotes, and use small square ones as inline emotes …" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>Comrade.components.servertools.emote_system</code></h1>
+</header>
+<section id="section-intro">
+<p>Emotes exist as 1) Inline Discord Emoji and 2) Big Images
+Keep wide images as big emotes, and use small square ones as inline emotes.</p>
+<p>CES - Comrade Emote System v4.0
+Developed by itchono and Slyflare
+With testing from the rest of the Comrade team</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#39;&#39;&#39;
+Emotes exist as 1) Inline Discord Emoji and 2) Big Images
+Keep wide images as big emotes, and use small square ones as inline emotes.
+
+CES - Comrade Emote System v4.0
+Developed by itchono and Slyflare
+With testing from the rest of the Comrade team
+&#39;&#39;&#39;
+import discord
+from discord.ext import commands
+
+import imghdr
+import io
+import re
+from PIL import Image
+import requests
+import asyncio
+from google.cloud import storage
+
+from db import gc_bucket, collection
+from utils.utilities import is_url, bot_prefix
+from utils.reactions import reactX
+from utils.echo import echo, mimic
+from utils.checks import isOP
+
+
+def compress(imgfile, ext):
+    img = Image.open(imgfile)
+
+    aspect = img.size[0] / img.size[1]
+
+    if img.size[0] &gt; 1000:
+        img.resize((1000, round(1000 / aspect)), Image.ANTIALIAS)
+
+    elif img.size[1] &gt; 1000:
+        img.resize((round(1000 * aspect), 1000), Image.ANTIALIAS)
+
+    imgfile = io.BytesIO()
+    img.save(imgfile, optimize=True, format=ext, quality=65)
+    imgfile.seek(0)
+    return imgfile
+
+
+async def upload(ctx, name, url, emote_type):
+    &#39;&#39;&#39;
+    Uploads an emote into CES provided a name and a url.
+    &#39;&#39;&#39;
+    content = requests.get(url).content
+
+    ext = imghdr.what(None, h=content)
+    # determine the file extension
+
+    imgfile = io.BytesIO(content)
+
+    blob = storage.Blob(f&#34;{ctx.guild.id}{name}.{ext}&#34;, gc_bucket())
+
+    if emote_type == &#34;big&#34; and ext in [&#34;jpeg&#34;, &#34;png&#34;, &#34;jpg&#34;]:
+        imgfile = compress(imgfile, ext)
+
+    # file-like representation of the attachment
+    blob.upload_from_file(imgfile)
+    # Upload to Google Cloud
+
+    collection(&#34;emotes&#34;).insert_one(
+        {&#34;name&#34;: name,
+         &#34;server&#34;: ctx.guild.id,
+         &#34;type&#34;: emote_type,
+         &#34;ext&#34;: ext,
+         &#34;URL&#34;: blob.media_link})
+
+
+async def inject(ctx: commands.Context, name):
+    &#39;&#39;&#39;
+    Attempts to inject image into the server&#39;s list of emoji,
+    returning it afterward
+    &#39;&#39;&#39;
+    if document := collection(&#34;emotes&#34;).find_one(
+            {&#34;name&#34;: name, &#34;server&#34;: ctx.guild.id}):
+        LIMIT = 50
+
+        # UNLOAD EMOJI
+        if len(ctx.guild.emojis) &gt;= LIMIT - 1:
+
+            unload = ctx.guild.emojis[0]  # emoji to be unloaded -- oldest one
+
+            if not collection(&#34;emotes&#34;).find_one(
+                    {&#34;name&#34;: unload.name, &#34;server&#34;: ctx.guild.id}):
+                # If not loaded, we must first database it
+
+                # upload the about-to-be-destroyed emoji
+                await upload(ctx, unload.name, unload.url, &#34;inline&#34;)
+
+            await unload.delete(reason=f&#34;Unloading emoji to make space for {name}&#34;)
+
+        # LOAD NEW EMOJI
+        return await ctx.guild.create_custom_emoji(name=document[&#34;name&#34;], image=requests.get(document[&#34;URL&#34;]).content, reason=f&#34;Requested by user {ctx.author.display_name}&#34;)
+
+    else:
+        await ctx.send(f&#34;Emote `{name}` was not found in the database.&#34;)
+
+
+async def inline(ctx: commands.Context, e: str):
+    &#39;&#39;&#39;
+    Gets an inline emote from Discord, if it exists,
+    else it injects it and returns it
+    Similar code to emote function
+    &#39;&#39;&#39;
+    # Stage 1: Search server cache
+    if emote := discord.utils.get(ctx.guild.emojis, name=e):
+        return emote
+
+    # Stage 2: Search MongoDB
+    elif (
+        (document := collection(&#34;emotes&#34;).find_one(
+            {&#34;name&#34;: e, &#34;server&#34;: ctx.guild.id})) or
+            (document := collection(&#34;emotes&#34;).find_one({&#34;name&#34;: re.compile(&#39;^&#39; + e + &#39;$&#39;, re.IGNORECASE), &#34;server&#34;: ctx.guild.id}))) and \
+            document[&#34;type&#34;] == &#34;inline&#34;:
+
+        # maybe they just can&#39;t spell
+        if emote := discord.utils.get(ctx.guild.emojis, name=document[&#34;name&#34;]):
+            return emote
+        return await inject(ctx, document[&#34;name&#34;])
+    return None
+
+
+class Emotes(commands.Cog):
+    &#39;&#39;&#39;
+    Add or remove emotes.
+    Use :emotename: to call an emote
+    Use /emotename/ to swap its type
+    &#39;&#39;&#39;
+
+    def __init__(self, bot):
+        self.bot: commands.Bot = bot
+
+    @commands.group(invoke_without_command=True)
+    @commands.guild_only()
+    async def emote(self, ctx: commands.Context, e: str):
+        &#39;&#39;&#39;
+        Sends an emote into a context, injecting first if necessary
+
+        Subcommands: add, remove, rename
+        &#39;&#39;&#39;
+        if ctx.invoked_subcommand is None:
+
+            # Stage 1: Search server cache
+            if emote := discord.utils.get(ctx.guild.emojis, name=e):
+                await echo(ctx, member=ctx.author, content=emote)
+                await ctx.message.delete()  # try to delete
+
+            # Stage 2: Search MongoDB
+            elif (document := collection(&#34;emotes&#34;).find_one({&#34;name&#34;: e, &#34;server&#34;: ctx.guild.id})) or \
+                    (document := collection(&#34;emotes&#34;).find_one(
+                        {&#34;name&#34;: re.compile(&#39;^&#39; + e + &#39;$&#39;, re.IGNORECASE),
+                         &#34;server&#34;: ctx.guild.id})):
+
+                # 2A: inline emoji,
+                # maybe they just can&#39;t spell
+                if emote := discord.utils.get(
+                        ctx.guild.emojis, name=document[&#34;name&#34;]):
+                    await echo(ctx, member=ctx.author, content=emote)
+                    await ctx.message.delete()  # try to delete
+
+                # Or, it needs to be added
+                elif document[&#34;type&#34;] == &#34;inline&#34;:
+                    emote = await inject(ctx, document[&#34;name&#34;])
+                    await echo(ctx, member=ctx.author, content=emote)
+                    await ctx.message.delete()  # try to delete
+
+                # 2B: Big emoji, send as-is
+                elif document[&#34;type&#34;] == &#34;big&#34;:
+                    eb = discord.Embed()
+                    eb.set_image(url=document[&#34;URL&#34;])
+                    if len(e) &gt; 32:
+                        e = e[:32]
+                    await mimic(ctx.channel,
+                                embed=eb,
+                                avatar_url=ctx.author.avatar_url,
+                                username=e)
+
+    @emote.command()
+    @commands.guild_only()
+    async def add(self, ctx: commands.Context, name: str, url=None):
+        &#39;&#39;&#39;
+        Adds a custom emote to the Comrade Emote System.
+        Adds as a big emote by default.
+        &#39;&#39;&#39;
+        try:
+            if not url:
+                url = ctx.message.attachments[0].url
+        except BaseException:
+            if not is_url(url):
+                await ctx.send(&#34;Invalid URL Provided.&#34;)
+                return
+
+        # Validate Name
+        if not name.isalnum():
+            await ctx.send(&#34;Name must be alphanumeric!&#34;)
+            return
+        elif len(name) &gt; 32:
+            await ctx.send(&#34;Max Name Length is 32 Chars.&#34;)
+            return
+
+        # make sure it doesn&#39;t already exist
+        if not collection(&#34;emotes&#34;).find_one(
+                {&#34;name&#34;: name, &#34;server&#34;: ctx.guild.id}):
+            await ctx.trigger_typing()
+
+            # upload as big by default
+            await upload(ctx, name, url, &#34;big&#34;)
+
+            await ctx.send(f&#39;Emote `{name}` was added. &#39;
+                           f&#39;you can call it using `:{name}:`&#39;)
+
+        else:
+            await reactX(ctx)
+            await ctx.send(f&#39;Emote `{name}` already exists! &#39;
+                           &#39;Contact a mod to get this fixed.&#39;)
+
+    @emote.command()
+    @commands.check(isOP())
+    @commands.guild_only()
+    async def remove(self, ctx: commands.Context, name):
+        &#39;&#39;&#39;
+        Removes a custom emote from the Comrade Emote System
+        &#39;&#39;&#39;
+        if e := collection(&#34;emotes&#34;).find_one(
+                {&#34;name&#34;: name, &#34;server&#34;: ctx.guild.id}):
+
+            try:
+                blob = storage.Blob(
+                    f&#34;{ctx.guild.id}{name}.{e[&#39;ext&#39;]}&#34;, gc_bucket())
+                blob.delete()
+            except BaseException:
+                pass
+
+            collection(&#34;emotes&#34;).delete_one(
+                {&#34;name&#34;: name, &#34;server&#34;: ctx.guild.id})
+            await ctx.send(f&#34;Emote `{name}` was removed.&#34;)
+
+            if e[&#34;type&#34;] == &#34;inline&#34;:
+                emote = discord.utils.get(ctx.guild.emojis, name=name)
+                try:
+                    await emote.delete(reason=&#34;Unloading emoji because &#34;
+                                       &#34;it was removed from the server.&#34;)
+                except BaseException:
+                    pass
+        else:
+            await ctx.send(f&#34;Emote `{name}` was not found.&#34;)
+
+    @emote.command()
+    @commands.guild_only()
+    async def rename(self, ctx: commands.Context, name_old, name_new):
+        &#39;&#39;&#39;
+        Renames an emote in the emote system
+        &#39;&#39;&#39;
+        if collection(&#34;emotes&#34;).update_one(
+                {&#34;name&#34;: name_old, &#34;server&#34;: ctx.guild.id},
+                {&#34;$set&#34;: {&#34;name&#34;: name_new}}):
+            await ctx.send(f&#34;Emote `{name_old}` was renamed.&#34;)
+
+            if e := collection(&#34;emotes&#34;).find_one(
+                {&#34;name&#34;: name_old, &#34;server&#34;: ctx.guild.id}):
+
+                if e[&#34;type&#34;] == &#34;inline&#34;:
+                    emote = discord.utils.get(ctx.guild.emojis, name=name_old)
+                    try:
+                        await emote.edit(name = name_new)
+                    except BaseException:
+                        pass
+        else:
+            await ctx.send(f&#34;Emote `{name_old}` was not found.&#34;)
+
+    @emote.command()
+    @commands.guild_only()
+    async def gallery(self, ctx: commands.Context, start_position: int = 1):
+        &#39;&#39;&#39;
+        Gallery of all big emotes in server
+        Can specify starting position to skip ahead
+        &#39;&#39;&#39;
+        bigemotes = collection(&#34;emotes&#34;).find(
+            {&#34;server&#34;: ctx.guild.id, &#34;type&#34;: &#34;big&#34;}).sort(
+                &#34;name&#34;, 1)
+
+        if not bigemotes:
+            return  # empty
+        bigemotes = list(bigemotes)
+
+        pagenum = start_position-1
+
+        def em_embed(pagenum):
+            e = discord.Embed(color=0xd7342a)
+            e.set_author(name=bigemotes[pagenum][&#34;name&#34;],
+                         url=bigemotes[pagenum][&#34;URL&#34;])
+            e.set_image(url=bigemotes[pagenum][&#34;URL&#34;])
+            e.set_footer(text=f&#34;{pagenum+1}/{len(bigemotes)}&#34;)
+            return e
+
+        m = await ctx.send(embed=em_embed(pagenum))
+
+        cont = True
+
+        for r in [&#34;⬅&#34;, &#34;➡&#34;, &#34;⏪&#34;, &#34;⏩&#34;, &#34;🗑️&#34;]:
+            await m.add_reaction(r)
+
+        def check(reaction, user):
+            return str(reaction) in [
+                &#34;⬅&#34;, &#34;➡&#34;, &#34;⏪&#34;, &#34;⏩&#34;, &#34;🗑️&#34;] and reaction.message.id == m.id \
+                    and not user.bot
+
+        BIGSTEP = round(len(bigemotes)/10)
+
+        while cont:
+            try:
+                reaction, user = await self.bot.wait_for(
+                    &#34;reaction_add&#34;, check=check, timeout=180)
+
+                await m.remove_reaction(reaction, user)
+                if str(reaction) == &#34;⬅&#34;:
+                    pagenum -= 1
+                    if pagenum &lt; 0:
+                        pagenum += len(bigemotes)
+
+                elif str(reaction) == &#34;➡&#34;:
+                    pagenum += 1
+                    if pagenum &gt;= len(bigemotes):
+                        pagenum -= len(bigemotes)
+
+                elif str(reaction) == &#34;⏩&#34;:
+                    pagenum += BIGSTEP
+                    if pagenum &gt;= len(bigemotes):
+                        pagenum -= len(bigemotes)
+
+                elif str(reaction) == &#34;⏪&#34;:
+                    pagenum -= BIGSTEP
+                    if pagenum &lt; 0:
+                        pagenum += len(bigemotes)
+
+                elif str(reaction) == &#34;🗑️&#34;:
+                    await m.delete()
+                    cont = False
+                    continue
+                
+                await m.edit(embed=em_embed(pagenum))
+            except asyncio.TimeoutError:
+                await m.delete()
+                cont = False
+                continue
+
+    @emote.group()
+    @commands.guild_only()
+    async def list(self, ctx: commands.Context):
+        if ctx.invoked_subcommand is None:
+            await ctx.send(f&#34;Run `{bot_prefix}emote list big` or &#34;
+                           f&#34;`{bot_prefix}emote list inline` to see a list &#34;
+                           &#34;or big and inline emotes respectively&#34;)
+
+    @list.command()
+    @commands.guild_only()
+    async def big(self, ctx: commands.Context, page=1):
+        &#39;&#39;&#39;
+        Lists all big emotes in the server, based on page
+        &#39;&#39;&#39;
+        paginator = commands.Paginator(prefix=&#34;&#34;, suffix=&#34;&#34;, max_size=200)
+
+        bigemotes = collection(&#34;emotes&#34;).find(
+            {&#34;server&#34;: ctx.guild.id, &#34;type&#34;: &#34;big&#34;}, {&#34;name&#34;: True}).sort(
+                &#34;name&#34;, 1)
+
+        if not bigemotes:
+            return  # empty
+
+        for i in bigemotes:
+            paginator.add_line(f&#34;- {i[&#39;name&#39;]}&#34;)
+
+        pagenum = 1
+
+        pages = paginator.pages
+
+        m = await ctx.send(f&#34;__**Big Emotes in {ctx.guild.name} &#34;
+                           f&#34;({pagenum}/{len(pages)})**__:{pages[pagenum-1]}&#34;)
+
+        cont = True
+
+        for r in [&#34;⬅&#34;, &#34;➡&#34;, &#34;⏪&#34;, &#34;⏩&#34;, &#34;🗑️&#34;]:
+            await m.add_reaction(r)
+
+        def check(reaction, user):
+            return str(reaction) in [
+                &#34;⬅&#34;, &#34;➡&#34;, &#34;⏪&#34;, &#34;⏩&#34;, &#34;🗑️&#34;] and reaction.message.id == m.id \
+                    and not user.bot
+
+        BIGSTEP = round(len(pages)/5)
+
+        while cont:
+            try:
+                reaction, user = await self.bot.wait_for(
+                    &#34;reaction_add&#34;, check=check, timeout=180)
+
+                await m.remove_reaction(reaction, user)
+                if str(reaction) == &#34;⬅&#34;:
+                    pagenum -= 1
+
+                    if pagenum &lt; 1:
+                        pagenum += len(pages) - 1
+
+                elif str(reaction) == &#34;⏪&#34;:
+                    pagenum -= BIGSTEP
+
+                    if pagenum &lt; 1:
+                        pagenum += len(pages) - 1
+
+                elif str(reaction) == &#34;➡&#34;:
+                    pagenum += 1
+                    if pagenum &gt;= len(pages):
+                        pagenum -= len(pages) - 1
+
+                elif str(reaction) == &#34;⏩&#34;:
+                    pagenum += BIGSTEP
+                    if pagenum &gt;= len(pages):
+                        pagenum -= len(pages) - 1
+
+                elif str(reaction) == &#34;🗑️&#34;:
+                    await m.delete()
+                    cont = False
+                    continue
+
+                await m.edit(content=f&#34;__**Big Emotes in {ctx.guild.name} &#34;
+                             f&#34;({pagenum}/{len(pages)})**__:{pages[pagenum-1]}&#34;)
+
+            except asyncio.TimeoutError:
+                cont = False
+                continue
+
+    @list.command()
+    @commands.guild_only()
+    async def inline(self, ctx: commands.Context, page=1):
+        &#39;&#39;&#39;
+        Lists all inline emotes in the server, based on page.
+        This may not include all inline emoji,
+        especially if the bot was recently added to the server.
+        &#39;&#39;&#39;
+        paginator = commands.Paginator(prefix=&#34;&#34;, suffix=&#34;&#34;, max_size=200)
+
+        inlineemotes = collection(&#34;emotes&#34;).find(
+            {&#34;server&#34;: ctx.guild.id, &#34;type&#34;: &#34;inline&#34;}, {&#34;name&#34;: True}).sort(
+                &#34;name&#34;, 1)
+
+        if not inlineemotes:
+            return  # empty
+
+        for i in inlineemotes:
+            paginator.add_line(f&#34;- {i[&#39;name&#39;]}&#34;)
+
+        pagenum = 1
+
+        pages = paginator.pages
+
+        m = await ctx.send(f&#34;__**Inline Emotes in {ctx.guild.name} ({pagenum}/{len(pages)})**__:{pages[pagenum-1]}&#34;)
+
+        cont = True
+
+        for r in [&#34;⬅&#34;, &#34;➡&#34;, &#34;⏪&#34;, &#34;⏩&#34;, &#34;🗑️&#34;]:
+            await m.add_reaction(r)
+
+        def check(reaction, user):
+           return str(reaction) in [
+                &#34;⬅&#34;, &#34;➡&#34;, &#34;⏪&#34;, &#34;⏩&#34;, &#34;🗑️&#34;] and reaction.message.id == m.id \
+                    and not user.bot
+
+        BIGSTEP = round(len(pages)/5)
+
+        while cont:
+            try:
+                reaction, user = await self.bot.wait_for(&#34;reaction_add&#34;, check=check, timeout=180)
+
+                await m.remove_reaction(reaction, user)
+
+                if str(reaction) == &#34;⬅&#34;:
+                    pagenum -= 1
+
+                    if pagenum &lt; 1:
+                        pagenum += len(pages) - 1
+
+                elif str(reaction) == &#34;⏪&#34;:
+                    pagenum -= BIGSTEP
+
+                    if pagenum &lt; 1:
+                        pagenum += len(pages) - 1
+
+                elif str(reaction) == &#34;➡&#34;:
+                    pagenum += 1
+                    if pagenum &gt;= len(pages):
+                        pagenum -= len(pages) - 1
+
+                elif str(reaction) == &#34;⏩&#34;:
+                    pagenum += BIGSTEP
+                    if pagenum &gt;= len(pages):
+                        pagenum -= len(pages) - 1
+
+                elif str(reaction) == &#34;🗑️&#34;:
+                    await m.delete()
+                    cont = False
+                    continue
+
+                await m.edit(content=f&#34;__**Inline Emotes in {ctx.guild.name} ({pagenum}/{len(pages)})**__:{pages[pagenum-1]}&#34;)
+            except asyncio.TimeoutError:
+                cont = False
+                continue
+
+    @commands.command()
+    @commands.guild_only()
+    async def swaptype(self, ctx: commands.Context, name):
+        &#39;&#39;&#39;
+        Swaps the type of the emote
+        &#39;&#39;&#39;
+        if (document := collection(&#34;emotes&#34;).find_one({&#34;name&#34;: name, &#34;server&#34;: ctx.guild.id})) or (document := collection(
+                &#34;emotes&#34;).find_one({&#34;name&#34;: re.compile(&#39;^&#39; + name + &#39;$&#39;, re.IGNORECASE), &#34;server&#34;: ctx.guild.id})):
+            # in mongodb already; most routine change
+
+            newtype = {&#34;big&#34;: &#34;inline&#34;, &#34;inline&#34;: &#34;big&#34;}[document[&#34;type&#34;]]
+
+            if document[&#34;type&#34;] == &#34;inline&#34;:
+                emote = discord.utils.get(
+                    ctx.guild.emojis, name=document[&#39;name&#39;])
+                try:
+                    await emote.delete(reason=f&#34;Unloading emoji because it changed type.&#34;)
+                except BaseException:
+                    pass
+
+            elif (size := len(requests.get(document[&#34;URL&#34;]).content)) &gt;= 262143:
+                await ctx.send(f&#34;Emote `{document[&#39;name&#39;]}` is too big to become inline! ({round(size/1024)} kb vs 256 kb limit)&#34;)
+                return
+
+            else:
+                await inject(ctx, document[&#39;name&#39;])  # inject the emote
+
+            collection(&#34;emotes&#34;).update_one(
+                {&#34;name&#34;: document[&#39;name&#39;], &#34;server&#34;: ctx.guild.id}, {&#34;$set&#34;: {&#34;type&#34;: newtype}})
+
+            await ctx.send(f&#34;Emote `{document[&#39;name&#39;]}` is now of type `{newtype}`&#34;)
+
+        elif emote := discord.utils.get(ctx.guild.emojis, name=name):
+            # in server, and not on mongodb (fringe case)
+            await upload(ctx, name, emote.url, &#34;big&#34;)
+            try:
+                await emote.delete(reason=f&#34;Unloading emoji because it changed type.&#34;)
+            except BaseException:
+                pass
+            await ctx.send(f&#34;Emote `{name}` is now of type `big` (newly uploaded)&#34;)
+
+        else:
+            # not in mongodb or in server
+            await ctx.send(f&#34;Emote `{name}` was not found.&#34;)
+
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.message):
+        &#39;&#39;&#39;
+        Emote listener
+        &#39;&#39;&#39;
+        async def pullemote(em):
+            return await inline(await self.bot.get_context(message),
+                                em.strip(&#39;:&#39;).strip(&#34; &#34;))
+
+        if message.content and not message.author.bot and message.guild:
+
+            # scan for inline emotes
+            if match := re.findall(
+                    r&#34;(?&lt;!&lt;):\s*[0-9A-z]+\s*:(?!\d+&gt;)&#34;,
+                    message.clean_content):
+                s = message.content
+                send = False
+                for i in match:
+                    if emote := await pullemote(i):
+                        send = True
+                        s = s.replace(i, str(emote))
+                    # else:
+                    # Handled by Go Module
+
+                if send:
+                    await echo(await self.bot.get_context(message),
+                               member=message.author, content=s,
+                               file=await message.attachments[0].to_file()
+                               if message.attachments else None,
+                               embed=message.embeds[0]
+                               if message.embeds else None)
+
+                    await message.delete()
+
+            # scan for changing emotes
+            elif message.content[0] == &#39;/&#39; and message.content[-1] == &#39;/&#39; and \
+                    len(message.content) &gt; 1:
+                # Swap type of emote
+                await self.swaptype(
+                    await self.bot.get_context(
+                        message), message.content.strip(&#39;/&#39;).strip(&#34; &#34;))</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="Comrade.components.servertools.emote_system.compress"><code class="name flex">
+<span>def <span class="ident">compress</span></span>(<span>imgfile, ext)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def compress(imgfile, ext):
+    img = Image.open(imgfile)
+
+    aspect = img.size[0] / img.size[1]
+
+    if img.size[0] &gt; 1000:
+        img.resize((1000, round(1000 / aspect)), Image.ANTIALIAS)
+
+    elif img.size[1] &gt; 1000:
+        img.resize((round(1000 * aspect), 1000), Image.ANTIALIAS)
+
+    imgfile = io.BytesIO()
+    img.save(imgfile, optimize=True, format=ext, quality=65)
+    imgfile.seek(0)
+    return imgfile</code></pre>
+</details>
+</dd>
+<dt id="Comrade.components.servertools.emote_system.inject"><code class="name flex">
+<span>async def <span class="ident">inject</span></span>(<span>ctx: discord.ext.commands.context.Context, name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Attempts to inject image into the server's list of emoji,
+returning it afterward</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def inject(ctx: commands.Context, name):
+    &#39;&#39;&#39;
+    Attempts to inject image into the server&#39;s list of emoji,
+    returning it afterward
+    &#39;&#39;&#39;
+    if document := collection(&#34;emotes&#34;).find_one(
+            {&#34;name&#34;: name, &#34;server&#34;: ctx.guild.id}):
+        LIMIT = 50
+
+        # UNLOAD EMOJI
+        if len(ctx.guild.emojis) &gt;= LIMIT - 1:
+
+            unload = ctx.guild.emojis[0]  # emoji to be unloaded -- oldest one
+
+            if not collection(&#34;emotes&#34;).find_one(
+                    {&#34;name&#34;: unload.name, &#34;server&#34;: ctx.guild.id}):
+                # If not loaded, we must first database it
+
+                # upload the about-to-be-destroyed emoji
+                await upload(ctx, unload.name, unload.url, &#34;inline&#34;)
+
+            await unload.delete(reason=f&#34;Unloading emoji to make space for {name}&#34;)
+
+        # LOAD NEW EMOJI
+        return await ctx.guild.create_custom_emoji(name=document[&#34;name&#34;], image=requests.get(document[&#34;URL&#34;]).content, reason=f&#34;Requested by user {ctx.author.display_name}&#34;)
+
+    else:
+        await ctx.send(f&#34;Emote `{name}` was not found in the database.&#34;)</code></pre>
+</details>
+</dd>
+<dt id="Comrade.components.servertools.emote_system.inline"><code class="name flex">
+<span>async def <span class="ident">inline</span></span>(<span>ctx: discord.ext.commands.context.Context, e: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Gets an inline emote from Discord, if it exists,
+else it injects it and returns it
+Similar code to emote function</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def inline(ctx: commands.Context, e: str):
+    &#39;&#39;&#39;
+    Gets an inline emote from Discord, if it exists,
+    else it injects it and returns it
+    Similar code to emote function
+    &#39;&#39;&#39;
+    # Stage 1: Search server cache
+    if emote := discord.utils.get(ctx.guild.emojis, name=e):
+        return emote
+
+    # Stage 2: Search MongoDB
+    elif (
+        (document := collection(&#34;emotes&#34;).find_one(
+            {&#34;name&#34;: e, &#34;server&#34;: ctx.guild.id})) or
+            (document := collection(&#34;emotes&#34;).find_one({&#34;name&#34;: re.compile(&#39;^&#39; + e + &#39;$&#39;, re.IGNORECASE), &#34;server&#34;: ctx.guild.id}))) and \
+            document[&#34;type&#34;] == &#34;inline&#34;:
+
+        # maybe they just can&#39;t spell
+        if emote := discord.utils.get(ctx.guild.emojis, name=document[&#34;name&#34;]):
+            return emote
+        return await inject(ctx, document[&#34;name&#34;])
+    return None</code></pre>
+</details>
+</dd>
+<dt id="Comrade.components.servertools.emote_system.upload"><code class="name flex">
+<span>async def <span class="ident">upload</span></span>(<span>ctx, name, url, emote_type)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Uploads an emote into CES provided a name and a url.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def upload(ctx, name, url, emote_type):
+    &#39;&#39;&#39;
+    Uploads an emote into CES provided a name and a url.
+    &#39;&#39;&#39;
+    content = requests.get(url).content
+
+    ext = imghdr.what(None, h=content)
+    # determine the file extension
+
+    imgfile = io.BytesIO(content)
+
+    blob = storage.Blob(f&#34;{ctx.guild.id}{name}.{ext}&#34;, gc_bucket())
+
+    if emote_type == &#34;big&#34; and ext in [&#34;jpeg&#34;, &#34;png&#34;, &#34;jpg&#34;]:
+        imgfile = compress(imgfile, ext)
+
+    # file-like representation of the attachment
+    blob.upload_from_file(imgfile)
+    # Upload to Google Cloud
+
+    collection(&#34;emotes&#34;).insert_one(
+        {&#34;name&#34;: name,
+         &#34;server&#34;: ctx.guild.id,
+         &#34;type&#34;: emote_type,
+         &#34;ext&#34;: ext,
+         &#34;URL&#34;: blob.media_link})</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="Comrade.components.servertools.emote_system.Emotes"><code class="flex name class">
+<span>class <span class="ident">Emotes</span></span>
+<span>(</span><span>bot)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add or remove emotes.
+Use :emotename: to call an emote
+Use /emotename/ to swap its type</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Emotes(commands.Cog):
+    &#39;&#39;&#39;
+    Add or remove emotes.
+    Use :emotename: to call an emote
+    Use /emotename/ to swap its type
+    &#39;&#39;&#39;
+
+    def __init__(self, bot):
+        self.bot: commands.Bot = bot
+
+    @commands.group(invoke_without_command=True)
+    @commands.guild_only()
+    async def emote(self, ctx: commands.Context, e: str):
+        &#39;&#39;&#39;
+        Sends an emote into a context, injecting first if necessary
+
+        Subcommands: add, remove, rename
+        &#39;&#39;&#39;
+        if ctx.invoked_subcommand is None:
+
+            # Stage 1: Search server cache
+            if emote := discord.utils.get(ctx.guild.emojis, name=e):
+                await echo(ctx, member=ctx.author, content=emote)
+                await ctx.message.delete()  # try to delete
+
+            # Stage 2: Search MongoDB
+            elif (document := collection(&#34;emotes&#34;).find_one({&#34;name&#34;: e, &#34;server&#34;: ctx.guild.id})) or \
+                    (document := collection(&#34;emotes&#34;).find_one(
+                        {&#34;name&#34;: re.compile(&#39;^&#39; + e + &#39;$&#39;, re.IGNORECASE),
+                         &#34;server&#34;: ctx.guild.id})):
+
+                # 2A: inline emoji,
+                # maybe they just can&#39;t spell
+                if emote := discord.utils.get(
+                        ctx.guild.emojis, name=document[&#34;name&#34;]):
+                    await echo(ctx, member=ctx.author, content=emote)
+                    await ctx.message.delete()  # try to delete
+
+                # Or, it needs to be added
+                elif document[&#34;type&#34;] == &#34;inline&#34;:
+                    emote = await inject(ctx, document[&#34;name&#34;])
+                    await echo(ctx, member=ctx.author, content=emote)
+                    await ctx.message.delete()  # try to delete
+
+                # 2B: Big emoji, send as-is
+                elif document[&#34;type&#34;] == &#34;big&#34;:
+                    eb = discord.Embed()
+                    eb.set_image(url=document[&#34;URL&#34;])
+                    if len(e) &gt; 32:
+                        e = e[:32]
+                    await mimic(ctx.channel,
+                                embed=eb,
+                                avatar_url=ctx.author.avatar_url,
+                                username=e)
+
+    @emote.command()
+    @commands.guild_only()
+    async def add(self, ctx: commands.Context, name: str, url=None):
+        &#39;&#39;&#39;
+        Adds a custom emote to the Comrade Emote System.
+        Adds as a big emote by default.
+        &#39;&#39;&#39;
+        try:
+            if not url:
+                url = ctx.message.attachments[0].url
+        except BaseException:
+            if not is_url(url):
+                await ctx.send(&#34;Invalid URL Provided.&#34;)
+                return
+
+        # Validate Name
+        if not name.isalnum():
+            await ctx.send(&#34;Name must be alphanumeric!&#34;)
+            return
+        elif len(name) &gt; 32:
+            await ctx.send(&#34;Max Name Length is 32 Chars.&#34;)
+            return
+
+        # make sure it doesn&#39;t already exist
+        if not collection(&#34;emotes&#34;).find_one(
+                {&#34;name&#34;: name, &#34;server&#34;: ctx.guild.id}):
+            await ctx.trigger_typing()
+
+            # upload as big by default
+            await upload(ctx, name, url, &#34;big&#34;)
+
+            await ctx.send(f&#39;Emote `{name}` was added. &#39;
+                           f&#39;you can call it using `:{name}:`&#39;)
+
+        else:
+            await reactX(ctx)
+            await ctx.send(f&#39;Emote `{name}` already exists! &#39;
+                           &#39;Contact a mod to get this fixed.&#39;)
+
+    @emote.command()
+    @commands.check(isOP())
+    @commands.guild_only()
+    async def remove(self, ctx: commands.Context, name):
+        &#39;&#39;&#39;
+        Removes a custom emote from the Comrade Emote System
+        &#39;&#39;&#39;
+        if e := collection(&#34;emotes&#34;).find_one(
+                {&#34;name&#34;: name, &#34;server&#34;: ctx.guild.id}):
+
+            try:
+                blob = storage.Blob(
+                    f&#34;{ctx.guild.id}{name}.{e[&#39;ext&#39;]}&#34;, gc_bucket())
+                blob.delete()
+            except BaseException:
+                pass
+
+            collection(&#34;emotes&#34;).delete_one(
+                {&#34;name&#34;: name, &#34;server&#34;: ctx.guild.id})
+            await ctx.send(f&#34;Emote `{name}` was removed.&#34;)
+
+            if e[&#34;type&#34;] == &#34;inline&#34;:
+                emote = discord.utils.get(ctx.guild.emojis, name=name)
+                try:
+                    await emote.delete(reason=&#34;Unloading emoji because &#34;
+                                       &#34;it was removed from the server.&#34;)
+                except BaseException:
+                    pass
+        else:
+            await ctx.send(f&#34;Emote `{name}` was not found.&#34;)
+
+    @emote.command()
+    @commands.guild_only()
+    async def rename(self, ctx: commands.Context, name_old, name_new):
+        &#39;&#39;&#39;
+        Renames an emote in the emote system
+        &#39;&#39;&#39;
+        if collection(&#34;emotes&#34;).update_one(
+                {&#34;name&#34;: name_old, &#34;server&#34;: ctx.guild.id},
+                {&#34;$set&#34;: {&#34;name&#34;: name_new}}):
+            await ctx.send(f&#34;Emote `{name_old}` was renamed.&#34;)
+
+            if e := collection(&#34;emotes&#34;).find_one(
+                {&#34;name&#34;: name_old, &#34;server&#34;: ctx.guild.id}):
+
+                if e[&#34;type&#34;] == &#34;inline&#34;:
+                    emote = discord.utils.get(ctx.guild.emojis, name=name_old)
+                    try:
+                        await emote.edit(name = name_new)
+                    except BaseException:
+                        pass
+        else:
+            await ctx.send(f&#34;Emote `{name_old}` was not found.&#34;)
+
+    @emote.command()
+    @commands.guild_only()
+    async def gallery(self, ctx: commands.Context, start_position: int = 1):
+        &#39;&#39;&#39;
+        Gallery of all big emotes in server
+        Can specify starting position to skip ahead
+        &#39;&#39;&#39;
+        bigemotes = collection(&#34;emotes&#34;).find(
+            {&#34;server&#34;: ctx.guild.id, &#34;type&#34;: &#34;big&#34;}).sort(
+                &#34;name&#34;, 1)
+
+        if not bigemotes:
+            return  # empty
+        bigemotes = list(bigemotes)
+
+        pagenum = start_position-1
+
+        def em_embed(pagenum):
+            e = discord.Embed(color=0xd7342a)
+            e.set_author(name=bigemotes[pagenum][&#34;name&#34;],
+                         url=bigemotes[pagenum][&#34;URL&#34;])
+            e.set_image(url=bigemotes[pagenum][&#34;URL&#34;])
+            e.set_footer(text=f&#34;{pagenum+1}/{len(bigemotes)}&#34;)
+            return e
+
+        m = await ctx.send(embed=em_embed(pagenum))
+
+        cont = True
+
+        for r in [&#34;⬅&#34;, &#34;➡&#34;, &#34;⏪&#34;, &#34;⏩&#34;, &#34;🗑️&#34;]:
+            await m.add_reaction(r)
+
+        def check(reaction, user):
+            return str(reaction) in [
+                &#34;⬅&#34;, &#34;➡&#34;, &#34;⏪&#34;, &#34;⏩&#34;, &#34;🗑️&#34;] and reaction.message.id == m.id \
+                    and not user.bot
+
+        BIGSTEP = round(len(bigemotes)/10)
+
+        while cont:
+            try:
+                reaction, user = await self.bot.wait_for(
+                    &#34;reaction_add&#34;, check=check, timeout=180)
+
+                await m.remove_reaction(reaction, user)
+                if str(reaction) == &#34;⬅&#34;:
+                    pagenum -= 1
+                    if pagenum &lt; 0:
+                        pagenum += len(bigemotes)
+
+                elif str(reaction) == &#34;➡&#34;:
+                    pagenum += 1
+                    if pagenum &gt;= len(bigemotes):
+                        pagenum -= len(bigemotes)
+
+                elif str(reaction) == &#34;⏩&#34;:
+                    pagenum += BIGSTEP
+                    if pagenum &gt;= len(bigemotes):
+                        pagenum -= len(bigemotes)
+
+                elif str(reaction) == &#34;⏪&#34;:
+                    pagenum -= BIGSTEP
+                    if pagenum &lt; 0:
+                        pagenum += len(bigemotes)
+
+                elif str(reaction) == &#34;🗑️&#34;:
+                    await m.delete()
+                    cont = False
+                    continue
+                
+                await m.edit(embed=em_embed(pagenum))
+            except asyncio.TimeoutError:
+                await m.delete()
+                cont = False
+                continue
+
+    @emote.group()
+    @commands.guild_only()
+    async def list(self, ctx: commands.Context):
+        if ctx.invoked_subcommand is None:
+            await ctx.send(f&#34;Run `{bot_prefix}emote list big` or &#34;
+                           f&#34;`{bot_prefix}emote list inline` to see a list &#34;
+                           &#34;or big and inline emotes respectively&#34;)
+
+    @list.command()
+    @commands.guild_only()
+    async def big(self, ctx: commands.Context, page=1):
+        &#39;&#39;&#39;
+        Lists all big emotes in the server, based on page
+        &#39;&#39;&#39;
+        paginator = commands.Paginator(prefix=&#34;&#34;, suffix=&#34;&#34;, max_size=200)
+
+        bigemotes = collection(&#34;emotes&#34;).find(
+            {&#34;server&#34;: ctx.guild.id, &#34;type&#34;: &#34;big&#34;}, {&#34;name&#34;: True}).sort(
+                &#34;name&#34;, 1)
+
+        if not bigemotes:
+            return  # empty
+
+        for i in bigemotes:
+            paginator.add_line(f&#34;- {i[&#39;name&#39;]}&#34;)
+
+        pagenum = 1
+
+        pages = paginator.pages
+
+        m = await ctx.send(f&#34;__**Big Emotes in {ctx.guild.name} &#34;
+                           f&#34;({pagenum}/{len(pages)})**__:{pages[pagenum-1]}&#34;)
+
+        cont = True
+
+        for r in [&#34;⬅&#34;, &#34;➡&#34;, &#34;⏪&#34;, &#34;⏩&#34;, &#34;🗑️&#34;]:
+            await m.add_reaction(r)
+
+        def check(reaction, user):
+            return str(reaction) in [
+                &#34;⬅&#34;, &#34;➡&#34;, &#34;⏪&#34;, &#34;⏩&#34;, &#34;🗑️&#34;] and reaction.message.id == m.id \
+                    and not user.bot
+
+        BIGSTEP = round(len(pages)/5)
+
+        while cont:
+            try:
+                reaction, user = await self.bot.wait_for(
+                    &#34;reaction_add&#34;, check=check, timeout=180)
+
+                await m.remove_reaction(reaction, user)
+                if str(reaction) == &#34;⬅&#34;:
+                    pagenum -= 1
+
+                    if pagenum &lt; 1:
+                        pagenum += len(pages) - 1
+
+                elif str(reaction) == &#34;⏪&#34;:
+                    pagenum -= BIGSTEP
+
+                    if pagenum &lt; 1:
+                        pagenum += len(pages) - 1
+
+                elif str(reaction) == &#34;➡&#34;:
+                    pagenum += 1
+                    if pagenum &gt;= len(pages):
+                        pagenum -= len(pages) - 1
+
+                elif str(reaction) == &#34;⏩&#34;:
+                    pagenum += BIGSTEP
+                    if pagenum &gt;= len(pages):
+                        pagenum -= len(pages) - 1
+
+                elif str(reaction) == &#34;🗑️&#34;:
+                    await m.delete()
+                    cont = False
+                    continue
+
+                await m.edit(content=f&#34;__**Big Emotes in {ctx.guild.name} &#34;
+                             f&#34;({pagenum}/{len(pages)})**__:{pages[pagenum-1]}&#34;)
+
+            except asyncio.TimeoutError:
+                cont = False
+                continue
+
+    @list.command()
+    @commands.guild_only()
+    async def inline(self, ctx: commands.Context, page=1):
+        &#39;&#39;&#39;
+        Lists all inline emotes in the server, based on page.
+        This may not include all inline emoji,
+        especially if the bot was recently added to the server.
+        &#39;&#39;&#39;
+        paginator = commands.Paginator(prefix=&#34;&#34;, suffix=&#34;&#34;, max_size=200)
+
+        inlineemotes = collection(&#34;emotes&#34;).find(
+            {&#34;server&#34;: ctx.guild.id, &#34;type&#34;: &#34;inline&#34;}, {&#34;name&#34;: True}).sort(
+                &#34;name&#34;, 1)
+
+        if not inlineemotes:
+            return  # empty
+
+        for i in inlineemotes:
+            paginator.add_line(f&#34;- {i[&#39;name&#39;]}&#34;)
+
+        pagenum = 1
+
+        pages = paginator.pages
+
+        m = await ctx.send(f&#34;__**Inline Emotes in {ctx.guild.name} ({pagenum}/{len(pages)})**__:{pages[pagenum-1]}&#34;)
+
+        cont = True
+
+        for r in [&#34;⬅&#34;, &#34;➡&#34;, &#34;⏪&#34;, &#34;⏩&#34;, &#34;🗑️&#34;]:
+            await m.add_reaction(r)
+
+        def check(reaction, user):
+           return str(reaction) in [
+                &#34;⬅&#34;, &#34;➡&#34;, &#34;⏪&#34;, &#34;⏩&#34;, &#34;🗑️&#34;] and reaction.message.id == m.id \
+                    and not user.bot
+
+        BIGSTEP = round(len(pages)/5)
+
+        while cont:
+            try:
+                reaction, user = await self.bot.wait_for(&#34;reaction_add&#34;, check=check, timeout=180)
+
+                await m.remove_reaction(reaction, user)
+
+                if str(reaction) == &#34;⬅&#34;:
+                    pagenum -= 1
+
+                    if pagenum &lt; 1:
+                        pagenum += len(pages) - 1
+
+                elif str(reaction) == &#34;⏪&#34;:
+                    pagenum -= BIGSTEP
+
+                    if pagenum &lt; 1:
+                        pagenum += len(pages) - 1
+
+                elif str(reaction) == &#34;➡&#34;:
+                    pagenum += 1
+                    if pagenum &gt;= len(pages):
+                        pagenum -= len(pages) - 1
+
+                elif str(reaction) == &#34;⏩&#34;:
+                    pagenum += BIGSTEP
+                    if pagenum &gt;= len(pages):
+                        pagenum -= len(pages) - 1
+
+                elif str(reaction) == &#34;🗑️&#34;:
+                    await m.delete()
+                    cont = False
+                    continue
+
+                await m.edit(content=f&#34;__**Inline Emotes in {ctx.guild.name} ({pagenum}/{len(pages)})**__:{pages[pagenum-1]}&#34;)
+            except asyncio.TimeoutError:
+                cont = False
+                continue
+
+    @commands.command()
+    @commands.guild_only()
+    async def swaptype(self, ctx: commands.Context, name):
+        &#39;&#39;&#39;
+        Swaps the type of the emote
+        &#39;&#39;&#39;
+        if (document := collection(&#34;emotes&#34;).find_one({&#34;name&#34;: name, &#34;server&#34;: ctx.guild.id})) or (document := collection(
+                &#34;emotes&#34;).find_one({&#34;name&#34;: re.compile(&#39;^&#39; + name + &#39;$&#39;, re.IGNORECASE), &#34;server&#34;: ctx.guild.id})):
+            # in mongodb already; most routine change
+
+            newtype = {&#34;big&#34;: &#34;inline&#34;, &#34;inline&#34;: &#34;big&#34;}[document[&#34;type&#34;]]
+
+            if document[&#34;type&#34;] == &#34;inline&#34;:
+                emote = discord.utils.get(
+                    ctx.guild.emojis, name=document[&#39;name&#39;])
+                try:
+                    await emote.delete(reason=f&#34;Unloading emoji because it changed type.&#34;)
+                except BaseException:
+                    pass
+
+            elif (size := len(requests.get(document[&#34;URL&#34;]).content)) &gt;= 262143:
+                await ctx.send(f&#34;Emote `{document[&#39;name&#39;]}` is too big to become inline! ({round(size/1024)} kb vs 256 kb limit)&#34;)
+                return
+
+            else:
+                await inject(ctx, document[&#39;name&#39;])  # inject the emote
+
+            collection(&#34;emotes&#34;).update_one(
+                {&#34;name&#34;: document[&#39;name&#39;], &#34;server&#34;: ctx.guild.id}, {&#34;$set&#34;: {&#34;type&#34;: newtype}})
+
+            await ctx.send(f&#34;Emote `{document[&#39;name&#39;]}` is now of type `{newtype}`&#34;)
+
+        elif emote := discord.utils.get(ctx.guild.emojis, name=name):
+            # in server, and not on mongodb (fringe case)
+            await upload(ctx, name, emote.url, &#34;big&#34;)
+            try:
+                await emote.delete(reason=f&#34;Unloading emoji because it changed type.&#34;)
+            except BaseException:
+                pass
+            await ctx.send(f&#34;Emote `{name}` is now of type `big` (newly uploaded)&#34;)
+
+        else:
+            # not in mongodb or in server
+            await ctx.send(f&#34;Emote `{name}` was not found.&#34;)
+
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.message):
+        &#39;&#39;&#39;
+        Emote listener
+        &#39;&#39;&#39;
+        async def pullemote(em):
+            return await inline(await self.bot.get_context(message),
+                                em.strip(&#39;:&#39;).strip(&#34; &#34;))
+
+        if message.content and not message.author.bot and message.guild:
+
+            # scan for inline emotes
+            if match := re.findall(
+                    r&#34;(?&lt;!&lt;):\s*[0-9A-z]+\s*:(?!\d+&gt;)&#34;,
+                    message.clean_content):
+                s = message.content
+                send = False
+                for i in match:
+                    if emote := await pullemote(i):
+                        send = True
+                        s = s.replace(i, str(emote))
+                    # else:
+                    # Handled by Go Module
+
+                if send:
+                    await echo(await self.bot.get_context(message),
+                               member=message.author, content=s,
+                               file=await message.attachments[0].to_file()
+                               if message.attachments else None,
+                               embed=message.embeds[0]
+                               if message.embeds else None)
+
+                    await message.delete()
+
+            # scan for changing emotes
+            elif message.content[0] == &#39;/&#39; and message.content[-1] == &#39;/&#39; and \
+                    len(message.content) &gt; 1:
+                # Swap type of emote
+                await self.swaptype(
+                    await self.bot.get_context(
+                        message), message.content.strip(&#39;/&#39;).strip(&#34; &#34;))</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>discord.ext.commands.cog.Cog</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="Comrade.components.servertools.emote_system.Emotes.add"><code class="name">var <span class="ident">add</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.servertools.emote_system.Emotes.big"><code class="name">var <span class="ident">big</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.servertools.emote_system.Emotes.emote"><code class="name">var <span class="ident">emote</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.servertools.emote_system.Emotes.gallery"><code class="name">var <span class="ident">gallery</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.servertools.emote_system.Emotes.inline"><code class="name">var <span class="ident">inline</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.servertools.emote_system.Emotes.list"><code class="name">var <span class="ident">list</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.servertools.emote_system.Emotes.remove"><code class="name">var <span class="ident">remove</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.servertools.emote_system.Emotes.rename"><code class="name">var <span class="ident">rename</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.servertools.emote_system.Emotes.swaptype"><code class="name">var <span class="ident">swaptype</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="Comrade.components.servertools.emote_system.Emotes.on_message"><code class="name flex">
+<span>async def <span class="ident">on_message</span></span>(<span>self, message: <module 'discord.message' from 'c:\\python38\\lib\\site-packages\\discord\\message.py'>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Emote listener</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@commands.Cog.listener()
+async def on_message(self, message: discord.message):
+    &#39;&#39;&#39;
+    Emote listener
+    &#39;&#39;&#39;
+    async def pullemote(em):
+        return await inline(await self.bot.get_context(message),
+                            em.strip(&#39;:&#39;).strip(&#34; &#34;))
+
+    if message.content and not message.author.bot and message.guild:
+
+        # scan for inline emotes
+        if match := re.findall(
+                r&#34;(?&lt;!&lt;):\s*[0-9A-z]+\s*:(?!\d+&gt;)&#34;,
+                message.clean_content):
+            s = message.content
+            send = False
+            for i in match:
+                if emote := await pullemote(i):
+                    send = True
+                    s = s.replace(i, str(emote))
+                # else:
+                # Handled by Go Module
+
+            if send:
+                await echo(await self.bot.get_context(message),
+                           member=message.author, content=s,
+                           file=await message.attachments[0].to_file()
+                           if message.attachments else None,
+                           embed=message.embeds[0]
+                           if message.embeds else None)
+
+                await message.delete()
+
+        # scan for changing emotes
+        elif message.content[0] == &#39;/&#39; and message.content[-1] == &#39;/&#39; and \
+                len(message.content) &gt; 1:
+            # Swap type of emote
+            await self.swaptype(
+                await self.bot.get_context(
+                    message), message.content.strip(&#39;/&#39;).strip(&#34; &#34;))</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="Comrade.components.servertools" href="index.html">Comrade.components.servertools</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="Comrade.components.servertools.emote_system.compress" href="#Comrade.components.servertools.emote_system.compress">compress</a></code></li>
+<li><code><a title="Comrade.components.servertools.emote_system.inject" href="#Comrade.components.servertools.emote_system.inject">inject</a></code></li>
+<li><code><a title="Comrade.components.servertools.emote_system.inline" href="#Comrade.components.servertools.emote_system.inline">inline</a></code></li>
+<li><code><a title="Comrade.components.servertools.emote_system.upload" href="#Comrade.components.servertools.emote_system.upload">upload</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="Comrade.components.servertools.emote_system.Emotes" href="#Comrade.components.servertools.emote_system.Emotes">Emotes</a></code></h4>
+<ul class="two-column">
+<li><code><a title="Comrade.components.servertools.emote_system.Emotes.add" href="#Comrade.components.servertools.emote_system.Emotes.add">add</a></code></li>
+<li><code><a title="Comrade.components.servertools.emote_system.Emotes.big" href="#Comrade.components.servertools.emote_system.Emotes.big">big</a></code></li>
+<li><code><a title="Comrade.components.servertools.emote_system.Emotes.emote" href="#Comrade.components.servertools.emote_system.Emotes.emote">emote</a></code></li>
+<li><code><a title="Comrade.components.servertools.emote_system.Emotes.gallery" href="#Comrade.components.servertools.emote_system.Emotes.gallery">gallery</a></code></li>
+<li><code><a title="Comrade.components.servertools.emote_system.Emotes.inline" href="#Comrade.components.servertools.emote_system.Emotes.inline">inline</a></code></li>
+<li><code><a title="Comrade.components.servertools.emote_system.Emotes.list" href="#Comrade.components.servertools.emote_system.Emotes.list">list</a></code></li>
+<li><code><a title="Comrade.components.servertools.emote_system.Emotes.on_message" href="#Comrade.components.servertools.emote_system.Emotes.on_message">on_message</a></code></li>
+<li><code><a title="Comrade.components.servertools.emote_system.Emotes.remove" href="#Comrade.components.servertools.emote_system.Emotes.remove">remove</a></code></li>
+<li><code><a title="Comrade.components.servertools.emote_system.Emotes.rename" href="#Comrade.components.servertools.emote_system.Emotes.rename">rename</a></code></li>
+<li><code><a title="Comrade.components.servertools.emote_system.Emotes.swaptype" href="#Comrade.components.servertools.emote_system.Emotes.swaptype">swaptype</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>

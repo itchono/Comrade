@@ -1,0 +1,835 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>Comrade.components.servertools.user_tools API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>Comrade.components.servertools.user_tools</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from utils.reactions import reactOK
+import discord
+from discord.ext import commands
+
+import typing
+import datetime
+import re
+
+from db import collection
+from utils.utilities import ufil, local_time, bot_prefix
+from utils.users import random_member_from_server, weight_table
+from utils.checks import isOP
+from utils.databases import new_user
+from utils.logger import logger
+
+
+class Users(commands.Cog):
+    &#39;&#39;&#39;
+    A set of commands for inspecting and working with
+    Discord users
+    &#39;&#39;&#39;
+
+    def __init__(self, bot):
+        self.bot: commands.Bot = bot
+
+    @commands.command(aliases=[&#34;profile&#34;])
+    async def userinfo(self, ctx: commands.Context, *,
+                       member: typing.Union[discord.Member,
+                                            discord.User] = None):
+        &#39;&#39;&#39;
+        Displays User Information of said person
+        Developed by Slyflare
+        &#39;&#39;&#39;
+        if not member:
+            member = ctx.author
+
+        e = discord.Embed(colour=member.colour)
+        e.set_author(name=f&#34;{member.display_name} ({member})&#34;,
+                     icon_url=member.avatar_url)
+        e.set_thumbnail(url=member.avatar_url)
+        e.set_footer(text=f&#34;ID: {member.id}&#34;)
+
+        e.add_field(name=&#34;Is Human&#34;,
+                    value=not member.bot)
+
+        e.add_field(name=&#34;Account Created&#34;,
+                    value=member.created_at.strftime(
+                        &#39;%B %d %Y at %I:%M:%S %p %Z&#39;), inline=False)
+
+        if ctx.guild:
+            user_information = collection(
+                &#34;users&#34;).find_one(ufil(member))
+
+            e.add_field(name=&#34;Joined Server&#34;,
+                        value=member.joined_at.strftime(
+                            &#39;%B %d %Y at %I:%M:%S %p %Z&#39;), inline=False)
+
+            if w := user_information[&#34;daily-weight&#34;]:
+                e.add_field(name=&#34;Daily Weight&#34;, value=w)
+
+            if w := user_information[&#34;OP&#34;]:
+                e.add_field(name=&#34;OP&#34;, value=w)
+
+            if (w := user_information[&#34;moderation&#34;][&#34;threat-level&#34;]):
+                e.add_field(name=&#34;Threat Level&#34;, value=w)
+
+            if w := user_information[&#34;identity&#34;]:
+                e.add_field(name=&#34;Identity&#34;, value=w)
+            else:
+                e.add_field(name=&#34;Identity&#34;, value=&#34;Unknown&#34;)
+
+            e.add_field(name=&#34;Status&#34;,
+                        value=member.status)
+
+            e.add_field(name=&#34;On Mobile&#34;,
+                        value=member.is_on_mobile())
+
+            if w := user_information[&#34;last-online&#34;]:
+                e.add_field(name=&#34;Last Online&#34;,
+                            value=w)
+
+            # Show stack of roles
+            e.add_field(name=f&#34;Roles ({len(member.roles)})&#34;,
+                        value=&#34;\n&#34;.join([
+                            role.mention for role in member.roles]),
+                        inline=False)
+
+        await ctx.send(embed=e)
+
+    @commands.command()
+    @commands.guild_only()
+    async def rolluser(self, ctx: commands.Context):
+        &#39;&#39;&#39;
+        Rolls a random user in the server, either weighted or unweighted
+        &#39;&#39;&#39;
+        mem = random_member_from_server(ctx.guild)
+        await self.userinfo(ctx, member=mem)
+
+    @commands.command()
+    @commands.guild_only()
+    async def track(self, ctx: commands.Context, *, member: discord.Member):
+        &#39;&#39;&#39;
+        Makes it so that when a user changes status, you are notified.
+        This command is a toggle.
+        &#39;&#39;&#39;
+        notifiees = collection(
+            &#34;users&#34;).find_one(ufil(member))[&#34;notify-status&#34;]
+
+        if ctx.author.id in notifiees:
+            collection(&#34;users&#34;).update_one(
+                ufil(member),
+                {&#34;$pull&#34;: {&#34;notify-status&#34;: ctx.author.id}})
+            await ctx.send(
+                f&#34;You will no longer be notified by when {member.display_name} changes their status.&#34;)
+        else:
+            collection(&#34;users&#34;).update_one(
+                ufil(member),
+                {&#34;$push&#34;: {&#34;notify-status&#34;: ctx.author.id}})
+            await ctx.send(
+                f&#34;You will now be notified by when {member.display_name} changes their status.&#34;)
+
+    @commands.command()
+    @commands.guild_only()
+    async def identity(self, ctx: commands.Context,
+                       member: typing.Optional[discord.Member] = None, *,
+                       name: typing.Optional[str] = None):
+        &#39;&#39;&#39;
+        Looks up user with real identity, or sets their identity.
+        &#39;&#39;&#39;
+        if name and member:
+            # Case: assign name to member
+            collection(
+                &#34;users&#34;).update_one(
+                    ufil(member),
+                    {&#34;$set&#34;: {&#34;identity&#34;: name}})
+            await reactOK(ctx)
+        elif name and (real_user := collection(
+            &#34;users&#34;).find_one(
+                {&#34;identity&#34;: re.compile(&#39;^&#39; + name + &#39;$&#39;, re.IGNORECASE)})):
+            # Case: find unknown user
+            user = ctx.guild.get_member(real_user[&#34;user&#34;])
+            await self.userinfo(ctx, member=user)
+
+        elif member:
+            await ctx.send(collection(
+                &#34;users&#34;).find_one(ufil(member))[&#34;identity&#34;])
+        else:
+            await ctx.send(&#34;No identity listed&#34;)
+
+    @commands.command()
+    @commands.guild_only()
+    async def requiem(self, ctx: commands.Context,
+                      day: int = 30, trim=False):
+        &#39;&#39;&#39;
+        Generates a list of users who have not talked in the past x days
+        &#39;&#39;&#39;
+        threshold = datetime.datetime.now() - datetime.timedelta(day)
+
+        active_author_ids = set()
+
+        for channel in ctx.guild.text_channels:
+
+            active_ids_in_channel = await channel.history(
+                limit=None, after=threshold).filter(
+                    lambda msg: msg.type == discord.MessageType.default
+            ).map(lambda msg: msg.author.id).flatten()
+
+            active_author_ids += set(active_ids_in_channel)
+
+        inactive_author_ids = set(
+            [member.id for member in ctx.guild.members]) - active_author_ids
+
+        await ctx.send(
+            f&#34;{len(inactive_author_ids)} members detected to have not posted in the past {day} days.&#34;)
+
+        OP = isOP()(ctx)  # check before trimming
+
+        s = &#34;```&#34;
+        for member in [
+                await ctx.guild.get_member(
+                    idd) for idd in inactive_author_ids]:
+            s += member.display_name + &#34;\n&#34;
+
+            if trim and OP:
+                collection(&#34;users&#34;).update_one(
+                    ufil(member), {&#34;$set&#34;: {&#34;daily-weight&#34;: 0}})
+        s += &#34;```&#34;
+        await ctx.send(s)
+
+        if trim:
+            await ctx.send(&#34;Users above have been removed from the daily member pool.&#34;)
+
+    @commands.command()
+    @commands.guild_only()
+    async def modchance(self, ctx,
+                        member: typing.Optional[discord.Member] = None):
+        &#39;&#39;&#39;
+        Shows the chance of a user to be member of the day [MoD]
+        &#39;&#39;&#39;
+        if not member:
+            member = ctx.author
+
+        _, weights = weight_table(ctx.guild)
+
+        sum_of_weights = sum(weights)
+
+        count = collection(
+            &#34;users&#34;).find_one(ufil(member))[&#34;daily-weight&#34;]
+
+        if sum_of_weights &gt; 0:
+            await ctx.send(
+                f&#34;{member.display_name}&#39;s chance of being rolled tomorrow is {count}/{sum_of_weights} ({round(count/sum_of_weights * 100, 2)}%)&#34;)
+        else:
+            await ctx.send(&#34;Daily weight cache is currently unavailable (may be being rebuilt).&#34;)
+
+    @commands.command()
+    @commands.guild_only()
+    async def modweights(self, ctx):
+        &#39;&#39;&#39;
+        Shows relative weights of daily member table.
+        &#39;&#39;&#39;
+        member_ids, weights = weight_table(ctx.guild)
+
+        pg = commands.Paginator()
+
+        for i in range(len(weights)):
+            pg.add_line(
+                f&#34;{ctx.guild.get_member(member_ids[i]).display_name}: {weights[i]}&#34;)
+        pg.add_line(f&#34;Total: {sum(weights)} entries.&#34;)
+
+        for page in pg.pages:
+            await ctx.send(page)
+
+    @commands.Cog.listener()
+    async def on_member_join(self, member: discord.Member):
+        &#39;&#39;&#39;
+        When a member joins the server.
+        &#39;&#39;&#39;
+        try:
+            announcements_channel_id = collection(
+                &#34;servers&#34;).find_one(
+                    member.guild.id)[&#34;channels&#34;][&#34;announcements&#34;]
+            channel = member.guild.get_channel(announcements_channel_id)
+            await channel.send(f&#34;Welcome {member.display_name}!&#34;)
+        except Exception:
+            logger.exception(&#34;Member join&#34;)
+
+        collection(&#34;users&#34;).insert_one(new_user(member))
+        # New user entry in DB
+
+    @commands.Cog.listener()
+    async def on_member_remove(self, member: discord.Member):
+        &#39;&#39;&#39;
+        When a member leaves the server
+        &#39;&#39;&#39;
+        try:
+            announcements_channel_id = collection(
+                &#34;servers&#34;).find_one(member.guild.id)[&#34;channels&#34;][&#34;announcements&#34;]
+
+            channel = member.guild.get_channel(announcements_channel_id)
+
+            await channel.send(f&#34;:door: {member.display_name} has left.&#34;)
+        except Exception:
+            logger.exception(&#34;Member leave&#34;)
+
+        collection(&#34;users&#34;).delete_one(ufil(member))
+        # Delete DB entry
+
+    @commands.Cog.listener()
+    async def on_member_update(self,
+                               before: discord.Member, after: discord.Member):
+        &#39;&#39;&#39;
+        Whenever a server member changes their state.
+        &#39;&#39;&#39;
+        if after.status != before.status:
+            # status update
+
+            if str(after.status) == &#34;offline&#34;:
+
+                collection(&#34;users&#34;).update_one(
+                    ufil(after),
+                    {&#34;$set&#34;: {
+                        &#34;last-online&#34;:
+                        local_time().strftime(&#34;%I:%M:%S %p %Z&#34;)}})
+            else:
+                collection(&#34;users&#34;).update_one(
+                    ufil(after),
+                    {&#34;$set&#34;: {
+                        &#34;last-online&#34;: &#34;Now&#34;}})
+
+            for mem_id in collection(
+                    &#34;users&#34;).find_one(
+                        ufil(after))[&#34;notify-status&#34;]:
+                mem = after.guild.get_member(mem_id)
+
+                embed = discord.Embed(color=0xd7342a,
+                    description=
+                    f&#34;{str(before.status)} -&gt; {str(after.status)} @ {local_time().strftime(&#39;%I:%M:%S %p %Z&#39;)}&#34;)
+
+                embed.set_author(
+                    name=
+                    f&#34;{after.display_name} ({str(after)}) is now {str(after.status)}.&#34;,
+                    icon_url=after.avatar_url)
+                embed.set_footer(
+                    text=
+                    f&#34;To unsubscribe, type [{bot_prefix}track {after.display_name}] in {after.guild.name}&#34;)
+
+                await mem.send(embed=embed)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="Comrade.components.servertools.user_tools.Users"><code class="flex name class">
+<span>class <span class="ident">Users</span></span>
+<span>(</span><span>bot)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A set of commands for inspecting and working with
+Discord users</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Users(commands.Cog):
+    &#39;&#39;&#39;
+    A set of commands for inspecting and working with
+    Discord users
+    &#39;&#39;&#39;
+
+    def __init__(self, bot):
+        self.bot: commands.Bot = bot
+
+    @commands.command(aliases=[&#34;profile&#34;])
+    async def userinfo(self, ctx: commands.Context, *,
+                       member: typing.Union[discord.Member,
+                                            discord.User] = None):
+        &#39;&#39;&#39;
+        Displays User Information of said person
+        Developed by Slyflare
+        &#39;&#39;&#39;
+        if not member:
+            member = ctx.author
+
+        e = discord.Embed(colour=member.colour)
+        e.set_author(name=f&#34;{member.display_name} ({member})&#34;,
+                     icon_url=member.avatar_url)
+        e.set_thumbnail(url=member.avatar_url)
+        e.set_footer(text=f&#34;ID: {member.id}&#34;)
+
+        e.add_field(name=&#34;Is Human&#34;,
+                    value=not member.bot)
+
+        e.add_field(name=&#34;Account Created&#34;,
+                    value=member.created_at.strftime(
+                        &#39;%B %d %Y at %I:%M:%S %p %Z&#39;), inline=False)
+
+        if ctx.guild:
+            user_information = collection(
+                &#34;users&#34;).find_one(ufil(member))
+
+            e.add_field(name=&#34;Joined Server&#34;,
+                        value=member.joined_at.strftime(
+                            &#39;%B %d %Y at %I:%M:%S %p %Z&#39;), inline=False)
+
+            if w := user_information[&#34;daily-weight&#34;]:
+                e.add_field(name=&#34;Daily Weight&#34;, value=w)
+
+            if w := user_information[&#34;OP&#34;]:
+                e.add_field(name=&#34;OP&#34;, value=w)
+
+            if (w := user_information[&#34;moderation&#34;][&#34;threat-level&#34;]):
+                e.add_field(name=&#34;Threat Level&#34;, value=w)
+
+            if w := user_information[&#34;identity&#34;]:
+                e.add_field(name=&#34;Identity&#34;, value=w)
+            else:
+                e.add_field(name=&#34;Identity&#34;, value=&#34;Unknown&#34;)
+
+            e.add_field(name=&#34;Status&#34;,
+                        value=member.status)
+
+            e.add_field(name=&#34;On Mobile&#34;,
+                        value=member.is_on_mobile())
+
+            if w := user_information[&#34;last-online&#34;]:
+                e.add_field(name=&#34;Last Online&#34;,
+                            value=w)
+
+            # Show stack of roles
+            e.add_field(name=f&#34;Roles ({len(member.roles)})&#34;,
+                        value=&#34;\n&#34;.join([
+                            role.mention for role in member.roles]),
+                        inline=False)
+
+        await ctx.send(embed=e)
+
+    @commands.command()
+    @commands.guild_only()
+    async def rolluser(self, ctx: commands.Context):
+        &#39;&#39;&#39;
+        Rolls a random user in the server, either weighted or unweighted
+        &#39;&#39;&#39;
+        mem = random_member_from_server(ctx.guild)
+        await self.userinfo(ctx, member=mem)
+
+    @commands.command()
+    @commands.guild_only()
+    async def track(self, ctx: commands.Context, *, member: discord.Member):
+        &#39;&#39;&#39;
+        Makes it so that when a user changes status, you are notified.
+        This command is a toggle.
+        &#39;&#39;&#39;
+        notifiees = collection(
+            &#34;users&#34;).find_one(ufil(member))[&#34;notify-status&#34;]
+
+        if ctx.author.id in notifiees:
+            collection(&#34;users&#34;).update_one(
+                ufil(member),
+                {&#34;$pull&#34;: {&#34;notify-status&#34;: ctx.author.id}})
+            await ctx.send(
+                f&#34;You will no longer be notified by when {member.display_name} changes their status.&#34;)
+        else:
+            collection(&#34;users&#34;).update_one(
+                ufil(member),
+                {&#34;$push&#34;: {&#34;notify-status&#34;: ctx.author.id}})
+            await ctx.send(
+                f&#34;You will now be notified by when {member.display_name} changes their status.&#34;)
+
+    @commands.command()
+    @commands.guild_only()
+    async def identity(self, ctx: commands.Context,
+                       member: typing.Optional[discord.Member] = None, *,
+                       name: typing.Optional[str] = None):
+        &#39;&#39;&#39;
+        Looks up user with real identity, or sets their identity.
+        &#39;&#39;&#39;
+        if name and member:
+            # Case: assign name to member
+            collection(
+                &#34;users&#34;).update_one(
+                    ufil(member),
+                    {&#34;$set&#34;: {&#34;identity&#34;: name}})
+            await reactOK(ctx)
+        elif name and (real_user := collection(
+            &#34;users&#34;).find_one(
+                {&#34;identity&#34;: re.compile(&#39;^&#39; + name + &#39;$&#39;, re.IGNORECASE)})):
+            # Case: find unknown user
+            user = ctx.guild.get_member(real_user[&#34;user&#34;])
+            await self.userinfo(ctx, member=user)
+
+        elif member:
+            await ctx.send(collection(
+                &#34;users&#34;).find_one(ufil(member))[&#34;identity&#34;])
+        else:
+            await ctx.send(&#34;No identity listed&#34;)
+
+    @commands.command()
+    @commands.guild_only()
+    async def requiem(self, ctx: commands.Context,
+                      day: int = 30, trim=False):
+        &#39;&#39;&#39;
+        Generates a list of users who have not talked in the past x days
+        &#39;&#39;&#39;
+        threshold = datetime.datetime.now() - datetime.timedelta(day)
+
+        active_author_ids = set()
+
+        for channel in ctx.guild.text_channels:
+
+            active_ids_in_channel = await channel.history(
+                limit=None, after=threshold).filter(
+                    lambda msg: msg.type == discord.MessageType.default
+            ).map(lambda msg: msg.author.id).flatten()
+
+            active_author_ids += set(active_ids_in_channel)
+
+        inactive_author_ids = set(
+            [member.id for member in ctx.guild.members]) - active_author_ids
+
+        await ctx.send(
+            f&#34;{len(inactive_author_ids)} members detected to have not posted in the past {day} days.&#34;)
+
+        OP = isOP()(ctx)  # check before trimming
+
+        s = &#34;```&#34;
+        for member in [
+                await ctx.guild.get_member(
+                    idd) for idd in inactive_author_ids]:
+            s += member.display_name + &#34;\n&#34;
+
+            if trim and OP:
+                collection(&#34;users&#34;).update_one(
+                    ufil(member), {&#34;$set&#34;: {&#34;daily-weight&#34;: 0}})
+        s += &#34;```&#34;
+        await ctx.send(s)
+
+        if trim:
+            await ctx.send(&#34;Users above have been removed from the daily member pool.&#34;)
+
+    @commands.command()
+    @commands.guild_only()
+    async def modchance(self, ctx,
+                        member: typing.Optional[discord.Member] = None):
+        &#39;&#39;&#39;
+        Shows the chance of a user to be member of the day [MoD]
+        &#39;&#39;&#39;
+        if not member:
+            member = ctx.author
+
+        _, weights = weight_table(ctx.guild)
+
+        sum_of_weights = sum(weights)
+
+        count = collection(
+            &#34;users&#34;).find_one(ufil(member))[&#34;daily-weight&#34;]
+
+        if sum_of_weights &gt; 0:
+            await ctx.send(
+                f&#34;{member.display_name}&#39;s chance of being rolled tomorrow is {count}/{sum_of_weights} ({round(count/sum_of_weights * 100, 2)}%)&#34;)
+        else:
+            await ctx.send(&#34;Daily weight cache is currently unavailable (may be being rebuilt).&#34;)
+
+    @commands.command()
+    @commands.guild_only()
+    async def modweights(self, ctx):
+        &#39;&#39;&#39;
+        Shows relative weights of daily member table.
+        &#39;&#39;&#39;
+        member_ids, weights = weight_table(ctx.guild)
+
+        pg = commands.Paginator()
+
+        for i in range(len(weights)):
+            pg.add_line(
+                f&#34;{ctx.guild.get_member(member_ids[i]).display_name}: {weights[i]}&#34;)
+        pg.add_line(f&#34;Total: {sum(weights)} entries.&#34;)
+
+        for page in pg.pages:
+            await ctx.send(page)
+
+    @commands.Cog.listener()
+    async def on_member_join(self, member: discord.Member):
+        &#39;&#39;&#39;
+        When a member joins the server.
+        &#39;&#39;&#39;
+        try:
+            announcements_channel_id = collection(
+                &#34;servers&#34;).find_one(
+                    member.guild.id)[&#34;channels&#34;][&#34;announcements&#34;]
+            channel = member.guild.get_channel(announcements_channel_id)
+            await channel.send(f&#34;Welcome {member.display_name}!&#34;)
+        except Exception:
+            logger.exception(&#34;Member join&#34;)
+
+        collection(&#34;users&#34;).insert_one(new_user(member))
+        # New user entry in DB
+
+    @commands.Cog.listener()
+    async def on_member_remove(self, member: discord.Member):
+        &#39;&#39;&#39;
+        When a member leaves the server
+        &#39;&#39;&#39;
+        try:
+            announcements_channel_id = collection(
+                &#34;servers&#34;).find_one(member.guild.id)[&#34;channels&#34;][&#34;announcements&#34;]
+
+            channel = member.guild.get_channel(announcements_channel_id)
+
+            await channel.send(f&#34;:door: {member.display_name} has left.&#34;)
+        except Exception:
+            logger.exception(&#34;Member leave&#34;)
+
+        collection(&#34;users&#34;).delete_one(ufil(member))
+        # Delete DB entry
+
+    @commands.Cog.listener()
+    async def on_member_update(self,
+                               before: discord.Member, after: discord.Member):
+        &#39;&#39;&#39;
+        Whenever a server member changes their state.
+        &#39;&#39;&#39;
+        if after.status != before.status:
+            # status update
+
+            if str(after.status) == &#34;offline&#34;:
+
+                collection(&#34;users&#34;).update_one(
+                    ufil(after),
+                    {&#34;$set&#34;: {
+                        &#34;last-online&#34;:
+                        local_time().strftime(&#34;%I:%M:%S %p %Z&#34;)}})
+            else:
+                collection(&#34;users&#34;).update_one(
+                    ufil(after),
+                    {&#34;$set&#34;: {
+                        &#34;last-online&#34;: &#34;Now&#34;}})
+
+            for mem_id in collection(
+                    &#34;users&#34;).find_one(
+                        ufil(after))[&#34;notify-status&#34;]:
+                mem = after.guild.get_member(mem_id)
+
+                embed = discord.Embed(color=0xd7342a,
+                    description=
+                    f&#34;{str(before.status)} -&gt; {str(after.status)} @ {local_time().strftime(&#39;%I:%M:%S %p %Z&#39;)}&#34;)
+
+                embed.set_author(
+                    name=
+                    f&#34;{after.display_name} ({str(after)}) is now {str(after.status)}.&#34;,
+                    icon_url=after.avatar_url)
+                embed.set_footer(
+                    text=
+                    f&#34;To unsubscribe, type [{bot_prefix}track {after.display_name}] in {after.guild.name}&#34;)
+
+                await mem.send(embed=embed)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>discord.ext.commands.cog.Cog</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="Comrade.components.servertools.user_tools.Users.identity"><code class="name">var <span class="ident">identity</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.servertools.user_tools.Users.modchance"><code class="name">var <span class="ident">modchance</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.servertools.user_tools.Users.modweights"><code class="name">var <span class="ident">modweights</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.servertools.user_tools.Users.requiem"><code class="name">var <span class="ident">requiem</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.servertools.user_tools.Users.rolluser"><code class="name">var <span class="ident">rolluser</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.servertools.user_tools.Users.track"><code class="name">var <span class="ident">track</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Comrade.components.servertools.user_tools.Users.userinfo"><code class="name">var <span class="ident">userinfo</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="Comrade.components.servertools.user_tools.Users.on_member_join"><code class="name flex">
+<span>async def <span class="ident">on_member_join</span></span>(<span>self, member: discord.member.Member)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>When a member joins the server.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@commands.Cog.listener()
+async def on_member_join(self, member: discord.Member):
+    &#39;&#39;&#39;
+    When a member joins the server.
+    &#39;&#39;&#39;
+    try:
+        announcements_channel_id = collection(
+            &#34;servers&#34;).find_one(
+                member.guild.id)[&#34;channels&#34;][&#34;announcements&#34;]
+        channel = member.guild.get_channel(announcements_channel_id)
+        await channel.send(f&#34;Welcome {member.display_name}!&#34;)
+    except Exception:
+        logger.exception(&#34;Member join&#34;)
+
+    collection(&#34;users&#34;).insert_one(new_user(member))</code></pre>
+</details>
+</dd>
+<dt id="Comrade.components.servertools.user_tools.Users.on_member_remove"><code class="name flex">
+<span>async def <span class="ident">on_member_remove</span></span>(<span>self, member: discord.member.Member)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>When a member leaves the server</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@commands.Cog.listener()
+async def on_member_remove(self, member: discord.Member):
+    &#39;&#39;&#39;
+    When a member leaves the server
+    &#39;&#39;&#39;
+    try:
+        announcements_channel_id = collection(
+            &#34;servers&#34;).find_one(member.guild.id)[&#34;channels&#34;][&#34;announcements&#34;]
+
+        channel = member.guild.get_channel(announcements_channel_id)
+
+        await channel.send(f&#34;:door: {member.display_name} has left.&#34;)
+    except Exception:
+        logger.exception(&#34;Member leave&#34;)
+
+    collection(&#34;users&#34;).delete_one(ufil(member))</code></pre>
+</details>
+</dd>
+<dt id="Comrade.components.servertools.user_tools.Users.on_member_update"><code class="name flex">
+<span>async def <span class="ident">on_member_update</span></span>(<span>self, before: discord.member.Member, after: discord.member.Member)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Whenever a server member changes their state.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@commands.Cog.listener()
+async def on_member_update(self,
+                           before: discord.Member, after: discord.Member):
+    &#39;&#39;&#39;
+    Whenever a server member changes their state.
+    &#39;&#39;&#39;
+    if after.status != before.status:
+        # status update
+
+        if str(after.status) == &#34;offline&#34;:
+
+            collection(&#34;users&#34;).update_one(
+                ufil(after),
+                {&#34;$set&#34;: {
+                    &#34;last-online&#34;:
+                    local_time().strftime(&#34;%I:%M:%S %p %Z&#34;)}})
+        else:
+            collection(&#34;users&#34;).update_one(
+                ufil(after),
+                {&#34;$set&#34;: {
+                    &#34;last-online&#34;: &#34;Now&#34;}})
+
+        for mem_id in collection(
+                &#34;users&#34;).find_one(
+                    ufil(after))[&#34;notify-status&#34;]:
+            mem = after.guild.get_member(mem_id)
+
+            embed = discord.Embed(color=0xd7342a,
+                description=
+                f&#34;{str(before.status)} -&gt; {str(after.status)} @ {local_time().strftime(&#39;%I:%M:%S %p %Z&#39;)}&#34;)
+
+            embed.set_author(
+                name=
+                f&#34;{after.display_name} ({str(after)}) is now {str(after.status)}.&#34;,
+                icon_url=after.avatar_url)
+            embed.set_footer(
+                text=
+                f&#34;To unsubscribe, type [{bot_prefix}track {after.display_name}] in {after.guild.name}&#34;)
+
+            await mem.send(embed=embed)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="Comrade.components.servertools" href="index.html">Comrade.components.servertools</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="Comrade.components.servertools.user_tools.Users" href="#Comrade.components.servertools.user_tools.Users">Users</a></code></h4>
+<ul class="two-column">
+<li><code><a title="Comrade.components.servertools.user_tools.Users.identity" href="#Comrade.components.servertools.user_tools.Users.identity">identity</a></code></li>
+<li><code><a title="Comrade.components.servertools.user_tools.Users.modchance" href="#Comrade.components.servertools.user_tools.Users.modchance">modchance</a></code></li>
+<li><code><a title="Comrade.components.servertools.user_tools.Users.modweights" href="#Comrade.components.servertools.user_tools.Users.modweights">modweights</a></code></li>
+<li><code><a title="Comrade.components.servertools.user_tools.Users.on_member_join" href="#Comrade.components.servertools.user_tools.Users.on_member_join">on_member_join</a></code></li>
+<li><code><a title="Comrade.components.servertools.user_tools.Users.on_member_remove" href="#Comrade.components.servertools.user_tools.Users.on_member_remove">on_member_remove</a></code></li>
+<li><code><a title="Comrade.components.servertools.user_tools.Users.on_member_update" href="#Comrade.components.servertools.user_tools.Users.on_member_update">on_member_update</a></code></li>
+<li><code><a title="Comrade.components.servertools.user_tools.Users.requiem" href="#Comrade.components.servertools.user_tools.Users.requiem">requiem</a></code></li>
+<li><code><a title="Comrade.components.servertools.user_tools.Users.rolluser" href="#Comrade.components.servertools.user_tools.Users.rolluser">rolluser</a></code></li>
+<li><code><a title="Comrade.components.servertools.user_tools.Users.track" href="#Comrade.components.servertools.user_tools.Users.track">track</a></code></li>
+<li><code><a title="Comrade.components.servertools.user_tools.Users.userinfo" href="#Comrade.components.servertools.user_tools.Users.userinfo">userinfo</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>
