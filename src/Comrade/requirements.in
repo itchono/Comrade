@@ -16,3 +16,5 @@ pytz
 PyDictionary
 pillow
 async_lru
+PyNaCl
+youtube_dl

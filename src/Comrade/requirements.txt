@@ -23,7 +23,9 @@ cachetools==4.1.1
 certifi==2020.11.8
     # via requests
 cffi==1.14.3
-    # via google-crc32c
+    # via
+    #   google-crc32c
+    #   pynacl
 chardet==3.0.4
     # via
     #   aiohttp
@@ -108,6 +110,8 @@ pydictionary==2.0.1
     # via -r requirements.in
 pymongo==3.11.1
     # via -r requirements.in
+pynacl==1.4.0
+    # via -r requirements.in
 pyparsing==2.4.7
     # via matplotlib
 python-dateutil==2.8.1
@@ -133,6 +137,7 @@ six==1.15.0
     #   google-auth
     #   google-resumable-media
     #   protobuf
+    #   pynacl
     #   python-dateutil
 soupsieve==2.0.1
     # via beautifulsoup4
@@ -146,6 +151,8 @@ werkzeug==1.0.1
     # via flask
 yarl==1.5.1
     # via aiohttp
+youtube-dl==2021.1.24.1
+    # via -r requirements.in
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
