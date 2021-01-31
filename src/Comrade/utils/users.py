@@ -17,7 +17,8 @@ def random_member_from_server(
 
     if require_human:
         members = [m for m in server.members if not m.bot]
-    members = server.members
+    else:
+        members = server.members
 
     return random.choice(members)
 

@@ -1,10 +1,9 @@
 import discord
-from discord import message
 from discord.ext import commands, tasks
 
 import datetime
 
-from utils.utilities import local_time, dm_channel
+from utils.utilities import local_time
 from db import collection
 
 from utils.logger import logger
@@ -61,11 +60,11 @@ class Reminders(commands.Cog):
             if r["server"]:
                 channel = self.bot.get_channel(r["channel"])
             else:
-                channel = await dm_channel(target)
+                channel = target
 
             logger.info(f"Reminded {target}")
 
-            embed = discord.Embed(description=r["message"])
+            embed = discord.Embed(color=0xd7342a, description=r["message"])
             embed.set_author(name=f"Reminder for {target.display_name}",
                              url=r["jumpurl"], icon_url=target.avatar_url)
 

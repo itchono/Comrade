@@ -54,7 +54,7 @@ func main() {
 		fmt.Println("error creating Discord session,", err)
 		return
 	}
-	dg.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsNone)
+	dg.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAllWithoutPrivileged)
 	dg.AddHandler(messageCreate)
 
 	// START BOT
@@ -95,6 +95,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	// Command Handler
 	if strings.ToLower(m.Content) == "hello ground dragon" {
 		s.ChannelMessageSend(m.ChannelID, "hello")
 
@@ -104,6 +105,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			fmt.Println("COMMAND ERROR")
 		}
 	}
+	// Message Handlers
 	NSFWHandler(s, m)
 	Emote(s, m, comradeDB.Collection("Emotes"))
+	Tunnel(s, m)
 }

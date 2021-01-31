@@ -245,7 +245,7 @@ class Tools(commands.Cog):
                 title=f"**__POLL__:\n{prompt}**")
 
             for i in range(len(options)):
-                e.add_field(
+                e.add_field(color=0xd7342a,
                     name=f"{i+1}) {options[i]}: 0",
                     value="No one",
                     inline=False)
@@ -292,7 +292,7 @@ class Tools(commands.Cog):
                     if reaction.emoji == "🛑" and user == ctx.author:
                         raise asyncio.TimeoutError
 
-                    e = discord.Embed(
+                    e = discord.Embed(color=0xd7342a,
                         title=f"**__POLL__:\n{prompt}**")
 
                     for i in range(len(options)):
@@ -318,7 +318,7 @@ class Tools(commands.Cog):
                 except asyncio.TimeoutError:
                     cont = False
 
-                    e = discord.Embed(
+                    e = discord.Embed(color=0xd7342a,
                         title=f"**__POLL (Closed)__:\n{prompt}**")
 
                     for i in range(len(options)):

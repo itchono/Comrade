@@ -83,6 +83,7 @@ func NHentaiStart(s *discordgo.Session, m *discordgo.MessageCreate, tag string) 
 
 	emb := discordgo.MessageEmbed{}
 	emb.Title = title
+	emb.Color = 0xfecbed
 	emb.URL = "https://nhentai.net/g/" + tag
 	emb.Description = tag
 	emb.Image = &discordgo.MessageEmbedImage{URL: coverURL}
@@ -316,6 +317,7 @@ func Hentai(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int
 		}
 
 		emb.URL = url
+		emb.Color = 0xfecbed
 		emb.Description = "ID: " + fmt.Sprintf("%.f", postData["id"].(float64)) + "\nScore: " + fmt.Sprintf("%.f", postData["score"].(float64)) + "\nHit Count: " + hitCount
 		emb.Footer = &discordgo.MessageEmbedFooter{Text: tagString}
 		emb.Image = &discordgo.MessageEmbedImage{URL: url}

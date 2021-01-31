@@ -5,7 +5,7 @@ import os
 import components
 from client import client as bot
 from config import cfg
-from utils.utilities import set_start_time, get_uptime, dm_channel
+from utils.utilities import set_start_time, get_uptime
 from utils.databases import rebuild_server_cfgs
 from utils.users import rebuild_weight_table, sum_of_weights
 from db import gc_startup, mongo_startup
@@ -56,8 +56,7 @@ async def on_ready():
 
     if cfg["Settings"]["notify-on-startup"] == "True":
         owner = (await bot.application_info()).owner
-        owner_dm_channel = await dm_channel(owner)
-        await owner_dm_channel.send("Bot is online.")
+        await owner.send("Bot is online.")
 
     # startup notify
     try:

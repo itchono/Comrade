@@ -2,19 +2,25 @@ import discord
 from discord.ext import commands
 
 import random
+import asyncio
 from async_lru import alru_cache
 
 from db import collection
-from utils.echo import echo
+from utils.echo import echo, mimic
 from utils.reactions import reactOK
 from utils.checks import isOP
+from utils.utilities import utc_to_local_time
 from config import cfg
+
+from client import discord_client as bot
 
 
 # Janky workaround of cacheing stuff properly, but oh well
 @alru_cache(maxsize=8)
 async def vault_posts(guild_id: int):
-    pass
+    vault: discord.TextChannel = bot.get_channel(
+            collection("servers").find_one(guild_id)["channels"]["vault"])
+    return (await vault.history(limit=None).flatten())
 
 
 class Vault(commands.Cog):
@@ -27,16 +33,11 @@ class Vault(commands.Cog):
         '''
         Returns a random post from the vault.
         '''
-        item = random.choice(self.vault_cache[ctx.guild.id])
+        message = random.choice(vault_posts(ctx.guild.id))
 
-        if item["type"] == "echo":
-            targetmsg = await commands.MessageConverter().convert(ctx, item["data"])
-            await echo(ctx, member=targetmsg.author, content=targetmsg.content, file=targetmsg.file, embed=targetmsg.embed)
-
-        else:
-            embed = discord.Embed()
-            embed.set_image(url=item["data"])
-            await ctx.send(embed=embed)
+        await echo(ctx, member=message.author, content=message.content,
+                        file=message.attachments[0] if message.attachments else None,
+                        embed=message.embeds[0] if message.embeds else None)
 
     @commands.command(aliases=[u"\U0001F345"])
     @commands.guild_only()
@@ -57,17 +58,22 @@ class Vault(commands.Cog):
         elif tgt and tgt.isnumeric():
             u = await commands.MessageConverter().convert(ctx, tgt)
             IDmode = True
-        elif u := await commands.MessageConverter().convert(ctx, tgt):
-            IDmode = True
         else:
-            u = tgt  # URL directly
+            try:
+                u = await commands.MessageConverter().convert(ctx, tgt)
+                IDmode = True
+            except Exception:
+                u = tgt  # URL directly
 
         duration = collection("servers").find_one(ctx.guild.id)[
             "durations"]["vault"]
 
-        m = await ctx.send(
-            f"React to this message with 🍅 to vault the post {ctx.message.jump_url if not IDmode else u.jump_url}. You have **{duration} seconds** to vote.",
-            delete_after=duration, embed=None)
+
+        ee = discord.Embed(color=0xd7342a,
+                        description= f"React to this message with 🍅 to vault [this post]({ctx.message.jump_url if not IDmode else u.jump_url})"
+                        f"\nYou have **{duration} seconds** to vote.")
+
+        m = await ctx.send(embed=ee, delete_after=duration)
 
         await m.add_reaction("🍅")
 
@@ -76,31 +82,36 @@ class Vault(commands.Cog):
                 (reaction.message.id == m.id and user != ctx.author)
                 or cfg["Settings"]["development-mode"] == "True"
                 or isOP()(ctx))
+        try:
+            await self.bot.wait_for("reaction_add", check=check, timeout=duration)
 
-        await self.bot.wait_for("reaction_add", check=check, timeout=duration)
+            vault = ctx.guild.get_channel(
+                collection("servers").find_one(ctx.guild.id)["channels"]["vault"])
 
-        vault = ctx.guild.get_channel(
-            collection("servers").find_one(ctx.guild.id)["channels"]["vault"])
+            if IDmode:
+                e = discord.Embed(color=0xd7342a,
+                    description=f"[Source Message]({u.jump_url})")
+                e.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar_url)
+                e.set_footer(
+                    text=f"Originally sent in #{ctx.channel.name}, at {utc_to_local_time(u.created_at).strftime('%B %d %Y at %I:%M:%S %p %Z')}")
+                await mimic(vault, content=u.content,
+                username=u.author.display_name, avatar_url=u.author.avatar_url,
+                file=await u.attachments[0].to_file() if u.attachments else None,
+                embeds=u.embeds + [e] if u.embeds else [e])
 
-        if IDmode:
-            e = discord.Embed(
-                title=":tomato: Echoed Vault Entry",
-                description="See Echoed Message Below.")
-            e.add_field(name='Original Post: ', value=ctx.message.jump_url)
-            e.set_footer(text=f"Sent by {ctx.author.display_name}")
-            m2 = await vault.send(embed=e)
+            else:
+                e = discord.Embed(color=0xd7342a,
+                    description=f"[Source Message]({ctx.message.jump_url})")
+                e.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar_url)
+                e.set_image(url=u)
+                e.set_footer(
+                    text=f"Originally sent in #{ctx.channel.name}, at {utc_to_local_time(ctx.message.created_at).strftime('%B %d %Y at %I:%M:%S %p %Z')}")
+                await vault.send(embed=e)
 
-            await echo(await self.bot.get_context(m2), member=u.author, content=u.content, file=await u.attachments[0].to_file() if u.attachments else None, embed=u.embeds[0] if u.embeds else None)
-        else:
-            e = discord.Embed(
-                title=":tomato: Vault Entry")
-            e.set_image(url=u)
-            e.add_field(name='Original Post: ', value=ctx.message.jump_url)
-            e.set_footer(text=f"Sent by {ctx.author.display_name}")
-            await vault.send(embed=e)
+            await reactOK(ctx)
+            # rebuild vault cache
+            vault_posts.cache_clear()
 
-        await reactOK(ctx)
-        # rebuild vault cache
-        await self.rebuildcache(ctx.guild)
-
-        await m.edit(content="Vault operation successful.", embed=None)
+            await m.edit(content="Vault operation successful.", embed=None)
+        except asyncio.TimeoutError:
+            await m.edit("Vault aborted (180s timeout).", embed=None)

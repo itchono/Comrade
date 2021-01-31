@@ -108,7 +108,7 @@ class NSFW(commands.Cog):
                 fav = collection(
                     "favouritensfw").find_one({"server": ctx.guild.id, "imageID": tokens[2], "user": await member.id, "category": tokens[1] if tokens[1] else ""})
 
-            e = discord.Embed()
+            e = discord.Embed(color=0xfecbed)
             e.set_image(url=fav["URL"])
             await ctx.send(embed=e)
         except BaseException:
@@ -200,7 +200,7 @@ class NSFW(commands.Cog):
                 categories[fav["category"]] = [fav]
 
         embeds = [
-            discord.Embed(
+            discord.Embed(color=0xfecbed,
                 title=f"All Favourites for {user.display_name} in {ctx.guild}")]
         category_count = 0
 
@@ -227,7 +227,7 @@ class NSFW(commands.Cog):
 
                     if len(embeds[-1]) >= 6000:
                         embeds.append(
-                            discord.Embed(
+                            discord.Embed(color=0xfecbed,
                                 title=f"All Favourites for {user.display_name} in {ctx.guild} (cont.)"))
                         category_count = 0
 

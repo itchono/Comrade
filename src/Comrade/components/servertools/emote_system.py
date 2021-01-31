@@ -289,7 +289,7 @@ class Emotes(commands.Cog):
         pagenum = start_position-1
 
         def em_embed(pagenum):
-            e = discord.Embed()
+            e = discord.Embed(color=0xd7342a)
             e.set_author(name=bigemotes[pagenum]["name"],
                          url=bigemotes[pagenum]["URL"])
             e.set_image(url=bigemotes[pagenum]["URL"])

@@ -3,7 +3,7 @@ from discord.ext import commands
 
 import typing
 
-from utils.utilities import (get_uptime, get_host, dm_channel,
+from utils.utilities import (get_uptime, get_host,
                              local_time, utc_to_local_time, bot_prefix)
 
 from config import cfg, version
@@ -37,8 +37,7 @@ class General(commands.Cog):
         '''
         Sends a direct message to a given user via the bot
         '''
-        channel = await dm_channel(user)
-        await channel.send(message)
+        await user.send(message)
 
     @commands.command()
     async def dateof(self, ctx: commands.Context, *, thing:

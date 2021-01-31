@@ -7,7 +7,7 @@ import datetime
 import re
 
 from db import collection
-from utils.utilities import ufil, local_time, dm_channel, bot_prefix
+from utils.utilities import ufil, local_time, bot_prefix
 from utils.users import random_member_from_server, weight_table
 from utils.checks import isOP
 from utils.databases import new_user
@@ -293,7 +293,7 @@ class Users(commands.Cog):
                         ufil(after))["notify-status"]:
                 mem = after.guild.get_member(mem_id)
 
-                embed = discord.Embed(
+                embed = discord.Embed(color=0xd7342a,
                     description=
                     f"{str(before.status)} -> {str(after.status)} @ {local_time().strftime('%I:%M:%S %p %Z')}")
 
@@ -305,5 +305,4 @@ class Users(commands.Cog):
                     text=
                     f"To unsubscribe, type [{bot_prefix}track {after.display_name}] in {after.guild.name}")
 
-                channel = await dm_channel(mem)
-                await channel.send(embed=embed)
+                await mem.send(embed=embed)

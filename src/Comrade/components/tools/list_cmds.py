@@ -96,7 +96,7 @@ class Lists(commands.Cog):
 
         names = ["- " + L["name"] for L in all_lists]
 
-        embed = discord.Embed(description="\n".join(names))
+        embed = discord.Embed(color=0xd7342a, description="\n".join(names))
 
         embed.set_author(
             name=f"Lists in {ctx.guild.name}", icon_url=ctx.guild.icon_url)

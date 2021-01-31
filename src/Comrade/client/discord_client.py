@@ -22,10 +22,7 @@ client = commands.Bot(
     case_insensitive=True,
     help_command=PrettyHelp(
         no_category="Help Command",
-        color=discord.Colour.from_rgb(
-            215,
-            52,
-            42),
+        color=0xd7342a,
         sort_commands=False),
     intents=intents,
     status=discord.Status.online,
@@ -41,7 +38,7 @@ async def on_error(event, *args, **kwargs):
 @client.event
 async def on_command_error(ctx: commands.Context, exception):
     # When a command fails to execute
-    await ctx.send(f"Error: {exception}")
+    await ctx.send(f"Error: {exception}", reference=ctx.message)
     logger.exception("Command Error", exc_info=exception)
 
 

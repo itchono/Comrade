@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -97,27 +96,15 @@ func Emote(s *discordgo.Session, m *discordgo.MessageCreate, emotecollection *mo
 
 		emoteurl, _ := emotedata["URL"].(string)
 
-		response, err := http.Get(emoteurl)
+		emb := discordgo.MessageEmbed{}
+		emb.Image = &discordgo.MessageEmbedImage{URL: emoteurl}
 
-		if err != nil || response.StatusCode != 200 {
-			s.ChannelMessageSend(m.ChannelID, "Error fetching emote")
-			return
-		}
-
-		defer response.Body.Close()
-
-		attachment := &discordgo.File{emotedata["name"].(string) + "." + emotedata["ext"].(string),
-			"image", response.Body}
-
-		messagesend := &discordgo.MessageSend{Files: []*discordgo.File{attachment}}
-
-		s.ChannelMessageSendComplex(m.ChannelID, messagesend)
+		s.ChannelMessageSendEmbed(m.ChannelID, &emb)
 
 		elapsed := time.Now().Sub(start)
 
 		fmt.Printf("Fulfilled emote %s in time: ", emotedata["name"])
 		fmt.Println(elapsed)
-
 	}
 
 }

@@ -123,7 +123,7 @@ class Macros(commands.Cog):
 
             # Fun features
             if "@someone" in message.content.lower():
-                e = discord.Embed(
+                e = discord.Embed(color=0xd7342a,
                     description=random_member_from_server(message.guild.id, True).mention)
                 e.set_footer(
                     text=f"Random ping by: {message.author.display_name}")
@@ -131,18 +131,6 @@ class Macros(commands.Cog):
 
             if message.content.lower() == "hello comrade":
                 await message.channel.send("Henlo")
-
-            if not isNotThreat(2)(
-                await self.bot.get_context(message)) and (len(
-                    message.attachments) + len(
-                    message.embeds) > 0 or is_url(message.content)):
-
-                e = discord.Embed(title="You just posted cringe")
-                e.set_image(
-                    url=
-                    "https://cdn.discordapp.com/attachments/419214713755402262/709165272447057981/unknown-11.png"
-                )
-                await message.channel.send(embed=e)
             # TODO: Re-add meme review in some capacity
 
     @commands.command()
@@ -236,7 +224,7 @@ class Macros(commands.Cog):
         macros = collection(
             "macros").find({"server": ctx.guild.id})
         if macros:
-            e = discord.Embed(
+            e = discord.Embed(color=0xd7342a,
                 title=f"Macros for {ctx.guild.name}",
                 description="\n".join(i["name"] for i in macros))
             await ctx.send(embed=e)

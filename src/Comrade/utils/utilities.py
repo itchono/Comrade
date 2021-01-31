@@ -56,11 +56,6 @@ def get_host() -> str:
         return str(ex)
 
 
-async def dm_channel(user: discord.User) -> discord.DMChannel:
-    # Returns DM channel with a discord user, creating it if it doesn't exist
-    return await user.create_dm() if not user.dm_channel else user.dm_channel
-
-
 def webscrape_header() -> dict:
     '''
     Returns user agent and header, useful for web scraping

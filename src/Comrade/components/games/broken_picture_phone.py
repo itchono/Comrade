@@ -2,16 +2,6 @@ import discord
 from discord.ext import commands
 import asyncio
 
-from utils.utilities import dm_channel
-
-
-async def DM(s: str, user: discord.User, embed=None):
-    '''
-    DMs a person
-    '''
-    userChannel = await dm_channel(user)
-    await userChannel.send(content=s, embed=embed)
-
 
 class PictoChain():
     '''
@@ -89,7 +79,8 @@ class BPCGame():
         mapping = dict(zip(pending, rolled_ids))
 
         for i in mapping:
-            await DM(f"Round {self.round_number}: Draw something that describes the following prompt ```{self.pictochains[mapping[i]].prompt()}```", self.ctx.guild.get_member(i))
+            await self.ctx.guild.get_member(i).send(
+                f"Round {self.round_number}: Draw something that describes the following prompt ```{self.pictochains[mapping[i]].prompt()}```")
 
         def check(m): return (len(m.attachments) > 0 or len(
             m.embeds) > 0) and m.author.id in pending
@@ -121,12 +112,12 @@ class BPCGame():
         for i in mapping:
 
             if self.round_number == 0:
-                await DM(f"Round {self.round_number}: Please type in your prompt below.", self.ctx.guild.get_member(i))
+                await self.ctx.guild.get_member(i).send(f"Round {self.round_number}: Please type in your prompt below.")
             else:
                 e = discord.Embed(title=f"Describe this drawing!",
                                   url=self.pictochains[mapping[i]].image())
                 e.set_image(url=self.pictochains[mapping[i]].image())
-                await DM(f"Round {self.round_number}: Write something that describes the following drawing:", self.ctx.guild.get_member(i), e)
+                await self.ctx.guild.get_member(i).send(f"Round {self.round_number}: Write something that describes the following drawing:", embed=e)
 
         def check(m): return m.content and m.author.id in pending
 

@@ -8,9 +8,7 @@ from discord.ext import commands
 
 
 async def mimic(channel: discord.TextChannel, content=None,
-                username=None, avatar_url: str = None,
-                file: discord.File = None,
-                embed: discord.Embed = None, tts=False):
+                username=None, avatar_url: str = None, **kwargs):
     '''
     Sends a mimic message in a channel using a webhook,
     allowing the bot to use a different name, and avatar
@@ -28,25 +26,22 @@ async def mimic(channel: discord.TextChannel, content=None,
         await channel.send(content=content,
                            username=username,
                            avatar_url=avatar_url,
-                           file=file, embed=embed,
-                           tts=tts)
+                           **kwargs)
         return
 
     await webhook.send(content=content,
                        username=username,
-                       avatar_url=avatar_url, file=file, embed=embed, tts=tts)
+                       avatar_url=avatar_url, **kwargs)
 
 
 async def echo(ctx: commands.Context, member=discord.Member,
-               content=None, file: discord.File = None,
-               embed: discord.Embed = None, tts=False, delete_msg=False):
+               content=None, delete_msg=False, **kwargs):
     '''
     Sends a mimic as a specific person
     '''
     await mimic(ctx.channel, content=content,
                 username=member.display_name,
-                avatar_url=member.avatar_url,
-                file=file, embed=embed, tts=tts)
+                avatar_url=member.avatar_url, **kwargs)
     if delete_msg:
         await ctx.message.delete()  # deletes the source message
 
