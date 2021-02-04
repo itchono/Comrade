@@ -9,6 +9,7 @@ from utils.checks import isServerOwner
 from utils.reactions import reactOK
 from utils.users import (weighted_member_from_server,
                          rebuild_weight_table, sum_of_weights)
+from utils.logger import logger
 from db import collection
 
 
@@ -103,6 +104,10 @@ class Announcements(commands.Cog):
                 self.announcements[g.id] = list(d) + additonal_announcements
             else:
                 self.announcements[g.id] = additonal_announcements
+
+    @timedannounce.error
+    async def announcement_error(self):
+        logger.exception("Announcement Error")
 
     @commands.command()
     @commands.guild_only()

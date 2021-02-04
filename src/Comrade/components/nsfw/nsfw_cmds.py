@@ -25,15 +25,15 @@ class NSFW(commands.Cog):
         Adds an image to the favourites list
 
         Category naming system:
-        type as `$c favourite category:name <URL>`
-        ex. `$c favourite neko:kurumi <URL>` saves an entry under the "neko" category, titled "kurumi
+        type as `$c favourite category/name <URL>`
+        ex. `$c favourite neko/kurumi <URL>` saves an entry under the "neko" category, titled "kurumi
 
         '''
         if ctx.invoked_subcommand is None:
             if ctx.message.attachments:
                 url = ctx.message.attachments[0].url
 
-            tokens = imageName.split(":")  # split tokens
+            tokens = imageName.split("/")  # split tokens
 
             if len(tokens) > 1:
                 collection("favouritensfw").insert_one(
@@ -43,7 +43,7 @@ class NSFW(commands.Cog):
                              "user": ctx.author.id,
                              "category": tokens[0]}
                 )
-                fullname = f"{tokens[0]}:{tokens[1]}"
+                fullname = f"{tokens[0]}/{tokens[1]}"
             else:
 
                 collection("favouritensfw").insert_one(
@@ -63,56 +63,57 @@ class NSFW(commands.Cog):
         '''
         Retrieves a favourite based on ID
         To view a post, you can either specify a name, category, or both.
-        ex. `$c favourite neko:kurumi` or `$c favourite kurumi` will get you identical results,
+        ex. `$c favourite neko/kurumi` or `$c favourite kurumi` will get you identical results,
         UNLESS you have multiple posts under different catergories with the same name, in which case it will be based on the most recent entry.
 
         You can view other people's favourites by specifying their name when you call the command.
-        ex. `$c favourite itchono:neko:kurumi`
+        ex. `$c favourite itchono/neko/kurumi`
         '''
-        try:
-            tokens = imageName.split(":")  # split tokens
+        tokens = imageName.split("/")  # split tokens
 
-            fav = None
+        fav = None
 
-            if len(tokens) == 1:
+        if len(tokens) == 1:
 
-                if fav := collection(
-                    "favouritensfw").find_one({"server": ctx.guild.id,
-                                               "imageID": tokens[0],
-                                               "user": ctx.author.id,
-                                               "category": ""}):
-                    pass
-                else:
-                    fav = collection(
-                            "favouritensfw").find_one({
-                            "server": ctx.guild.id, "imageID": tokens[0], "user": ctx.author.id})
-
-            elif len(tokens) == 2:
-
-                if fav := collection(
-                            "favouritensfw").find_one({"server": ctx.guild.id,
-                                        "imageID": tokens[1],
+            if fav := collection(
+                "favouritensfw").find_one({"server": ctx.guild.id,
+                                            "imageID": tokens[0],
                                             "user": ctx.author.id,
-                                            "category": tokens[0]}):
-                    pass
-                else:
-                    member = ctx.guild.get_member(tokens[0])
+                                            "category": ""}):
+                pass
+            else:
+                fav = collection(
+                        "favouritensfw").find_one({
+                        "server": ctx.guild.id, "imageID": tokens[0], "user": ctx.author.id})
 
-                    fav = collection(
-                    "favouritensfw").find_one({"server": ctx.guild.id, "imageID": tokens[1], "user": member.id})
+        elif len(tokens) == 2:
 
-            elif len(tokens) == 3:
-
-                member = ctx.guild.get_member(tokens[0])
+            if fav := collection(
+                        "favouritensfw").find_one({"server": ctx.guild.id,
+                                    "imageID": tokens[1],
+                                        "user": ctx.author.id,
+                                        "category": tokens[0]}):
+                pass
+            else:
+                member = discord.utils.find(lambda m: (m.name == tokens[0] or m.display_name == tokens[0]), ctx.guild.members)
 
                 fav = collection(
-                    "favouritensfw").find_one({"server": ctx.guild.id, "imageID": tokens[2], "user": await member.id, "category": tokens[1] if tokens[1] else ""})
+                "favouritensfw").find_one({"server": ctx.guild.id, "imageID": tokens[1], "user": member.id})
 
-            e = discord.Embed(color=0xfecbed)
-            e.set_image(url=fav["URL"])
-            await ctx.send(embed=e)
-        except BaseException:
+        elif len(tokens) == 3:
+
+            member = discord.utils.find(lambda m: (m.name == tokens[0] or m.display_name == tokens[0]), ctx.guild.members)
+
+            fav = collection(
+                "favouritensfw").find_one({"server": ctx.guild.id, "imageID": tokens[2], "user": member.id, "category": tokens[1] if tokens[1] else ""})
+
+        if not fav:
             await ctx.send("Image not found.")
+            return
+        e = discord.Embed(color=0xfecbed)
+        e.set_image(url=fav["URL"])
+        await ctx.send(embed=e)
+        
 
     @favourite.command()
     @commands.guild_only()
@@ -122,14 +123,14 @@ class NSFW(commands.Cog):
         removes an image from the favourites list
         '''
         try:
-            tokens = imageName.split(":")  # split tokens
+            tokens = imageName.split("/")  # split tokens
 
             if len(tokens) > 1:
                 collection("favouritensfw").delete_one({"server": ctx.guild.id,
                               "imageID": tokens[1],
                                  "user": ctx.author.id,
                                  "category": tokens[0]})
-                fullname = f"{tokens[1]}:{tokens[0]}"
+                fullname = f"{tokens[0]}/{tokens[1]}"
             else:
                 collection("favouritensfw").delete_one({"server": ctx.guild.id,
                               "imageID": tokens[0],
@@ -151,7 +152,7 @@ class NSFW(commands.Cog):
         '''
         renames an image in the favourites list
         '''
-        tokens = oldimageName.split(":")  # split tokens
+        tokens = oldimageName.split("/")  # split tokens
 
         fav = None
 
