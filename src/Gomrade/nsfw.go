@@ -26,12 +26,16 @@ var (
 	prevQuery map[string]([]string)
 	// previous hentai query in each channel
 
+	prevImg map[string]([]string)
+	// previous sfw query in each channel
+
 	prevNH map[string](*nHentaiSession)
 	// previous nhentai query in each channel
 )
 
 func init() {
 	prevQuery = make(map[string]([]string))
+	prevImg = make(map[string]([]string))
 	prevNH = make(map[string](*nHentaiSession))
 }
 
@@ -332,16 +336,101 @@ func Hentai(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int
 	return 0
 }
 
+// Img sends an embed into the channel specified by the session
+func Img(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int {
+	start := time.Now()
+
+	tempQuery := args // temporarily store previous copy of query, for use later
+
+	tagList := []string{}
+	// list of tags passed to API
+
+	// parse args
+	if len(args) > 0 {
+		tagList = args // overwrite tags
+	}
+
+	var hdata interface{}
+
+	// CONSTRUCT the query to gelbooru
+	urlBase := "https://safebooru.org/index.php?page=dapi&s=post&q=index&json=1&tags=-webm+"
+
+	for _, tag := range tagList {
+		urlBase += fmt.Sprintf("%s+", tag)
+	}
+
+	// QUERY
+	resp, err := http.Get(urlBase)
+	if err != nil {
+		// if HTTP request fails
+		return -1
+	}
+	defer resp.Body.Close()
+
+	err = json.NewDecoder(resp.Body).Decode(&hdata)
+
+	if err != nil {
+		// No JSON i.e. no results
+		s.ChannelMessageSend(m.ChannelID, "No results found. Please try another tag.")
+		return 0
+	}
+
+	hdatalist, ok := hdata.([]interface{}) // decode the outer layer of JSON
+
+	if !ok {
+		// critical error
+		return -1
+	}
+	// Query was successful
+	prevImg[m.ChannelID] = tempQuery
+	// set previous query
+
+	post := hdatalist[rand.Intn(len(hdatalist))] // randomly choost post
+
+	postData, _ := post.(map[string]interface{}) // type assert as dictionary
+
+	// PARAMETERS FOR EMBED
+	url := "https://safebooru.org//images/" + postData["directory"].(string) + "/" + postData["image"].(string) // get URL
+	tagString := postData["tags"].(string)
+
+	// CONSTRUCT EMBED
+	emb := discordgo.MessageEmbed{}
+
+	if len(args) == 0 {
+		// no tags
+		emb.Title = "*"
+	} else {
+		emb.Title = strings.Join(args, " ")
+	}
+
+	emb.URL = url
+	emb.Color = 0xfecbed
+	emb.Description = "ID: " + fmt.Sprintf("%.f", postData["id"].(float64))
+	emb.Footer = &discordgo.MessageEmbedFooter{Text: tagString}
+	emb.Image = &discordgo.MessageEmbedImage{URL: url}
+
+	s.ChannelMessageSendEmbed(m.ChannelID, &emb)
+
+	elapsed := time.Now().Sub(start)
+	fmt.Printf("Fulfilled rimg query in time: ")
+	fmt.Println(elapsed)
+
+	return 0
+}
+
 // NSFWHandler takes care of other raw messages
 func NSFWHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// check if previous session of hentai exists
 	prevQ, ok := prevQuery[m.ChannelID]
 	_, ok2 := prevNH[m.ChannelID]
+	prevR, ok3 := prevImg[m.ChannelID]
 
 	if strings.ToLower(m.Content) == "next" && ok {
 		Hentai(s, m, prevQ)
 	} else if strings.ToLower(m.Content) == "np" && ok2 {
 		NHentaiNext(s, m)
+	} else if strings.ToLower(m.Content) == "nextr" && ok3 {
+		Img(s, m, prevR)
 	}
 }
 
@@ -367,6 +456,12 @@ func NSFWCommand(s *discordgo.Session, m *discordgo.MessageCreate) int {
 		}
 		return Hentai(s, m, fields[1:])
 
+	case "rimg":
+		if len(fields) == 1 {
+			return Img(s, m, make([]string, 0))
+		}
+		return Img(s, m, fields[1:])
+
 	case "nhentai":
 		if len(fields) == 2 {
 			return NHentaiStart(s, m, fields[1])
@@ -384,7 +479,9 @@ func NSFWCommand(s *discordgo.Session, m *discordgo.MessageCreate) int {
 			"	next -- next hentai post with same tags\n"+
 			"`nhentai <gallery number>` -- displays a nhentai work\n"+
 			"	np -- next page of the work\n"+
-			"`nsearch [tags]` -- search nhentai for matching works")
+			"`nsearch [tags]` -- search nhentai for matching works\n"+
+			"`rimg [tags]` -- searches for SFW posts via safebooru\n"+
+			"	nextr -- next rimg post with same tags")
 
 	}
 
