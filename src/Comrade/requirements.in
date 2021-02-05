@@ -18,3 +18,4 @@ pillow
 async_lru
 PyNaCl
 youtube_dl
+Flask-Discord

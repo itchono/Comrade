@@ -24,6 +24,8 @@ f_handler.setFormatter(f_format)
 logger.addHandler(c_handler)
 logger.addHandler(f_handler)
 
-discordlogger = logging.getLogger("discord")
-discordlogger.setLevel(logging.INFO)
-discordlogger.addHandler(f_handler)
+logging.getLogger("discord").setLevel(logging.INFO)
+logging.getLogger("discord").addHandler(f_handler)
+
+logging.getLogger('werkzeug').setLevel(logging.WARNING)
+logging.getLogger('werkzeug').addHandler(f_handler)

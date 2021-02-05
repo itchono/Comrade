@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+
+    <title>Comrade Status</title>
+  </head>
+  <body>
+    <div class="container pt-3 pb-3 bg-light text-dark">
+        <h1>Emotes</h1>
+        <h2>{{ username }}</h2>
+
+        <p>All emotes in {{  server_names  }}</p>
+
+        <!-- FORMAT: images is a list of dictionaries of length [row] containing name:url fields -->
+            
+        {% for chunk in images %}
+            <div class="row">
+                {% for name, image in chunk.items() %}
+                <div class="col-sm">
+                    <div class="card">
+                        <img class="card-img-top" src="{{  image  }}" alt="{{ name }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ name }}</h5>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        
+    </div>
+
+    <!-- Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+
+  </body>
+</html>
