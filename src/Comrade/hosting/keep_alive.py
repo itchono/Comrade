@@ -1,27 +1,38 @@
-from flask import Flask, render_template, send_file
+from flask import Flask, render_template, send_file, redirect, url_for
 # used to create web server to keep bot actively hosted
 from threading import Thread
 # used to create separate parallel process to keep bot up
 
-import logging
+from flask_discord import DiscordOAuth2Session, requires_authorization, Unauthorized
+
 import os
+import secrets
 
 from utils.utilities import get_uptime, get_host
 from utils.logger import logger
 from client import client as bot
 import datetime
-from config import version
-
-# disable flask dumb logging
-logging.getLogger('werkzeug').disabled = True
-os.environ['WERKZEUG_RUN_MAIN'] = 'true'
+from config import version, cfg
 
 app = Flask('')
+
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "true"
+app.config["DISCORD_CLIENT_ID"] = os.environ.get("CLIENTID")
+app.config["DISCORD_CLIENT_SECRET"] = os.environ.get("CLIENTSECRET")
+app.config["DISCORD_REDIRECT_URI"] = f"{cfg['Hosting']['host-url']}/callback"
+app.config["DISCORD_BOT_TOKEN"] = os.environ.get("TOKEN")
+app.config["SECRET_KEY"] = secrets.token_hex(20)
+
+discordflask = DiscordOAuth2Session(app)
+
+def divide_chunks(l, n):  
+    # looping till length l 
+    for i in range(0, len(l), n):  
+        yield l[i:i + n] 
 
 
 @app.route('/')
 def main():
-
     with open("comrade.log", "r", encoding="utf-8") as f:
         content = f.read().splitlines()
 
@@ -41,6 +52,45 @@ def downloadFile():
     path = "comrade.log"
     return send_file(path, as_attachment=True,
                      attachment_filename='comrade_log.txt')
+
+
+@app.route("/login/")
+def login():
+    return discordflask.create_session()
+
+
+@app.route("/callback/")
+def callback():
+    discordflask.callback()
+    return redirect(url_for(".emotegallery"))
+
+
+@app.errorhandler(Unauthorized)
+def redirect_unauthorized(e):
+    return redirect(url_for("login"))
+
+
+@app.route("/emotegallery/")
+@requires_authorization
+def emotegallery():
+    user = discordflask.fetch_user()
+    user.fetch_guilds()
+
+    emote_urls = [{}]
+
+    user_ids = [g.id for g in user.guilds]
+
+    server_names = []
+
+    for guild in bot.guilds:
+        if guild.id in user_ids:
+            for emote in guild.emojis:
+                if len(emote_urls[-1]) >= 8:
+                    emote_urls.append({})
+                emote_urls[-1][emote.name] = emote.url
+            server_names += [guild.name]
+
+    return render_template("emotegallery.html", images=emote_urls, username=user.name, server_names=server_names)
 
 
 def run():

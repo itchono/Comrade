@@ -113,23 +113,19 @@ class Announcements(commands.Cog):
     @commands.guild_only()
     async def addannounce(self, ctx: commands.Context, time, *, message):
         '''
-        Adds an announcement to the announcement system [24 hr time].
+        Adds an announcement to the announcement system [24 hr time hh:mm].
         Each user is allowed to have a maximum of one announcement.
         '''
-        announce = {
-            "server": ctx.guild.id,
-            "time": time, "announcement": message, "owner": ctx.author.id}
-
         collection("announcements").update_one(
-            {"server": ctx.guild.id,
-             "owner": ctx.author.id}, announce, upsert=True)
+            {"server": ctx.guild.id, "owner": ctx.author.id}, {"$set": {"time": time, "announcement": message}},
+            upsert=True)
 
         await reactOK(ctx)
         await self.build_announcement_cache()  # rebuild cache
 
     @commands.command()
     @commands.guild_only()
-    async def removeannounce(self, ctx: commands.Context, time, *, message):
+    async def removeannounce(self, ctx: commands.Context):
         '''
         Removes an announcement from the announcement system
         '''

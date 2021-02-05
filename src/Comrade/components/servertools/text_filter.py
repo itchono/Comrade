@@ -12,7 +12,7 @@ from fuzzywuzzy import fuzz
 from collections import defaultdict
 
 from utils.emoji_converter import emojiToText
-from db import collection
+from db import collection, RELAY_ID
 
 from utils.logger import logger
 from config import cfg
@@ -74,7 +74,8 @@ class TextFilter(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
-        if not message.author.bot and message.guild:
+        if not message.author.bot and message.guild and \
+                message.guild.id != RELAY_ID:
             # moderation system
             if text_filter(message.content, message.author, message.guild) or \
                     content_filter(message):

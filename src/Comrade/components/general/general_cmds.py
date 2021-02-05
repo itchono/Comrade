@@ -78,7 +78,7 @@ class General(commands.Cog):
                      icon_url=ctx.guild.icon_url)
 
         e.add_field(name="Time of Creation",
-                    value=ctx.guild.created_at.strftime('%B %d %Y at %I:%M:%S %p %Z'),
+                    value=utc_to_local_time(ctx.guild.created_at).strftime('%B %d %Y at %I:%M:%S %p %Z'),
                     inline=False)
 
         e.add_field(name="Text Channels",

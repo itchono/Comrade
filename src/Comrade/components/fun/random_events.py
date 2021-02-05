@@ -5,8 +5,7 @@ import random
 import asyncio
 
 from utils.utilities import role
-from db import collection
-
+from db import collection, RELAY_ID
 
 
 class RandomEvents(commands.Cog):
@@ -61,11 +60,10 @@ class RandomEvents(commands.Cog):
         await ctx.author.edit(roles=roles)
         await ctx.send(f"{ctx.author.mention} got rick roled.")
 
-
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
 
-        if message.guild and \
+        if message.guild and message.guild.id != RELAY_ID and \
                 collection("servers").find_one(message.guild.id)["jokes"]:
             choice = random.choices(
                 *zip(*RandomEvents.probabilities.items()))[0]

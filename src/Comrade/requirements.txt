@@ -19,7 +19,9 @@ bs4==0.0.1
     #   -r requirements.in
     #   pydictionary
 cachetools==4.2.1
-    # via google-auth
+    # via
+    #   flask-discord
+    #   google-auth
 certifi==2020.12.5
     # via requests
 cffi==1.14.4
@@ -36,27 +38,36 @@ click==7.1.2
     #   pydictionary
 cycler==0.10.0
     # via matplotlib
-discord-pretty-help==1.2.0
+discord-pretty-help==1.2.1
+    # via -r requirements.in
+discord-py-slash-command==1.0.8.5
     # via -r requirements.in
 discord.py==1.6.0
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   flask-discord
 dnspython==2.1.0
     # via -r requirements.in
-flask==1.1.2
+flask-discord==0.1.64
     # via -r requirements.in
+flask==1.1.2
+    # via
+    #   -r requirements.in
+    #   flask-discord
 futures==3.1.1
     # via goslate
 fuzzywuzzy==0.18.0
     # via -r requirements.in
 google-api-core==1.25.1
     # via google-cloud-core
-google-auth==1.24.0
+google-auth==1.25.0
     # via
     #   google-api-core
+    #   google-cloud-core
     #   google-cloud-storage
-google-cloud-core==1.5.0
+google-cloud-core==1.6.0
     # via google-cloud-storage
-google-cloud-storage==1.35.0
+google-cloud-storage==1.35.1
     # via -r requirements.in
 google-crc32c==1.1.2
     # via google-resumable-media
@@ -72,7 +83,7 @@ idna==2.10
     #   yarl
 itsdangerous==1.1.0
     # via flask
-jinja2==2.11.2
+jinja2==2.11.3
     # via flask
 kiwisolver==1.3.1
     # via matplotlib
@@ -90,6 +101,10 @@ numpy==1.20.0
     # via
     #   -r requirements.in
     #   matplotlib
+oauthlib==3.1.0
+    # via
+    #   flask-discord
+    #   requests-oauthlib
 pillow==8.1.0
     # via
     #   -r requirements.in
@@ -108,7 +123,9 @@ pycparser==2.20
     # via cffi
 pydictionary==2.0.1
     # via -r requirements.in
-pymongo==3.11.2
+pyjwt==2.0.1
+    # via flask-discord
+pymongo==3.11.3
     # via -r requirements.in
 pynacl==1.4.0
     # via -r requirements.in
@@ -118,16 +135,20 @@ python-dateutil==2.8.1
     # via matplotlib
 python-dotenv==0.15.0
     # via -r requirements.in
-pytz==2020.5
+pytz==2021.1
     # via
     #   -r requirements.in
     #   google-api-core
+requests-oauthlib==1.3.0
+    # via flask-discord
 requests==2.25.1
     # via
     #   -r requirements.in
+    #   flask-discord
     #   google-api-core
     #   google-cloud-storage
     #   pydictionary
+    #   requests-oauthlib
 rsa==4.7
     # via google-auth
 six==1.15.0
@@ -146,7 +167,7 @@ sympy==1.7.1
     # via -r requirements.in
 typing-extensions==3.7.4.3
     # via aiohttp
-unidecode==1.1.2
+unidecode==1.2.0
     # via -r requirements.in
 urllib3==1.26.3
     # via requests
@@ -154,7 +175,7 @@ werkzeug==1.0.1
     # via flask
 yarl==1.6.3
     # via aiohttp
-youtube-dl==2021.1.24.1
+youtube-dl==2021.2.4.1
     # via -r requirements.in
 
 # The following packages are considered to be unsafe in a requirements file:

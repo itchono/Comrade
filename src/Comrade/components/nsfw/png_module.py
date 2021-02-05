@@ -3,7 +3,7 @@ from discord.ext import commands
 
 import math
 import random
-import requests
+import aiohttp
 
 from db import collection
 
