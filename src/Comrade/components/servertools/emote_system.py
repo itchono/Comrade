@@ -217,6 +217,14 @@ class Emotes(commands.Cog):
             await ctx.send(f'Emote `{name}` already exists! '
                            'Contact a mod to get this fixed.')
 
+    @commands.command()
+    @commands.guild_only()
+    async def addemote(self, ctx: commands.Context, name: str, url=None):
+        '''
+        Alias for emote add
+        '''
+        await self.add(ctx, name, url)
+
     @emote.command()
     @commands.check(isOP())
     @commands.guild_only()
