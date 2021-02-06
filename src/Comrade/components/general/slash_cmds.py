@@ -19,4 +19,4 @@ class Slash(commands.Cog):
 
     @cog_ext.cog_slash(name="test", guild_ids=guild_ids)
     async def _test(self, ctx: SlashContext):
-        await ctx.send("hello")
+        await ctx.send(content="hello")
