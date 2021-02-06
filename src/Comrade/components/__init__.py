@@ -1,5 +1,5 @@
 from typing import Text
-from .general import General, Macros, Go, Music
+from .general import General, Macros, Go, Music, Slash
 from .fun import Fun, RandomEvents, Echo
 from .tools import Tools, Textgen, Lists, Reminders
 from .games import Games
@@ -14,4 +14,4 @@ cogs = [General, Fun, Tools, Textgen, Games,
         Reminders, Lists, RandomEvents,
         Databases, Announcements, Sniper,
         Vault, Moderation, TextFilter,
-        Copier, NSFW, Go, Music]
+        Copier, NSFW, Go, Music, Slash]
