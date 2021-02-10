@@ -9,4 +9,4 @@ spec:
   capacity:
     storage: 1M
   hostPath:
-    path: /tmp/music-bot-pv
+    path: /mnt/sharedfolder/music-bot-pv
