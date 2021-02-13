@@ -242,11 +242,10 @@ class Tools(commands.Cog):
                 [f"{i+1}) {options[i]}" for i in range(len(options))])
 
             e = discord.Embed(
-                title=f"**__POLL__:\n{prompt}**")
+                title=f"**__POLL__:\n{prompt}**", color=0xd7342a)
 
             for i in range(len(options)):
-                e.add_field(color=0xd7342a,
-                    name=f"{i+1}) {options[i]}: 0",
+                e.add_field(name=f"{i+1}) {options[i]}: 0",
                     value="No one",
                     inline=False)
             e.set_author(
