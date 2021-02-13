@@ -56,4 +56,4 @@ async def log_after_command(ctx: commands.Context):
 
 # Users with threat level 3 or higher cannot use Comrade's features
 @client.check_once
-async def globalcheck(ctx): return isNotThreat(3)
+async def globalcheck(ctx): return isNotThreat(3)(ctx)

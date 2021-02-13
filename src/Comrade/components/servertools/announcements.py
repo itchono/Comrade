@@ -116,11 +116,9 @@ class Announcements(commands.Cog):
         Adds an announcement to the announcement system [24 hr time hh:mm].
         Each user is allowed to have a maximum of one announcement.
         '''
-        announce = {
-            "server": ctx.guild.id,
-            "time": time, "announcement": message, "owner": ctx.author.id}
-
-        collection("announcements").insert_one(announce)
+        collection("announcements").update_one(
+            {"server": ctx.guild.id, "owner": ctx.author.id}, {"$set": {"time": time, "announcement": message}},
+            upsert=True)
 
         await reactOK(ctx)
         await self.build_announcement_cache()  # rebuild cache
