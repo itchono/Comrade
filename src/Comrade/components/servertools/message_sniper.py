@@ -28,9 +28,9 @@ class Sniper(commands.Cog):
         Retrieves the last message deleted in the channel
         '''
         if msg := self.last_deleted[ctx.channel.id]:
-            await echo(ctx, msg.author, msg.content,
-                       msg.attachments[0] if msg.attachments else None,
-                       msg.embeds[0] if msg.embeds else None)
+            await echo(ctx, member=msg.author, content=msg.content,
+                       file=msg.attachments[0] if msg.attachments else None,
+                       embed=msg.embeds[0] if msg.embeds else None)
             self.last_deleted[ctx.channel.id] = None
         else:
             await ctx.send("No known deleted messages")
@@ -42,9 +42,9 @@ class Sniper(commands.Cog):
         '''
         if msg := self.last_edited[ctx.channel.id]:
             before, after = msg
-            await echo(ctx, before.author, before.content,
-                       before.attachments[0] if before.attachments else None,
-                       before.embeds[0] if before.embeds else None)
+            await echo(ctx, member=before.author, content=before.content,
+                       file=before.attachments[0] if before.attachments else None,
+                       embed=before.embeds[0] if before.embeds else None)
             await ctx.send(after.jump_url)
             self.last_edited[ctx.channel.id] = None
         else:
