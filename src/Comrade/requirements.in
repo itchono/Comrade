@@ -3,9 +3,7 @@ discord-pretty-help
 python-dotenv
 pymongo
 dnspython
-google-cloud-storage
 bs4
-requests
 numpy
 sympy
 matplotlib

@@ -8,7 +8,7 @@ from config import cfg
 from utils.utilities import set_start_time, get_uptime
 from utils.databases import rebuild_server_cfgs
 from utils.users import rebuild_weight_table, sum_of_weights
-from db import gc_startup, mongo_startup
+from db import gc_startup, mongo_startup, RELAY_ID, relay_startup
 from hosting.keep_alive import keep_alive
 from utils.logger import logger
 
@@ -22,8 +22,6 @@ mongo_startup()
 
 for c in components.cogs:
     bot.add_cog(c(bot))
-
-online = False
 
 
 @bot.event
@@ -40,7 +38,8 @@ async def on_ready():
     '''
     Message cache etc. is ready
     '''
-    rebuild_server_cfgs(bot.guilds)
+    rebuild_server_cfgs([guild for guild in bot.guilds if guild.id != RELAY_ID])
+    await relay_startup(bot)
 
     logger.info("Server List:\n" +
                 "\n".join(
@@ -51,7 +50,8 @@ async def on_ready():
     logger.info(f"Startup completed in {round(get_uptime(),3)}s")
 
     for guild in bot.guilds:
-        if sum_of_weights(guild) == 0:
+        if guild.id != int(
+                cfg["Hosting"]["relay-id"]) and sum_of_weights(guild) == 0:
             await rebuild_weight_table(guild)
 
     if cfg["Settings"]["notify-on-startup"] == "True":

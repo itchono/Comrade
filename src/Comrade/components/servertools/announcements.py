@@ -125,7 +125,7 @@ class Announcements(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    async def removeannounce(self, ctx: commands.Context, time, *, message):
+    async def removeannounce(self, ctx: commands.Context):
         '''
         Removes an announcement from the announcement system
         '''

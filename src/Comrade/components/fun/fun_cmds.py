@@ -441,6 +441,46 @@ class Fun(commands.Cog):
         except KeyError:
             await ctx.send("Text must be alphabetical only.")
 
+    @commands.command(name="8ball")
+    async def eightball(self, ctx: commands.Context, *, query):
+        '''
+        Ask the bot a yes/no question!
+        '''
+        responses = [
+            "It is certain.",
+            "It is decidedly so.",
+            "Without a doubt.",
+            "Yes – definitely.",
+            "You may rely on it.",
+            "As I see it, yes.",
+            "Most likely.",
+            "Outlook good.",
+            "Yes.",
+            "Signs point to yes.",
+            "Reply hazy, try again.",
+            "Ask again later.",
+            "Better not tell you now.",
+            "Cannot predict now.",
+            "Concentrate and ask again.",
+            "Don't count on it.",
+            "My reply is no.",
+            "My sources say no.",
+            "Outlook not so good.",
+            "Very doubtful."
+        ]
+        choicenumber = random.randint(0, 19)
+
+        if choicenumber <= 9:
+            colour = discord.Color.green()
+        elif choicenumber <= 14:
+            colour = discord.Color.gold()
+        else:
+            colour = discord.Color.red()
+
+        e = discord.Embed(title=responses[choicenumber], colour=colour, description = "Question: " + query)
+        e.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar_url)
+        await ctx.send(embed=e)
+
     @commands.command()
     async def secret(self, ctx: commands.Context):
         '''

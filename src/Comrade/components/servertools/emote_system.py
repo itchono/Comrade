@@ -2,7 +2,7 @@
 Emotes exist as 1) Inline Discord Emoji and 2) Big Images
 Keep wide images as big emotes, and use small square ones as inline emotes.
 
-CES - Comrade Emote System v4.0
+CES - Comrade Emote System v5.0
 Developed by itchono and Slyflare
 With testing from the rest of the Comrade team
 '''
@@ -10,63 +10,44 @@ import discord
 from discord.ext import commands
 
 import imghdr
-import io
 import re
-from PIL import Image
-import requests
+import io
+import aiohttp
 import asyncio
-from google.cloud import storage
 
-from db import gc_bucket, collection
+from db import collection, emote_channel
 from utils.utilities import is_url, bot_prefix
 from utils.reactions import reactX
 from utils.echo import echo, mimic
 from utils.checks import isOP
 
-
-def compress(imgfile, ext):
-    img = Image.open(imgfile)
-
-    aspect = img.size[0] / img.size[1]
-
-    if img.size[0] > 1000:
-        img.resize((1000, round(1000 / aspect)), Image.ANTIALIAS)
-
-    elif img.size[1] > 1000:
-        img.resize((round(1000 * aspect), 1000), Image.ANTIALIAS)
-
-    imgfile = io.BytesIO()
-    img.save(imgfile, optimize=True, format=ext, quality=65)
-    imgfile.seek(0)
-    return imgfile
+session = aiohttp.ClientSession()
 
 
 async def upload(ctx, name, url, emote_type):
     '''
     Uploads an emote into CES provided a name and a url.
     '''
-    content = requests.get(url).content
+    async with session.get(url) as resp:
+        content = await resp.read()
 
     ext = imghdr.what(None, h=content)
     # determine the file extension
 
-    imgfile = io.BytesIO(content)
+    content = io.BytesIO(content)
 
-    blob = storage.Blob(f"{ctx.guild.id}{name}.{ext}", gc_bucket())
+    channel = emote_channel(ctx.guild)
 
-    if emote_type == "big" and ext in ["jpeg", "png", "jpg"]:
-        imgfile = compress(imgfile, ext)
-
-    # file-like representation of the attachment
-    blob.upload_from_file(imgfile)
-    # Upload to Google Cloud
+    msg = await channel.send(
+        file=discord.File(content, filename=f"{name}.{ext}"))
 
     collection("emotes").insert_one(
         {"name": name,
          "server": ctx.guild.id,
          "type": emote_type,
          "ext": ext,
-         "URL": blob.media_link})
+         "URL": msg.attachments[0].url,
+         "size": msg.attachments[0].size})
 
 
 async def inject(ctx: commands.Context, name):
@@ -93,7 +74,10 @@ async def inject(ctx: commands.Context, name):
             await unload.delete(reason=f"Unloading emoji to make space for {name}")
 
         # LOAD NEW EMOJI
-        return await ctx.guild.create_custom_emoji(name=document["name"], image=requests.get(document["URL"]).content, reason=f"Requested by user {ctx.author.display_name}")
+        async with session.get(document["URL"]) as resp:
+            content = await resp.read()
+
+        return await ctx.guild.create_custom_emoji(name=document["name"], image=content, reason=f"Requested by user {ctx.author.display_name}")
 
     else:
         await ctx.send(f"Emote `{name}` was not found in the database.")
@@ -129,7 +113,6 @@ class Emotes(commands.Cog):
     Use :emotename: to call an emote
     Use /emotename/ to swap its type
     '''
-
     def __init__(self, bot):
         self.bot: commands.Bot = bot
 
@@ -197,8 +180,8 @@ class Emotes(commands.Cog):
         if not name.isalnum():
             await ctx.send("Name must be alphanumeric!")
             return
-        elif len(name) > 32:
-            await ctx.send("Max Name Length is 32 Chars.")
+        elif len(name) > 32 or len(name) < 2:
+            await ctx.send("Name must be 2 to 32 chars long")
             return
 
         # make sure it doesn't already exist
@@ -234,13 +217,6 @@ class Emotes(commands.Cog):
         '''
         if e := collection("emotes").find_one(
                 {"name": name, "server": ctx.guild.id}):
-
-            try:
-                blob = storage.Blob(
-                    f"{ctx.guild.id}{name}.{e['ext']}", gc_bucket())
-                blob.delete()
-            except BaseException:
-                pass
 
             collection("emotes").delete_one(
                 {"name": name, "server": ctx.guild.id})
@@ -348,7 +324,7 @@ class Emotes(commands.Cog):
                     await m.delete()
                     cont = False
                     continue
-                
+
                 await m.edit(embed=em_embed(pagenum))
             except asyncio.TimeoutError:
                 await m.delete()
@@ -536,7 +512,7 @@ class Emotes(commands.Cog):
                 except BaseException:
                     pass
 
-            elif (size := len(requests.get(document["URL"]).content)) >= 262143:
+            elif (size := document["size"]) >= 262143:
                 await ctx.send(f"Emote `{document['name']}` is too big to become inline! ({round(size/1024)} kb vs 256 kb limit)")
                 return
 
@@ -561,6 +537,32 @@ class Emotes(commands.Cog):
             # not in mongodb or in server
             await ctx.send(f"Emote `{name}` was not found.")
 
+    @commands.command()
+    @commands.is_owner()
+    async def migrate(self, ctx):
+        '''
+        Migrates all emotes of the bot over to the new system
+        '''
+
+        await ctx.send("Migration started. This will take a long time...")
+        for guild in self.bot.guilds:
+            for emote in collection("emotes").find({"server": guild.id}):
+                async with session.get(emote["URL"]) as resp:
+                    content = await resp.read()
+
+                content = io.BytesIO(content)
+
+                channel = emote_channel(guild)
+
+                msg = await channel.send(
+                    file=discord.File(content, filename=f"{emote['name']}.{emote['ext']}"))
+                collection("emotes").update_one({"name": emote['name'], "server": ctx.guild.id},
+                    {"$set": {"URL": msg.attachments[0].url, "size": msg.attachments[0].size}})
+
+        await ctx.send("Migration successful. Command disabled. Please remove this function from execution for safety.")
+
+        await self.bot.remove_command("migrate") # disable command after execution
+
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
         '''
@@ -574,7 +576,7 @@ class Emotes(commands.Cog):
 
             # scan for inline emotes
             if match := re.findall(
-                    r"(?<!<):\s*[0-9A-z]+\s*:(?!\d+>)",
+                    r":\s*[0-9A-z]+\s*:(?!\d+>)",
                     message.clean_content):
                 s = message.content
                 send = False

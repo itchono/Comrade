@@ -7,7 +7,7 @@ import datetime
 import re
 
 from db import collection
-from utils.utilities import ufil, local_time, bot_prefix
+from utils.utilities import ufil, local_time, bot_prefix, utc_to_local_time
 from utils.users import random_member_from_server, weight_table
 from utils.checks import isOP
 from utils.databases import new_user
@@ -44,7 +44,7 @@ class Users(commands.Cog):
                     value=not member.bot)
 
         e.add_field(name="Account Created",
-                    value=member.created_at.strftime(
+                    value=utc_to_local_time(member.created_at).strftime(
                         '%B %d %Y at %I:%M:%S %p %Z'), inline=False)
 
         if ctx.guild:
@@ -52,7 +52,7 @@ class Users(commands.Cog):
                 "users").find_one(ufil(member))
 
             e.add_field(name="Joined Server",
-                        value=member.joined_at.strftime(
+                        value=utc_to_local_time(member.joined_at).strftime(
                             '%B %d %Y at %I:%M:%S %p %Z'), inline=False)
 
             if w := user_information["daily-weight"]:
@@ -236,14 +236,12 @@ class Users(commands.Cog):
         '''
         When a member joins the server.
         '''
-        try:
-            announcements_channel_id = collection(
-                "servers").find_one(
-                    member.guild.id)["channels"]["announcements"]
-            channel = member.guild.get_channel(announcements_channel_id)
+        announcements_channel_id = collection(
+            "servers").find_one(
+                member.guild.id)["channels"]["announcements"]
+        if channel := member.guild.get_channel(announcements_channel_id):
             await channel.send(f"Welcome {member.display_name}!")
-        except Exception:
-            logger.exception("Member join")
+        logger.info("Member join")
 
         collection("users").insert_one(new_user(member))
         # New user entry in DB
@@ -253,15 +251,13 @@ class Users(commands.Cog):
         '''
         When a member leaves the server
         '''
-        try:
-            announcements_channel_id = collection(
-                "servers").find_one(member.guild.id)["channels"]["announcements"]
+        announcements_channel_id = collection(
+            "servers").find_one(member.guild.id)["channels"]["announcements"]
 
-            channel = member.guild.get_channel(announcements_channel_id)
+        if channel := member.guild.get_channel(announcements_channel_id):
 
             await channel.send(f":door: {member.display_name} has left.")
-        except Exception:
-            logger.exception("Member leave")
+        logger.info("Member leave")
 
         collection("users").delete_one(ufil(member))
         # Delete DB entry

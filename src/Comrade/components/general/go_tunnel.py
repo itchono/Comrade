@@ -4,8 +4,7 @@ from discord.ext import commands
 
 from config import cfg
 from utils.logger import logger
-
-GO_ID = int(cfg["Hosting"]["go-id"])
+from db import relay_channel
 
 
 class Go(commands.Cog):
@@ -17,14 +16,12 @@ class Go(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        if message.author.id == GO_ID:
-            logger.info(message.content)
+        if message.channel == relay_channel and message.content.startswith("<%PY>"):
+            logger.info(f"Relay message: {message.content}")
 
     @commands.command()
     async def go(self, ctx: commands.Context, *, message):
         '''
         Sends a message to the go bot
         '''
-        gobot: discord.Member = ctx.guild.get_member(GO_ID)
-        dmchannel = await gobot.create_dm()
-        await dmchannel.send(message)
+        await relay_channel.send("<%GO>" + message)
