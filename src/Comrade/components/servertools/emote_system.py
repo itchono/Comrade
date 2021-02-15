@@ -537,32 +537,6 @@ class Emotes(commands.Cog):
             # not in mongodb or in server
             await ctx.send(f"Emote `{name}` was not found.")
 
-    @commands.command()
-    @commands.is_owner()
-    async def migrate(self, ctx):
-        '''
-        Migrates all emotes of the bot over to the new system
-        '''
-
-        await ctx.send("Migration started. This will take a long time...")
-        for guild in self.bot.guilds:
-            for emote in collection("emotes").find({"server": guild.id}):
-                async with session.get(emote["URL"]) as resp:
-                    content = await resp.read()
-
-                content = io.BytesIO(content)
-
-                channel = emote_channel(guild)
-
-                msg = await channel.send(
-                    file=discord.File(content, filename=f"{emote['name']}.{emote['ext']}"))
-                collection("emotes").update_one({"name": emote['name'], "server": ctx.guild.id},
-                    {"$set": {"URL": msg.attachments[0].url, "size": msg.attachments[0].size}})
-
-        await ctx.send("Migration successful. Command disabled. Please remove this function from execution for safety.")
-
-        await self.bot.remove_command("migrate") # disable command after execution
-
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
         '''

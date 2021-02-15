@@ -48,7 +48,7 @@ We need to create an account for the bot to log into. This type of account is di
 * __Add the bot to your Discord server__. Make sure the bot has permissions to `read messages, send messages, embed links, attach files, create webhooks` at the very least.
 
 ## 2. Databases
-Comrade uses two database services to operate. You need to supply login information for these two databases to the bot. Both of these services are free to use. The bot will set up these databases automatically once it connects to them.
+Comrade uses two database services to operate. You need to supply login information for one of them to the bot. Both of these services are free to use. The bot will set up these databases automatically once it connects to them.
 
 ### A) MongoDB
 MongoDB is used for server-side configuration, and persisting information. It is critical to many core features of the bot.
@@ -61,14 +61,12 @@ MongoDB is used for server-side configuration, and persisting information. It is
 
 **Keep this connection string private; treat it as if it were your bank login**.
 
-### B) Google Cloud Storage
-Google Cloud Storage is used for the emotes system.
+### B) Discord Server
+A second Discord server is used for the emotes system.
 
-* Go to [Google Cloud Storage](https://console.cloud.google.com/storage/). Sign up for an account if you don't already have one (it's free, just need a credit card of some sort)
-* Create a **Project**.
-* Create a [Service Account](https://cloud.google.com/docs/authentication/getting-started) and download the **JSON key file**. Save the contents of this file for step 3.
-
-**Keep this file private; treat it as if it were your bank login**.
+* Create a Discord server and invite Comrade to the server.
+* Give Comrade admin privileges in the server.
+* Don't touch anything.
 
 ## 3. Create the .env file
 Comrade has a method of loading private data, using a file called `.env`. In the same folder as this file (`src/Comrade`), create a file called `.env`.
@@ -76,13 +74,11 @@ Comrade has a method of loading private data, using a file called `.env`. In the
 Make the following entries in your file:
 * TOKEN = \<discord token>
 * MONGOKEY = \<MongoDB Connection string>
-* GC = \<JSON String>
 
 It should have the form:
 ```
 TOKEN = AbC1234.....
 MONGOKEY = mongodb+srv://.....
-GC = {"type": "service_account","project_id":.......}
 ```
 
 ## 4. Install Dependencies
@@ -133,9 +129,6 @@ python main.py
 
 ## Example Config File
 ```
-[Information]
-version = 5.0c [January 8]
-
 [Settings]
 prefix = "$c "
 # prefix for the bot
@@ -156,7 +149,7 @@ timezone = Canada/Eastern
 development-mode = False
 # bypasses checks and provides more verbose logging
 
-notify-on-startup = True
+notify-on-startup = False
 # sends the bot owner a DM when the bot starts up
 
 exclude-bots-from-daily = True
@@ -175,38 +168,26 @@ moderation-buffer-limit = 10
 macro-timeout = 15
 # maximum number of seconds allowed for execution of custom commands and macros
 
-[Modules]
-# enable or disable modules here
-NSFW = True
-General = True
-TextGen = True
-Fun = True
-RandomEvents = True
-Tools = True
-Games = True
-Waifu = True
-
 [MongoDB]
 # these entries map the names of collections in the MongoDB database to the variables called in code. These can be left alone.
 users = UserData
-servers = cfg
-announcements = announcements
-macros = macros
-lists = lists
-favouritensfw = favourites
-pngnsfw = pngs
+servers = ServerData
+announcements = Announcements
+macros = Macros
+lists = Lists
+favouritensfw = Favourites
+pngnsfw = PNGS
 emotes = Emotes
-reminders = reminders
-activitydata = activitydata
-
-[GoogleCloud]
-# the name of the bucket in which Comrade's emotes are to be stored
-bucket = comrade_emotes
+reminders = Reminders
+polls = Polls
 
 [Hosting]
 # if you will ping the bot to keep it alive on a host like repl.it
 ping = True
 # makes it so that if you request the monitoring link, it will return this.
 host-url =
-
+relay-id = 
+# Server ID of the Relay server
+go-id = 
+# Discord user ID of the Go account
 ```

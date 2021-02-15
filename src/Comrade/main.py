@@ -8,7 +8,7 @@ from config import cfg
 from utils.utilities import set_start_time, get_uptime
 from utils.databases import rebuild_server_cfgs
 from utils.users import rebuild_weight_table, sum_of_weights
-from db import gc_startup, mongo_startup, RELAY_ID, relay_startup
+from db import mongo_startup, RELAY_ID, relay_startup
 from hosting.keep_alive import keep_alive
 from utils.logger import logger
 
@@ -17,7 +17,6 @@ dotenv.load_dotenv()  # Load .env file, prior to components loading
 
 # Startup operations
 set_start_time(time.perf_counter())
-gc_startup()
 mongo_startup()
 
 for c in components.cogs:

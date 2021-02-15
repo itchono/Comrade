@@ -16,18 +16,19 @@
         <h1>Emotes</h1>
         <h2>{{ username }}</h2>
 
-        <p>All emotes in {{  server_names  }}</p>
+        <p>Custom Emotes</p>
 
         <!-- FORMAT: images is a list of dictionaries of length [row] containing name:url fields -->
             
         {% for chunk in images %}
             <div class="row">
-                {% for name, image in chunk.items() %}
+                {% for name, emote in chunk.items() %}
                 <div class="col-sm">
                     <div class="card">
-                        <img class="card-img-top" src="{{  image  }}" alt="{{ name }}">
+                        <img class="card-img-top" src="{{  emote[0]  }}" alt="{{ name }}">
                         <div class="card-body">
                             <h5 class="card-title">{{ name }}</h5>
+                            <p class="card-text">{{ emote[1] }}</p>
                         </div>
                     </div>
                 </div>

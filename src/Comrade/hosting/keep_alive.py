@@ -13,6 +13,7 @@ from utils.logger import logger
 from client import client as bot
 import datetime
 from config import version, cfg
+from db import collection
 
 app = Flask('')
 
@@ -78,19 +79,13 @@ def emotegallery():
 
     emote_urls = [{}]
 
-    user_ids = [g.id for g in user.guilds]
+    for g in user.guilds:
+        for emote in collection("emotes").find({"server": g.id}):
+            if len(emote_urls[-1]) >= 8:
+                emote_urls.append({})
+            emote_urls[-1][emote["name"]] = (emote["URL"], g.name)
 
-    server_names = []
-
-    for guild in bot.guilds:
-        if guild.id in user_ids:
-            for emote in guild.emojis:
-                if len(emote_urls[-1]) >= 8:
-                    emote_urls.append({})
-                emote_urls[-1][emote.name] = emote.url
-            server_names += [guild.name]
-
-    return render_template("emotegallery.html", images=emote_urls, username=user.name, server_names=server_names)
+    return render_template("emotegallery.html", images=emote_urls, username=user.name)
 
 
 def run():

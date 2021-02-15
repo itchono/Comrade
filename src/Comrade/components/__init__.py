@@ -14,4 +14,4 @@ cogs = [General, Fun, Tools, Textgen, Games,
         Reminders, Lists, RandomEvents,
         Databases, Announcements, Sniper,
         Vault, Moderation, TextFilter,
-        Copier, NSFW, Go, Music, Slash]
+        Copier, NSFW, Go, Music]
