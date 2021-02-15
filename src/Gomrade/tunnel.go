@@ -1,7 +1,8 @@
 package main
 
 import (
-	"os"
+	"fmt"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -9,18 +10,15 @@ import (
 // Tunnel interprets a discord message event and executes the corresponding command
 func Tunnel(s *discordgo.Session, m *discordgo.MessageCreate) int {
 	// returns -1 in case of error
+	if m.GuildID == RELAYID && strings.HasPrefix(m.Content, "<%GO>") {
 
-	COMRADEID, _ := os.LookupEnv("COMRADEID")
-
-	if m.Author.ID == COMRADEID {
-
-		channel, err := s.UserChannelCreate(COMRADEID)
-
-		if err != nil {
-			return -1
-		}
-
-		s.ChannelMessageSend(channel.ID, m.Content)
+		fmt.Println("Message Received: " + m.Content)
 	}
 	return 0
+}
+
+// Relay sends a message to the relay server
+func Relay(s *discordgo.Session, message string) {
+	s.ChannelMessageSend(relayChannel.ID, "<%PY>"+message)
+
 }

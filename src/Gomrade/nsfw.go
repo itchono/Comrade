@@ -330,8 +330,8 @@ func Hentai(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int
 	}
 
 	elapsed := time.Now().Sub(start)
-	fmt.Printf("Fulfilled hentai query in time: ")
-	fmt.Println(elapsed)
+
+	Relay(s, fmt.Sprintf("Fulfilled hentai query in time: %d", elapsed))
 
 	return 0
 }
@@ -412,8 +412,8 @@ func Img(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int {
 	s.ChannelMessageSendEmbed(m.ChannelID, &emb)
 
 	elapsed := time.Now().Sub(start)
-	fmt.Printf("Fulfilled rimg query in time: ")
-	fmt.Println(elapsed)
+
+	Relay(s, fmt.Sprintf("Fulfilled rimg query in time: %d", elapsed))
 
 	return 0
 }

@@ -6,7 +6,7 @@ import typing
 import datetime
 import re
 
-from db import collection
+from db import collection, RELAY_ID
 from utils.utilities import ufil, local_time, bot_prefix, utc_to_local_time
 from utils.users import random_member_from_server, weight_table
 from utils.checks import isOP
@@ -268,7 +268,7 @@ class Users(commands.Cog):
         '''
         Whenever a server member changes their state.
         '''
-        if after.status != before.status:
+        if after.status != before.status and after.guild.id != RELAY_ID:
             # status update
 
             if str(after.status) == "offline":

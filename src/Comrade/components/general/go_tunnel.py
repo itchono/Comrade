@@ -16,7 +16,7 @@ class Go(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        if message.channel == relay_channel and message.content.startswith("<%PY>"):
+        if message.channel == relay_channel() and message.content.startswith("<%PY>"):
             logger.info(f"Relay message: {message.content}")
 
     @commands.command()
@@ -24,4 +24,4 @@ class Go(commands.Cog):
         '''
         Sends a message to the go bot
         '''
-        await relay_channel.send("<%GO>" + message)
+        await relay_channel().send("<%GO>" + message)

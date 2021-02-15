@@ -20,11 +20,13 @@ import (
 
 // Variables (global)
 var (
-	Token     string
-	MDB       string
-	client    *mongo.Client
-	comradeDB *mongo.Database
-	prefix    string
+	Token        string
+	MDB          string
+	client       *mongo.Client
+	comradeDB    *mongo.Database
+	prefix       string
+	RELAYID      string
+	relayChannel *discordgo.Channel
 )
 
 // init is called before main
@@ -35,6 +37,7 @@ func init() {
 	}
 	Token, _ = os.LookupEnv("TOKEN")
 	MDB, _ = os.LookupEnv("MONGOKEY")
+	RELAYID, _ = os.LookupEnv("RELAYID")
 }
 
 func main() {
@@ -55,7 +58,9 @@ func main() {
 		return
 	}
 	dg.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAllWithoutPrivileged)
+	dg.StateEnabled = true
 	dg.AddHandler(messageCreate)
+	dg.AddHandler(ready)
 
 	// START BOT
 	// Open a websocket connection to Discord and begin listening.
@@ -64,15 +69,15 @@ func main() {
 		fmt.Println("error opening connection,", err)
 		return
 	}
+
+	// Post-init stuff
 	dg.UpdateGameStatus(0, "["+prefix+"] Accelerating Communism")
 
 	// SERVER
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello!")
+		fmt.Fprintf(w, "Gomrade is online.")
 	})
 
-	fmt.Printf("Starting server at port 8080\n")
-	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal(err)
 	}
@@ -109,4 +114,21 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	NSFWHandler(s, m)
 	Emote(s, m, comradeDB.Collection("Emotes"))
 	Tunnel(s, m)
+}
+
+// This function will be called (due to AddHandler above) when the bot receives
+// the "ready" event from Discord.
+func ready(s *discordgo.Session, event *discordgo.Ready) {
+	channels, _ := s.GuildChannels(RELAYID)
+
+	for _, channel := range channels {
+		if channel.Name == "relay" {
+			relayChannel = channel
+		}
+	}
+
+	if relayChannel == nil {
+		fmt.Println("RELAY CHANNEL NOT FOUND")
+	}
+	fmt.Println("Bot is online. Logged in as", event.User.Username)
 }

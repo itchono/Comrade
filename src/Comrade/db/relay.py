@@ -8,6 +8,11 @@ RELAY_ID = int(cfg["Hosting"]["relay-id"])
 relay_guild = None
 relay_channel = None
 
+def get_relay_channel():
+    return relay_channel
+
+def get_relay_guild():
+    return relay_guild
 
 async def startup(bot):
     '''
