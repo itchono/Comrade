@@ -103,7 +103,7 @@ func Emote(s *discordgo.Session, m *discordgo.MessageCreate, emotecollection *mo
 
 		elapsed := time.Now().Sub(start)
 
-		Relay(s, fmt.Sprintf("Fulfilled emote %s in time: %d", emotedata["name"], elapsed))
+		Relay(s, fmt.Sprintf("Fulfilled emote %s in time: %d ms", emotedata["name"], elapsed/1e6))
 	}
 
 }

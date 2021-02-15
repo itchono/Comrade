@@ -25,7 +25,7 @@
                 {% for name, emote in chunk.items() %}
                 <div class="col-sm">
                     <div class="card">
-                        <img class="card-img-top" src="{{  emote[0]  }}" alt="{{ name }}">
+                        <img class="card-img-top" src="{{  emote[0]  }}" loading="lazy" alt="{{ name }}">
                         <div class="card-body">
                             <h5 class="card-title">{{ name }}</h5>
                             <p class="card-text">{{ emote[1] }}</p>

@@ -71,6 +71,11 @@ def redirect_unauthorized(e):
     return redirect(url_for("login"))
 
 
+@app.errorhandler(Exception)
+def handle_exception(e):
+    logger.exception(exc_info=e)
+
+
 @app.route("/emotegallery/")
 @requires_authorization
 def emotegallery():
@@ -81,7 +86,7 @@ def emotegallery():
 
     for g in user.guilds:
         for emote in collection("emotes").find({"server": g.id}):
-            if len(emote_urls[-1]) >= 8:
+            if len(emote_urls[-1]) >= 6:
                 emote_urls.append({})
             emote_urls[-1][emote["name"]] = (emote["URL"], g.name)
 
