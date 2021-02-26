@@ -189,6 +189,11 @@ func NSearch(s *discordgo.Session, m *discordgo.MessageCreate, args []string) in
 
 	hentais := re.FindAllStringSubmatch(string(pageText), -1)
 
+	if len(hentais) == 0 {
+		s.ChannelMessageSend(m.ChannelID, "No results found. Please try another tag.")
+		return -1
+	}
+
 	NHentaiStart(s, m, hentais[rand.Intn(len(hentais))][1])
 
 	return 0
