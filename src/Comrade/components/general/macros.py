@@ -44,11 +44,11 @@ async def process_macro(message: discord.message):
         name = args.pop(0)
 
         cmds = macros.find_one(
-            {"server": message.guild.id, "name": name, "macro": "/%/"})
+            {"server": message.guild.id, "name": name})
         # only macros with arguments in them
 
         # Not found
-        if not cmds:
+        if not cmds or "%" not in cmds["macro"]:
             return 1
 
     cmds: str = cmds["macro"]
@@ -161,7 +161,7 @@ class Macros(commands.Cog):
 
         ascii 🍅 b
         wait 5
-        $1 is the best game
+        %1 is the best game
         \defaultdance
         anime
         defaultdance

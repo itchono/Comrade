@@ -10,11 +10,12 @@ import discord
 from discord.ext import commands
 
 import asyncio
+import textwrap
 import random
 import io
 import urllib.request
 from bs4 import BeautifulSoup
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 
 from utils.emoji_converter import emojiToText, textToEmoji
 from utils.echo import echo, mimic
@@ -480,6 +481,32 @@ class Fun(commands.Cog):
         e = discord.Embed(title=responses[choicenumber], colour=colour, description = "Question: " + query)
         e.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar_url)
         await ctx.send(embed=e)
+
+    @commands.command()
+    async def amongus(self, ctx: commands.Context, *, text: str):
+        '''
+        Prints text out in among us font
+        '''
+        wrapper = textwrap.TextWrapper(width=14)
+        word_list = wrapper.wrap(text=text.upper())
+        text = "\n".join(word_list)
+
+        # create an image
+        out = Image.new("RGB", (900, 500), (255, 255, 255))
+
+        # get a font
+        fnt = ImageFont.truetype("static/AmongUs-Regular.ttf", 80)
+        # get a drawing context
+        d = ImageDraw.Draw(out)
+
+        # draw multiline text
+        d.multiline_text((10, 10), text, font=fnt, fill=(0, 0, 0))
+
+        f = io.BytesIO()
+        out.save(f, "PNG")
+        f.seek(0)
+
+        await ctx.send(file=discord.File(f, 'amongus.png'))
 
     @commands.command()
     async def secret(self, ctx: commands.Context):
