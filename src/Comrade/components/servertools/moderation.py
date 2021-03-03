@@ -34,6 +34,9 @@ async def zahando(channel: discord.TextChannel,
         await channel.purge(limit=num)
 
 class Moderation(commands.Cog):
+    '''
+    Moderation commands for the bot.
+    '''
     def __init__(self, bot):
         self.bot: commands.Bot = bot
 
@@ -232,6 +235,8 @@ class Moderation(commands.Cog):
             "users").update_one(
                 ufil(member), {"$set": {"moderation.threat-level": level}})
         threat_list.cache_clear()
+        assert member.id in threat_list(ctx.guild.id, level)
+
         await ctx.send(f"{member.display_name} is now threat level `{level}`")
 
     @commands.Cog.listener()

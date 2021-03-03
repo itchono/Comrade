@@ -9,7 +9,7 @@ from utils.utilities import set_start_time, get_uptime
 from utils.databases import rebuild_server_cfgs
 from utils.users import rebuild_weight_table, sum_of_weights
 from db import mongo_startup, RELAY_ID, relay_startup
-from hosting.keep_alive import keep_alive
+from hosting import keep_alive
 from utils.logger import logger
 
 
@@ -61,8 +61,10 @@ async def on_ready():
     try:
         with open("restart.cfg", "r") as f:
             channel_id = int(f.read())
-            channel = bot.get_channel(channel_id)
-            await channel.send("Restart completed.")
+            if channel := bot.get_channel(channel_id):
+                await channel.send("Restart completed.")
+            elif user := bot.get_user(channel_id):
+                await user.send("Restart completed.")
 
         os.remove("restart.cfg")
         logger.info("Restart reminder found. Notifying channel.")

@@ -3,6 +3,10 @@ from discord.ext import commands
 
 import typing
 
+from utils.echo import echo
+
+from collections import defaultdict
+
 from utils.utilities import (get_uptime, get_host,
                              local_time, utc_to_local_time, bot_prefix)
 
@@ -17,6 +21,8 @@ class General(commands.Cog):
     '''
     def __init__(self, bot):
         self.bot: commands.Bot = bot
+        self.last_deleted = defaultdict(lambda: None)
+        self.last_edited = defaultdict(lambda: None)
 
     @commands.command()
     async def status(self, ctx: commands.Context):
@@ -182,3 +188,39 @@ class General(commands.Cog):
         await self.bot.change_presence(status=discord.Status.offline)
         await self.bot.logout()
         sys.exit(0)
+
+    @commands.Cog.listener()
+    async def on_message_delete(self, message):
+        self.last_deleted[message.channel.id] = message
+
+    @commands.Cog.listener()
+    async def on_message_edit(self, before, after):
+        self.last_edited[after.channel.id] = (before, after)
+
+    @commands.command()
+    async def deleted(self, ctx: commands.Context):
+        '''
+        Retrieves the last message deleted in the channel
+        '''
+        if msg := self.last_deleted[ctx.channel.id]:
+            await echo(ctx, member=msg.author, content=msg.content,
+                       file=msg.attachments[0] if msg.attachments else None,
+                       embed=msg.embeds[0] if msg.embeds else None)
+            self.last_deleted[ctx.channel.id] = None
+        else:
+            await ctx.send("No known deleted messages")
+
+    @commands.command()
+    async def edited(self, ctx: commands.Context):
+        '''
+        Retrieves the last message edited in the channel
+        '''
+        if msg := self.last_edited[ctx.channel.id]:
+            before, after = msg
+            await echo(ctx, member=before.author, content=before.content,
+                       file=before.attachments[0] if before.attachments else None,
+                       embed=before.embeds[0] if before.embeds else None)
+            await ctx.send(after.jump_url)
+            self.last_edited[ctx.channel.id] = None
+        else:
+            await ctx.send("No known edited messages")

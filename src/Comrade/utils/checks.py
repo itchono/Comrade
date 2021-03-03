@@ -22,7 +22,7 @@ def threat_list(guild_id: int, threat_level: int):
     '''
     all_users = collection("users").find(
         {"server": guild_id,
-         "moderation.threat-level": {"$gt": threat_level + 1}})
+         "moderation.threat-level": {"$gt": threat_level - 1}})
     return [u["user"] for u in all_users]
 
 
