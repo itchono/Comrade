@@ -46,10 +46,7 @@ class General(commands.Cog):
         await user.send(message)
 
     @commands.command()
-    async def dateof(self, ctx: commands.Context, *, thing:
-                     typing.Union[discord.TextChannel, discord.User,
-                                  discord.VoiceChannel, discord.Message,
-                                  discord.Role, discord.Guild]):
+    async def dateof(self, ctx: commands.Context, *, thing: discord.Object):
         '''
         Gets the creation time of basically any Discord object.
         '''

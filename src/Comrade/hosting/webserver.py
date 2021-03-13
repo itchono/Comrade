@@ -73,7 +73,7 @@ def redirect_unauthorized(e):
 
 @app.errorhandler(Exception)
 def handle_exception(e):
-    logger.exception(exc_info=e)
+    logger.exception("Webserver Error", exc_info=e)
 
 
 @app.route("/emotegallery/")

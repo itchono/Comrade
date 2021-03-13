@@ -6,6 +6,7 @@ CES - Comrade Emote System v5.0
 Developed by itchono and Slyflare
 With testing from the rest of the Comrade team
 '''
+from typing import Type
 import discord
 from discord.ext import commands
 
@@ -37,6 +38,9 @@ async def upload(ctx, name, url, emote_type):
     content = io.BytesIO(content)
 
     channel = emote_channel(ctx.guild)
+
+    if ext is None:
+        raise TypeError("Could not download emote. Check that you are actually linking to an image or GIF.")
 
     msg = await channel.send(
         file=discord.File(content, filename=f"{name}.{ext}"))
