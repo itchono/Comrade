@@ -12,6 +12,8 @@ from db import mongo_startup, RELAY_ID, relay_startup
 from hosting import keep_alive
 from utils.logger import logger
 
+from discord import HTTPException
+
 
 dotenv.load_dotenv()  # Load .env file, prior to components loading
 
@@ -74,4 +76,7 @@ async def on_ready():
 if cfg["Hosting"]["ping"] == "True":
     keep_alive()
 
-bot.run(os.environ.get("TOKEN"))  # Run bot with loaded password
+try:
+    bot.run(os.environ.get("TOKEN"))  # Run bot with loaded password
+except HTTPException:
+    os.system("kill 1")  # hard restart on 429
