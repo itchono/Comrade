@@ -11,7 +11,7 @@ from db import collection
 from utils.reactions import reactOK
 from utils.users import random_member_from_server
 from utils.checks import isNotThreat
-from utils.utilities import is_url, bot_prefix
+from utils.utilities import bot_prefix
 from config import cfg
 from client import client as bot
 
@@ -145,6 +145,7 @@ class Macros(commands.Cog):
                 await ctx.send(f"Macro `{name}` not found.")
 
     @commands.command(aliases=["addtrigger"])
+    @commands.check(isNotThreat())
     @commands.guild_only()
     async def addmacro(self, ctx: commands.Context, name: str, *, macro):
         '''
@@ -232,6 +233,7 @@ class Macros(commands.Cog):
             await ctx.send(f"No macros found in {ctx.guild.name}")
 
     @commands.command()
+    @commands.check(isNotThreat())
     @commands.guild_only()
     async def removemacro(self, ctx: commands.Context, name):
         '''
