@@ -6,7 +6,6 @@ CES - Comrade Emote System v5.0
 Developed by itchono and Slyflare
 With testing from the rest of the Comrade team
 '''
-from typing import Type
 import discord
 from discord.ext import commands
 

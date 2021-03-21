@@ -91,6 +91,37 @@ def mock(t):
             s += character.upper()
     return s
 
+def roswaal(t: str):
+    '''
+    Turns user message into Roswaal-sounding text.
+    https://github.com/itchono/Comrade/issues/153
+    '''
+    words = t.split(" ")
+
+    last_word = words[-1]
+
+    # Prefer vowels that are not the first in the word
+
+    ind_vowel = -1
+
+    for i in range(len(last_word)):
+        if last_word[i].lower() in "aeiou":
+            ind_vowel = i
+            if ind_vowel > 0:
+                break
+
+    if ind_vowel == -1:
+        return t  # can't roswaal
+
+    num_cap = random.randint(3, 5)
+    num_lower = random.randint(2, 4)
+
+    last_word = last_word[:ind_vowel] + num_cap * last_word[ind_vowel].upper() + num_lower * last_word[ind_vowel] + last_word[ind_vowel:]
+
+    words[-1] = last_word
+
+    return " ".join(words)
+
 
 async def shoujosend(ctx: commands.Context, content,
                      file: discord.File = None,
@@ -332,6 +363,21 @@ class Fun(commands.Cog):
 
         await echo(ctx, member=auth,
                    content=owoify(emojify(ctx.guild, mock(t))))
+
+    @commands.command(name="roswaal")
+    @commands.guild_only()
+    async def cmdroswaal(self, ctx: commands.Context, *, text: str = ""):
+        '''
+        Turns user message into Roswaal-sounding text.
+        '''
+        t = text.strip()
+        if len(t) == 0:
+            msg = (await ctx.channel.history(limit=2).flatten())[1]
+            t = msg.content
+
+        await mimic(ctx.channel, content=roswaal(t),
+                    username="Roswaal",
+                    avatar_url="https://i.redd.it/uae2lxfmfqn51.jpg")
 
     @commands.command()
     async def futa(self, ctx: commands.Context, m: discord.Message = None):
