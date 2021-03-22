@@ -32,8 +32,10 @@ class Reminders(commands.Cog):
             advance = datetime.timedelta(days=float(time[:-1].strip()))
         elif time[-1] == "m":
             advance = datetime.timedelta(minutes=float(time[:-1].strip()))
-        else:
+        elif time[-1] == "h":
             advance = datetime.timedelta(hours=float(time[:-1].strip()))
+        else:
+            advance = datetime.timedelta(hours=float(time.strip()))
 
         reminder = {
             "server": ctx.guild is not None,
