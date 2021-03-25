@@ -88,7 +88,7 @@ def emotegallery():
         for emote in collection("emotes").find({"server": g.id}):
             if len(emote_urls[-1]) >= 6:
                 emote_urls.append({})
-            emote_urls[-1][emote["name"]] = (emote["URL"], g.name)
+            emote_urls[-1][emote["name"]] = (emote["URL"], g.name, emote["type"])
 
     return render_template("emotegallery.html", images=emote_urls, username=user.name)
 
