@@ -191,6 +191,15 @@ class General(commands.Cog):
         self.last_deleted[message.channel.id] = message
 
     @commands.Cog.listener()
+    async def on_raw_message_delete(self, payload):
+        '''
+        When a message is deleted
+        '''
+        if msg := payload.cached_message:
+            if msg.guild and not msg.author.bot:
+                if msg.mentions: await msg.channel.send(f":rotating_light: PING POLICE :rotating_light:\n{msg.author.mention} deleted a message which pinged the following user(s): {', '.join(['`' + m.display_name + '`' for m in msg.mentions])}")
+
+    @commands.Cog.listener()
     async def on_message_edit(self, before, after):
         self.last_edited[after.channel.id] = (before, after)
 
