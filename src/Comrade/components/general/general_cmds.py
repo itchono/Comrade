@@ -10,6 +10,8 @@ from collections import defaultdict
 from utils.utilities import (get_uptime, get_host,
                              local_time, utc_to_local_time, bot_prefix)
 
+from utils.checks import isNotThreat
+
 from config import cfg, version
 import sys
 
@@ -139,6 +141,7 @@ class General(commands.Cog):
                        f"{len(ctx.guild.emojis)} emojis:\n{emoji}")
 
     @commands.command()
+    @commands.check(isNotThreat())
     async def clear(self, ctx: commands.Context, amount: typing.Optional[int] = 50):
         '''
         Clears bot commands (server-only) and messages
