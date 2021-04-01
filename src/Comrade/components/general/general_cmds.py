@@ -198,6 +198,8 @@ class General(commands.Cog):
         if msg := payload.cached_message:
             if msg.guild and not msg.author.bot:
                 if msg.mentions: await msg.channel.send(f":rotating_light: PING POLICE :rotating_light:\n{msg.author.mention} deleted a message which pinged the following user(s): {', '.join(['`' + m.display_name + '`' for m in msg.mentions])}")
+                elif msg.role_mentions: await msg.channel.send(f":rotating_light: PING POLICE :rotating_light:\n{msg.author.mention} deleted a message which pinged the following role(s): {', '.join(['`' + m.name + '`' for m in msg.role_mentions])}")
+
 
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
