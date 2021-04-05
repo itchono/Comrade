@@ -132,13 +132,24 @@ class General(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    async def emoji(self, ctx: commands.Context):
+    async def emojis(self, ctx: commands.Context):
         '''
         Shows all emoji in the server
         '''
         emoji = "".join([str(e) for e in ctx.guild.emojis])
         await ctx.send(f"{ctx.guild.name} has "
                        f"{len(ctx.guild.emojis)} emojis:\n{emoji}")
+
+    @commands.command()
+    @commands.guild_only()
+    async def react(self, ctx: commands.context, emoji: discord.Emoji):
+        '''
+        Reacts to the above message with a given emoji (can be animated)
+        '''
+        m = (await ctx.channel.history(limit=2).flatten())[1]
+        # Get most recent non-bot message
+        await m.add_reaction(emoji)
+        await ctx.message.delete()
 
     @commands.command()
     @commands.check(isNotThreat())

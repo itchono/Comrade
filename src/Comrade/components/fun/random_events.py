@@ -32,6 +32,7 @@ class RandomEvents(commands.Cog):
             msg = await self.bot.wait_for('message', check=check, timeout=120)
         except asyncio.TimeoutError:
             await ctx.send("Nameswap aborted (120s timeout).")
+            return
 
         try:
             await ctx.author.edit(nick=msg.content[:32], reason="Comrade name change")
