@@ -34,7 +34,7 @@ def divide_chunks(l, n):
 
 @app.route('/')
 def main():
-    with open("comrade.log", "r", encoding="utf-8") as f:
+    with open("comrade_primary.log", "r", encoding="utf-8") as f:
         content = f.read().splitlines()
 
     uptime = datetime.timedelta(seconds=round(get_uptime()))
@@ -50,7 +50,7 @@ def main():
 
 @app.route('/log')
 def downloadFile():
-    path = "comrade.log"
+    path = "comrade_full.log"
     return send_file(path, as_attachment=True,
                      attachment_filename='comrade_log.txt')
 
@@ -69,11 +69,6 @@ def callback():
 @app.errorhandler(Unauthorized)
 def redirect_unauthorized(e):
     return redirect(url_for("login"))
-
-
-@app.errorhandler(Exception)
-def handle_exception(e):
-    logger.exception("Webserver Error", exc_info=e)
 
 
 @app.route("/emotegallery/")

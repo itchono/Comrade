@@ -173,7 +173,7 @@ class General(commands.Cog):
         '''
         Uploads Comrade's log file for analysis
         '''
-        with open("comrade.log", "rb") as f:
+        with open("comrade_full.log", "rb") as f:
             await ctx.send(file=discord.File(f, filename="comrade_log.txt"))
 
     @commands.command()
@@ -194,7 +194,7 @@ class General(commands.Cog):
         '''
         await ctx.send("Restarting...")
         with open("restart.cfg", "w") as f:
-            f.write(str(ctx.channel.id))
+            f.write(str(ctx.channel.id if ctx.guild else ctx.author.id))
             # pointer for bot restart
         await self.bot.change_presence(status=discord.Status.offline)
         await self.bot.logout()
