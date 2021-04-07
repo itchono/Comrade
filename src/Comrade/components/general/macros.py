@@ -4,6 +4,7 @@ from discord.ext import commands
 
 import re
 import asyncio
+from random import choice
 import async_timeout
 from discord.ext.commands.view import StringView
 
@@ -67,12 +68,20 @@ async def process_macro(message: discord.message):
         try:
             print_queue = []
             # I need this, so that I can print multiline messages
+            random_queue = []
+            # I need this, so that I can randomly select
 
-            # nonempty lines in the macro
-            for line in filter(lambda l: l,
-                               map(lambda l: l.strip(), cmds.splitlines())):
+            in_random = False
 
+            async def parse_line(line):
+                '''
+                Parses a macro line
+                '''
                 if line.split()[0].lower() == "wait":
+                    if print_queue:
+                        # We have run into a wait, send ze messages
+                        await message.channel.send("\n".join(print_queue))
+                        print_queue.clear()
                     await asyncio.sleep(float(line.split()[1]))
                 else:
                     # Trick discord.py into parsing this command as a bot
@@ -95,9 +104,29 @@ async def process_macro(message: discord.message):
                         # Push string to queue
                         print_queue.append(line.lstrip("\\"))
 
+            # nonempty lines in the macro
+            for line in filter(lambda l: l,
+                               map(lambda l: l.strip(), cmds.splitlines())):
+
+                if line.split()[0].lower() == "random" and line.split()[1] == "{":
+                    # Start parsing random
+                    in_random = True
+
+                elif line.split()[0] == "}" and in_random:
+                    in_random = False
+                    # pick a random command to execute from within
+                    await parse_line(choice(random_queue))
+                    random_queue.clear()
+                else:
+                    await parse_line(line)
+
             if print_queue:
                 # We have run to the end, send ze messages
                 await message.channel.send("\n".join(print_queue))
+
+            if in_random:
+                await message.channel.send(
+                    "Did you forget to close the bracket `}` on your `random {` command?")
 
         except (asyncio.CancelledError, asyncio.TimeoutError):
             await message.channel.send(
