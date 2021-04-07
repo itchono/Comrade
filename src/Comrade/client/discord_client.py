@@ -5,6 +5,7 @@ from pretty_help import PrettyHelp
 from utils.logger import logger
 from utils.checks import isNotThreat
 import time
+import os
 
 # Map prefixes
 if cfg["Settings"]["secondary-prefix"]:
@@ -32,7 +33,12 @@ client = commands.Bot(
 # Listeners for client events
 @client.event
 async def on_error(event, *args, **kwargs):
-    logger.exception("Discord Error", exc_info=event)
+    if type(event) == discord.HTTPException:
+        os.system("kill 1")  # hard restart on 429
+    try:
+        raise event
+    except Exception:
+        logger.exception(event)
 
 
 @client.event
