@@ -114,4 +114,4 @@ class Vault(commands.Cog):
 
             await m.edit(content="Vault operation successful.", embed=None)
         except asyncio.TimeoutError:
-            await m.edit("Vault aborted (180s timeout).", embed=None)
+            await m.edit(content="Vault aborted (180s timeout).", embed=None)

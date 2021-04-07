@@ -4,7 +4,7 @@ import os
 
 import components
 from client import client as bot
-from config import cfg
+from config import cfg, version
 from utils.utilities import set_start_time, get_uptime
 from utils.databases import rebuild_server_cfgs
 from utils.users import rebuild_weight_table, sum_of_weights
@@ -64,9 +64,9 @@ async def on_ready():
         with open("restart.cfg", "r") as f:
             channel_id = int(f.read())
             if channel := bot.get_channel(channel_id):
-                await channel.send("Restart completed.")
+                await channel.send(f"Restart completed. Version is: {version}")
             elif user := bot.get_user(channel_id):
-                await user.send("Restart completed.")
+                await user.send(f"Restart completed. Version is: {version}")
 
         os.remove("restart.cfg")
         logger.info("Restart reminder found. Notifying channel.")
