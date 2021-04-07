@@ -117,6 +117,8 @@ async def process_macro(message: discord.message):
                     # pick a random command to execute from within
                     await parse_line(choice(random_queue))
                     random_queue.clear()
+                elif in_random:
+                    random_queue.append(line)
                 else:
                     await parse_line(line)
 
