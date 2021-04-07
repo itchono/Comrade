@@ -35,7 +35,7 @@ def divide_chunks(l, n):
 @app.route('/')
 def main():
     with open("comrade_primary.log", "r", encoding="utf-8") as f:
-        content = f.read().splitlines()
+        content = f.read()
 
     uptime = datetime.timedelta(seconds=round(get_uptime()))
 
