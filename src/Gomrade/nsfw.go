@@ -43,7 +43,7 @@ func init() {
 func NHentaiStart(s *discordgo.Session, m *discordgo.MessageCreate, tag string) int {
 	channel, _ := s.Channel(m.ChannelID)
 	// channel in command was called
-	if !channel.NSFW {
+	if channel.GuildID != "" && !channel.NSFW {
 		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("%s is not NSFW!", channel.Mention()))
 		return 0
 	}

@@ -57,7 +57,7 @@ func main() {
 		fmt.Println("error creating Discord session,", err)
 		return
 	}
-	dg.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAllWithoutPrivileged)
+	dg.Identify.Intents = discordgo.MakeIntent((discordgo.IntentsGuilds | discordgo.IntentsGuildMessages | discordgo.IntentsDirectMessages))
 	dg.StateEnabled = true
 	dg.AddHandler(messageCreate)
 	dg.AddHandler(ready)
