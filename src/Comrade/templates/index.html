@@ -15,7 +15,8 @@
     <div class="container pt-3 pb-3 bg-light text-dark">
         <h1>Comrade Status</h1>
         <p>Comrade is online, logged in as {{ user }}</p>
-        <p>Version: {{ version }}</p>
+        <p>Bot Version: {{ version }}</p>
+        <p>Timezone: {{ timezone }}</p>
     </div>
 
     <div class="container pt-3">
@@ -23,12 +24,6 @@
             <div class="col-sm">
                 <h3>Bot Uptime</h3>
                 <p>{{ uptime }}</p>
-
-            </div>
-
-            <div class="col-sm">
-                <h3>Bot Host</h3>
-                <p>{{ host }}</p>
 
             </div>
 
@@ -42,6 +37,7 @@
             </div>
 
             <div class="col-sm">
+                <h3>Server Emote Browser</h3>
                 <a href="/emotegallery">
                     <button>Browse server emotes</button>
                 </a>
@@ -56,11 +52,11 @@
             <button>Download Full Log</button>
         </a>
 
-        <p>
+        <pre><code>
             {% for para in loglines %}
                 {{para}}<br>
             {% endfor %}
-        </p>
+        </code></pre>
 
     </div>
 

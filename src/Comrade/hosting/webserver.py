@@ -8,7 +8,7 @@ from flask_discord import DiscordOAuth2Session, requires_authorization, Unauthor
 import os
 import secrets
 
-from utils.utilities import get_uptime, get_host
+from utils.utilities import get_uptime
 from utils.logger import logger
 from client import client as bot
 import datetime
@@ -40,12 +40,13 @@ def main():
     uptime = datetime.timedelta(seconds=round(get_uptime()))
 
     return render_template("index.html", uptime=str(uptime),
-                           host=get_host(), numservers=len(bot.guilds),
+                           numservers=len(bot.guilds),
                            user=str(bot.user), serverlist=[f"{server.name} "
                            f"({len(server.members)} members)"
                                                            for server in bot.guilds],
                            loglines=content,
-                           version=version)
+                           version=version,
+                           timezone=cfg["Settings"]["timezone"])
 
 
 @app.route('/log')
