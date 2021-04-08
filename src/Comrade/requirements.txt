@@ -76,7 +76,7 @@ marshmallow==3.11.1
     # via
     #   dataclasses-json
     #   marshmallow-enum
-matplotlib==3.4.1
+matplotlib==3.3.4
     # via -r requirements.in
 mpmath==1.2.1
     # via sympy
