@@ -27,7 +27,7 @@ client = commands.Bot(
     status=discord.Status.online,
     activity=discord.Game(cfg["Settings"]["Status"]))
 
-slash = SlashCommand(client, override_type=True, sync_commands=True, sync_on_cog_reload=True)
+slash = SlashCommand(client, override_type=True, sync_commands=True, sync_on_cog_reload=True, delete_from_unused_guilds=True)
 
 
 # Listeners for client events

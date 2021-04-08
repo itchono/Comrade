@@ -242,7 +242,7 @@ class Moderation(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
         if not message.author.bot and message.guild and \
-               message.content == "ZA HANDO":
+               "ZA HANDO" in message.content:
             args = (message.content.lower()).split()
             amount = 20
 
@@ -278,4 +278,5 @@ class Moderation(commands.Cog):
                 await self.bot.wait_for(
                     "reaction_add", check=check, timeout=duration)
 
-                await zahando(message.channel, amount, message.mentions[0])
+                await zahando(
+                    message.channel, amount, message.mentions[0] if message.mentions else None)
