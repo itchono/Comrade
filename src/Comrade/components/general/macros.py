@@ -91,7 +91,7 @@ async def process_macro(message: discord.message):
                     invoker = view.get_word()
                     ctx.invoked_with = invoker
 
-                    if command := bot.all_commands.get(invoker):
+                    if (command := bot.all_commands.get(invoker)) and not command.qualified_name == "macro":
                         if print_queue:
                             # We have run into a command, send ze messages
                             await ctx.send("\n".join(print_queue))
@@ -147,7 +147,7 @@ class Macros(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
         if not message.author.bot and message.guild:
-            # await process_macro(message)
+            await process_macro(message)
 
             # Fun features
             if "@someone" in message.content.lower():
@@ -167,6 +167,7 @@ class Macros(commands.Cog):
         '''
         Runs a macro, with arguments
         '''
+        # TODO: rework process_macro so that it takes in a set of arguments instead of processing using ctx.message (causes infinite recursion)
         if ctx.invoked_subcommand is None:
             result = await process_macro(ctx.message)
             if result == 1:
@@ -272,7 +273,7 @@ class Macros(commands.Cog):
         await reactOK(ctx)
 
     @commands.command()
-    @commands.guild_only()
+    @commands.guild_only(aliases=["viewmacro"])
     async def showmacro(self, ctx: commands.Context, name):
         '''
         Show the script content of a macro
