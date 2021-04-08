@@ -272,8 +272,8 @@ class Macros(commands.Cog):
             {"server": ctx.guild.id, "name": name})
         await reactOK(ctx)
 
-    @commands.command()
-    @commands.guild_only(aliases=["viewmacro"])
+    @commands.command(aliases=["viewmacro"])
+    @commands.guild_only()
     async def showmacro(self, ctx: commands.Context, name):
         '''
         Show the script content of a macro
