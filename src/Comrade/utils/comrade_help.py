@@ -56,8 +56,9 @@ class ComradeHelp(commands.HelpCommand):
             group.commands
         )
 
-        embed = discord.Embed(title=f"Commands in `{group.qualified_name}`",
-                              colour=0xd7342a)
+        embed = discord.Embed(title=f"`{bot_prefix}{group.qualified_name} {group.signature}`",
+                              colour=0xd7342a,
+                              description=group.help + "\n**Additional Commands in this group:**")
 
         embed.set_footer(icon_url=self.context.bot.user.avatar_url, text=f"Comrade Bot, Version {version}")
 

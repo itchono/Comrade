@@ -1,5 +1,5 @@
 '''
-List 3.0
+List 3.1
 
 Like a text editor
 
@@ -84,7 +84,7 @@ class Lists(commands.Cog):
     '''
     def __init__(self, bot):
         self.bot: commands.Bot = bot
-        self.active = defaultdict(lambda: defaultdict(lambda: CustomList({})))
+        self.active = defaultdict(lambda: CustomList({}))
 
     @commands.command()
     @commands.guild_only()
@@ -113,12 +113,12 @@ class Lists(commands.Cog):
         Opens a new list if you already have one open
         '''
         if ctx.invoked_subcommand is None:
-            if self.active[ctx.guild.id][ctx.author.id]:
+            if self.active[ctx.channel.id]:
                 await self.close(ctx)  # close list
 
             if L := collection("lists").find_one(
                     {"server": ctx.guild.id, "name": list_name}):
-                self.active[ctx.guild.id][ctx.author.id] = CustomList(L)
+                self.active[ctx.channel.id] = CustomList(L)
 
                 await self.print_list(ctx)
                 await ctx.send(
@@ -128,19 +128,19 @@ class Lists(commands.Cog):
                 L = {
                     "server": ctx.guild.id,
                     "name": list_name, "author": ctx.author.id, "list": []}
-                self.active[ctx.guild.id][ctx.author.id] = CustomList(L)
+                self.active[ctx.channel.id] = CustomList(L)
                 collection("lists").insert_one(L)
                 await ctx.send(
                     f"You have created the list `{list_name}`.\nMake sure to `{bot_prefix}list close` to save your list.")
 
     async def print_list(self, ctx):
-        await ctx.send(str(self.active[ctx.guild.id][ctx.author.id]) +
-                f"\n(Author: {ctx.guild.get_member(self.active[ctx.guild.id][ctx.author.id].author)})")
+        await ctx.send(str(self.active[ctx.channel.id]) +
+                f"\n(Author: {ctx.guild.get_member(self.active[ctx.channel.id].author)})")
 
     @custom_list.group()
     @commands.after_invoke(print_list)
     @commands.guild_only()
-    async def all(self, ctx: commands.Context, *, content: str):
+    async def all(self, ctx: commands.Context):
         '''
         Shows all lists in this server.
         '''
@@ -153,7 +153,8 @@ class Lists(commands.Cog):
         '''
         Adds a single item to the currently open list
         '''
-        self.active[ctx.guild.id][ctx.author.id].add(content)
+        if d := self.active[ctx.channel.id]:
+            d.add(content)
 
     @add.command(name="many")
     @commands.after_invoke(print_list)
@@ -163,7 +164,7 @@ class Lists(commands.Cog):
         Adds multiple items to the currently open list
         '''
         for item in items:
-            self.active[ctx.guild.id][ctx.author.id].add(item)
+            self.active[ctx.channel.id].add(item)
 
     @custom_list.group()
     @commands.after_invoke(print_list)
@@ -172,7 +173,8 @@ class Lists(commands.Cog):
         '''
         Removes a single item from the currently open list
         '''
-        self.active[ctx.guild.id][ctx.author.id].remove(content)
+        if d := self.active[ctx.channel.id]:
+            d.remove(content)
 
     @remove.command(name="many")
     @commands.after_invoke(print_list)
@@ -182,7 +184,7 @@ class Lists(commands.Cog):
         Removes multiple items from the currently open list
         '''
         for item in items:
-            self.active[ctx.guild.id][ctx.author.id].remove(item)
+            self.active[ctx.channel.id].remove(item)
 
     @custom_list.command()
     @commands.guild_only()
@@ -190,10 +192,11 @@ class Lists(commands.Cog):
         '''
         Removes this list from the database
         '''
-        result = collection("lists").delete_one(
-            {"server": ctx.guild.id, "name": self.active[ctx.guild.id][ctx.author.id].name,
-            "author": ctx.author.id})
-        await ctx.send(result)
+        if self.active[ctx.channel.id]:
+            result = collection("lists").delete_one(
+                {"server": ctx.guild.id, "name": self.active[ctx.channel.id].name,
+                "author": ctx.author.id})
+            await ctx.send(result)
 
     @custom_list.command()
     @commands.after_invoke(print_list)
@@ -202,13 +205,13 @@ class Lists(commands.Cog):
         '''
         Closes the currently open list and saves it to MongoDB
         '''
-        if self.active[ctx.guild.id][ctx.author.id] and self.active[ctx.guild.id][ctx.author.id].arr:
+        if self.active[ctx.channel.id] and self.active[ctx.channel.id].arr:
 
             collection("lists").update_one(
-                {"server": ctx.guild.id, "name": self.active[ctx.guild.id][ctx.author.id].name},
-                {"$set":{"list":self.active[ctx.guild.id][ctx.author.id].arr}})
+                {"server": ctx.guild.id, "name": self.active[ctx.channel.id].name},
+                {"$set":{"list":self.active[ctx.channel.id].arr}})
 
-            await ctx.send(f"`{self.active[ctx.guild.id][ctx.author.id].name}` saved.")
-            self.active[ctx.guild.id][ctx.author.id] = None
+            await ctx.send(f"`{self.active[ctx.channel.id].name}` saved.")
+            self.active[ctx.channel.id] = None
         else:
             await ctx.send("You do not have a list currently open.")
