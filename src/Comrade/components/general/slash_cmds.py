@@ -26,7 +26,7 @@ class Slash(commands.Cog):
                         description = "command to invoke",
                         option_type = 3,
                         required = True
-                    )],guild_ids=guild_ids)
+                    )], description="Invoke a command like usual, but now with a slash!",guild_ids=guild_ids)
     async def invoke(self, ctx: SlashContext, command):
         view = StringView(command)
         m = await ctx.send(f"Invoking command `{command}`...")
@@ -45,7 +45,7 @@ class Slash(commands.Cog):
                         description = "User to get info on",
                         option_type = 6,
                         required = False
-                    )],guild_ids=guild_ids)
+                    )], description="Displays info about yourself or another user", guild_ids=guild_ids)
     async def userinfo(self, ctx: SlashContext, user=None):
         command = self.bot.get_command("userinfo")
         await command(ctx, member=user)
