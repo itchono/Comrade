@@ -266,14 +266,15 @@ class Moderation(commands.Cog):
 
                 voted = [message.author.id]
 
-                def check(reaction, user):
+                async def check(reaction, user):
 
                     voted_already = user.id in voted
                     voted.append(user.id)
 
                     return reaction.emoji == "✋" and not user.bot and (
                             (reaction.message.id == m.id and not voted_already)
-                            or cfg["Settings"]["development-mode"] == "True")
+                            or cfg["Settings"]["development-mode"] == "True"
+                            or isOP()(await self.bot.get_context(message)))
 
                 await self.bot.wait_for(
                     "reaction_add", check=check, timeout=duration)

@@ -147,7 +147,7 @@ class Macros(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
         if not message.author.bot and message.guild:
-            await process_macro(message)
+            # await process_macro(message)
 
             # Fun features
             if "@someone" in message.content.lower():
