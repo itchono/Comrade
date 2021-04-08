@@ -15,7 +15,7 @@ from db import collection
 
 class Announcements(commands.Cog):
     '''
-    Add timed announcements, delivered in the announcements channel
+    Timed announcements
     '''
 
     def __init__(self, bot):

@@ -8,7 +8,7 @@ from db import relay_channel
 
 class Go(commands.Cog):
     '''
-    Communicates with Gomrade to serve as a data relay between the two
+    Relays with Go module
     '''
     def __init__(self, bot):
         self.bot: commands.Bot = bot

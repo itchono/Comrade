@@ -18,13 +18,13 @@ import sys
 
 class General(commands.Cog):
     '''
-    General purpose commands for checking on the status of the bot,
-    and various utilites like fetching avatars.
+    Status, avatars, small utilities.
     '''
     def __init__(self, bot):
         self.bot: commands.Bot = bot
         self.last_deleted = defaultdict(lambda: None)
         self.last_edited = defaultdict(lambda: None)
+        self.emoji = "🌞"
 
     @commands.command()
     async def status(self, ctx: commands.Context):

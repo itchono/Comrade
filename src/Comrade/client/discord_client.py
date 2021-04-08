@@ -1,9 +1,10 @@
 import discord
 from discord.ext import commands
+from discord_slash import SlashCommand
 from config import cfg
-from pretty_help import PrettyHelp
 from utils.logger import logger
 from utils.checks import isNotThreat
+from utils.comrade_help import ComradeHelp
 import time
 import os
 
@@ -21,13 +22,12 @@ intents = discord.Intents.all()
 client = commands.Bot(
     command_prefix=prefixes,
     case_insensitive=True,
-    help_command=PrettyHelp(
-        no_category="Help Command",
-        color=0xd7342a,
-        sort_commands=False),
+    help_command=ComradeHelp(),
     intents=intents,
     status=discord.Status.online,
     activity=discord.Game(cfg["Settings"]["Status"]))
+
+slash = SlashCommand(client, override_type=True, sync_commands=True, sync_on_cog_reload=True)
 
 
 # Listeners for client events

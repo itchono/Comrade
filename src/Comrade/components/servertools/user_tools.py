@@ -16,8 +16,7 @@ from utils.logger import logger
 
 class Users(commands.Cog):
     '''
-    A set of commands for inspecting and working with
-    Discord users
+    Inspecting and Managing Discord users
     '''
 
     def __init__(self, bot):

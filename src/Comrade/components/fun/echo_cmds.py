@@ -12,7 +12,7 @@ from config import cfg
 
 class Echo(commands.Cog):
     '''
-    Send messages as another person, pretend to be someone else
+    Pretend to be someone else
     '''
 
     def __init__(self, bot):

@@ -80,7 +80,7 @@ class CustomList():
 
 class Lists(commands.Cog):
     '''
-    Lists for writing things down
+    Writing things down
     '''
     def __init__(self, bot):
         self.bot: commands.Bot = bot

@@ -37,8 +37,7 @@ with open("static/news_border.txt", "r", encoding="utf-8") as f:
 
 class Tools(commands.Cog):
     '''
-    A set of miscellaneous tools for you to use.
-    (News, Dictionary, Math, Poll, Channel Creation)
+    Misc Tools -- News, Dictionary, Math, Poll
     '''
     # Some of these can operate entiely outside of a server.
 
@@ -46,36 +45,35 @@ class Tools(commands.Cog):
         self.bot: commands.Bot = bot
         mpl.rcParams['mathtext.fontset'] = "cm"  # set to Computer Modern
 
-    @commands.group(invoke_without_command=True)
+    @commands.command()
     async def define(self, ctx: commands.Context, *, word):
         '''
         Defines a word
         '''
-        if ctx.invoked_subcommand is None:
-            await ctx.trigger_typing()
+        await ctx.trigger_typing()
 
-            dictionary = PyDictionary()
+        dictionary = PyDictionary()
 
-            if (meanings := dictionary.meaning(word)):
+        if (meanings := dictionary.meaning(word)):
 
-                printout = f"**__{string.capwords(word)}__:**\n"
+            printout = f"**__{string.capwords(word)}__:**\n"
 
-                for wordtype in meanings:
-                    defs = meanings[wordtype]
-                    printout += f"__{wordtype}__\n"
+            for wordtype in meanings:
+                defs = meanings[wordtype]
+                printout += f"__{wordtype}__\n"
 
-                    for num, d in enumerate(defs, 1):
-                        printout += f"{num}. {d}\n"
+                for num, d in enumerate(defs, 1):
+                    printout += f"{num}. {d}\n"
 
-                await ctx.send(printout)
+            await ctx.send(printout)
 
-            else:
-                await ctx.send(f"Definition for `{word}` could not be found.")
+        else:
+            await ctx.send(f"Definition for `{word}` could not be found.")
 
-    @define.command()
+    @commands.command()
     async def urban(self, ctx: commands.Context, *, word):
         '''
-        Defines a word in a dictionary
+        Defines a word in Urban dictionary
 
         Credits to MgWg
         '''

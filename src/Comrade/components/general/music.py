@@ -56,7 +56,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
 class Music(commands.Cog):
     '''
-    Copied line for line from the discord.py
+    Plays music, but not very well
     '''
     def __init__(self, bot):
         self.bot = bot

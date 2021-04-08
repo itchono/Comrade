@@ -139,10 +139,7 @@ async def process_macro(message: discord.message):
 
 class Macros(commands.Cog):
     '''
-    Set the bot to say something whenever you type a certain
-    message in chat.
-
-    Can write more advanced macros to execute scripts
+    Custom responses to messages sent in a server.
     '''
     def __init__(self, bot):
         self.bot: commands.Bot = bot

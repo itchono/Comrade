@@ -13,7 +13,7 @@ from utils.databases import new_server, rebuild_user_profiles
 
 class Databases(commands.Cog):
     '''
-    Server-side configuration of Comrade's Databases.
+    Configuration of Comrade's Databases.
     '''
 
     def __init__(self, bot):

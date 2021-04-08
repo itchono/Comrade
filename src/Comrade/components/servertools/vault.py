@@ -24,6 +24,9 @@ async def vault_posts(guild_id: int):
 
 
 class Vault(commands.Cog):
+    '''
+    User-curated archive of good posts
+    '''
     def __init__(self, bot):
         self.bot: commands.Bot = bot
 

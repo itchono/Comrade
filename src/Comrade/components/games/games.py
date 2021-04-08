@@ -17,8 +17,7 @@ from db import collection
 
 class Games(commands.Cog):
     '''
-    A bunch of games made by the Comrade team,
-    playable using text and Discord reactions.
+    Games playable on Discord!
     '''
 
     def __init__(self, bot):

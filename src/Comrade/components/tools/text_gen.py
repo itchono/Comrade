@@ -85,8 +85,7 @@ def generate_text(model, num_chars):
 
 class Textgen(commands.Cog):
     '''
-    Text generator, based off of what each user has said in
-    a given text channel.
+    Use AI to generate user messages
     '''
 
     def __init__(self, bot):

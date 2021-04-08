@@ -112,9 +112,9 @@ async def inline(ctx: commands.Context, e: str):
 
 class Emotes(commands.Cog):
     '''
-    Add or remove emotes.
-    Use :emotename: to call an emote
-    Use /emotename/ to swap its type
+    Custom Emote System.
+    `:emotename:` call
+    `/emotename/` swap type
     '''
     def __init__(self, bot):
         self.bot: commands.Bot = bot

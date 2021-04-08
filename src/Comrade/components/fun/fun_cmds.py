@@ -140,9 +140,7 @@ async def shoujosend(ctx: commands.Context, content,
 
 class Fun(commands.Cog):
     '''
-    Fun stuff.
-    (Text manipulation, stopping time)
-    [Try typing "STAR PLATINUM"]
+    Text manipulation, copypastas, stopping time
     '''
 
     def __init__(self, bot):
