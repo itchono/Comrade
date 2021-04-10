@@ -5,6 +5,16 @@ const fs = require('fs');
 var toWav = require('audiobuffer-to-wav');
 const arrayBufferToAudioBuffer = require('arraybuffer-to-audiobuffer')
 const { type } = require('os');
+const express = require('express');
+const server = express();
+server.all('/', (req, res)=>{
+    res.send('Your bot is alive!')
+})
+
+
+function keepAlive(){
+    server.listen(3000, ()=>{console.log("Server is Ready!")});
+}
 
 require('dotenv').config();
 
@@ -35,7 +45,7 @@ client.on('message', (message) => {
       listen(message)
     }
     else if (message.content === "*export") {
-      savefile(message)
+      savefile2(message)
     }
 
   });
@@ -70,7 +80,7 @@ function savefile(message) {
     var AudioContext = require('web-audio-api').AudioContext
   , context = new AudioContext()
 
-    arrayBufferToAudioBuffer(data, context)
+    arrayBufferToAudioBuffer(data)
     .then(audioBuffer => {
       // do something with AudioBuffer
 
@@ -80,6 +90,12 @@ function savefile(message) {
     });
     })
   })
+}
+
+async function savefile2(message) {
+  message.channel.send({
+    files: ['./user_audio']
+});
 }
 
 
@@ -99,5 +115,5 @@ async function voiceclip(message, url) {
 
 }
 
-
+keepAlive();
 client.login(process.env.TOKEN)
