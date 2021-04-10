@@ -283,21 +283,23 @@ class Users(commands.Cog):
                     {"$set": {
                         "last-online": "Now"}})
 
-            for mem_id in collection(
+            if col := collection(
                     "users").find_one(
-                        ufil(after))["notify-status"]:
-                mem = after.guild.get_member(mem_id)
+                        ufil(after)):
 
-                embed = discord.Embed(color=0xd7342a,
-                    description=
-                    f"{str(before.status)} -> {str(after.status)} @ {local_time().strftime('%I:%M:%S %p %Z')}")
+                for mem_id in col["notify-status"]:
+                    mem = after.guild.get_member(mem_id)
 
-                embed.set_author(
-                    name=
-                    f"{after.display_name} ({str(after)}) is now {str(after.status)}.",
-                    icon_url=after.avatar_url)
-                embed.set_footer(
-                    text=
-                    f"To unsubscribe, type [{bot_prefix}track {after.display_name}] in {after.guild.name}")
+                    embed = discord.Embed(color=0xd7342a,
+                        description=
+                        f"{str(before.status)} -> {str(after.status)} @ {local_time().strftime('%I:%M:%S %p %Z')}")
 
-                await mem.send(embed=embed)
+                    embed.set_author(
+                        name=
+                        f"{after.display_name} ({str(after)}) is now {str(after.status)}.",
+                        icon_url=after.avatar_url)
+                    embed.set_footer(
+                        text=
+                        f"To unsubscribe, type [{bot_prefix}track {after.display_name}] in {after.guild.name}")
+
+                    await mem.send(embed=embed)
