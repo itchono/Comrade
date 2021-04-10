@@ -1,6 +1,6 @@
 from .general import General, Macros, Go, Slash
 from .fun import Fun, RandomEvents, Echo, Youtube
-from .tools import Tools, Textgen, Lists, Reminders, PCM2WAV
+from .tools import Tools, Textgen, Lists, Reminders
 from .games import Games
 from .servertools import (Databases, Emotes, Users,
                           Announcements, Vault, Moderation,
@@ -13,4 +13,4 @@ cogs = [General, Fun, Tools, Textgen, Games,
         Reminders, Lists, RandomEvents,
         Databases, Announcements, Vault,
         Moderation, TextFilter,
-        NSFW, Go, Slash, Youtube, PCM2WAV]
+        NSFW, Go, Slash, Youtube]

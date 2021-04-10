@@ -1,14 +1,15 @@
 // Dependencies
-const Discord = require('discord.js');
+const Discord = require("discord.js")
+const express = require("express")
 const ytdl = require('ytdl-core');
 const fs = require('fs');
-const express = require('express');
 const server = express();
+var pathToFfmpeg = require('ffmpeg-static');
+var spawn = require('child_process').spawn;
 
 server.all('/', (req, res)=>{
     res.send('Kaiba is online and ready to duel.')
 })
-
 
 function keepAlive(){
     server.listen(3000, ()=>{console.log("Server is Ready!")});
@@ -34,8 +35,8 @@ client.on('message', (message) => {
     if (message.guild) {
       if (message.content.toLowerCase() === 'hello kaiba') message.reply("you're a third rate duelist with a fourth rate deck");
 
-      else if (message.content === "*motivation") {
-        voiceclip(message, "https://www.youtube.com/watch?v=2oiZ1oZBXxU")
+      else if (message.content.split(" ").length === 2 && message.content.split(" ")[0] === "*play") {
+        voiceclip(message, message.content.split(" ")[1])
       }
       else if (message.content === "*disgrace") {
         voiceclip(message, "https://www.youtube.com/watch?v=yau-rTqV4xQ")
@@ -68,10 +69,9 @@ async function listen(message) {
     var connection = await voiceChannel.join();
 
     // Create a ReadableStream of s16le PCM audio
-    const audio = connection.receiver.createStream(message.author, { mode: 'pcm' });
-    audio.pipe(fs.createWriteStream('user_audio'));
+    const audio = connection.receiver.createStream(message.author, { mode: 'pcm' , end: 'manual'});
+    audio.pipe(fs.createWriteStream('raw_audio.pcm'));
     message.channel.send(`Recording started <@${message.author.id}>.` +  " Type `*stop` to stop the recording.")
-
   } catch (err) {
     return message.channel.send(err);
   }
@@ -81,31 +81,36 @@ async function listen(message) {
 async function savefile(message) {
 
   try {
-
     const voiceChannel = message.member.voice.channel;
     await voiceChannel.leave()
+  } catch (err) { return message.channel.send("You need to start recording first, with `*listen`");}
 
-    await message.channel.send({
-      files: ['./user_audio'],
-      content: "Hello Comrade, please convert this file <@707042278132154408>"
+  // FFMpeg the audio to 64 kbps stereo mp3
+  var args = ['-f', 's16le', '-ar', '48k', '-ac', '2', '-i', 'raw_audio.pcm', '-b:a', '64k', 'recording.mp3', "-y"];
+  var proc = spawn(pathToFfmpeg, args);
+
+  proc.on('close', async function() {
+      // send ze stuff
+
+      var stats = fs.statSync("./recording.mp3")
+      if (stats.size > 8e6) {
+        return message.channel.send(`File is too large! (${stats.size/1e6} vs 8 MB limit!)`);
+      }
+
+      await message.channel.send({
+        files: ['./recording.mp3']});
+      
+      // Remove audio files
+      try {
+        fs.unlinkSync("./raw_audio.pcm")
+        fs.unlinkSync("./recording.mp3")
+      } catch(err) {
+        console.error(err)
+      }
   });
-  
-  } catch (err) {
-    return message.channel.send("You need to start recording first, with `*listen`");
-  }
-  
-  try {
-    fs.unlinkSync("./user_audio")
-    //file removed
-  } catch(err) {
-    console.error(err)
-  }
-
 }
 
-
 async function voiceclip(message, url) {
-
   const voiceChannel = message.member.voice.channel;
 
   if (!voiceChannel) {
