@@ -1,7 +1,6 @@
-from components.fun.youtube_random import Youtube
-from .general import General, Macros, Go, Music, Slash
+from .general import General, Macros, Go, Slash
 from .fun import Fun, RandomEvents, Echo, Youtube
-from .tools import Tools, Textgen, Lists, Reminders
+from .tools import Tools, Textgen, Lists, Reminders, PCM2WAV
 from .games import Games
 from .servertools import (Databases, Emotes, Users,
                           Announcements, Vault, Moderation,
@@ -14,4 +13,4 @@ cogs = [General, Fun, Tools, Textgen, Games,
         Reminders, Lists, RandomEvents,
         Databases, Announcements, Vault,
         Moderation, TextFilter,
-        NSFW, Go, Music, Slash, Youtube]
+        NSFW, Go, Slash, Youtube, PCM2WAV]
