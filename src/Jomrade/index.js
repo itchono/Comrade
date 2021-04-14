@@ -48,7 +48,7 @@ client.on('message', (message) => {
         savefile(message)
       }
       else if (message.content === "*help") {
-        message.channel.send("motivation: says something motivational in your voice channel\ndisgrace: calls you a disgrace\nlisten: starts recording\nstop: stops recording")
+        message.channel.send("play: plays a link in your voice channel\ndisgrace: calls you a disgrace\nlisten: starts recording\nstop: stops recording")
       }
 
     }
@@ -86,16 +86,11 @@ async function savefile(message) {
   } catch (err) { return message.channel.send("You need to start recording first, with `*listen`");}
 
   // FFMpeg the audio to 64 kbps stereo mp3
-  var args = ['-f', 's16le', '-ar', '48k', '-ac', '2', '-i', 'raw_audio.pcm', '-b:a', '64k', 'recording.mp3', "-y"];
+  var args = ['-f', 's16le', '-ar', '48k', '-ac', '2', '-i', 'raw_audio.pcm', '-b:a', '96k', 'recording.mp3', "-y"];
   var proc = spawn(pathToFfmpeg, args);
 
   proc.on('close', async function() {
       // send ze stuff
-
-      var stats = fs.statSync("./recording.mp3")
-      if (stats.size > 8e6) {
-        return message.channel.send(`File is too large! (${stats.size/1e6} vs 8 MB limit!)`);
-      }
 
       await message.channel.send({
         files: ['./recording.mp3']});

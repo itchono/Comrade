@@ -33,10 +33,10 @@ slash = SlashCommand(client, override_type=True, sync_commands=True, sync_on_cog
 # Listeners for client events
 @client.event
 async def on_error(event, *args, **kwargs):
-    if type(event) == discord.HTTPException:
-        os.system("kill 1")  # hard restart on 429
     try:
         raise event
+    except discord.HTTPException:
+        os.system("kill 1")  # hard restart on 429
     except Exception:
         logger.exception(event)
 
