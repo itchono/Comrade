@@ -509,3 +509,16 @@ class Tools(commands.Cog):
         else:
             await ctx.send(
                 f"Transfer from {source.mention} to {destination.mention} completed successfully.")
+
+    @commands.command()
+    @commands.guild_only()
+    async def searchcaps(self, ctx: commands.Context):
+        '''
+        Finds all of your capitalized messages in this channel and DMs it to you
+        '''
+        msg: discord.Message
+        async for msg in ctx.channel.history(limit=None):
+            if msg.author == ctx.author and msg.content.isupper():
+                await ctx.author.send(msg.content)
+
+        await ctx.author.send("Done.")
