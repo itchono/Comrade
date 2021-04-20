@@ -176,8 +176,7 @@ class Users(commands.Cog):
         OP = isOP()(ctx)  # check before trimming
 
         s = "```"
-        for member in [
-                await ctx.guild.get_member(
+        for member in [ctx.guild.get_member(
                     idd) for idd in inactive_author_ids]:
             s += member.display_name + "\n"
 
