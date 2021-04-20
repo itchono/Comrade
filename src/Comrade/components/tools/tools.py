@@ -522,3 +522,16 @@ class Tools(commands.Cog):
                 await ctx.author.send(msg.content)
 
         await ctx.author.send("Done.")
+
+    @commands.command()
+    @commands.is_owner()
+    @commands.guild_only()
+    async def downloadpfp(self, ctx: commands.Context):
+        '''
+        Downloads all pfps in the server to a folder
+        '''
+        member: discord.User
+        for member in ctx.guild.members:
+            with open('avatars/avatar{0}.png'.format(member.id), 'wb') as outfile:
+                asset = member.avatar_url_as(format="png", static_format="png", size=256)
+                await asset.save(outfile)

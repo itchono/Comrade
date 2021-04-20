@@ -155,8 +155,9 @@ class Users(commands.Cog):
         '''
         threshold = datetime.datetime.now() - datetime.timedelta(day)
 
-        active_author_ids = set()
+        active_author_ids: set = set()
 
+        channel: discord.TextChannel
         for channel in ctx.guild.text_channels:
 
             active_ids_in_channel = await channel.history(
@@ -164,7 +165,7 @@ class Users(commands.Cog):
                     lambda msg: msg.type == discord.MessageType.default
             ).map(lambda msg: msg.author.id).flatten()
 
-            active_author_ids += set(active_ids_in_channel)
+            active_author_ids.update(active_ids_in_channel)
 
         inactive_author_ids = set(
             [member.id for member in ctx.guild.members]) - active_author_ids
