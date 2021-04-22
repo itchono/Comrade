@@ -6,6 +6,7 @@ import random
 from utils.echo import echo, mimic
 from utils.checks import isNotThreat
 from utils.utilities import is_url
+from utils.logger import logger
 
 from config import cfg
 
@@ -23,7 +24,7 @@ class Echo(commands.Cog):
     @commands.guild_only()
     async def echo(self, ctx: commands.Context,
                    member: typing.Optional[discord.Member] = None,
-                   *, text: str):
+                   delete: typing.Optional[bool] = True, *, text: str):
         '''
         Echoes a block of text as if it were sent by another server member.
         Defaults to self if no member specified.
@@ -38,9 +39,10 @@ class Echo(commands.Cog):
                    content=text,
                    file=ctx.message.attachments[0] if ctx.message.attachments else None,
                    embed=ctx.message.embeds[0] if ctx.message.embeds else None)
-        # await log(ctx.guild, f"Echo for {target.mention} sent by
-        # {ctx.author.mention}")
-        await ctx.message.delete()
+        logger.info(ctx.guild, f"Echo for {member.id} sent by {ctx.author.id}")
+
+        if delete:
+            await ctx.message.delete()
 
     @commands.command()
     @commands.check(isNotThreat())

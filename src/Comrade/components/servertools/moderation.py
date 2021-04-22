@@ -6,6 +6,7 @@ from utils.checks import isOP, op_list, threat_list, isServerOwner
 from utils.utilities import role, ufil
 from db import collection
 from config import cfg
+from utils.logger import logger
 
 
 def dynamic_threshold(guild, threshold) -> int:
@@ -282,3 +283,5 @@ class Moderation(commands.Cog):
 
                 await zahando(
                     message.channel, amount, message.mentions[0] if message.mentions else None)
+
+                logger.info(f"ZA HANDO performed by user {message.author.id}")

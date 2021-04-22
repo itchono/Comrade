@@ -255,8 +255,7 @@ class Fun(commands.Cog):
 
         await announcement_msg.edit(content=f"*Time has begun to move again.*\n(Time stopped by {ctx.author.mention})", suppress=False)
 
-        logger.info(ctx.guild,
-                    f"Timestop in {ctx.channel.name} lasting {time} seconds")
+        logger.info(f"Timestop in {ctx.channel.id} lasting {time} seconds sent by {ctx.author.id}")
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
