@@ -46,4 +46,4 @@ With Help from:
 * [Kevin Zhao](https://github.com/Kevinozoid) - Feature suggestions and testing
 * [Nick Hewko](https://github.com/NHewko) - Feature suggestions and testing
 * [Stephen Luu](https://github.com/PhtephenLuu) - Feature suggestions and testing
-* [Anthony Luo](https://github.com/4ntLu0) - Feature suggestions and testing
+* [Anthony Luo](https://github.com/antholuo) - Feature suggestions and testing
