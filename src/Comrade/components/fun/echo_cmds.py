@@ -39,7 +39,7 @@ class Echo(commands.Cog):
                    content=text,
                    file=ctx.message.attachments[0] if ctx.message.attachments else None,
                    embed=ctx.message.embeds[0] if ctx.message.embeds else None)
-        logger.info(ctx.guild, f"Echo for {member.id} sent by {ctx.author.id}")
+        logger.info(f"Guild {ctx.guild.id}: Echo for {member.id} sent by {ctx.author.id}")
 
         if delete:
             await ctx.message.delete()
