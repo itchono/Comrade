@@ -12,7 +12,7 @@ Comrade provides a multitude of different features, and includes many features t
 I started Comrade as a way to learn Python, and with every rewrite I've put in more and more of my new skills. I am still learning, so of course the code, as well as the repo will be a bit messy.
 
 # Inviting Comrade to your server
-[Link to invite](https://discord.com/api/oauth2/authorize?client_id=707042278132154408&permissions=536083799&scope=bot)
+[Link to invite](https://discord.com/api/oauth2/authorize?client_id=707042278132154408&permissions=2885807190&scope=bot%20applications.commands)
 
 NOTE: Self-hosting the bot is DEFINITELY better; using the above link should only be for provisional purposes.
 
