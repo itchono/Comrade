@@ -67,7 +67,7 @@ class Echo(commands.Cog):
         Sends a message with a custom avatar name and image URL.
         Alternatively, you can also attach an image.
 
-        ex. $c cosplay Giorno Giovanna http://<image> I HAVE A DREAM
+        ex. $c cosplay "Giorno Giovanna" http://<image> I HAVE A DREAM
         '''
         url = None
         if is_url(img_url):
@@ -75,9 +75,8 @@ class Echo(commands.Cog):
         elif ctx.message.attachments:
             url = ctx.message.attachments[0].url
         else:
-            message = url + message
+            message = img_url + " " + message
 
-        message = " ".join(message)
         await mimic(ctx.channel,
                     content=message, username=name, avatar_url=url)
 

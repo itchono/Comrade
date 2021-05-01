@@ -147,7 +147,8 @@ def rebuild_user_profiles(guild: discord.Guild):
 
     # Scan to remove old
     for mem_id in member_ids:
-        if mem_id not in actual_member_ids:
+        if mem_id not in actual_member_ids and \
+                cfg["Settings"]["development-mode"] == "False":
             logger.info(f"Deleting Old Member Found in {guild.name}")
             collection("users").delete_one(
                 {"server": guild.id, "user": mem_id})
