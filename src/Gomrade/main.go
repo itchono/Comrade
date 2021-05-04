@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"os/exec"
 	"strings"
 	"syscall"
 	"time"
@@ -64,7 +65,18 @@ func main() {
 
 	// START BOT
 	// Open a websocket connection to Discord and begin listening.
-	err = dg.Open()
+	timeout := make(chan bool, 3)
+	go func() {
+		err = dg.Open()
+		timeout <- true
+	}()
+
+	select {
+	case <- timeout:
+		fmt.Println("Login successful.")
+	case <-time.After(10 * time.Second):
+		exec.Command("kill", "1")
+	}
 	if err != nil {
 		fmt.Println("error opening connection,", err)
 		return
