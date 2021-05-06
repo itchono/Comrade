@@ -59,6 +59,14 @@ class Announcements(commands.Cog):
             await channel.send(
                 f"Today's Daily Member is **{luckyperson.display_name}**")
 
+            col = luckyperson.colour
+
+            a = discord.Embed(color=col,
+                            title=f"{luckyperson.display_name}'s Avatar",
+                            url=str(luckyperson.avatar_url_as(static_format="png")))
+            a.set_image(url=luckyperson.avatar_url)
+            await ctx.send(embed=a)
+
             general_cog = self.bot.get_cog("General")
             await general_cog.avatar(ctx, member=luckyperson)
 

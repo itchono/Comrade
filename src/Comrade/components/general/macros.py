@@ -1,5 +1,6 @@
 # Macros
 import discord
+from discord.enums import _is_descriptor
 from discord.ext import commands
 
 import re
@@ -28,6 +29,10 @@ async def process_macro(message: discord.message):
         return
 
     macros = collection("macros")
+
+    # Check if user has opted in
+    if not collection("users").find_one({"_id": message.author.id, "macros": True}):
+        return
 
     # First, try fast loop for simple macros
     cmds = macros.find_one(
@@ -241,7 +246,8 @@ class Macros(commands.Cog):
             "macros").insert_one(
                 {"server": ctx.guild.id,
                  "name": name,
-                 "macro": macro.strip("```").strip("\n")}
+                 "macro": macro.strip("```").strip("\n"),
+                 "author": ctx.author.id}
                 )
         await reactOK(ctx)
 
@@ -283,5 +289,28 @@ class Macros(commands.Cog):
         if not cmds:
             await ctx.send("Macro not found.")
             return
-        await ctx.send(
-            f"```{cmds['macro']}```")
+
+        if "author" in cmds:
+            author = ctx.guild.get_member(cmds["author"])
+            e = discord.Embed(description=f"Author: {author.mention}")
+            await ctx.send(
+                f"```{cmds['macro']}```", embed=e)
+        else:
+            await ctx.send(
+                f"```{cmds['macro']}```")
+
+    @commands.command()
+    @commands.guild_only()
+    async def optin(self, ctx: commands.Context):
+        '''
+        Opts in to macros
+        '''
+        collection("users").update_one({"_id": ctx.author.id}, {"$set": {"macros": True}})
+
+    @commands.command()
+    @commands.guild_only()
+    async def optout(self, ctx: commands.Context):
+        '''
+        Opts out from macros
+        '''
+        collection("users").update_one({"_id": ctx.author.id}, {"$set": {"macros": False}})
