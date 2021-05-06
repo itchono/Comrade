@@ -1,5 +1,7 @@
 import discord
 from discord.ext import commands
+from discord_slash import cog_ext, SlashContext, SlashCommandOptionType
+from discord_slash.utils.manage_commands import create_option
 
 import typing
 
@@ -15,6 +17,8 @@ from utils.checks import isNotThreat
 from config import cfg, version
 import sys
 
+GUILD_IDS = [709954286376976425, 419214713252216848]
+
 
 class General(commands.Cog):
     '''
@@ -26,8 +30,10 @@ class General(commands.Cog):
         self.last_edited = defaultdict(lambda: None)
         self.emoji = "🌞"
 
-    @commands.command()
-    async def status(self, ctx: commands.Context):
+    @cog_ext.cog_slash(name="status",
+                       description="Shows the current status of the bot",
+                       guild_ids=GUILD_IDS)
+    async def status(self, ctx: SlashContext):
         '''
         Shows the current status of the bot
         '''
@@ -38,14 +44,30 @@ class General(commands.Cog):
                        f"**API Latency**: {round(self.bot.latency, 4)}s\n"
                        f"Running discord.py version {discord.__version__}")
 
-    @commands.command()
-    async def dm(self, ctx: commands.Context, user:
-                 typing.Union[discord.Member, discord.User] = None,
-                 *, message: str):
+    @cog_ext.cog_slash(name="dm",
+                       description="Sends a direct message to a given user via the bot",
+                       options=[
+                                create_option(
+                                    name="user",
+                                    description="User to message",
+                                    option_type=SlashCommandOptionType.USER,
+                                    required=True
+                                ),
+                                create_option(
+                                    name="message",
+                                    description="Message to send them",
+                                    option_type=SlashCommandOptionType.STRING,
+                                    required=True
+                                )
+                            ],
+                       guild_ids=GUILD_IDS)
+    async def dm(self, ctx: SlashContext, user: discord.User, message: str):
         '''
         Sends a direct message to a given user via the bot
         '''
+        await ctx.defer(hidden=True)
         await user.send(message)
+        await ctx.send(f"I have sent a DM to {user.mention}", hidden=True)
 
     @commands.command()
     async def dateof(self, ctx: commands.Context, *, thing: discord.Object):
@@ -71,12 +93,10 @@ class General(commands.Cog):
                        f" {t0.strftime('%B %d %Y at %I:%M:%S %p %Z')} by "
                        f"`{msg.author.display_name}` ({difference} days ago.)")
 
-    @commands.group(invoke_without_command=True)
-    @commands.guild_only()
+    @cog_ext.cog_slash(name="serverinfo",
+                       description="Gets information about the server.",
+                       guild_ids=GUILD_IDS)
     async def serverinfo(self, ctx: commands.Context):
-        '''
-        Gets information about the server.
-        '''
         e = discord.Embed(colour=ctx.guild.roles[-1].colour)
         e.set_thumbnail(url=ctx.guild.icon_url)
         e.set_author(name=f"Information for {ctx.guild.name}",
@@ -109,47 +129,66 @@ class General(commands.Cog):
         e.set_footer(text=f"ID: {ctx.guild.id}")
         await ctx.send(embed=e)
 
-    @commands.command(aliases=["pfp"])
-    async def avatar(self, ctx: commands.Context, *,
-                     member: typing.Union[discord.Member,
-                                          discord.User] = None):
+    @cog_ext.cog_slash(name="avatar",
+                       description="Displays the avatar of a target user, or yourself by default",
+                       options=[
+                                create_option(
+                                    name="user",
+                                    description="User to get avatar from; leave blank for self.",
+                                    option_type=SlashCommandOptionType.USER,
+                                    required=False
+                                )
+                            ],
+                       guild_ids=GUILD_IDS)
+    async def avatar(self, ctx: SlashContext, user: discord.User = None):
         '''
         Displays the avatar of a target user, or yourself by default
         Made by Slyflare, PhtephenLuu
         '''
-        if not member:
-            member = ctx.author
+        if not user:
+            user = ctx.author
 
-        col = member.colour if type(member) == discord.Member \
-            else discord.Color.dark_blue()
+        # col = user.colour if type(user) == discord.Member \
+        #     else discord.Color.dark_blue() TODO
+
+        col = discord.Color.dark_blue()
 
         a = discord.Embed(color=col,
-                          title=f"{member.display_name}'s Avatar",
-                          url=str(member.avatar_url_as(static_format="png")))
+                          title=f"{user.display_name}'s Avatar",
+                          url=str(user.avatar_url_as(static_format="png")))
 
-        a.set_image(url=member.avatar_url)
+        a.set_image(url=user.avatar_url)
         await ctx.send(embed=a)
 
-    @commands.command()
-    @commands.guild_only()
+    @cog_ext.cog_slash(name="emojis",
+                       description="Shows all emoji in the server.",
+                       guild_ids=GUILD_IDS)
     async def emojis(self, ctx: commands.Context):
-        '''
-        Shows all emoji in the server
-        '''
         emoji = "".join([str(e) for e in ctx.guild.emojis])
         await ctx.send(f"{ctx.guild.name} has "
                        f"{len(ctx.guild.emojis)} emojis:\n{emoji}")
 
-    @commands.command()
-    @commands.guild_only()
-    async def react(self, ctx: commands.context, emoji: discord.Emoji):
-        '''
-        Reacts to the above message with a given emoji (can be animated)
-        '''
-        m = (await ctx.channel.history(limit=2).flatten())[1]
-        # Get most recent non-bot message
-        await m.add_reaction(emoji)
-        await ctx.message.delete()
+    @cog_ext.cog_slash(name="react",
+                       description="Reacts to the above message with a given emoji (can be animated)",
+                       options=[
+                                create_option(
+                                    name="emoji",
+                                    description="Name of the emoji.",
+                                    option_type=SlashCommandOptionType.STRING,
+                                    required=True
+                                )
+                            ],
+                       guild_ids=GUILD_IDS)
+    async def react(self, ctx: SlashContext, emoji: str):
+        m = await ctx.channel.fetch_message(ctx.channel.last_message_id)
+        # Get most recent message
+
+        try:
+            emoji = await commands.EmojiConverter().convert(ctx, emoji)
+            await m.add_reaction(emoji)
+            await ctx.send("Reaction added!", hidden=True)
+        except commands.BadArgument:
+            await ctx.send("Could not find emoji!", hidden=True)
 
     @commands.command()
     @commands.check(isNotThreat())
@@ -176,13 +215,12 @@ class General(commands.Cog):
         with open("comrade_full.log", "rb") as f:
             await ctx.send(file=discord.File(f, filename="comrade_log.txt"))
 
-    @commands.command()
-    async def website(self, ctx: commands.Context):
-        '''
-        Pastes in Comrade's website, if the owner configured it
-        '''
+    @cog_ext.cog_slash(name="website",
+                       description="Get Comrade's website.",
+                       guild_ids=GUILD_IDS)
+    async def website(self, ctx: SlashContext):
         if url := cfg["Hosting"]["host-url"]:
-            await ctx.send(url)
+            await ctx.send(f"[Bot website]({url})")
         else:
             await ctx.send("The owner has not configured a hosting website")
 
