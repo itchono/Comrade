@@ -31,7 +31,7 @@ async def process_macro(message: discord.message):
     macros = collection("macros")
 
     # Check if user has opted in
-    if not collection("users").find_one({"_id": message.author.id, "macros": True}):
+    if not collection("users").find_one({"user": message.author.id, "macros": True}):
         return
 
     # First, try fast loop for simple macros
@@ -305,7 +305,8 @@ class Macros(commands.Cog):
         '''
         Opts in to macros
         '''
-        collection("users").update_one({"_id": ctx.author.id}, {"$set": {"macros": True}})
+        collection("users").update_one({"user": ctx.author.id}, {"$set": {"macros": True}})
+        await ctx.message.add_reaction("👍")
 
     @commands.command()
     @commands.guild_only()
@@ -313,4 +314,5 @@ class Macros(commands.Cog):
         '''
         Opts out from macros
         '''
-        collection("users").update_one({"_id": ctx.author.id}, {"$set": {"macros": False}})
+        collection("users").update_one({"user": ctx.author.id}, {"$set": {"macros": False}})
+        await ctx.message.add_reaction("👍")
