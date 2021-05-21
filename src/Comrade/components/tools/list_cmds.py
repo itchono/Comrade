@@ -60,7 +60,9 @@ class CustomList():
         return s
 
     def add(self, item):
+        print("bruh")
         self.arr.append(item)
+        print(self)
         self.arr.sort()
 
     def remove(self, item):
@@ -153,18 +155,19 @@ class Lists(commands.Cog):
         '''
         Adds a single item to the currently open list
         '''
-        if d := self.active[ctx.channel.id]:
-            d.add(content)
+        if self.active[ctx.channel.id] is not None:
+            self.active[ctx.channel.id].add(content)
 
-    @add.command(name="many")
+    @add.command()
     @commands.after_invoke(print_list)
     @commands.guild_only()
     async def add_many(self, ctx: commands.Context, *items):
         '''
         Adds multiple items to the currently open list
         '''
-        for item in items:
-            self.active[ctx.channel.id].add(item)
+        if self.active[ctx.channel.id] is not None:
+            for item in items:
+                self.active[ctx.channel.id].add(item)
 
     @custom_list.group()
     @commands.after_invoke(print_list)
@@ -173,8 +176,8 @@ class Lists(commands.Cog):
         '''
         Removes a single item from the currently open list
         '''
-        if d := self.active[ctx.channel.id]:
-            d.remove(content)
+        if self.active[ctx.channel.id] is not None:
+            self.active[ctx.channel.id].remove(content)
 
     @remove.command(name="many")
     @commands.after_invoke(print_list)
@@ -183,8 +186,9 @@ class Lists(commands.Cog):
         '''
         Removes multiple items from the currently open list
         '''
-        for item in items:
-            self.active[ctx.channel.id].remove(item)
+        if self.active[ctx.channel.id] is not None:
+            for item in items:
+                self.active[ctx.channel.id].remove(item)
 
     @custom_list.command()
     @commands.guild_only()
@@ -192,12 +196,16 @@ class Lists(commands.Cog):
         '''
         Removes this list from the database
         '''
-        if self.active[ctx.channel.id]:
-            result = collection("lists").delete_one(
-                {"server": ctx.guild.id, "name": self.active[ctx.channel.id].name,
-                "author": ctx.author.id})
-            self.active[ctx.channel.id] = None
-            await ctx.send(result)
+        if self.active[ctx.channel.id] is not None:
+            try:
+                result = collection("lists").delete_one(
+                    {"server": ctx.guild.id, "name": self.active[ctx.channel.id].name,
+                    "author": ctx.author.id})
+                self.active[ctx.channel.id] = None
+                if result.acknowledged:
+                    await ctx.send(f"`{self.active[ctx.channel.id].name}` deleted.")
+            except AttributeError:
+                await ctx.send("This list has not been saved yet.")
 
     @custom_list.command()
     @commands.after_invoke(print_list)
@@ -206,7 +214,7 @@ class Lists(commands.Cog):
         '''
         Closes the currently open list and saves it to MongoDB
         '''
-        if self.active[ctx.channel.id] and self.active[ctx.channel.id].arr:
+        if self.active[ctx.channel.id] is not None and self.active[ctx.channel.id].arr:
 
             collection("lists").update_one(
                 {"server": ctx.guild.id, "name": self.active[ctx.channel.id].name},
