@@ -61,6 +61,10 @@ func NHentaiStart(s *discordgo.Session, m *discordgo.MessageCreate, tag string) 
 	// SCRAPE Nhentai
 	doc := soup.HTMLParse(resp)
 
+	if len(doc.FindAll("meta")) <= 3 {
+		return -1
+	}
+
 	// A: Metadata
 	title := doc.FindAll("meta")[2].Attrs()["content"]             // title of the hentai
 	galleryCoverProxy := doc.FindAll("meta")[3].Attrs()["content"] // used to extra the gallery number

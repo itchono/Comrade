@@ -179,8 +179,26 @@ class General(commands.Cog):
                                 )
                             ],
                        guild_ids=GUILD_IDS)
-    async def react(self, ctx: SlashContext, emoji: str):
+    async def slashreact(self, ctx: SlashContext, emoji: str):
         m = await ctx.channel.fetch_message(ctx.channel.last_message_id)
+        # Get most recent message
+
+        try:
+            emoji = await commands.EmojiConverter().convert(ctx, emoji)
+            await m.add_reaction(emoji)
+            await ctx.send("Reaction added!", hidden=True)
+        except commands.BadArgument:
+            await ctx.send("Could not find emoji!", hidden=True)
+
+    @commands.command()
+    @commands.guild_only()
+    async def react(self, ctx: commands.Context, emoji: discord.Emoji,
+                    m: discord.Message = None):
+        '''
+        Reacts to the above message with a given emoji (can be animated)
+        '''
+        if not m:
+            m = (await ctx.channel.history(limit=2).flatten())[1]
         # Get most recent message
 
         try:

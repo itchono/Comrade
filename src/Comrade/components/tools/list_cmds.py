@@ -196,6 +196,7 @@ class Lists(commands.Cog):
             result = collection("lists").delete_one(
                 {"server": ctx.guild.id, "name": self.active[ctx.channel.id].name,
                 "author": ctx.author.id})
+            self.active[ctx.channel.id] = None
             await ctx.send(result)
 
     @custom_list.command()
