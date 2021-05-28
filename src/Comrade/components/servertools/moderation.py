@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import typing
 
-from utils.checks import isOP, op_list, threat_list, isServerOwner
+from utils.checks import isOP, op_list, threat_list, isServerOwner, isNotThreat
 from utils.utilities import role, ufil
 from db import collection
 from config import cfg
@@ -249,6 +249,10 @@ class Moderation(commands.Cog):
 
             if len(args) > 2 and args[2].isnumeric():
                 amount = int(args[2])
+
+            if not isNotThreat()(await self.bot.get_context(message)):
+                await message.channel.send("Nah")
+                return
 
             if amount > 200 and not isOP()(await self.bot.get_context(message)):
                 await message.channel.send("No")

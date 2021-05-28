@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands, tasks
 
 from utils.utilities import local_time, ufil, role
-from utils.checks import isServerOwner
+from utils.checks import isServerOwner, isNotThreat
 from utils.reactions import reactOK
 from utils.users import (weighted_member_from_server,
                          rebuild_weight_table, sum_of_weights)
@@ -118,6 +118,7 @@ class Announcements(commands.Cog):
         logger.exception("Announcement Error")
 
     @commands.command()
+    @commands.check(isNotThreat())
     @commands.guild_only()
     async def addannounce(self, ctx: commands.Context, time, *, message):
         '''

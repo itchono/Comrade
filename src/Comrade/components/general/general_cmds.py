@@ -209,21 +209,12 @@ class General(commands.Cog):
             await ctx.send("Could not find emoji!", hidden=True)
 
     @commands.command()
-    @commands.check(isNotThreat())
-    async def clear(self, ctx: commands.Context, amount: typing.Optional[int] = 50):
+    async def clear(self, ctx: commands.Context):
         '''
         Clears bot commands (server-only) and messages
         from bot in the last 50 messages or otherwise specified
         '''
-        if ctx.guild:
-            def check(message):
-                return (message.content and message.content.startswith(bot_prefix)) or \
-                        message.author == self.bot.user
-            await ctx.channel.purge(check=check, bulk=True, limit=amount)
-        else:
-            async for msg in ctx.channel.history(limit=amount):
-                if msg.author == self.bot.user:
-                    await msg.delete()
+        await ctx.send("This command got abused way too much, disabled for now")
 
     @commands.command()
     async def getlog(self, ctx: commands.Context):
