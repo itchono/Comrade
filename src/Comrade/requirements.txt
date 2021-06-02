@@ -96,8 +96,6 @@ pillow==8.2.0
     # via
     #   -r requirements.in
     #   matplotlib
-pycparser==2.20
-    # via cffi
 pydictionary==2.0.1
     # via -r requirements.in
 pyjwt==2.0.1
@@ -143,7 +141,7 @@ typing-inspect==0.6.0
     # via dataclasses-json
 unidecode==1.2.0
     # via -r requirements.in
-urllib3==1.26.4
+urllib3==1.26.5
     # via requests
 werkzeug==1.0.1
     # via flask
