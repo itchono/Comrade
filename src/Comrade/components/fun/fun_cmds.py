@@ -17,11 +17,11 @@ import urllib.request
 from bs4 import BeautifulSoup
 from PIL import Image, ImageDraw, ImageFont
 
-from utils.emoji_converter import emojiToText, textToEmoji
-from utils.echo import echo, mimic
-from utils.utilities import webscrape_header
+from common.emoji_converter import emojiToText, textToEmoji
+from common.echo import echo, mimic
+from common.utilities import webscrape_header
 
-from utils.logger import logger
+from common.logger import logger
 
 # Static dependencies
 with open("static/space.txt", "r", encoding="utf-8") as f:
@@ -414,7 +414,7 @@ class Fun(commands.Cog):
         Sends a big form of a character in word art form. Can use emojis too.
         '''
         if ctx.guild and (
-                e := discord.utils.get(ctx.guild.emojis, name=character)):
+                e := discord.common.get(ctx.guild.emojis, name=character)):
             character = str(e)
 
         letters = {"a": "###\n#b#\n###\n#b#\n#b#",

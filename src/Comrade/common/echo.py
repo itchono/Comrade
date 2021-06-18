@@ -16,7 +16,7 @@ async def mimic(channel: discord.TextChannel, content=None,
     # Set up webhook if it doesn't already exist
     # if there are no webhook permissions, send it directly using the bot
     try:
-        if not (webhook := discord.utils.get(await channel.webhooks(),
+        if not (webhook := discord.common.get(await channel.webhooks(),
                                              name="Comrade")):
             webhook = await channel.create_webhook(name="Comrade",
                                                    avatar=None,
@@ -49,3 +49,8 @@ async def echo(ctx: commands.Context, member=discord.Member,
 def isWebhook(message: discord.Message) -> bool:
     # Checks if it's a webhook
     return message.author.discriminator == "0000"
+
+
+def setup(bot):
+    # Entry point for extension
+    pass

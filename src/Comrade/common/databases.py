@@ -4,9 +4,9 @@ Utilities related to databases
 
 import discord
 
-from db import collection
-from config import cfg
-from utils.logger import logger
+from common.mongodb import collection
+from common.config import cfg
+from common.logger import logger
 
 
 def new_server(guild: discord.Guild):
@@ -14,15 +14,18 @@ def new_server(guild: discord.Guild):
     Configures a new server for use, returns a dictionary ready to be updated
     '''
     # Attempt to locate channels automatically
-    vault = discord.utils.find(
+    vault = discord.common.find(
         lambda c: "vault" in c.name, guild.text_channels)
-    announcements = discord.utils.find(
+    announcements = discord.common.find(
         lambda c: "announcements" in c.name, guild.text_channels)
 
     return {
         "_id": guild.id,
         "jokes": True,
         # allows for joke stuff to happen
+
+        "prefix": "$c ",
+        # Bot prefix
 
         "thresholds":
             {
@@ -152,3 +155,8 @@ def rebuild_user_profiles(guild: discord.Guild):
             logger.info(f"Deleting Old Member Found in {guild.name}")
             collection("users").delete_one(
                 {"server": guild.id, "user": mem_id})
+
+
+def setup(bot):
+    # Entry point for extension
+    pass

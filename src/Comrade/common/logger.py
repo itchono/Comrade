@@ -1,5 +1,5 @@
 import logging
-from utils.utilities import local_time
+from .utilities import local_time
 
 logging.Formatter.converter = lambda *args: local_time().timetuple()
 
@@ -29,12 +29,20 @@ c_handler.setFormatter(c_format)
 f_handler1.setFormatter(f_format)
 f_handler2.setFormatter(f_format)
 
-logger.addHandler(c_handler)
-logger.addHandler(f_handler1)
-logger.addHandler(f_handler2)
+if not logger.handlers:
+    logger.addHandler(c_handler)
+    logger.addHandler(f_handler1)
+    logger.addHandler(f_handler2)
 
 logging.getLogger("discord").setLevel(logging.INFO)
-logging.getLogger("discord").addHandler(f_handler2)
+if not logging.getLogger("discord").handlers:
+    logging.getLogger("discord").addHandler(f_handler2)
 
 logging.getLogger('werkzeug').setLevel(logging.INFO)
-logging.getLogger('werkzeug').addHandler(f_handler2)
+if not logging.getLogger('werkzeug').handlers:
+    logging.getLogger('werkzeug').addHandler(f_handler2)
+
+
+def setup(bot):
+    # Entry point for extension
+    pass

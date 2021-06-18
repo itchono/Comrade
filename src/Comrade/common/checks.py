@@ -1,11 +1,12 @@
 from discord.ext import commands
 
 from functools import lru_cache
-from db import collection
-from utils.logger import logger
+from common.mongodb import collection
+from common.logger import logger
+
 
 @lru_cache()
-def op_list(guild_id: int):
+def op_list(guild_id: int) -> list:
     '''
     Returns list of OPS in a server
     '''
@@ -16,7 +17,7 @@ def op_list(guild_id: int):
 
 
 @lru_cache()
-def threat_list(guild_id: int, threat_level: int):
+def threat_list(guild_id: int, threat_level: int) -> list:
     '''
     Returns list of threats ids in a given server
     '''
@@ -63,3 +64,7 @@ def isServerOwner():
         '''
         return ctx.guild and ctx.author.id == ctx.guild.owner.id
     return commands.check(predicate)
+
+def setup(bot):
+    # Entry point for extension
+    pass

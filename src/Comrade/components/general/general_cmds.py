@@ -1,18 +1,18 @@
 import discord
 from discord.ext import commands
 from discord_slash import cog_ext, SlashContext, SlashCommandOptionType
-from discord_slash.utils.manage_commands import create_option
+from discord_slash.common.manage_commands import create_option
 
 import typing
 
-from utils.echo import echo
+from common.echo import echo
 
 from collections import defaultdict
 
-from utils.utilities import (get_uptime, get_host,
+from common.utilities import (get_uptime, get_host,
                              local_time, utc_to_local_time, bot_prefix)
 
-from utils.checks import isNotThreat
+from common.checks import isNotThreat
 
 from config import cfg, version
 import sys

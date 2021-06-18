@@ -15,7 +15,7 @@ import typing
 import time
 from config import cfg
 from client import client as bot
-from utils.echo import echo
+from common.echo import echo
 
 MODEL_LEN = 3  # Length of text generation model
 

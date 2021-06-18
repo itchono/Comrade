@@ -4,7 +4,7 @@ from discord.ext import commands
 import random
 import asyncio
 
-from utils.utilities import role
+from common.utilities import role
 from db import collection, RELAY_ID
 
 

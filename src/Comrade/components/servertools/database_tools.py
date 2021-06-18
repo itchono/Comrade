@@ -5,10 +5,10 @@ from ast import literal_eval
 import typing
 
 from db import collection
-from utils.checks import isServerOwner
-from utils.reactions import reactOK, reactX
-from utils.utilities import ufil
-from utils.databases import new_server, rebuild_user_profiles
+from common.checks import isServerOwner
+from common.reactions import reactOK, reactX
+from common.utilities import ufil
+from common.databases import new_server, rebuild_user_profiles
 
 
 class Databases(commands.Cog):

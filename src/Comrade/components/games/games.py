@@ -8,8 +8,8 @@ import typing
 
 from .broken_picture_phone import BPCGame
 from .terrestrial import TerrestrialGame
-from utils.users import random_member_from_server
-from utils.utilities import bot_prefix, ufil
+from common.users import random_member_from_server
+from common.utilities import bot_prefix, ufil
 from components.tools.text_gen import generate_text, text_model
 
 from db import collection

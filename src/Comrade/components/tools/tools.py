@@ -8,7 +8,7 @@ import random
 import asyncio
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from utils.checks import isServerOwner
+from common.checks import isServerOwner
 from sympy import pretty, sympify
 from sympy.parsing.sympy_parser import (implicit_multiplication_application,
                                         factorial_notation, convert_xor,
@@ -17,10 +17,10 @@ from sympy.parsing.sympy_parser import (implicit_multiplication_application,
 from bs4 import BeautifulSoup
 from PyDictionary import PyDictionary
 import urllib.request
-from utils.utilities import webscrape_header, local_time
-from utils.echo import echo
-from utils.emoji_converter import textToEmoji
-from utils.logger import logger
+from common.utilities import webscrape_header, local_time
+from common.echo import echo
+from common.emoji_converter import textToEmoji
+from common.logger import logger
 from db import collection
 
 

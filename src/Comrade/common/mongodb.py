@@ -1,23 +1,28 @@
 '''
-MongoDB Database for Comrade
+MongoDB Interface for Comrade
 '''
 import sys
 import os
 import pymongo
 from pymongo.collection import Collection
 
-from config import cfg
-from utils.logger import logger
+from common.config import cfg
+from common.logger import logger
 
 mongo_client = None
 db = None
 
 
-def startup():
+def setup(bot) -> None:
+    # Entry point for extension
     '''
     Runs during startup to set up the databases
     The rationale is to defer execution until .env is loaded
     '''
+    mongo_startup()
+
+
+def mongo_startup():
     global mongo_client, db
     try:
         mongo_client = pymongo.MongoClient(os.environ.get("MONGOKEY"))
@@ -35,6 +40,9 @@ def startup():
 
 # Convenience method to return collection by name in configuration
 def collection(name) -> Collection:
+    if not db:
+        mongo_startup()
+
     try:
         return db[cfg["MongoDB"][name]]
     except Exception:

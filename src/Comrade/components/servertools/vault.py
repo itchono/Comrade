@@ -6,10 +6,10 @@ import asyncio
 from async_lru import alru_cache
 
 from db import collection
-from utils.echo import echo, mimic
-from utils.reactions import reactOK
-from utils.checks import isOP
-from utils.utilities import utc_to_local_time
+from common.echo import echo, mimic
+from common.reactions import reactOK
+from common.checks import isOP
+from common.utilities import utc_to_local_time
 from config import cfg
 
 from client import discord_client as bot

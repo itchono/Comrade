@@ -1,7 +1,8 @@
 import discord
 from discord.ext import commands
-from utils.utilities import bot_prefix
-from config import version
+from common.config import version
+
+# Custom help command for Comrade
 
 
 class ComradeHelp(commands.HelpCommand):
@@ -10,10 +11,9 @@ class ComradeHelp(commands.HelpCommand):
         super().__init__(**options)
 
     async def send_bot_help(self, mapping: dict):
-
         embed = discord.Embed(title="Comrade Command Categories",
                               colour=0xd7342a,
-                              description=f"`{bot_prefix}[Category]` for more info on a given category.")
+                              description=f"`{self.context.prefix}[Category]` for more info on a given category.")
 
         embed.set_footer(icon_url=self.context.bot.user.avatar_url, text=f"Comrade Bot, Version {version}")
 
@@ -35,7 +35,7 @@ class ComradeHelp(commands.HelpCommand):
         filtered = await self.filter_commands([command])
         # check user actually is allowed to invoke the command
         if filtered:
-            embed = discord.Embed(title=f"`{bot_prefix}{command.qualified_name} {command.signature}`",
+            embed = discord.Embed(title=f"`{self.context.prefix}{command.qualified_name} {command.signature}`",
                               colour=0xd7342a,
                               description=command.help)
 
@@ -56,7 +56,7 @@ class ComradeHelp(commands.HelpCommand):
             group.commands
         )
 
-        embed = discord.Embed(title=f"`{bot_prefix}{group.qualified_name} {group.signature}`",
+        embed = discord.Embed(title=f"`{self.context.prefix}{group.qualified_name} {group.signature}`",
                               colour=0xd7342a,
                               description=group.help + "\n**Additional Commands in this group:**")
 

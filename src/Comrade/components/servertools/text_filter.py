@@ -11,12 +11,12 @@ from fuzzywuzzy import fuzz
 
 from collections import defaultdict
 
-from utils.emoji_converter import emojiToText
+from common.emoji_converter import emojiToText
 from db import collection, RELAY_ID
 
-from utils.logger import logger
+from common.logger import logger
 from config import cfg
-from utils.utilities import ufil
+from common.utilities import ufil
 
 
 def content_filter(message: discord.Message) -> bool:

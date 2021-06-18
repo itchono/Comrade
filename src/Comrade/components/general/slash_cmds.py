@@ -3,7 +3,7 @@ from discord_slash import SlashContext
 from discord_slash import cog_ext
 from discord_slash.utils import manage_commands
 from discord.ext.commands.view import StringView
-from utils.utilities import bot_prefix
+from common.utilities import bot_prefix
 
 guild_ids = [419214713252216848, 709954286376976425]
 

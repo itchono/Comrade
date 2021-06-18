@@ -5,21 +5,9 @@ import pytz
 import datetime
 import socket
 from urllib.parse import urlparse
+from common.config import cfg
 
-from config import cfg
-
-
-bot_prefix = cfg["Settings"]["prefix"].strip("\"")
 startup_time = None
-
-
-def set_start_time(time):
-    '''
-    Sets the startup time for the bot,
-    so that we can use it to calculate the uptime of the bot
-    '''
-    global startup_time
-    startup_time = time
 
 
 def get_uptime() -> float:
@@ -65,7 +53,7 @@ def webscrape_header() -> dict:
     return {'User-Agent': user_agent, }
 
 
-def is_url(url):
+def is_url(url) -> bool:
     try:
         result = urlparse(url)
         return all([result.scheme, result.netloc])
@@ -78,15 +66,25 @@ def ufil(member: discord.Member) -> dict:
     return {"user": member.id, "server": member.guild.id}
 
 
-async def role(guild: discord.Guild, name: str):
+async def role(guild: discord.Guild, name: str) -> discord.Role:
     '''
     Returns the named role for a guild,
     if it exists, or tries to create it
     '''
-    if role := discord.utils.find(
+    if role := discord.common.find(
             lambda role: role.name == name, guild.roles):
         return role
     try:
         role = await guild.create_role(name=name, mentionable=True)
     except discord.errors.Forbidden:
         return None
+
+
+def setup(bot) -> None:
+    # Entry point for extension
+    '''
+    Sets the startup time for the bot,
+    so that we can use it to calculate the uptime of the bot
+    '''
+    global startup_time
+    startup_time = time.perf_counter()

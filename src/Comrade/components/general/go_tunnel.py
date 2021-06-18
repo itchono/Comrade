@@ -2,7 +2,7 @@
 import discord
 from discord.ext import commands
 
-from utils.logger import logger
+from common.logger import logger
 from db import relay_channel
 
 

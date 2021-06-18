@@ -1,4 +1,4 @@
-from utils.reactions import reactOK
+from common.reactions import reactOK
 import discord
 from discord.ext import commands
 
@@ -7,11 +7,11 @@ import datetime
 import re
 
 from db import collection, RELAY_ID
-from utils.utilities import ufil, local_time, bot_prefix, utc_to_local_time
-from utils.users import random_member_from_server, weight_table
-from utils.checks import isOP
-from utils.databases import new_user
-from utils.logger import logger
+from common.utilities import ufil, local_time, bot_prefix, utc_to_local_time
+from common.users import random_member_from_server, weight_table
+from common.checks import isOP
+from common.databases import new_user
+from common.logger import logger
 
 
 class Users(commands.Cog):

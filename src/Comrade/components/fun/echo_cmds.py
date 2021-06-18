@@ -3,10 +3,10 @@ from discord.ext import commands
 import typing
 import random
 
-from utils.echo import echo, mimic
-from utils.checks import isNotThreat
-from utils.utilities import is_url
-from utils.logger import logger
+from common.echo import echo, mimic
+from common.checks import isNotThreat
+from common.utilities import is_url
+from common.logger import logger
 
 from config import cfg
 

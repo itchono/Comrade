@@ -3,13 +3,45 @@ Comrade - Emoji Converter
 Turns text into emoji and vice versa
 '''
 
+TTE_LUT = {
+        "a": u"\U0001F1E6",
+        "b": u"\U0001F1E7",
+        "c": u"\U0001F1E8",
+        "d": u"\U0001F1E9",
+        "e": u"\U0001F1EA",
+        "f": u"\U0001F1EB",
+        "g": u"\U0001F1EC",
+        "h": u"\U0001F1ED",
+        "i": u"\U0001F1EE",
+        "j": u"\U0001F1EF",
+        "k": u"\U0001F1F0",
+        "l": u"\U0001F1F1",
+        "m": u"\U0001F1F2",
+        "n": u"\U0001F1F3",
+        "o": u"\U0001F1F4",
+        "p": u"\U0001F1F5",
+        "q": u"\U0001F1F6",
+        "r": u"\U0001F1F7",
+        "s": u"\U0001F1F8",
+        "t": u"\U0001F1F9",
+        "u": u"\U0001F1FA",
+        "v": u"\U0001F1FB",
+        "w": u"\U0001F1FC",
+        "x": u"\U0001F1FD",
+        "y": u"\U0001F1FE",
+        "z": u"\U0001F1FF",
+        "0": "0️⃣",
+        "1": "1️⃣",
+        "2": "2️⃣",
+        "3": "3️⃣",
+        "4": "4️⃣",
+        "5": "5️⃣",
+        "6": "6️⃣",
+        "7": "7️⃣",
+        "8": "8️⃣",
+        "9": "9️⃣"}
 
-def emojiToText(s) -> str:
-    '''
-    Converts emoji to closest real text representation (lowercase output)
-    Note: Will strip spaces.
-    '''
-    lookupTable = {
+ETT_LUT = {
         u"\U0001F1E6": "a",
         u"\U0001F1E7": "b",
         u"\U0001F1E8": "c",
@@ -47,13 +79,19 @@ def emojiToText(s) -> str:
         "8️⃣": 8,
         "9️⃣": 9}
 
+
+def emojiToText(s) -> str:
+    '''
+    Converts emoji to closest real text representation (lowercase output)
+    Note: Will strip spaces.
+    '''
     newS = ''
 
     i = 0
 
     while i < len(s):
-        if s[i] in lookupTable:
-            newS += lookupTable[s[i]]
+        if s[i] in ETT_LUT:
+            newS += ETT_LUT[s[i]]
             i += 1
         else:
             newS += s[i]
@@ -65,42 +103,12 @@ def textToEmoji(s) -> str:
     '''
     Converts text to equivalent emoji
     '''
-    lookupTable = {
-        "a": u"\U0001F1E6",
-        "b": u"\U0001F1E7",
-        "c": u"\U0001F1E8",
-        "d": u"\U0001F1E9",
-        "e": u"\U0001F1EA",
-        "f": u"\U0001F1EB",
-        "g": u"\U0001F1EC",
-        "h": u"\U0001F1ED",
-        "i": u"\U0001F1EE",
-        "j": u"\U0001F1EF",
-        "k": u"\U0001F1F0",
-        "l": u"\U0001F1F1",
-        "m": u"\U0001F1F2",
-        "n": u"\U0001F1F3",
-        "o": u"\U0001F1F4",
-        "p": u"\U0001F1F5",
-        "q": u"\U0001F1F6",
-        "r": u"\U0001F1F7",
-        "s": u"\U0001F1F8",
-        "t": u"\U0001F1F9",
-        "u": u"\U0001F1FA",
-        "v": u"\U0001F1FB",
-        "w": u"\U0001F1FC",
-        "x": u"\U0001F1FD",
-        "y": u"\U0001F1FE",
-        "z": u"\U0001F1FF"}
     s = s.lower()
 
     newS = ''
     for c in s:
-        if c in lookupTable:
-            newS += lookupTable[c] + " "
-        elif c in "0123456789":
-            newS += {0: "0️⃣", 1: "1️⃣", 2: "2️⃣", 3: "3️⃣", 4: "4️⃣",
-                     5: "5️⃣", 6: "6️⃣", 7: "7️⃣", 8: "8️⃣", 9: "9️⃣"}[int(c)]
+        if c in TTE_LUT:
+            newS += TTE_LUT[c] + " "
         else:
             newS += c
     return newS
@@ -109,3 +117,8 @@ def textToEmoji(s) -> str:
 if __name__ == "__main__":
     # can be run standalone if that's your thing
     print(textToEmoji(input("Text?")))
+
+
+def setup(bot):
+    # Entry point for extension
+    pass

@@ -30,7 +30,7 @@ from discord.ext import commands
 from collections import defaultdict
 from db import collection
 
-from utils.utilities import bot_prefix
+from common.utilities import bot_prefix
 
 
 class CustomList():

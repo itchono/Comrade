@@ -8,12 +8,12 @@ from flask_discord import DiscordOAuth2Session, requires_authorization, Unauthor
 import os
 import secrets
 
-from utils.utilities import get_uptime
-from utils.logger import logger
-from client import client as bot
+from common.utilities import get_uptime
+from common.logger import logger
+from core.discord_client import client as bot
 import datetime
-from config import version, cfg
-from db import collection
+from common.config import version, cfg
+from common.mongodb import collection
 
 app = Flask('')
 
@@ -93,11 +93,15 @@ def run():
     app.run(host="0.0.0.0", port=8080)
 
 
-def keep_alive():
-    server = Thread(target=run)
-    server.daemon = True
-    server.start()
-    logger.info("Flask server started.")
+def setup(bot) -> None:
+    # Entry point for extension
+    if cfg["Hosting"]["ping"] == "True":
+        server = Thread(target=run)
+        server.daemon = True
+        server.start()
+        logger.info("Flask server started.")
+    else:
+        logger.info("Flask server has been disabled in the configuration.")
 
 
 '''

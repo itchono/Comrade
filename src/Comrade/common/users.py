@@ -1,11 +1,11 @@
 import discord
 import random
 import datetime
-from client import client as bot
-from db import collection
-from config import cfg
-from utils.utilities import ufil
-from utils.logger import logger
+from core.discord_client import client as bot
+from common.mongodb import collection
+from common.config import cfg
+from common.utilities import ufil
+from common.logger import logger
 
 
 def random_member_from_server(
@@ -105,3 +105,8 @@ async def rebuild_weight_table(guild: discord.Guild):
 
     logger.info(
         f"{guild.name}: Rebuilt weights for users in past {staleness} days")
+
+
+def setup(bot):
+    # Entry point for extension
+    pass

@@ -5,7 +5,7 @@ Credits to Sunekku (Nuha Sahraoui).
 import discord
 from discord.ext import commands
 
-from utils.reactions import reactOK
+from common.reactions import reactOK
 from db import collection
 
 
@@ -95,14 +95,14 @@ class NSFW(commands.Cog):
                                         "category": tokens[0]}):
                 pass
             else:
-                member = discord.utils.find(lambda m: (m.name == tokens[0] or m.display_name == tokens[0]), ctx.guild.members)
+                member = discord.common.find(lambda m: (m.name == tokens[0] or m.display_name == tokens[0]), ctx.guild.members)
 
                 fav = collection(
                 "favouritensfw").find_one({"server": ctx.guild.id, "imageID": tokens[1], "user": member.id})
 
         elif len(tokens) == 3:
 
-            member = discord.utils.find(lambda m: (m.name == tokens[0] or m.display_name == tokens[0]), ctx.guild.members)
+            member = discord.common.find(lambda m: (m.name == tokens[0] or m.display_name == tokens[0]), ctx.guild.members)
 
             fav = collection(
                 "favouritensfw").find_one({"server": ctx.guild.id, "imageID": tokens[2], "user": member.id, "category": tokens[1] if tokens[1] else ""})

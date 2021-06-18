@@ -16,10 +16,10 @@ import aiohttp
 import asyncio
 
 from db import collection, emote_channel
-from utils.utilities import is_url, bot_prefix
-from utils.reactions import reactX
-from utils.echo import echo, mimic
-from utils.checks import isOP
+from common.utilities import is_url, bot_prefix
+from common.reactions import reactX
+from common.echo import echo, mimic
+from common.checks import isOP
 
 session = aiohttp.ClientSession()
 
@@ -93,7 +93,7 @@ async def inline(ctx: commands.Context, e: str):
     Similar code to emote function
     '''
     # Stage 1: Search server cache
-    if emote := discord.utils.get(ctx.guild.emojis, name=e):
+    if emote := discord.common.get(ctx.guild.emojis, name=e):
         return emote
 
     # Stage 2: Search MongoDB
@@ -104,7 +104,7 @@ async def inline(ctx: commands.Context, e: str):
             document["type"] == "inline":
 
         # maybe they just can't spell
-        if emote := discord.utils.get(ctx.guild.emojis, name=document["name"]):
+        if emote := discord.common.get(ctx.guild.emojis, name=document["name"]):
             return emote
         return await inject(ctx, document["name"])
     return None
@@ -130,7 +130,7 @@ class Emotes(commands.Cog):
         if ctx.invoked_subcommand is None:
 
             # Stage 1: Search server cache
-            if emote := discord.utils.get(ctx.guild.emojis, name=e):
+            if emote := discord.common.get(ctx.guild.emojis, name=e):
                 await echo(ctx, member=ctx.author, content=emote)
                 await ctx.message.delete()  # try to delete
 
@@ -142,7 +142,7 @@ class Emotes(commands.Cog):
 
                 # 2A: inline emoji,
                 # maybe they just can't spell
-                if emote := discord.utils.get(
+                if emote := discord.common.get(
                         ctx.guild.emojis, name=document["name"]):
                     await echo(ctx, member=ctx.author, content=emote)
                     await ctx.message.delete()  # try to delete
@@ -226,7 +226,7 @@ class Emotes(commands.Cog):
             await ctx.send(f"Emote `{name}` was removed.")
 
             if e["type"] == "inline":
-                emote = discord.utils.get(ctx.guild.emojis, name=name)
+                emote = discord.common.get(ctx.guild.emojis, name=name)
                 try:
                     await emote.delete(reason="Unloading emoji because "
                                        "it was removed from the server.")
@@ -250,7 +250,7 @@ class Emotes(commands.Cog):
                 {"name": name_old, "server": ctx.guild.id}):
 
                 if e["type"] == "inline":
-                    emote = discord.utils.get(ctx.guild.emojis, name=name_old)
+                    emote = discord.common.get(ctx.guild.emojis, name=name_old)
                     try:
                         await emote.edit(name = name_new)
                     except BaseException:
@@ -508,7 +508,7 @@ class Emotes(commands.Cog):
             newtype = {"big": "inline", "inline": "big"}[document["type"]]
 
             if document["type"] == "inline":
-                emote = discord.utils.get(
+                emote = discord.common.get(
                     ctx.guild.emojis, name=document['name'])
                 try:
                     await emote.delete(reason=f"Unloading emoji because it changed type.")
@@ -527,7 +527,7 @@ class Emotes(commands.Cog):
 
             await ctx.send(f"Emote `{document['name']}` is now of type `{newtype}`")
 
-        elif emote := discord.utils.get(ctx.guild.emojis, name=name):
+        elif emote := discord.common.get(ctx.guild.emojis, name=name):
             # in server, and not on mongodb (fringe case)
             await upload(ctx, name, emote.url, "big")
             try:

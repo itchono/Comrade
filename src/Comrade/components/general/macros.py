@@ -10,10 +10,10 @@ import async_timeout
 from discord.ext.commands.view import StringView
 
 from db import collection
-from utils.reactions import reactOK
-from utils.users import random_member_from_server
-from utils.checks import isNotThreat
-from utils.utilities import bot_prefix
+from common.reactions import reactOK
+from common.users import random_member_from_server
+from common.checks import isNotThreat
+from common.utilities import bot_prefix
 from config import cfg
 from client import client as bot
 

@@ -3,10 +3,10 @@ from discord.ext import commands, tasks
 
 import datetime
 
-from utils.utilities import local_time
+from common.utilities import local_time
 from db import collection
 
-from utils.logger import logger
+from common.logger import logger
 
 
 class Reminders(commands.Cog):
