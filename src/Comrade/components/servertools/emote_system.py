@@ -553,7 +553,7 @@ class Emotes(commands.Cog):
 
             # scan for inline emotes
             if match := re.findall(
-                    r":\s*[0-9A-z]+\s*:(?!\d+>)",
+                    r"(?<!<|<a):\s*[0-9A-z]+\s*:(?!\d+>)",
                     message.clean_content):
                 s = message.content
                 send = False
