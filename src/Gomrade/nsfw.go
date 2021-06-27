@@ -284,7 +284,8 @@ func Hentai(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int
 		resp, err = http.Get(hitURL)
 		if err != nil {
 			// if HTTP request fails
-			return -1
+			s.ChannelMessageSend(m.ChannelID, "HTTP request failed. Ping Mingde.")
+			return 0
 		}
 		defer resp.Body.Close()
 
@@ -298,8 +299,8 @@ func Hentai(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int
 		hitdatalist, ok := hitdata.([]interface{}) // decode the outer layer of JSON
 
 		if !ok {
-			// critical error
-			return -1
+			s.ChannelMessageSend(m.ChannelID, "No results found. Please try another tag.")
+			return 0
 		}
 
 		if len(hitdatalist) == 0 {
