@@ -268,8 +268,8 @@ func Hentai(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int
 	hdatalist, ok := hdata.([]interface{}) // decode the outer layer of JSON
 
 	if !ok {
-		// critical error
-		return -1
+		s.ChannelMessageSend(m.ChannelID, "No results found. Please try another tag.")
+		return 0
 	}
 	// Query was successful
 	prevQuery[m.ChannelID] = tempQuery
