@@ -229,6 +229,48 @@ class Emotes(commands.Cog):
         '''
         await self.add(ctx, name, url)
 
+    @commands.command()
+    @commands.guild_only()
+    async def copyemote(self, ctx: commands.Context, emote: discord.PartialEmoji):
+        '''
+        Alias for emote copy
+        '''
+        await self.copy(ctx, emote)
+
+    @emote.command()
+    @commands.guild_only()
+    async def copy(self, ctx: commands.Context, emote: discord.PartialEmoji):
+        '''
+        Copies emoji from another context into this server.
+        '''
+        if emote.animated:
+            await self.add(ctx, emote.name, f"https://cdn.discordapp.com/emojis/{emote.id}.gif?v=1")
+        else:
+            await self.add(ctx, emote.name, f"https://cdn.discordapp.com/emojis/{emote.id}.png?v=1")
+
+    @commands.command()
+    @commands.guild_only()
+    async def addemojigg(self, ctx: commands.Context, name: str):
+        '''
+        Add emote from emoji.gg
+
+        Should be of form ####-name
+        eg. 5492_EzPepe
+        '''
+
+        url = f"https://emoji.gg/assets/emoji/{name}.png"
+
+        async with session.get(url) as resp:
+            if resp.status == 404:
+                url = f"https://emoji.gg/assets/emoji/{name}.gif"
+                async with session.get(url) as resp:
+                    if resp.status == 404:
+                        await ctx.send("Invalid name. Valid Example: `$c addemojigg 5492_EzPepe`")
+
+        name = name.split("_")[1]
+
+        await self.add(ctx, name, url)
+
     @emote.command()
     @commands.check(isOP())
     @commands.guild_only()
