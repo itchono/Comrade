@@ -5,12 +5,15 @@
 #    pip-compile requirements.in
 #
 aiohttp==3.7.4.post0
-    # via discord.py
+    # via
+    #   discord-components
+    #   discord-py-slash-command
+    #   discord.py
 async-lru==1.0.2
     # via -r requirements.in
 async-timeout==3.0.1
     # via aiohttp
-attrs==20.3.0
+attrs==21.2.0
     # via aiohttp
 beautifulsoup4==4.9.3
     # via bs4
@@ -18,33 +21,39 @@ bs4==0.0.1
     # via
     #   -r requirements.in
     #   pydictionary
-cachetools==4.2.1
+cachetools==4.2.2
     # via flask-discord
-certifi==2020.12.5
+certifi==2021.5.30
     # via requests
 chardet==4.0.0
     # via
     #   aiohttp
     #   requests
-click==7.1.2
+click==8.0.1
     # via
     #   flask
     #   pydictionary
+colorama==0.4.4
+    # via click
 cycler==0.10.0
     # via matplotlib
-dataclasses-json==0.5.2
+dataclasses-json==0.5.4
     # via python-youtube
-discord-py-slash-command==1.1.2
+discord-components==1.1.2
     # via -r requirements.in
-discord.py==1.7.1
+discord-py-slash-command==2.3.0
+    # via -r requirements.in
+discord.py==1.7.3
     # via
     #   -r requirements.in
+    #   discord-components
+    #   discord-py-slash-command
     #   flask-discord
 dnspython==2.1.0
     # via -r requirements.in
 flask-discord==0.1.64
     # via -r requirements.in
-flask==1.1.2
+flask==2.0.1
     # via
     #   -r requirements.in
     #   flask-discord
@@ -60,21 +69,21 @@ idna==2.10
     #   yarl
 isodate==0.6.0
     # via python-youtube
-itsdangerous==1.1.0
+itsdangerous==2.0.1
     # via flask
-jinja2==2.11.3
+jinja2==3.0.1
     # via flask
 kiwisolver==1.3.1
     # via matplotlib
-markupsafe==1.1.1
+markupsafe==2.0.1
     # via jinja2
 marshmallow-enum==1.5.1
     # via dataclasses-json
-marshmallow==3.11.1
+marshmallow==3.12.1
     # via
     #   dataclasses-json
     #   marshmallow-enum
-matplotlib==3.3.4
+matplotlib==3.4.2
     # via -r requirements.in
 mpmath==1.2.1
     # via sympy
@@ -84,33 +93,31 @@ multidict==5.1.0
     #   yarl
 mypy-extensions==0.4.3
     # via typing-inspect
-numpy==1.20.2
+numpy==1.21.0
     # via
     #   -r requirements.in
     #   matplotlib
-oauthlib==3.1.0
+oauthlib==3.1.1
     # via
     #   flask-discord
     #   requests-oauthlib
-pillow==8.2.0
+pillow==8.3.0
     # via
     #   -r requirements.in
     #   matplotlib
-pycparser==2.20
-    # via cffi
 pydictionary==2.0.1
     # via -r requirements.in
-pyjwt==2.0.1
+pyjwt==2.1.0
     # via flask-discord
-pymongo==3.11.3
+pymongo==3.11.4
     # via -r requirements.in
 pyparsing==2.4.7
     # via matplotlib
 python-dateutil==2.8.1
     # via matplotlib
-python-dotenv==0.17.0
+python-dotenv==0.18.0
     # via -r requirements.in
-python-youtube==0.7.0
+python-youtube==0.8.1
     # via -r requirements.in
 pytz==2021.1
     # via -r requirements.in
@@ -124,7 +131,7 @@ requests==2.25.1
     #   pydictionary
     #   python-youtube
     #   requests-oauthlib
-six==1.15.0
+six==1.16.0
     # via
     #   cycler
     #   isodate
@@ -133,19 +140,19 @@ soupsieve==2.2.1
     # via beautifulsoup4
 stringcase==1.2.0
     # via dataclasses-json
-sympy==1.7.1
+sympy==1.8
     # via -r requirements.in
-typing-extensions==3.7.4.3
+typing-extensions==3.10.0.0
     # via
     #   aiohttp
     #   typing-inspect
-typing-inspect==0.6.0
+typing-inspect==0.7.1
     # via dataclasses-json
 unidecode==1.2.0
     # via -r requirements.in
-urllib3==1.26.4
+urllib3==1.26.6
     # via requests
-werkzeug==1.0.1
+werkzeug==2.0.1
     # via flask
 yarl==1.6.3
     # via aiohttp
