@@ -198,12 +198,13 @@ class Lists(commands.Cog):
         '''
         if self.active[ctx.channel.id] is not None:
             try:
+                name = self.active[ctx.channel.id].name
                 result = collection("lists").delete_one(
                     {"server": ctx.guild.id, "name": self.active[ctx.channel.id].name,
                     "author": ctx.author.id})
                 self.active[ctx.channel.id] = None
                 if result.acknowledged:
-                    await ctx.send(f"`{self.active[ctx.channel.id].name}` deleted.")
+                    await ctx.send(f"`{name}` has been deleted.")
             except AttributeError:
                 await ctx.send("This list has not been saved yet.")
 

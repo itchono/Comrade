@@ -30,7 +30,7 @@ func Emote(s *discordgo.Session, m *discordgo.MessageCreate, emotecollection *mo
 
 		// detect waste nonalphanumeric strings
 		for _, r := range query {
-			if !unicode.IsLetter(r) && !unicode.IsNumber(r) {
+			if !unicode.IsLetter(r) && !unicode.IsNumber(r) && r != []rune("_")[0] {
 				return
 			}
 		}

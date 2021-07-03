@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from discord_slash import SlashCommand
+from discord_components import DiscordComponents
 from config import cfg
 from utils.logger import logger
 from utils.checks import isNotThreat
@@ -26,6 +27,8 @@ client = commands.Bot(
     intents=intents,
     status=discord.Status.online,
     activity=discord.Game(cfg["Settings"]["Status"]))
+
+ddb = DiscordComponents(client)
 
 slash = SlashCommand(client,
                      override_type=True,

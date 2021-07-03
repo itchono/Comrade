@@ -13,18 +13,19 @@ import imghdr
 import re
 import io
 import aiohttp
-import asyncio
+from PIL import Image
 
 from db import collection, emote_channel
 from utils.utilities import is_url, bot_prefix
 from utils.reactions import reactX
 from utils.echo import echo, mimic
 from utils.checks import isOP
+from utils.button_menu import send_menu
 
 session = aiohttp.ClientSession()
 
 
-async def upload(ctx, name, url, emote_type):
+async def upload(ctx, name, url, emote_type="auto") -> str:
     '''
     Uploads an emote into CES provided a name and a url.
     '''
@@ -39,7 +40,16 @@ async def upload(ctx, name, url, emote_type):
     channel = emote_channel(ctx.guild)
 
     if ext is None:
-        raise TypeError("Could not download emote. Check that you are actually linking to an image or GIF.")
+        raise TypeError(
+            "Could not download emote. Check that you are actually linking to an image or GIF.")
+
+    if emote_type == "auto":
+        # Automatically make inline
+        im = Image.open(content)
+
+        content.seek(0)
+
+        emote_type = "inline" if max(im.size) < 256 else "big"
 
     msg = await channel.send(
         file=discord.File(content, filename=f"{name}.{ext}"))
@@ -52,8 +62,10 @@ async def upload(ctx, name, url, emote_type):
          "URL": msg.attachments[0].url,
          "size": msg.attachments[0].size})
 
+    return emote_type
 
-async def inject(ctx: commands.Context, name):
+
+async def inject(ctx: commands.Context, name) -> discord.Emoji:
     '''
     Attempts to inject image into the server's list of emoji,
     returning it afterward
@@ -84,6 +96,7 @@ async def inject(ctx: commands.Context, name):
 
     else:
         await ctx.send(f"Emote `{name}` was not found in the database.")
+        return None
 
 
 async def inline(ctx: commands.Context, e: str):
@@ -114,7 +127,7 @@ class Emotes(commands.Cog):
     '''
     Custom Emote System.
     `:emotename:` call
-    `/emotename/` swap type
+    `\emotename\` swap type
     '''
     def __init__(self, bot):
         self.bot: commands.Bot = bot
@@ -180,8 +193,8 @@ class Emotes(commands.Cog):
                 return
 
         # Validate Name
-        if not name.isalnum():
-            await ctx.send("Name must be alphanumeric!")
+        if not re.match(r'^\w+$', name):
+            await ctx.send("Name must only consist of letters, numbers, and underscores.")
             return
         elif len(name) > 32 or len(name) < 2:
             await ctx.send("Name must be 2 to 32 chars long")
@@ -193,10 +206,15 @@ class Emotes(commands.Cog):
             await ctx.trigger_typing()
 
             # upload as big by default
-            await upload(ctx, name, url, "big")
+            type = await upload(ctx, name, url)
 
-            await ctx.send(f'Emote `{name}` was added. '
-                           f'you can call it using `:{name}:`')
+            if type == "inline":
+                emote = await inject(ctx, name)
+                await ctx.send(f'Emote `{name}` was added.'
+                            f'You can call {emote} using `:{name}:`')
+            else:
+                await ctx.send(f'Emote `{name}` was added. '
+                            f'You can call it using `:{name}:`')
 
         else:
             await reactX(ctx)
@@ -273,8 +291,6 @@ class Emotes(commands.Cog):
             return  # empty
         bigemotes = list(bigemotes)
 
-        pagenum = start_position-1
-
         def em_embed(pagenum):
             e = discord.Embed(color=0xd7342a)
             e.set_author(name=bigemotes[pagenum]["name"],
@@ -283,60 +299,14 @@ class Emotes(commands.Cog):
             e.set_footer(text=f"{pagenum+1}/{len(bigemotes)}")
             return e
 
-        m = await ctx.send(embed=em_embed(pagenum))
-
-        cont = True
-
-        for r in ["⬅", "➡", "⏪", "⏩", "🗑️"]:
-            await m.add_reaction(r)
-
-        def check(reaction, user):
-            return str(reaction) in [
-                "⬅", "➡", "⏪", "⏩", "🗑️"] and reaction.message.id == m.id \
-                    and not user.bot
-
-        BIGSTEP = round(len(bigemotes)/10)
-
-        while cont:
-            try:
-                reaction, user = await self.bot.wait_for(
-                    "reaction_add", check=check, timeout=180)
-
-                await m.remove_reaction(reaction, user)
-                if str(reaction) == "⬅":
-                    pagenum -= 1
-                    if pagenum < 0:
-                        pagenum += len(bigemotes)
-
-                elif str(reaction) == "➡":
-                    pagenum += 1
-                    if pagenum >= len(bigemotes):
-                        pagenum -= len(bigemotes)
-
-                elif str(reaction) == "⏩":
-                    pagenum += BIGSTEP
-                    if pagenum >= len(bigemotes):
-                        pagenum -= len(bigemotes)
-
-                elif str(reaction) == "⏪":
-                    pagenum -= BIGSTEP
-                    if pagenum < 0:
-                        pagenum += len(bigemotes)
-
-                elif str(reaction) == "🗑️":
-                    await m.delete()
-                    cont = False
-                    continue
-
-                await m.edit(embed=em_embed(pagenum))
-            except asyncio.TimeoutError:
-                await m.delete()
-                cont = False
-                continue
+        await send_menu(ctx, [em_embed(num) for num in range(len(bigemotes))])
 
     @emote.group()
     @commands.guild_only()
     async def list(self, ctx: commands.Context):
+        '''
+        Sends a list of emotes by name.
+        '''
         if ctx.invoked_subcommand is None:
             await ctx.send(f"Run `{bot_prefix}emote list big` or "
                            f"`{bot_prefix}emote list inline` to see a list "
@@ -360,64 +330,15 @@ class Emotes(commands.Cog):
         for i in bigemotes:
             paginator.add_line(f"- {i['name']}")
 
-        pagenum = 1
-
         pages = paginator.pages
 
-        m = await ctx.send(f"__**Big Emotes in {ctx.guild.name} "
-                           f"({pagenum}/{len(pages)})**__:{pages[pagenum-1]}")
+        def em_embed(pagenum):
+            e = discord.Embed(color=0xd7342a, title=f"__**Big Emotes in {ctx.guild.name}**__")
+            e.set_footer(text=f"({pagenum + 1}/{len(pages)})")
+            e.description = pages[pagenum]
+            return e
 
-        cont = True
-
-        for r in ["⬅", "➡", "⏪", "⏩", "🗑️"]:
-            await m.add_reaction(r)
-
-        def check(reaction, user):
-            return str(reaction) in [
-                "⬅", "➡", "⏪", "⏩", "🗑️"] and reaction.message.id == m.id \
-                    and not user.bot
-
-        BIGSTEP = round(len(pages)/5)
-
-        while cont:
-            try:
-                reaction, user = await self.bot.wait_for(
-                    "reaction_add", check=check, timeout=180)
-
-                await m.remove_reaction(reaction, user)
-                if str(reaction) == "⬅":
-                    pagenum -= 1
-
-                    if pagenum < 1:
-                        pagenum += len(pages) - 1
-
-                elif str(reaction) == "⏪":
-                    pagenum -= BIGSTEP
-
-                    if pagenum < 1:
-                        pagenum += len(pages) - 1
-
-                elif str(reaction) == "➡":
-                    pagenum += 1
-                    if pagenum >= len(pages):
-                        pagenum -= len(pages) - 1
-
-                elif str(reaction) == "⏩":
-                    pagenum += BIGSTEP
-                    if pagenum >= len(pages):
-                        pagenum -= len(pages) - 1
-
-                elif str(reaction) == "🗑️":
-                    await m.delete()
-                    cont = False
-                    continue
-
-                await m.edit(content=f"__**Big Emotes in {ctx.guild.name} "
-                             f"({pagenum}/{len(pages)})**__:{pages[pagenum-1]}")
-
-            except asyncio.TimeoutError:
-                cont = False
-                continue
+        await send_menu(ctx, [em_embed(num) for num in range(len(pages))])
 
     @list.command()
     @commands.guild_only()
@@ -437,63 +358,20 @@ class Emotes(commands.Cog):
             return  # empty
 
         for i in inlineemotes:
-            paginator.add_line(f"- {i['name']}")
-
-        pagenum = 1
+            if emote := discord.utils.find(lambda m: m.name == i['name'], ctx.guild.emojis):
+                paginator.add_line(f"- {i['name']} {emote}")
+            else:
+                paginator.add_line(f"- {i['name']}")
 
         pages = paginator.pages
 
-        m = await ctx.send(f"__**Inline Emotes in {ctx.guild.name} ({pagenum}/{len(pages)})**__:{pages[pagenum-1]}")
+        def em_embed(pagenum):
+            e = discord.Embed(color=0xd7342a, title=f"__**Inline Emotes in {ctx.guild.name}**__")
+            e.set_footer(text=f"({pagenum + 1}/{len(pages)})")
+            e.description = pages[pagenum]
+            return e
 
-        cont = True
-
-        for r in ["⬅", "➡", "⏪", "⏩", "🗑️"]:
-            await m.add_reaction(r)
-
-        def check(reaction, user):
-           return str(reaction) in [
-                "⬅", "➡", "⏪", "⏩", "🗑️"] and reaction.message.id == m.id \
-                    and not user.bot
-
-        BIGSTEP = round(len(pages)/5)
-
-        while cont:
-            try:
-                reaction, user = await self.bot.wait_for("reaction_add", check=check, timeout=180)
-
-                await m.remove_reaction(reaction, user)
-
-                if str(reaction) == "⬅":
-                    pagenum -= 1
-
-                    if pagenum < 1:
-                        pagenum += len(pages) - 1
-
-                elif str(reaction) == "⏪":
-                    pagenum -= BIGSTEP
-
-                    if pagenum < 1:
-                        pagenum += len(pages) - 1
-
-                elif str(reaction) == "➡":
-                    pagenum += 1
-                    if pagenum >= len(pages):
-                        pagenum -= len(pages) - 1
-
-                elif str(reaction) == "⏩":
-                    pagenum += BIGSTEP
-                    if pagenum >= len(pages):
-                        pagenum -= len(pages) - 1
-
-                elif str(reaction) == "🗑️":
-                    await m.delete()
-                    cont = False
-                    continue
-
-                await m.edit(content=f"__**Inline Emotes in {ctx.guild.name} ({pagenum}/{len(pages)})**__:{pages[pagenum-1]}")
-            except asyncio.TimeoutError:
-                cont = False
-                continue
+        await send_menu(ctx, [em_embed(num) for num in range(len(pages))])
 
     @commands.command()
     @commands.guild_only()
@@ -575,9 +453,9 @@ class Emotes(commands.Cog):
                     await message.delete()
 
             # scan for changing emotes
-            elif message.content[0] == '/' and message.content[-1] == '/' and \
+            elif message.content[0] == '\\' and message.content[-1] == '\\' and \
                     len(message.content) > 1:
                 # Swap type of emote
                 await self.swaptype(
                     await self.bot.get_context(
-                        message), message.content.strip('/').strip(" "))
+                        message), message.content.strip('\\').strip(" "))
