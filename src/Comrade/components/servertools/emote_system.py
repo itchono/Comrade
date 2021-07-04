@@ -232,11 +232,11 @@ class Emotes(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    async def copyemote(self, ctx: commands.Context, emote: discord.PartialEmoji):
+    async def copyemote(self, ctx: commands.Context, emote: discord.PartialEmoji, name: Optional[str] = None):
         '''
         Alias for emote copy
         '''
-        await self.copy(ctx, emote)
+        await self.copy(ctx, emote, name)
 
     @emote.command()
     @commands.guild_only()
