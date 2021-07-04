@@ -14,6 +14,7 @@ import re
 import io
 import aiohttp
 from PIL import Image
+from typing import Optional
 
 from db import collection, emote_channel
 from utils.utilities import is_url, bot_prefix
@@ -239,14 +240,18 @@ class Emotes(commands.Cog):
 
     @emote.command()
     @commands.guild_only()
-    async def copy(self, ctx: commands.Context, emote: discord.PartialEmoji):
+    async def copy(self, ctx: commands.Context, emote: discord.PartialEmoji,
+                   name: Optional[str] = None):
         '''
-        Copies emoji from another context into this server.
+        Copies emoji from another context into this server, optionally specifying a different name.
         '''
+        if not name:
+            name = emote.name
+
         if emote.animated:
-            await self.add(ctx, emote.name, f"https://cdn.discordapp.com/emojis/{emote.id}.gif?v=1")
+            await self.add(ctx, name, f"https://cdn.discordapp.com/emojis/{emote.id}.gif?v=1")
         else:
-            await self.add(ctx, emote.name, f"https://cdn.discordapp.com/emojis/{emote.id}.png?v=1")
+            await self.add(ctx, name, f"https://cdn.discordapp.com/emojis/{emote.id}.png?v=1")
 
     @commands.command()
     @commands.guild_only()
