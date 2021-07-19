@@ -39,7 +39,7 @@ class Vault(commands.Cog):
         message = random.choice(vault_posts(ctx.guild.id))
 
         await echo(ctx, member=message.author, content=message.content,
-                        file=message.attachments[0] if message.attachments else None,
+                        file=await message.attachments[0].to_file() if message.attachments else None,
                         embed=message.embeds[0] if message.embeds else None)
 
     @commands.command(aliases=[u"\U0001F345"])

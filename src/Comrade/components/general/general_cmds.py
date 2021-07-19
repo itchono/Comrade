@@ -273,7 +273,7 @@ class General(commands.Cog):
         '''
         if msg := self.last_deleted[ctx.channel.id]:
             await echo(ctx, member=msg.author, content=msg.content,
-                       file=msg.attachments[0] if msg.attachments else None,
+                       file=await msg.attachments[0].to_file() if msg.attachments else None,
                        embed=msg.embeds[0] if msg.embeds else None)
             self.last_deleted[ctx.channel.id] = None
         else:
@@ -287,7 +287,7 @@ class General(commands.Cog):
         if msg := self.last_edited[ctx.channel.id]:
             before, after = msg
             await echo(ctx, member=before.author, content=before.content,
-                       file=before.attachments[0] if before.attachments else None,
+                       file=await before.attachments[0].to_file() if before.attachments else None,
                        embed=before.embeds[0] if before.embeds else None)
             await ctx.send(after.jump_url)
             self.last_edited[ctx.channel.id] = None

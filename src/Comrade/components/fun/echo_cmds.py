@@ -37,7 +37,7 @@ class Echo(commands.Cog):
 
         await echo(ctx, member=member,
                    content=text,
-                   file=ctx.message.attachments[0] if ctx.message.attachments else None,
+                   file=await ctx.message.attachments[0].to_file() if ctx.message.attachments else None,
                    embed=ctx.message.embeds[0] if ctx.message.embeds else None)
         logger.info(f"Guild {ctx.guild.id}: Echo for {member.id} sent by {ctx.author.id}")
 
