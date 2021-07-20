@@ -253,6 +253,20 @@ class Emotes(commands.Cog):
         else:
             await self.add(ctx, name, f"https://cdn.discordapp.com/emojis/{emote.id}.png?v=1")
 
+    @emote.command()
+    @commands.guild_only()
+    async def steal(self, ctx: commands.Context, name: Optional[str] = None):
+        '''
+        Steals emoji from the message you reply to.
+        Use this instead of `copy` if you're non-nitro
+        '''
+        if ref := ctx.message.reference:
+            msg = await ctx.fetch_message(ref.message_id)
+
+            em = commands.PartialEmojiConverter().convert(ctx, msg.content)
+
+            await self.copy(ctx, em, name)
+
     @commands.command()
     @commands.guild_only()
     async def addemojigg(self, ctx: commands.Context, name: str):
