@@ -263,7 +263,7 @@ class Emotes(commands.Cog):
         if ref := ctx.message.reference:
             msg = await ctx.fetch_message(ref.message_id)
 
-            em = commands.PartialEmojiConverter().convert(ctx, msg.content)
+            em = await commands.PartialEmojiConverter().convert(ctx, msg.content)
 
             await self.copy(ctx, em, name)
 
