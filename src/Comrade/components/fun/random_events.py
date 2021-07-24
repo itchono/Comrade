@@ -16,6 +16,7 @@ class RandomEvents(commands.Cog):
 
     def __init__(self, bot):
         self.bot: commands.Bot = bot
+        self.namelock = []
 
     async def nameswap(self, ctx: commands.Context):
         '''
@@ -43,6 +44,8 @@ class RandomEvents(commands.Cog):
             # Mission permissions
             await ctx.send(
                 f"{ctx.author.mention}, you must change your name to `{msg.content}`!")
+
+        self.namelock.append(ctx.author)
 
     async def rickroll(self, ctx: commands.Context):
         '''
@@ -76,3 +79,10 @@ class RandomEvents(commands.Cog):
                     await self.nameswap(ctx)
                 elif choice == "rickroll":
                     await self.rickroll(ctx)
+
+    @commands.Cog.listener()
+    @commands.Cog.listener()
+    async def on_member_update(self,
+                               before: discord.Member, after: discord.Member):
+        if before in self.namelock and before.nick != after.nick:
+            await after.edit(nick=before.nick, reason="Comrade name change")
