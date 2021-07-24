@@ -81,7 +81,6 @@ class RandomEvents(commands.Cog):
                     await self.rickroll(ctx)
 
     @commands.Cog.listener()
-    @commands.Cog.listener()
     async def on_member_update(self,
                                before: discord.Member, after: discord.Member):
         if before in self.namelock and before.nick != after.nick:
