@@ -35,6 +35,13 @@ class RandomEvents(commands.Cog):
             await ctx.send("Nameswap aborted (120s timeout).")
             return
 
+        collection("users").update_one(
+                    ufil(ctx.author),
+                    {"$set": {
+                        "persistent-name":
+                        msg.content[:32]}})
+        # Lock name
+
         try:
             await ctx.author.edit(nick=msg.content[:32], reason="Comrade name change")
             # Note: must be less than 32 char
@@ -44,13 +51,6 @@ class RandomEvents(commands.Cog):
             # Mission permissions
             await ctx.send(
                 f"{ctx.author.mention}, you must change your name to `{msg.content}`!")
-
-        collection("users").update_one(
-                    ufil(ctx.author),
-                    {"$set": {
-                        "persistent-name":
-                        msg.content[:32]}})
-        # Lock name
 
     async def rickroll(self, ctx: commands.Context):
         '''
