@@ -3,6 +3,7 @@ const Discord = require("discord.js")
 const express = require("express")
 const ytdl = require('ytdl-core');
 const fs = require('fs');
+const { OpusEncoder } = require('@discordjs/opus');
 const server = express();
 var pathToFfmpeg = require('ffmpeg-static');
 var spawn = require('child_process').spawn;
@@ -40,6 +41,9 @@ client.on('message', (message) => {
       }
       else if (message.content === "*disgrace") {
         voiceclip(message, "https://www.youtube.com/watch?v=yau-rTqV4xQ")
+      }
+      else if (message.content === "*letsgo") {
+        voiceclip(message, "https://www.youtube.com/watch?v=O6ZsoOvn4uo")
       }
       else if (message.content === "*listen") {
         listen(message)

@@ -303,41 +303,43 @@ class Tools(commands.Cog):
                 if res.component.label == "🛑" and res.author.id == author.id:
                     raise asyncio.TimeoutError  # stop poll
 
-                options_index = int(res.component.id[-2:])
+                elif res.component.label != "🛑":
 
-                e: discord.Embed = res.message.embeds[0]
+                    options_index = int(res.component.id[-2:])
 
-                for i in range(len(e.fields)):
-                    # Traverse every field
+                    e: discord.Embed = res.message.embeds[0]
 
-                    field = e.fields[i]
+                    for i in range(len(e.fields)):
+                        # Traverse every field
 
-                    existing_user_ids = []
+                        field = e.fields[i]
 
-                    if matches := re.findall(r"<@(\d+)>", field.value):
-                        existing_user_ids = [u for u in matches]
+                        existing_user_ids = []
 
-                    if i == options_index and str(res.author.id) in existing_user_ids:
-                        # Remove
-                        existing_user_ids.remove(str(res.author.id))
-                    elif i == options_index:
-                        # Add
-                        existing_user_ids.append(str(res.author.id))
+                        if matches := re.findall(r"<@(\d+)>", field.value):
+                            existing_user_ids = [u for u in matches]
 
-                    users = [f"<@{u}>" for u in existing_user_ids]
-                    people = " ".join(users)
+                        if i == options_index and str(res.author.id) in existing_user_ids:
+                            # Remove
+                            existing_user_ids.remove(str(res.author.id))
+                        elif i == options_index:
+                            # Add
+                            existing_user_ids.append(str(res.author.id))
 
-                    e.set_field_at(i,
-                        name=f"{REACTIONS[i].upper()}) {options[i]}: {len(users)}",
-                        value=people if people else "No one",
-                        inline=False)
-                e.set_author(
-                    name=f"{author.display_name}, press 🛑 to stop the poll.",
-                    icon_url=author.avatar_url)
-                e.set_footer(
-                    text=f"Updated {local_time().strftime('%I:%M:%S %p %Z')}\nPress one of the buttons to vote or un-vote")
+                        users = [f"<@{u}>" for u in existing_user_ids]
+                        people = " ".join(users)
 
-                await res.respond(type=InteractionType.UpdateMessage, embeds=[e])
+                        e.set_field_at(i,
+                            name=f"{REACTIONS[i].upper()}) {options[i]}: {len(users)}",
+                            value=people if people else "No one",
+                            inline=False)
+                    e.set_author(
+                        name=f"{author.display_name}, press 🛑 to stop the poll.",
+                        icon_url=author.avatar_url)
+                    e.set_footer(
+                        text=f"Updated {local_time().strftime('%I:%M:%S %p %Z')}\nPress one of the buttons to vote or un-vote")
+
+                    await res.respond(type=InteractionType.UpdateMessage, embeds=[e])
 
             except asyncio.TimeoutError:
                 cont = False
