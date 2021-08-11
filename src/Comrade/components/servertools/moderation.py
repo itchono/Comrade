@@ -232,10 +232,33 @@ class Moderation(commands.Cog):
     @commands.command()
     @commands.check(isOP())
     @commands.guild_only()
+    async def banreactions(self, ctx: commands.Context,
+                        member: discord.Member):
+        '''
+        Bans reactions on a member
+        '''
+        collection("users").update_one(ufil(member), {"$set": {"moderation.stop-reactions": True}})
+        await ctx.send(f"{member.display_name} can no longer react.")
+
+    @commands.command()
+    @commands.check(isOP())
+    @commands.guild_only()
+    async def unbanreactions(self, ctx: commands.Context,
+                        member: discord.Member):
+        '''
+        unBans reactions on a member
+        '''
+        collection("users").update_one(ufil(member), {"$set": {"moderation.stop-reactions": False}})
+        await ctx.send(f"{member.display_name} can react.")
+
+
+    @commands.command()
+    @commands.check(isOP())
+    @commands.guild_only()
     async def banpings(self, ctx: commands.Context,
                         member: discord.Member):
         '''
-        Bans images on a member
+        Bans pings on a member
         '''
         collection("users").update_one(ufil(member), {"$set": {"moderation.stop-pings": True}})
         await ctx.send(f"{member.display_name} can no longer ping.")
@@ -246,7 +269,7 @@ class Moderation(commands.Cog):
     async def unbanpings(self, ctx: commands.Context,
                         member: discord.Member):
         '''
-        Bans images on a member
+        Bans pings on a member
         '''
         collection("users").update_one(ufil(member), {"$set": {"moderation.stop-pings": False}})
         await ctx.send(f"{member.display_name} can ping.")
@@ -284,6 +307,14 @@ class Moderation(commands.Cog):
         assert member.id in threat_list(ctx.guild.id, level)
 
         await ctx.send(f"{member.display_name} is now threat level `{level}`")
+
+    @commands.Cog.listener()
+    async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):
+        if reaction.message.guild:
+            u = collection("users").find_one(ufil(reaction.message.author))
+
+            if u["moderation"]["stop-reactions"]:
+                await reaction.clear()
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.message):
