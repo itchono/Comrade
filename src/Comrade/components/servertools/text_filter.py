@@ -56,7 +56,7 @@ def text_filter(content: str,
             return True
 
         for word in spaced_query.split(" "):
-            if word[0] == w[0] and word[-1] == w[-1] and fuzz.partial_ratio(word, w) >= words[w]:
+            if word and word[0] == w[0] and word[-1] == w[-1] and fuzz.partial_ratio(word, w) >= words[w]:
                 return True
             # checking endcap letters
     return False

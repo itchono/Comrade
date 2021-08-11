@@ -207,6 +207,51 @@ class Moderation(commands.Cog):
                     f"Word has been added to {member.display_name}'s set of personal banned words.\nActivation threshold: {threshold}%")
 
     @commands.command()
+    @commands.check(isOP())
+    @commands.guild_only()
+    async def banimages(self, ctx: commands.Context,
+                        member: discord.Member):
+        '''
+        Bans images on a member
+        '''
+        collection("users").update_one(ufil(member), {"$set": {"moderation.stop-images": True}})
+        await ctx.send(f"{member.display_name} can no longer send images.")
+
+    @commands.command()
+    @commands.check(isOP())
+    @commands.guild_only()
+    async def unbanimages(self, ctx: commands.Context,
+                        member: discord.Member):
+        '''
+        unBans images on a member
+        '''
+        collection("users").update_one(ufil(member), {"$set": {"moderation.stop-images": False}})
+        await ctx.send(f"{member.display_name} can send images.")
+
+
+    @commands.command()
+    @commands.check(isOP())
+    @commands.guild_only()
+    async def banpings(self, ctx: commands.Context,
+                        member: discord.Member):
+        '''
+        Bans images on a member
+        '''
+        collection("users").update_one(ufil(member), {"$set": {"moderation.stop-pings": True}})
+        await ctx.send(f"{member.display_name} can no longer ping.")
+
+    @commands.command()
+    @commands.check(isOP())
+    @commands.guild_only()
+    async def unbanpings(self, ctx: commands.Context,
+                        member: discord.Member):
+        '''
+        Bans images on a member
+        '''
+        collection("users").update_one(ufil(member), {"$set": {"moderation.stop-pings": False}})
+        await ctx.send(f"{member.display_name} can ping.")
+
+    @commands.command()
     @commands.check_any(commands.check(isOP()), isServerOwner())
     async def op(self, ctx, *, member: discord.Member):
         '''
