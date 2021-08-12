@@ -34,6 +34,10 @@ with open("static/news_border.txt", "r", encoding="utf-8") as f:
     BORDER_TOP, ACCENT_BORDER, BORDER_BOTTOM = f.read().splitlines()
     len_border = len(BORDER_TOP)
 
+with open("static/bad_news_border.txt", "r", encoding="utf-8") as f:
+    BAD_BORDER_TOP, BAD_ACCENT_BORDER, BAD_BORDER_BOTTOM = f.read().splitlines()
+    len_border = len(BAD_BORDER_TOP)
+
 
 class Tools(commands.Cog):
     '''
@@ -224,6 +228,39 @@ class Tools(commands.Cog):
                        delete_msg=True)
         else:
             await ctx.send(f"**```{BORDER_TOP}\n{ACCENT_BORDER}\n{content}\n{ACCENT_BORDER}\n{BORDER_BOTTOM}```**")
+
+    @commands.command()
+    async def badnews(self, ctx: commands.Context, *, content):
+        '''
+        Wraps a piece of text in a somber border to report bad news
+        '''
+        words = content.split(" ")
+        lines = []
+        buffer = ""  # line buffer
+
+        while words:
+            # do until the array of words is empty
+            if len(words[0]) >= len_border and (max_word := words.pop(0)):
+                words = [max_word[:len_border - 2] + '-',
+                         max_word[len_border - 2:]] + words
+                # case: word is too long
+
+            while words and len(buffer + words[0]) < len_border:
+                buffer += words.pop(0) + " "
+
+            lines.append(buffer.strip(" ").center(len_border))
+            # center the text in the block after removing spaces
+            buffer = ""
+
+        content = "\n".join(lines)
+
+        if ctx.guild:
+            # using monospaced font to fix spacing
+            await echo(ctx, member=ctx.author,
+                       content=f"**```{BAD_BORDER_TOP}\n{BAD_ACCENT_BORDER}\n{content}\n{BAD_ACCENT_BORDER}\n{BAD_BORDER_BOTTOM}```**",
+                       delete_msg=True)
+        else:
+            await ctx.send(f"**```{BAD_BORDER_TOP}\n{BAD_ACCENT_BORDER}\n{content}\n{BAD_ACCENT_BORDER}\n{BAD_BORDER_BOTTOM}```**")
 
     @commands.command()
     @commands.guild_only()
