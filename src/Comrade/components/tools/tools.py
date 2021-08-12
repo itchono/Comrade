@@ -36,7 +36,7 @@ with open("static/news_border.txt", "r", encoding="utf-8") as f:
 
 with open("static/bad_news_border.txt", "r", encoding="utf-8") as f:
     BAD_BORDER_TOP, BAD_ACCENT_BORDER, BAD_BORDER_BOTTOM = f.read().splitlines()
-    len_border = len(BAD_BORDER_TOP)
+    len_bad_border = len(BAD_BORDER_TOP)
 
 
 class Tools(commands.Cog):
@@ -240,15 +240,15 @@ class Tools(commands.Cog):
 
         while words:
             # do until the array of words is empty
-            if len(words[0]) >= len_border and (max_word := words.pop(0)):
-                words = [max_word[:len_border - 2] + '-',
-                         max_word[len_border - 2:]] + words
+            if len(words[0]) >= len_bad_border and (max_word := words.pop(0)):
+                words = [max_word[:len_bad_border - 2] + '-',
+                         max_word[len_bad_border - 2:]] + words
                 # case: word is too long
 
-            while words and len(buffer + words[0]) < len_border:
+            while words and len(buffer + words[0]) < len_bad_border:
                 buffer += words.pop(0) + " "
 
-            lines.append(buffer.strip(" ").center(len_border))
+            lines.append(buffer.strip(" ").center(len_bad_border))
             # center the text in the block after removing spaces
             buffer = ""
 
