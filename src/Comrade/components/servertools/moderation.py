@@ -311,7 +311,7 @@ class Moderation(commands.Cog):
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):
         if reaction.message.guild:
-            u = collection("users").find_one(ufil(reaction.message.author))
+            u = collection("users").find_one({"user": user.id, "server": reaction.message.guild.id})
 
             if u["moderation"]["stop-reactions"]:
                 await reaction.clear()
