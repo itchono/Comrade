@@ -258,8 +258,11 @@ class Users(commands.Cog):
             await channel.send(f":door: {member.display_name} has left.")
         logger.info("Member leave")
 
-        collection("users").delete_one(ufil(member))
-        # Delete DB entry
+        uprofile = collection("users").find_one(ufil(member))
+
+        if not uprofile["moderation"]["threat-level"]:
+            collection("users").delete_one(ufil(member))
+            # Delete DB entry if member's threat level is nonzero only
 
     @commands.Cog.listener()
     async def on_member_update(self,

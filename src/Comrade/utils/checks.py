@@ -4,6 +4,7 @@ from functools import lru_cache
 from db import collection
 from utils.logger import logger
 
+
 @lru_cache()
 def op_list(guild_id: int):
     '''
