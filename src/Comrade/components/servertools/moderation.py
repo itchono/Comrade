@@ -313,7 +313,7 @@ class Moderation(commands.Cog):
         if reaction.message.guild:
             u = collection("users").find_one({"user": user.id, "server": reaction.message.guild.id})
 
-            if u["moderation"]["stop-reactions"]:
+            if "stop-reactions" in u["moderation"] and u["moderation"]["stop-reactions"]:
                 await reaction.clear()
 
     @commands.Cog.listener()

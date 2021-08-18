@@ -54,6 +54,9 @@ async def on_command_error(ctx: commands.Context, exception):
     await ctx.send(f"Error: {exception}", reference=ctx.message)
     logger.exception("Command Error", exc_info=exception)
 
+    if type(exception) == discord.HTTPException:
+        os.system("kill 1")  # hard restart on 429
+
 
 @client.before_invoke
 async def set_before_command(ctx: commands.Context):
