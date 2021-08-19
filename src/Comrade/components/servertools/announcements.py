@@ -10,7 +10,11 @@ from utils.reactions import reactOK
 from utils.users import (weighted_member_from_server,
                          rebuild_weight_table, sum_of_weights)
 from utils.logger import logger
-from db import collection
+from db import collection, emote_channel
+from utils.echo import echo
+import io
+
+session = aiohttp.ClientSession()
 
 
 class Announcements(commands.Cog):
@@ -56,14 +60,26 @@ class Announcements(commands.Cog):
             roles.append(dailyrole)
             await luckyperson.edit(roles=roles)
 
-            await channel.send(
-                f"Today's Daily Member is **{luckyperson.display_name}**")
+            await echo(ctx, luckyperson, content=f"Today's Daily Member is **{luckyperson.display_name}**")
 
             col = luckyperson.colour
 
-            a = discord.Embed(color=col,
-                            title=f"{luckyperson.display_name}'s Avatar",
-                            url=str(luckyperson.avatar_url_as(static_format="png")))
+            try:
+                content = io.BytesIO()
+                avatar: discord.Asset = luckyperson.avatar_url_as(static_format="png")
+                avatar = avatar.save(content)
+
+                storage_chan = emote_channel(ctx.guild)
+                m = await storage_chan.send(file=discord.File(content, filename=f"{luckyperson.id}.png"))
+
+                a = discord.Embed(color=col,
+                                title=f"{luckyperson.display_name}'s Avatar",
+                                url=m.attachments[0].url)
+
+            except Exception:
+                a = discord.Embed(color=col,
+                                title=f"{luckyperson.display_name}'s Avatar",
+                                url=str(luckyperson.avatar_url_as(static_format="png")))
             a.set_image(url=luckyperson.avatar_url)
             await ctx.send(embed=a)
 

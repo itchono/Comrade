@@ -264,7 +264,13 @@ class General(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
+        '''
+        When a message is edited
+        '''
         self.last_edited[after.channel.id] = (before, after)
+
+        if before.mentions != after.mentions: await after.channel.send(f":rotating_light: PING POLICE :rotating_light:\n{after.author.mention} edited a message which pinged the following user(s): {', '.join(['`' + m.display_name + '`' for m in before.mentions])}")
+        elif before.role_mentions != after.role_mentions: await after.channel.send(f":rotating_light: PING POLICE :rotating_light:\n{after.author.mention} edited a message which pinged the following role(s): {', '.join(['`' + m.name + '`' for m in before.role_mentions])}")
 
     @commands.command()
     async def deleted(self, ctx: commands.Context):
