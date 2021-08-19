@@ -14,8 +14,6 @@ from db import collection, emote_channel
 from utils.echo import echo
 import io
 
-session = aiohttp.ClientSession()
-
 
 class Announcements(commands.Cog):
     '''
