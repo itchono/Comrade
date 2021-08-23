@@ -612,3 +612,23 @@ class Fun(commands.Cog):
 
             await shoujosend(ctx, content=feelings,
                              file=discord.File(f, 'sparklified.png'))
+
+    @commands.command()
+    async def yes(self, ctx: commands.Context):
+        '''
+        makes an image yes; attach another image to yes-ify it
+        '''
+        f = io.BytesIO()
+        await ctx.message.attachments[0].save(f)
+        f.seek(0)
+        ogImage = Image.open(f)
+        size = ogImage.size[0]  # width of image
+
+        yeah = Image.open("static/yes.png").resize((size, int(564/600 * size)))
+        ogImage.paste(yeah, (0, ogImage.size[1] - int(564/600 * size)), yeah)
+
+        f.seek(0)
+        ogImage.save(f, "PNG")
+        f.seek(0)
+
+        await ctx.send(file=discord.File(f, 'sparklified.png'))

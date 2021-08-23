@@ -65,7 +65,7 @@ class Announcements(commands.Cog):
             try:
                 content = io.BytesIO()
                 avatar: discord.Asset = luckyperson.avatar_url_as(static_format="png")
-                avatar = avatar.save(content)
+                avatar = await avatar.save(content)
 
                 storage_chan = emote_channel(ctx.guild)
                 m = await storage_chan.send(file=discord.File(content, filename=f"{luckyperson.id}.png"))
