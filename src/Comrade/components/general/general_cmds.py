@@ -76,7 +76,7 @@ class General(commands.Cog):
         Gets the creation time of basically any Discord object.
         '''
         await ctx.send(f"That was created on "
-                       f"{utc_to_local_time(thing.created_at).strftime('%B %d %Y at %I:%M:%S.%f %p %Z')}")
+                       f"<t:{int(utc_to_local_time(thing.created_at).timestamp())}>")
 
     @commands.command(aliases=["lastmsg", "staleness"])
     @commands.guild_only()

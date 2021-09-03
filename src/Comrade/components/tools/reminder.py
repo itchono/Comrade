@@ -49,7 +49,7 @@ class Reminders(commands.Cog):
         collection("reminders").insert_one(reminder)
 
         await ctx.send(
-            f"I will remind you on {(local_time() + advance).strftime('%B %d %Y at %I:%M %p %Z')}.")
+            f"I will remind you on <t:{(local_time() + advance).timestamp()}>.")
 
     @tasks.loop(minutes=1.0)
     async def send_reminders(self):
