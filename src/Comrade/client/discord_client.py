@@ -41,7 +41,7 @@ slash = SlashCommand(client,
 @client.event
 async def on_error(event, *args, **kwargs):
     try:
-        raise event
+        raise Exception(event)
     except discord.HTTPException:
         os.system("kill 1")  # hard restart on 429
     except Exception:
