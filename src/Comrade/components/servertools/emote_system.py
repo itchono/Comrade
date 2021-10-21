@@ -60,7 +60,7 @@ async def upload(ctx, name, url, emote_type="auto") -> str:
          "server": ctx.guild.id,
          "type": emote_type,
          "ext": ext,
-         "URL": msg.attachments[0].url,
+         "URL": str(msg.attachments[0].url),
          "size": msg.attachments[0].size})
 
     return emote_type
@@ -85,7 +85,7 @@ async def inject(ctx: commands.Context, name) -> discord.Emoji:
                 # If not loaded, we must first database it
 
                 # upload the about-to-be-destroyed emoji
-                await upload(ctx, unload.name, unload.url, "inline")
+                await upload(ctx, unload.name, str(unload.url), "inline")
 
             await unload.delete(reason=f"Unloading emoji to make space for {name}")
 
@@ -187,7 +187,7 @@ class Emotes(commands.Cog):
         '''
         try:
             if not url:
-                url = ctx.message.attachments[0].url
+                url = str(ctx.message.attachments[0].url)
         except BaseException:
             if not is_url(url):
                 await ctx.send("Invalid URL Provided.")
@@ -468,7 +468,7 @@ class Emotes(commands.Cog):
 
         elif emote := discord.utils.get(ctx.guild.emojis, name=name):
             # in server, and not on mongodb (fringe case)
-            await upload(ctx, name, emote.url, "big")
+            await upload(ctx, name, str(emote.url), "big")
             try:
                 await emote.delete(reason=f"Unloading emoji because it changed type.")
             except BaseException:
