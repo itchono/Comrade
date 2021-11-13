@@ -618,6 +618,10 @@ class Fun(commands.Cog):
         '''
         makes an image yes; attach another image to yes-ify it
         '''
+        if not ctx.message.attachments:
+            await ctx.send("Please attach an image to your message!")
+            return
+
         f = io.BytesIO()
         await ctx.message.attachments[0].save(f)
         f.seek(0)
@@ -629,6 +633,33 @@ class Fun(commands.Cog):
 
         f.seek(0)
         ogImage.save(f, "PNG")
+        f.seek(0)
+
+        await ctx.send(file=discord.File(f, 'sparklified.png'))
+
+    @commands.command()
+    async def zamn(self, ctx: commands.Context):
+        '''
+        makes an image ZAMN; attach another image to yes-ify it
+        '''
+        if not ctx.message.attachments:
+            await ctx.send("Please attach an image to your message!")
+            return
+
+        f = io.BytesIO()
+        await ctx.message.attachments[0].save(f)
+        f.seek(0)
+        ogImage = Image.open(f)
+        template = Image.open("static/zamn.png")
+        ratio = ogImage.size[0]/ogImage.size[1]
+        ogImage = ogImage.resize((int(360 * ratio), 360))
+
+        template.paste(ogImage, (254-int((ogImage.size[0]-249)/2), 73))
+        template2 = Image.open("static/zamn.png")
+        template.paste(template2, (0, 0), template2)
+
+        f.seek(0)
+        template.save(f, "PNG")
         f.seek(0)
 
         await ctx.send(file=discord.File(f, 'sparklified.png'))
