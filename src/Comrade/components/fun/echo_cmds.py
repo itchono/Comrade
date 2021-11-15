@@ -62,7 +62,8 @@ class Echo(commands.Cog):
     @commands.check(isNotThreat())
     @commands.guild_only()
     async def cosplay(self, ctx: commands.Context, name: str,
-                      img_url: typing.Optional[str] = None, *, message):
+                      img_url: typing.Optional[str] = None,
+                      delete: typing.Optional[bool] = True, *, message):
         '''
         Sends a message with a custom avatar name and image URL.
         Alternatively, you can also attach an image.
@@ -80,7 +81,8 @@ class Echo(commands.Cog):
         await mimic(ctx.channel,
                     content=message, username=name, avatar_url=url)
 
-        await ctx.message.delete()
+        if delete:
+            await ctx.message.delete()
 
     @commands.command()
     @commands.check(isNotThreat())
