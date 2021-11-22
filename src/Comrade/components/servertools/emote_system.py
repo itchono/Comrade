@@ -146,7 +146,7 @@ class Emotes(commands.Cog):
             # Stage 1: Search server cache
             if emote := discord.utils.get(ctx.guild.emojis, name=e):
                 await echo(ctx, member=ctx.author, content=emote)
-                await ctx.message.delete()  # try to delete
+                # await ctx.message.delete()  # try to delete
 
             # Stage 2: Search MongoDB
             elif (document := collection("emotes").find_one({"name": e, "server": ctx.guild.id})) or \
@@ -159,13 +159,13 @@ class Emotes(commands.Cog):
                 if emote := discord.utils.get(
                         ctx.guild.emojis, name=document["name"]):
                     await echo(ctx, member=ctx.author, content=emote)
-                    await ctx.message.delete()  # try to delete
+                    # await ctx.message.delete()  # try to delete
 
                 # Or, it needs to be added
                 elif document["type"] == "inline":
                     emote = await inject(ctx, document["name"])
                     await echo(ctx, member=ctx.author, content=emote)
-                    await ctx.message.delete()  # try to delete
+                    # await ctx.message.delete()  # try to delete
 
                 # 2B: Big emoji, send as-is
                 elif document["type"] == "big":
