@@ -52,8 +52,12 @@ class ComradeEmojiConverter(commands.Converter):
         logger.info(f"Trying to load {emote}...")
         try:
             emoji = await commands.EmojiConverter().convert(ctx, emote)
-            logger.info(f"Emoji: {str(emoji)}")
-            return emoji
+            logger.info(f"Emoji: {str(emoji)} Guild: {emoji.guild.name}")
+
+            if emoji.guild == ctx.guild:
+                return emoji
+            else:
+                raise Exception(f"Emoji is not in this server.")
         except BaseException:
             pass
 
