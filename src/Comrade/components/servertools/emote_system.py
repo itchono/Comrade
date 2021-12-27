@@ -77,10 +77,13 @@ class ComradeEmojiConverter(commands.Converter):
 
         # Stage 3: Unicode Emoji
         try:
-            return PartialEmoji(name=emote)
+            emoji = PartialEmoji(name=emote)
+            if emoji.is_unicode_emoji():
+                return emoji
+            return None
         except commands.BadArgument:
-            pass
-        return None
+            return None
+        # ISSUE: does not check if emoji is valid unicode emoji.
 
 
 async def upload(ctx, name, url, emote_type="auto") -> str:
@@ -503,9 +506,9 @@ class Emotes(commands.Cog):
             emote = await ComradeEmojiConverter().convert(
                 await self.bot.get_context(message), em.strip(':').strip(" ")
             )
-            if type(emote) is discord.Emoji or \
-               type(emote) is discord.PartialEmoji:
+            if type(emote) is discord.Emoji:
                 return emote
+            return None
 
         if message.content and not message.author.bot and message.guild:
 
