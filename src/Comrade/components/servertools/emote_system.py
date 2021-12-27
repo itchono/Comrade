@@ -15,7 +15,6 @@ import io
 import aiohttp
 from PIL import Image
 from typing import Optional, Union
-from discord.ext.commands.converter import EmojiConverter
 
 from discord.partial_emoji import PartialEmoji
 
@@ -25,6 +24,7 @@ from utils.reactions import reactX
 from utils.echo import echo, mimic
 from utils.checks import isOP
 from utils.button_menu import send_menu
+from utils.logger import logger
 
 session = aiohttp.ClientSession()
 
@@ -50,10 +50,12 @@ class ComradeEmojiConverter(commands.Converter):
             Union[discord.Emoji, dict, str]:
         # Stage 1: Try direct conversion
         try:
+            logger.info("Emoji found in server: {}".format(emote))
             return await commands.EmojiConverter().convert(ctx, emote)
-        except commands.BadArgument:
+        except commands.EmojiNotFound:
             pass
 
+        logger.info(f"Trying to load {emote}; Moving to stage 2.")
         # Stage 2: Search MongoDB
         if (document := collection("emotes").find_one(
             {"name": emote, "server": ctx.guild.id})) or \
@@ -65,10 +67,12 @@ class ComradeEmojiConverter(commands.Converter):
             # maybe they just got the case wrong
             if emote := discord.utils.get(
                     ctx.guild.emojis, name=document["name"]):
+                logger.info("Inline emoji found: {}".format(emote))
                 return emote
 
             # Or, it needs to be added
             elif document["type"] == "inline":
+                logger.info("Inline emoji not loaded, adding it.")
                 return await inject(ctx, document["name"])
 
             # 2B: Big emoji, send as-is
@@ -76,6 +80,7 @@ class ComradeEmojiConverter(commands.Converter):
                 return document
 
         # Stage 3: Unicode Emoji
+        logger.info("Moving onto unicode emoji.")
         try:
             emoji = PartialEmoji(name=emote)
             if emoji.is_unicode_emoji():
@@ -181,8 +186,7 @@ class Emotes(commands.Cog):
 
             emote = await ComradeEmojiConverter().convert(ctx, e)
 
-            if type(emote) is discord.Emoji or \
-               type(emote) is discord.PartialEmoji:
+            if type(emote) is discord.Emoji:
                 # Inline emoji
                 await echo(ctx, member=ctx.author, content=emote)
 
