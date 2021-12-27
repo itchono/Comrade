@@ -230,12 +230,7 @@ class General(commands.Cog):
             m = (await ctx.channel.history(limit=2).flatten())[1]
         # Get most recent message
 
-        try:
-            emoji = await commands.EmojiConverter().convert(ctx, emoji)
-            await m.add_reaction(emoji)
-            await ctx.send("Reaction added!", hidden=True)
-        except commands.BadArgument:
-            await ctx.send("Could not find emoji!", hidden=True)
+        await m.add_reaction(emoji)
 
     @commands.command()
     async def clear(self, ctx: commands.Context):
