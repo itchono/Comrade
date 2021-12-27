@@ -49,13 +49,10 @@ class ComradeEmojiConverter(commands.Converter):
                       emote: str) -> \
             Union[discord.Emoji, dict, str]:
         # Stage 1: Try direct conversion
-        try:
-            logger.info("Emoji found in server: {}".format(emote))
-            return await commands.EmojiConverter().convert(ctx, emote)
-        except commands.EmojiNotFound:
-            pass
+        if emoji := await commands.EmojiConverter().convert(ctx, emote):
+            return emoji
 
-        logger.info(f"Trying to load {emote}; Moving to stage 2.")
+        logger.info(f"Trying to load {emote}; not found in server, moving to stage 2.")
         # Stage 2: Search MongoDB
         if (document := collection("emotes").find_one(
             {"name": emote, "server": ctx.guild.id})) or \
