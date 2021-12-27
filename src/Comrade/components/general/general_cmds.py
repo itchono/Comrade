@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from discord_slash import cog_ext, SlashContext, SlashCommandOptionType
 from discord_slash.utils.manage_commands import create_option
+from typing import Union
 
 import datetime
 
@@ -10,9 +11,10 @@ from utils.echo import echo
 from collections import defaultdict
 
 from utils.utilities import (get_uptime, get_host,
-                             local_time, utc_to_local_time, bot_prefix)
+                             local_time, utc_to_local_time)
 
-from utils.checks import isNotThreat
+from components.servertools.emote_system import ComradeEmojiConverter
+
 import math
 
 from config import cfg, version
@@ -221,8 +223,8 @@ class General(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    async def react(self, ctx: commands.Context, emoji: discord.Emoji,
-                    m: discord.Message = None):
+    async def react(self, ctx: commands.Context,
+                    emoji: str, m: discord.Message = None):
         '''
         Reacts to the above message with a given emoji (can be animated)
         '''
@@ -230,7 +232,11 @@ class General(commands.Cog):
             m = (await ctx.channel.history(limit=2).flatten())[1]
         # Get most recent message
 
-        await m.add_reaction(emoji)
+        emote = await ComradeEmojiConverter().convert(ctx, emoji)
+
+        if type(emote) is discord.Emoji or \
+           type(emote) is discord.PartialEmoji:
+            await m.add_reaction(emote)
 
     @commands.command()
     async def clear(self, ctx: commands.Context):

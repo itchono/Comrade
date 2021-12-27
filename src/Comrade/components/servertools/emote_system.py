@@ -14,7 +14,10 @@ import re
 import io
 import aiohttp
 from PIL import Image
-from typing import Optional
+from typing import Optional, Union
+from discord.ext.commands.converter import EmojiConverter
+
+from discord.partial_emoji import PartialEmoji
 
 from db import collection, emote_channel
 from utils.utilities import is_url, bot_prefix
@@ -24,6 +27,60 @@ from utils.checks import isOP
 from utils.button_menu import send_menu
 
 session = aiohttp.ClientSession()
+
+
+# Custom emoji converter class
+class ComradeEmojiConverter(commands.Converter):
+    '''
+    Finds emoji based on Comrade system or otherwise.
+
+    Parameters
+    ----------
+    emote: str
+        name, discord formatted emoji, etc..
+
+    Returns
+    -------
+    discord.Emoji: animated or regular emoji
+    discord.PartialEmoji: unicode emoji
+    dict: Comrade custom large emoji {name, URL}
+    '''
+    async def convert(self, ctx: commands.Context,
+                      emote: str) -> \
+            Union[discord.Emoji, dict, str]:
+        # Stage 1: Try direct conversion
+        try:
+            return await commands.EmojiConverter().convert(ctx, emote)
+        except commands.BadArgument:
+            pass
+
+        # Stage 2: Search MongoDB
+        if (document := collection("emotes").find_one(
+            {"name": emote, "server": ctx.guild.id})) or \
+                (document := collection("emotes").find_one(
+                    {"name": re.compile('^' + emote + '$', re.IGNORECASE),
+                        "server": ctx.guild.id})):
+
+            # 2A: inline emoji,
+            # maybe they just got the case wrong
+            if emote := discord.utils.get(
+                    ctx.guild.emojis, name=document["name"]):
+                return emote
+
+            # Or, it needs to be added
+            elif document["type"] == "inline":
+                return await inject(ctx, document["name"])
+
+            # 2B: Big emoji, send as-is
+            elif document["type"] == "big":
+                return document
+
+        # Stage 3: Unicode Emoji
+        try:
+            return PartialEmoji(name=emote)
+        except commands.BadArgument:
+            pass
+        return None
 
 
 async def upload(ctx, name, url, emote_type="auto") -> str:
@@ -100,30 +157,6 @@ async def inject(ctx: commands.Context, name) -> discord.Emoji:
         return None
 
 
-async def inline(ctx: commands.Context, e: str):
-    '''
-    Gets an inline emote from Discord, if it exists,
-    else it injects it and returns it
-    Similar code to emote function
-    '''
-    # Stage 1: Search server cache
-    if emote := discord.utils.get(ctx.guild.emojis, name=e):
-        return emote
-
-    # Stage 2: Search MongoDB
-    elif (
-        (document := collection("emotes").find_one(
-            {"name": e, "server": ctx.guild.id})) or
-            (document := collection("emotes").find_one({"name": re.compile('^' + e + '$', re.IGNORECASE), "server": ctx.guild.id}))) and \
-            document["type"] == "inline":
-
-        # maybe they just can't spell
-        if emote := discord.utils.get(ctx.guild.emojis, name=document["name"]):
-            return emote
-        return await inject(ctx, document["name"])
-    return None
-
-
 class Emotes(commands.Cog):
     '''
     Custom Emote System.
@@ -143,40 +176,21 @@ class Emotes(commands.Cog):
         '''
         if ctx.invoked_subcommand is None:
 
-            # Stage 1: Search server cache
-            if emote := discord.utils.get(ctx.guild.emojis, name=e):
+            emote = await ComradeEmojiConverter().convert(ctx, e)
+
+            if type(emote) is discord.Emoji or \
+               type(emote) is discord.PartialEmoji:
+                # Inline emoji
                 await echo(ctx, member=ctx.author, content=emote)
-                # await ctx.message.delete()  # try to delete
 
-            # Stage 2: Search MongoDB
-            elif (document := collection("emotes").find_one({"name": e, "server": ctx.guild.id})) or \
-                    (document := collection("emotes").find_one(
-                        {"name": re.compile('^' + e + '$', re.IGNORECASE),
-                         "server": ctx.guild.id})):
-
-                # 2A: inline emoji,
-                # maybe they just can't spell
-                if emote := discord.utils.get(
-                        ctx.guild.emojis, name=document["name"]):
-                    await echo(ctx, member=ctx.author, content=emote)
-                    # await ctx.message.delete()  # try to delete
-
-                # Or, it needs to be added
-                elif document["type"] == "inline":
-                    emote = await inject(ctx, document["name"])
-                    await echo(ctx, member=ctx.author, content=emote)
-                    # await ctx.message.delete()  # try to delete
-
-                # 2B: Big emoji, send as-is
-                elif document["type"] == "big":
-                    eb = discord.Embed()
-                    eb.set_image(url=document["URL"])
-                    if len(e) > 32:
-                        e = e[:32]
-                    await mimic(ctx.channel,
-                                embed=eb,
-                                avatar_url=ctx.author.avatar_url,
-                                username=e)
+            elif type(emote) is dict:
+                # Big emote
+                eb = discord.Embed()
+                eb.set_image(url=emote["URL"])
+                await mimic(ctx.channel,
+                            embed=eb,
+                            avatar_url=ctx.author.avatar_url,
+                            username=emote["name"])
 
     @emote.command()
     @commands.guild_only()
@@ -244,6 +258,7 @@ class Emotes(commands.Cog):
                    name: Optional[str] = None):
         '''
         Copies emoji from another context into this server, optionally specifying a different name.
+        You can type the emoji directly if you have nitro, or paste its ID.
         '''
         if not name:
             name = emote.name
@@ -485,8 +500,12 @@ class Emotes(commands.Cog):
         Emote listener
         '''
         async def pullemote(em):
-            return await inline(await self.bot.get_context(message),
-                                em.strip(':').strip(" "))
+            emote = await ComradeEmojiConverter().convert(
+                await self.bot.get_context(message), em.strip(':').strip(" ")
+            )
+            if type(emote) is discord.Emoji or \
+               type(emote) is discord.PartialEmoji:
+                return emote
 
         if message.content and not message.author.bot and message.guild:
 
