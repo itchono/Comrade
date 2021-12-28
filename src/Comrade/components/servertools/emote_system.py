@@ -24,7 +24,6 @@ from utils.reactions import reactX
 from utils.echo import echo, mimic
 from utils.checks import isOP
 from utils.button_menu import send_menu
-from utils.logger import logger
 
 session = aiohttp.ClientSession()
 
@@ -49,11 +48,8 @@ class ComradeEmojiConverter(commands.Converter):
                       emote: str) -> \
             Union[discord.Emoji, dict, str]:
         # Stage 1: Try direct conversion
-        logger.info(f"Trying to load {emote}...")
         try:
             emoji = await commands.EmojiConverter().convert(ctx, emote)
-            logger.info(f"Emoji: {str(emoji)} Guild: {emoji.guild.name}")
-
             if emoji.guild == ctx.guild:
                 return emoji
             else:
@@ -61,7 +57,6 @@ class ComradeEmojiConverter(commands.Converter):
         except BaseException:
             pass
 
-        logger.info(f"Trying to load {emote}; not found in server, moving to stage 2.")
         # Stage 2: Search MongoDB
         if (document := collection("emotes").find_one(
             {"name": emote, "server": ctx.guild.id})) or \
@@ -73,12 +68,10 @@ class ComradeEmojiConverter(commands.Converter):
             # maybe they just got the case wrong
             if emote := discord.utils.get(
                     ctx.guild.emojis, name=document["name"]):
-                logger.info("Inline emoji found: {}".format(emote))
                 return emote
 
             # Or, it needs to be added
             elif document["type"] == "inline":
-                logger.info("Inline emoji not loaded, adding it.")
                 return await inject(ctx, document["name"])
 
             # 2B: Big emoji, send as-is
@@ -86,7 +79,6 @@ class ComradeEmojiConverter(commands.Converter):
                 return document
 
         # Stage 3: Unicode Emoji
-        logger.info("Moving onto unicode emoji.")
         try:
             emoji = PartialEmoji(name=emote)
             if emoji.is_unicode_emoji():
