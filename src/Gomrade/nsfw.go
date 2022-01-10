@@ -243,10 +243,12 @@ func Hentai(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int
 
 	// CONSTRUCT the query to gelbooru
 	urlBase := "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1"
-	urlBase += fmt.Sprintf("&limit=%d", limit) + "&tags=-rating%3asafe+-webm+sort%3arandom+"
 
-	for _, tag := range tagList {
-		urlBase += fmt.Sprintf("%s+", tag)
+	// sort randomly if no sort is specified
+	if strings.Contains(strings.Join(tagList, " "), "sort") {
+		urlBase += fmt.Sprintf("&limit=%d", limit) + "&tags=" + strings.Join(tagList, "+")
+	} else {
+		urlBase += fmt.Sprintf("&limit=%d", limit) + "&tags=sort%3arandom+" + strings.Join(tagList, "+")
 	}
 
 	// QUERY
@@ -261,13 +263,7 @@ func Hentai(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int
 
 	if err != nil {
 		// No JSON i.e. no results
-		s.ChannelMessageSend(m.ChannelID, "No results found (search failed). Please try another tag.")
-		return 0
-	}
-
-	if fmt.Sprintf("%v", responseData) == "[]" {
-		// Empty List i.e. no results
-		s.ChannelMessageSend(m.ChannelID, "No results found (empty list). Please try another tag.")
+		s.ChannelMessageSend(m.ChannelID, "No results found (search failed).")
 		return 0
 	}
 
@@ -283,7 +279,12 @@ func Hentai(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int
 
 	// responseDict["post"] is a list of posts, which we need to extract
 	// responseDict["@attr"] is a dictionary with attribute count
-	postDataList := responseDict["post"].([]interface{})
+	postDataList, ok := responseDict["post"].([]interface{})
+	if !ok {
+		// Empty Post List i.e. no results
+		s.ChannelMessageSend(m.ChannelID, "No results found (empty list). Please try another tag.")
+		return 0
+	}
 	attributes := responseDict["@attributes"].(map[string]interface{})
 
 	// We now have postDataList containing all of our posts.
@@ -292,8 +293,9 @@ func Hentai(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int
 		postData, _ := post.(map[string]interface{}) // type assert each item in the list as dictionary
 
 		// PARAMETERS FOR EMBED
-		url := postData["file_url"].(string) // get URL
+		post_url := fmt.Sprintf("https://gelbooru.com/index.php?page=post&s=view&id=%.f", postData["id"].(float64))
 		tagString := postData["tags"].(string)
+		file_url := postData["file_url"].(string)
 
 		// CONSTRUCT EMBED
 		emb := discordgo.MessageEmbed{}
@@ -304,15 +306,20 @@ func Hentai(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int
 			emb.Title = strings.Join(args, " ")
 		}
 
-		emb.URL = url
+		emb.URL = post_url
 		emb.Color = 0xfecbed
 		emb.Description = "ID: " + fmt.Sprintf("%.f", postData["id"].(float64)) +
 			"\nScore: " + fmt.Sprintf("%.f", postData["score"].(float64)) +
 			"\nHit Count: " + fmt.Sprintf("%.f", attributes["count"])
 		emb.Footer = &discordgo.MessageEmbedFooter{Text: tagString}
-		emb.Image = &discordgo.MessageEmbedImage{URL: url}
+		emb.Image = &discordgo.MessageEmbedImage{URL: file_url}
 
 		s.ChannelMessageSendEmbed(m.ChannelID, &emb)
+
+		// if the file is a .mp4 or .webm, send a message with the file url
+		if strings.Contains(file_url, "webm") || strings.Contains(file_url, "mp4") {
+			s.ChannelMessageSend(m.ChannelID, file_url)
+		}
 	}
 
 	elapsed := time.Since(start)
@@ -389,7 +396,7 @@ func Img(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int {
 		emb.Title = strings.Join(args, " ")
 	}
 
-	emb.URL = url
+	emb.URL = fmt.Sprintf("https://safebooru.org/index.php?page=post&s=view&id=%.f", postData["id"].(float64))
 	emb.Color = 0xfecbed
 	emb.Description = "ID: " + fmt.Sprintf("%.f", postData["id"].(float64))
 	emb.Footer = &discordgo.MessageEmbedFooter{Text: tagString}
