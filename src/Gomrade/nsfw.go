@@ -122,8 +122,9 @@ func NHentaiNext(s *discordgo.Session, m *discordgo.MessageCreate) int {
 
 	defer response.Body.Close()
 
-	attachment := &discordgo.File{fmt.Sprintf("%d", prevNH[m.ChannelID].Page) + "." + prevNH[m.ChannelID].Ext[prevNH[m.ChannelID].Page],
-		"image", response.Body}
+	attachment := &discordgo.File{Name: fmt.Sprintf("%d", prevNH[m.ChannelID].Page) +
+		"." + prevNH[m.ChannelID].Ext[prevNH[m.ChannelID].Page],
+		ContentType: "image", Reader: response.Body}
 
 	messagesend := &discordgo.MessageSend{Files: []*discordgo.File{attachment}}
 
@@ -205,7 +206,7 @@ func NSearch(s *discordgo.Session, m *discordgo.MessageCreate, args []string) in
 
 // Hentai sends an embed into the channel specified by the session
 func Hentai(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int {
-	start := time.Now()
+	start := time.Now() // log start time
 	channel, _ := s.Channel(m.ChannelID)
 	// channel in command was called
 	if channel.GuildID != "" && !channel.NSFW {
@@ -238,8 +239,7 @@ func Hentai(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int
 		return 0
 	}
 
-	var hdata interface{}
-	var hitdata interface{}
+	var responseData interface{} // decoded response data
 
 	// CONSTRUCT the query to gelbooru
 	urlBase := "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1"
@@ -257,70 +257,39 @@ func Hentai(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int
 	}
 	defer resp.Body.Close()
 
-	err = json.NewDecoder(resp.Body).Decode(&hdata)
+	err = json.NewDecoder(resp.Body).Decode(&responseData) // Decode JSON to struct
 
 	if err != nil {
 		// No JSON i.e. no results
-		s.ChannelMessageSend(m.ChannelID, "No results found. Please try another tag.")
+		s.ChannelMessageSend(m.ChannelID, "No results found (search failed). Please try another tag.")
 		return 0
 	}
 
-	if fmt.Sprintf("%v", hdata) == "[]" {
+	if fmt.Sprintf("%v", responseData) == "[]" {
 		// Empty List i.e. no results
-		s.ChannelMessageSend(m.ChannelID, "No results found. Please try another tag.")
+		s.ChannelMessageSend(m.ChannelID, "No results found (empty list). Please try another tag.")
 		return 0
 	}
 
-	hdatalist, ok := hdata.([]interface{}) // decode the outer layer of JSON
+	responseDict, ok := responseData.(map[string]interface{}) // responseDict is a dictionary with attribute post
 
 	if !ok {
-		s.ChannelMessageSend(m.ChannelID, "No results found. Please try another tag.")
+		s.ChannelMessageSend(m.ChannelID, "JSON Decode Error. Ping Mingde.")
 		return 0
 	}
 	// Query was successful
 	prevQuery[m.ChannelID] = tempQuery
 	// set previous query
 
-	// HIT COUNT
-	var hitCount string = "N/A" // default value
+	// responseDict["post"] is a list of posts, which we need to extract
+	// responseDict["@attr"] is a dictionary with attribute count
+	postDataList := responseDict["post"].([]interface{})
+	attributes := responseDict["@attributes"].(map[string]interface{})
 
-	if len(tagList) > 0 {
-		hitURL := "https://gelbooru.com/index.php?page=dapi&s=tag&q=index&json=1&name=" + tagList[0]
-		// get data about hit count
-		resp, err = http.Get(hitURL)
-		if err != nil {
-			// if HTTP request fails
-			s.ChannelMessageSend(m.ChannelID, "HTTP request failed. Ping Mingde.")
-			return 0
-		}
-		defer resp.Body.Close()
+	// We now have postDataList containing all of our posts.
+	for _, post := range postDataList {
 
-		err = json.NewDecoder(resp.Body).Decode(&hitdata)
-
-		if err != nil {
-			// No JSON i.e. no results
-			hitCount = "N/A (JSON decode error)"
-		}
-
-		hitdatalist, ok := hitdata.([]interface{}) // decode the outer layer of JSON
-
-		if !ok {
-			s.ChannelMessageSend(m.ChannelID, "No results found. Please try another tag.")
-			return 0
-		}
-
-		if len(hitdatalist) == 0 {
-			hitCount = "N/A (because of *)"
-		} else {
-			hitData, _ := hitdatalist[0].(map[string]interface{}) // type assert as dictionary
-			hitCount = hitData["count"].(string) + " (" + tagList[0] + ")"
-		}
-	}
-
-	// We now have hdatalist containing all of our posts.
-	for _, post := range hdatalist {
-
-		postData, _ := post.(map[string]interface{}) // type assert as dictionary
+		postData, _ := post.(map[string]interface{}) // type assert each item in the list as dictionary
 
 		// PARAMETERS FOR EMBED
 		url := postData["file_url"].(string) // get URL
@@ -330,22 +299,23 @@ func Hentai(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int
 		emb := discordgo.MessageEmbed{}
 
 		if len(args) == 0 {
-			// no tags
-			emb.Title = "*"
+			emb.Title = "*" // no tags
 		} else {
 			emb.Title = strings.Join(args, " ")
 		}
 
 		emb.URL = url
 		emb.Color = 0xfecbed
-		emb.Description = "ID: " + fmt.Sprintf("%.f", postData["id"].(float64)) + "\nScore: " + fmt.Sprintf("%.f", postData["score"].(float64)) + "\nHit Count: " + hitCount
+		emb.Description = "ID: " + fmt.Sprintf("%.f", postData["id"].(float64)) +
+			"\nScore: " + fmt.Sprintf("%.f", postData["score"].(float64)) +
+			"\nHit Count: " + fmt.Sprintf("%.f", attributes["count"])
 		emb.Footer = &discordgo.MessageEmbedFooter{Text: tagString}
 		emb.Image = &discordgo.MessageEmbedImage{URL: url}
 
 		s.ChannelMessageSendEmbed(m.ChannelID, &emb)
 	}
 
-	elapsed := time.Now().Sub(start)
+	elapsed := time.Since(start)
 
 	Relay(s, fmt.Sprintf("Fulfilled hentai query in time: %d ms", elapsed/1e6))
 
@@ -366,7 +336,7 @@ func Img(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int {
 		tagList = args // overwrite tags
 	}
 
-	var hdata interface{}
+	var responseData interface{}
 
 	// CONSTRUCT the query to gelbooru
 	urlBase := "https://safebooru.org/index.php?page=dapi&s=post&q=index&json=1&tags=-webm+"
@@ -383,7 +353,7 @@ func Img(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int {
 	}
 	defer resp.Body.Close()
 
-	err = json.NewDecoder(resp.Body).Decode(&hdata)
+	err = json.NewDecoder(resp.Body).Decode(&responseData)
 
 	if err != nil {
 		// No JSON i.e. no results
@@ -391,7 +361,7 @@ func Img(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int {
 		return 0
 	}
 
-	hdatalist, ok := hdata.([]interface{}) // decode the outer layer of JSON
+	postDataList, ok := responseData.([]interface{}) // decode the outer layer of JSON
 
 	if !ok {
 		// critical error
@@ -401,7 +371,7 @@ func Img(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int {
 	prevImg[m.ChannelID] = tempQuery
 	// set previous query
 
-	post := hdatalist[rand.Intn(len(hdatalist))] // randomly choost post
+	post := postDataList[rand.Intn(len(postDataList))] // randomly choost post
 
 	postData, _ := post.(map[string]interface{}) // type assert as dictionary
 
@@ -427,7 +397,7 @@ func Img(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int {
 
 	s.ChannelMessageSendEmbed(m.ChannelID, &emb)
 
-	elapsed := time.Now().Sub(start)
+	elapsed := time.Since(start)
 
 	Relay(s, fmt.Sprintf("Fulfilled rimg query in time: %d ms", elapsed/1e6))
 

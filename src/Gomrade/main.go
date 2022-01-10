@@ -6,8 +6,8 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/signal"
 	"os/exec"
+	"os/signal"
 	"strings"
 	"syscall"
 	"time"
@@ -72,7 +72,7 @@ func main() {
 	}()
 
 	select {
-	case <- timeout:
+	case <-timeout:
 		fmt.Println("Login successful.")
 	case <-time.After(10 * time.Second):
 		exec.Command("kill", "1")
@@ -95,7 +95,7 @@ func main() {
 	}
 	// Wait here until CTRL-C or other term signal is received.
 	sc := make(chan os.Signal, 1)
-	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sc
 
 	// Cleanly close down the Discord session.

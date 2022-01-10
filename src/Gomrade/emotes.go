@@ -50,7 +50,9 @@ func Emote(s *discordgo.Session, m *discordgo.MessageCreate, emotecollection *mo
 				}
 
 				// otherwise, the user made a typo and we want to find similar emotes
-				cur, err := emotecollection.Find(context.Background(), bson.M{"server": numericguild}, options.Find().SetProjection(bson.D{{"name", 1}, {"type", 1}, {"_id", 0}}))
+				cur, err := emotecollection.Find(
+					context.Background(), bson.M{"server": numericguild}, options.Find().SetProjection(
+						bson.D{{Key: "name", Value: 1}, {Key: "type", Value: 1}, {Key: "_id", Value: 0}}))
 				if err != nil {
 					return
 				}
@@ -101,7 +103,7 @@ func Emote(s *discordgo.Session, m *discordgo.MessageCreate, emotecollection *mo
 
 		s.ChannelMessageSendEmbed(m.ChannelID, &emb)
 
-		elapsed := time.Now().Sub(start)
+		elapsed := time.Since(start)
 
 		Relay(s, fmt.Sprintf("Fulfilled emote %s in time: %d ms", emotedata["name"], elapsed/1e6))
 	}
