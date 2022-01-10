@@ -18,6 +18,7 @@ from bs4 import BeautifulSoup
 from PyDictionary import PyDictionary
 import urllib.request
 from utils.utilities import webscrape_header, local_time
+from utils.button_menu import send_menu
 from utils.echo import echo
 from utils.logger import logger
 from db import collection
@@ -79,7 +80,7 @@ class Tools(commands.Cog):
         '''
         Defines a word in Urban dictionary
 
-        Credits to MgWg
+        Credits to MgWg for the original implementation
         '''
         printout = f"**__{string.capwords(word)}__:**\n"
 
@@ -98,18 +99,25 @@ class Tools(commands.Cog):
 
         data = response.read()
         soup = BeautifulSoup(data, 'html.parser')
-        # Regex pattern for finding text
-        r = r'(?<=<div class\="meaning">)(.*?)(?=<div class\="def-footer">)'
-        num_results = re.findall(r, str(soup))
 
-        def_1 = BeautifulSoup(num_results[0], features="html.parser")
-        ex = def_1.find_all('div', {'class': 'example'})
-        example = BeautifulSoup(str(ex[0]), features="html.parser").get_text()
-        index = def_1.get_text().index(example)
-        def_1 = def_1.get_text()[:index]
 
-        printout += def_1 + f"\n\n__Example:__\n*{example}*"
-        await ctx.send(printout)
+        embeds = []  # embeds to store the definition and example
+        
+        definition_divs = soup.find_all("div", class_="definition")
+        for d in definition_divs:
+            # Find the meaning and example in each definition
+            meaning = d.find("div", class_="meaning").get_text()
+            example = d.find("div", class_="example").get_text()
+
+            # Create the embed
+            embed = discord.Embed(title=word, url=url)
+            embed.add_field(name="Definition", value=meaning, inline=False)
+            embed.add_field(name="Example", value=example, inline=False)
+
+            embeds.append(embed)
+
+        # Use button menu to send the embeds
+        await send_menu(ctx, embeds)
 
     @commands.command()
     async def graph(self, ctx: commands.Context, *, function: str):
