@@ -5,3 +5,5 @@
 *.dat
 *.log
 src/Comrade/cfg.ini
+src/Comrade/.venv
+src/Comrade-Requiem/.venv
