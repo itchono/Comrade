@@ -15,7 +15,7 @@ class CustomSnake(Snake):
                                error: Exception):
         logger.exception(msg=error, exc_info=error)
         if not ctx.responded:
-            await ctx.send("Something went wrong.\n"
+            await ctx.send("Something went wrong while executing the command.\n"
                            f"Error: `{error}`", ephemeral=True)
 
 

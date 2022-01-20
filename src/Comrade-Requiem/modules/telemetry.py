@@ -28,8 +28,9 @@ class Telemetry(Scale):
 
         embed.add_field(name="Latency", value=f"{bot.latency * 1000:.2f}ms")
         embed.add_field(name="Library Version", value=dis_snek.__version__)
-        
+      
         await ctx.send(embed=embed)
+
 
 def setup(bot):
     Telemetry(bot)

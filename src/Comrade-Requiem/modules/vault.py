@@ -57,7 +57,7 @@ class Vault(Scale):
                 f"<Post would be vaulted>, vote cast by {used_component.context.author}")
             await sent_message.edit(components=[])
 
+
 def setup(bot):
     Vault(bot)
     logger.info("Module vault.py loaded.")
-            

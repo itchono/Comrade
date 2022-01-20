@@ -2,18 +2,21 @@
 from dis_snek.models.context import InteractionContext
 from dis_snek.models.discord_objects.message import Attachment
 from dis_snek.models.events import MessageCreate
+from dis_snek.models.application_commands import slash_option, OptionTypes
 import asyncio
+from imghdr import what
 
 import aiohttp
 
 from io import BytesIO
+from logger import logger
 
 
 async def request_file(ctx: InteractionContext,
-                       prompt: str = None) -> Attachment:
+                       prompt: str = None,
+                       timeout: int = 30) -> Attachment:
     '''
-    Sends a prompt to request a file from the author;
-    will use up the response on the ctx object, so be careful
+    Sends a prompt to request a file from the author and returns the file.
     '''
     if not prompt:
         prompt = "**FILE UPLOAD REQUEST**\n" \
@@ -28,26 +31,32 @@ async def request_file(ctx: InteractionContext,
 
     try:
         event: MessageCreate = await ctx.bot.wait_for(
-            "message_create", timeout=30, checks=message_check)
+            "message_create", timeout=timeout, checks=message_check)
     except asyncio.TimeoutError:
         await prompt_msg.edit(content="Upload request timed out.")
     else:
         # Get the first attachment
         attachment: Attachment = event.message.attachments[0]
-
-        await ctx.channel.send("The content type of your file is "
-                               f"{attachment.content_type} "
-                               f"and has size {attachment.size} bytes.")
+        
+        logger.info("File requested and received: "
+                    f"{attachment.content_type}:"
+                    f" {attachment.size} bytes.")
         return attachment
 
 
 async def request_file_bytes(ctx: InteractionContext,
-                             prompt: str = None) -> BytesIO:
+                             prompt: str = None,
+                             timeout: int = 30) -> BytesIO:
     '''
     Returns a BytesIO object with the contents of the file
     '''
-    attachment: Attachment = await request_file(ctx, prompt)
+    return await attachment_to_bytes(await request_file(ctx, prompt, timeout))
 
+
+async def attachment_to_bytes(attachment: Attachment) -> BytesIO:
+    '''
+    Returns a BytesIO object with the contents of the attachment
+    '''
     # Bit stream for temporarily saving the attachment
     file_bytes = BytesIO()
     file_url = attachment.url
@@ -58,3 +67,39 @@ async def request_file_bytes(ctx: InteractionContext,
             file_bytes.write(await resp.read())
     file_bytes.seek(0)
     return file_bytes
+
+class ImageBytes():
+    @classmethod
+    async def convert(cls, ctx: InteractionContext, url: str):
+        # Downloads the image at url and returns a BytesIO object
+        
+        if not ctx.responded:
+            await ctx.defer(ephemeral=True)
+            # Defer execution because downloading will take time
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as resp:
+                file_bytes = BytesIO()
+                file_bytes.write(await resp.read())
+                file_bytes.seek(0)
+                
+                # Assert that the image is valid
+                if not what(file_bytes):
+                    raise ValueError(
+                        "The image at the URL you provided is not valid.")
+                return file_bytes
+
+
+def image_url(required: bool = False):
+    """Call with `@my_own_int_option()`"""
+
+    def wrapper(func):
+        return slash_option(
+            name="image_url",
+            description="URL linking to the image",
+            opt_type=OptionTypes.STRING,
+            required=required
+        )(func)
+
+    return wrapper
+
