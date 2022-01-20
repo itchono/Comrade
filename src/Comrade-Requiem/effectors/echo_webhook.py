@@ -34,7 +34,7 @@ async def mimic(channel: GuildText, content:str=None,
 
     await webhook.send(content=content,
                        username=username,
-                       avatar_url=avatar_url, wait=True, **kwargs)
+                       avatar_url=avatar_url, **kwargs)
 
 
 async def echo(ctx: InteractionContext, member: Member,
