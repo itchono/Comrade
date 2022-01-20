@@ -5,3 +5,4 @@
 *.dat
 *.log
 src/Comrade/cfg.ini
+*.venv
