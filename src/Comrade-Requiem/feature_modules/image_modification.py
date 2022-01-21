@@ -1,7 +1,7 @@
 from dis_snek.models.scale import Scale
 from dis_snek.models.application_commands import slash_command
 from dis_snek.models.context import InteractionContext
-from logger import logger
+from logger import log
 
 from dis_snek.models.file import File
 
@@ -51,5 +51,5 @@ class ImageModification(Scale):
 
 def setup(bot):
     ImageModification(bot)
-    logger.info("Module image_modification.py loaded.")
+    log.info("Module image_modification.py loaded.")
     

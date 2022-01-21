@@ -4,10 +4,10 @@ from dis_snek.const import logger_name
 
 logging.Formatter.converter = lambda *args: datetime.datetime.now().timetuple()
 
-logger = logging.getLogger("ComradeLog")
-logger.setLevel(logging.DEBUG)
+log = logging.getLogger("ComradeLog")
+log.setLevel(logging.DEBUG)
 
-# Configure loggers
+# Configure logs
 c_handler = logging.StreamHandler()
 # Console output
 f_handler = logging.FileHandler(
@@ -25,8 +25,8 @@ f_format = logging.Formatter('%(asctime)s [%(filename)s@%(lineno)d (%(funcName)s
 c_handler.setFormatter(c_format)
 f_handler.setFormatter(f_format)
 
-logger.addHandler(c_handler)
-logger.addHandler(f_handler)
+log.addHandler(c_handler)
+log.addHandler(f_handler)
 
 logging.getLogger(logger_name).setLevel(logging.INFO)
 logging.getLogger(logger_name).addHandler(f_handler)

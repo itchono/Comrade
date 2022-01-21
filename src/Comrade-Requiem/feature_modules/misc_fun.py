@@ -13,7 +13,7 @@ import random
 
 from effectors.echo_webhook import echo
 from effectors.request_file import request_file
-from logger import logger
+from logger import log
 
 
 class MiscFun(Scale):
@@ -94,4 +94,4 @@ class MiscFun(Scale):
 
 def setup(bot):
     MiscFun(bot)
-    logger.info("Module misc_fun.py loaded.")
+    log.info("Module misc_fun.py loaded.")

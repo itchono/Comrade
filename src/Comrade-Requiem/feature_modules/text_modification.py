@@ -3,7 +3,7 @@ from dis_snek.models.application_commands import (slash_command,
                                                   OptionTypes, slash_option)
 from dis_snek.models.context import InteractionContext
 from effectors.send_image_text import send_amongus
-from logger import logger
+from logger import log
 
 
 class TextModification(Scale):
@@ -17,4 +17,4 @@ class TextModification(Scale):
 
 def setup(bot):
     TextModification(bot)
-    logger.info("Module text_modification.py loaded.")
+    log.info("Module text_modification.py loaded.")

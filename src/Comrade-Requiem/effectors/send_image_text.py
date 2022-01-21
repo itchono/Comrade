@@ -45,4 +45,5 @@ async def send_amongus(ctx: InteractionContext, text: str):
     
     await ctx.channel.send(file=send_file)
     # Send the image to the channel
-    await ctx.send("AMOGUS", ephemeral=True)
+    if not ctx.responded:
+        await ctx.send("AMOGUS", ephemeral=True)

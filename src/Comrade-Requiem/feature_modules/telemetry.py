@@ -6,7 +6,7 @@ from dis_snek.models.discord_objects.embed import Embed
 import datetime
 import dis_snek
 
-from logger import logger
+from logger import log
 
 
 class Telemetry(Scale):
@@ -34,4 +34,4 @@ class Telemetry(Scale):
 
 def setup(bot):
     Telemetry(bot)
-    logger.info("Module telemetry.py loaded.")
+    log.info("Module telemetry.py loaded.")

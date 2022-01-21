@@ -6,7 +6,7 @@ from dis_snek.models.discord_objects.components import (ActionRow,
 from dis_snek.models.discord_objects.message import Message
 from dis_snek.models.enums import CommandTypes
 
-from logger import logger
+from logger import log
 import asyncio
 
 
@@ -24,7 +24,7 @@ class Vault(Scale):
         vault_message: Message = await ctx.channel.get_message(ctx.target_id)
 
         jump_url = "https://discordapp.com/channels/"
-        f"{ctx.guild.id}/{ctx.channel.id}/{vault_message.id}"
+        f"{ctx.guild_id}/{ctx.channel.id}/{vault_message.id}"
 
         special_id = f"vault{ctx.target_id}"
 
@@ -60,4 +60,4 @@ class Vault(Scale):
 
 def setup(bot):
     Vault(bot)
-    logger.info("Module vault.py loaded.")
+    log.info("Module vault.py loaded.")

@@ -9,7 +9,7 @@ from imghdr import what
 import aiohttp
 
 from io import BytesIO
-from logger import logger
+from logger import log
 
 
 async def request_file(ctx: InteractionContext,
@@ -38,7 +38,7 @@ async def request_file(ctx: InteractionContext,
         # Get the first attachment
         attachment: Attachment = event.message.attachments[0]
         
-        logger.info("File requested and received: "
+        log.info("File requested and received: "
                     f"{attachment.content_type}:"
                     f" {attachment.size} bytes.")
         return attachment

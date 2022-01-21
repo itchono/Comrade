@@ -9,7 +9,7 @@ from dis_snek.models.color import FlatUIColours
 import aiohttp
 from bs4 import BeautifulSoup
 
-from logger import logger
+from logger import log
 
 
 class WebSearches(Scale):
@@ -71,4 +71,4 @@ class WebSearches(Scale):
 
 def setup(bot):
     WebSearches(bot)
-    logger.info("Module website_searches.py loaded.")
+    log.info("Module website_searches.py loaded.")
