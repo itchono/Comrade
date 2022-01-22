@@ -1,8 +1,9 @@
 import logging
-import datetime
+from datetime import datetime
 from dis_snek.const import logger_name
 
-logging.Formatter.converter = lambda *args: datetime.datetime.now().timetuple()
+logging.Formatter.converter = \
+    lambda *args: datetime.now().timetuple()
 
 log = logging.getLogger("ComradeLog")
 log.setLevel(logging.DEBUG)

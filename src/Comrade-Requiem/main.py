@@ -24,8 +24,14 @@ class CustomSnake(Snake):
 
 activity = Activity.create(name=" the rise of communism", type=ActivityType.WATCHING, url="comrade.itchono.repl.co")
 
-bot = CustomSnake(intents=Intents.ALL, sync_interactions=True,
+bot = CustomSnake(intents=Intents.new(
+                        guild_members=True,
+                        guild_messages=True,
+                        direct_messages=True
+                    ), sync_interactions=True,
                   delete_unused_application_cmds=True, activity=activity)
+# TODO: May need to add "GUILDS" and "GUILD_EMOJIS_AND_STICKERS" to intents
+# e.g. for emote system validation
 
 
 @listen()
@@ -50,4 +56,4 @@ for module in os.listdir("./feature_modules"):
 
 
 
-bot.start(os.environ.get("TOKEN"))
+bot.start(os.environ.get("DISCORD_BOT_TOKEN"))

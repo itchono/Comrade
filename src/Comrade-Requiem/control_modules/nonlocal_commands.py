@@ -10,7 +10,7 @@ from logger import log
 from copy import copy
 
 
-def fake_ctx(ctx: Context) -> InteractionContext:
+def fake_ctx(ctx: Context, args) -> InteractionContext:
     
     new_ctx = copy(ctx)
     
@@ -31,33 +31,42 @@ def fake_ctx(ctx: Context) -> InteractionContext:
     
     new_ctx.defer = defer
     
+    # Pass in args to the function
+    new_ctx.args = args
+    
     return new_ctx
 
 
-async def execute_slash_command(ctx: Context, command: str, *args):
+async def execute_slash_command(ctx: Context, cmd_name: str, args):
     '''
     Executes any slash command registered with the bot.
     '''
-
-    bot: Snake = ctx.bot
-    
-    command: SlashCommand
-    if command := bot.interactions[ctx.guild_id][command]:
-        # log.info(f"Executing slash command {command.name}"
+    if cmd_name in ctx.bot.interactions[ctx.guild_id]:
+        command: SlashCommand = ctx.bot.interactions[ctx.guild_id][cmd_name]
+        # log.info(f"Executing nonlocal command {command.name}"
         #          f" with function signature {signature(command.callback)}")
-                
-        await command.callback(fake_ctx(ctx), *args)
-        
+        await command.call_callback(command.callback, fake_ctx(ctx, list(args)))
     else:
-        raise ValueError(f"Command {command} not found.")
-    
+        raise ValueError(f"Command {cmd_name} not found.")
+
+
 class NonlocalCommands(Scale):
     @message_command()
     async def runcommand(self, ctx: MessageContext, command: str, *args):
         '''
         Executes any slash command registered with the bot.
         '''
-        await execute_slash_command(ctx, command, *args)
+        await execute_slash_command(ctx, command, args)
+
+    @message_command()
+    async def inspect(self, ctx: MessageContext, command: str):
+        '''
+        Inspects the function signature of a registered slash command.
+        '''
+        if cmd := ctx.bot.interactions[ctx.guild_id][command]:
+            await ctx.send(f"{command} has signature {signature(cmd.callback)}")
+        else:
+            await ctx.send(f"Command {command} not found.")
     
     
 def setup(bot):

@@ -3,94 +3,89 @@ from dis_snek.models.application_commands import (slash_command,
                                                   OptionTypes, slash_option,
                                                   SlashCommandChoice,
                                                   ComponentCommand)
-from dis_snek.models.context import InteractionContext, ComponentContext, Context
-from dis_snek.models.discord_objects.embed import Embed
+from dis_snek.models.context import InteractionContext, ComponentContext
 from dis_snek.models.discord_objects.components import Button
 from dis_snek.models.enums import ButtonStyles
 from logger import log
-import aiohttp
-from dataclasses import dataclass
+
+from processors import gelbooru_api, e621_api
 
 
-@dataclass
-class HentaiSession:
-    tags: str
-    count: int
-    sorting: str
-    page: int
+gelbooru_sessions = {}
+genderbend_sessions = {}
 
 
-hentai_sessions = {}
-
-URL_BASE = "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1"
-# Base URL for Gelbooru API
-
-
-async def get_post_embeds(ctx: Context, tags: str, count: int, sorting: str, page: int = 0) -> list[Embed]:
-    embeds = []
+async def e621_button_next(ctx: ComponentContext):
+    # Disable the previous button
+    await ctx.edit_origin(components=[])
     
-    # Assemble url to query gelbooru API
-    url_ext = f"&tags={tags}+sort:{sorting}&limit={count}&pid={page}" if tags \
-        else f"&tags=sort:{sorting}&limit={count}&pid={page}"
+    if ctx.channel.id not in genderbend_sessions:
+        await ctx.channel.send(
+            "Sorry, the session attached to this button has expired.",
+            reply_to = ctx.message)
     
-    print(URL_BASE+url_ext)
+    session = genderbend_sessions[ctx.channel.id]
     
-    # Make request to gelbooru API
-    async with aiohttp.ClientSession() as session:
-        async with session.get(URL_BASE+url_ext) as resp:
-            if resp.status == 200:
-                data = await resp.json()
-                if not data:
-                    await ctx.send("No results found")
-            else:
-                await ctx.send(f"Error: {resp.status}")
-    
-    # Get each post, a dict which contains the attributes of the post
-    attrs = data["@attributes"]
-    for post in data["post"]:
-        # Construct the embed
-        embed = Embed(title=tags if tags else "*",
-                      url = f"https://gelbooru.com/index.php?page=post&s=view&id={post['id']}",
-                      color=0xfecbed,
-                      image=post["file_url"])
-        embed.set_footer(text=post["tags"])
-        embed.set_author(name=f"Hentai ({page+1})",
-                         icon_url=ctx.author.avatar.url)
-        embed.add_field(name="id", value=post["id"], inline=True)
-        embed.add_field(name="Score", value=post["score"], inline=True)
-        embed.add_field(name="Hit Count", value=attrs["count"], inline=True)
+    if data := await e621_api.e621_get_next_post_data(session):
+        embeds = [e621_api.e621_formatted_embed(post, session)
+            for post in data["posts"]]
         
-        embeds.append(embed)
-    return embeds
+        next_button = Button(style=ButtonStyles.GREY, label="Next", emoji="🔽", custom_id="e621_next")
+        await ctx.channel.send(embeds=embeds, components=[next_button])
+    else:
+        await ctx.send("No more posts.")
+
+
+async def gb_button_next(ctx: ComponentContext):
+    # Disable the previous button
+    await ctx.edit_origin(components=[])
+    
+    if ctx.channel.id not in genderbend_sessions:
+        await ctx.channel.send(
+            "Sorry, the session attached to this button has expired.",
+            reply_to = ctx.message)
+    
+    session = genderbend_sessions[ctx.channel.id]
+    
+    if data := await e621_api.gb_get_next_post_data(session):
+        embeds = [e621_api.gb_formatted_embed(post, session)
+            for post in data["posts"]]
+        
+        next_button = Button(style=ButtonStyles.GREY, label="Next", emoji="🔽", custom_id="gb_next")
+        await ctx.channel.send(embeds=embeds, components=[next_button])
+    else:
+        await ctx.send("No more posts.")
 
 
 async def hentai_button_next(ctx: ComponentContext):
     # Disable the previous button
     await ctx.edit_origin(components=[])
     
-    if ctx.channel.id not in hentai_sessions:
+    if ctx.channel.id not in gelbooru_sessions:
         await ctx.channel.send(
             "Sorry, the session attached to this button has expired.",
             reply_to = ctx.message)
     
-    # Update the page number in the session
-    hentai_sessions[ctx.channel.id].page += 1
-    session = hentai_sessions[ctx.channel.id]
+    session = gelbooru_sessions[ctx.channel.id]
     
-    embeds = await get_post_embeds(ctx, session.tags, session.count,
-                                   session.sorting, session.page)
-    
-    next_button = Button(style=ButtonStyles.GREY, label="Next", emoji="🔽", custom_id="hentai_next")
-    await ctx.channel.send(embeds=embeds, components=[next_button])
+    if data := await gelbooru_api.get_next_post_data(session):
+        attrs = data["@attributes"]
+        embeds = [gelbooru_api.formatted_embed(post, attrs, session)
+            for post in data["post"]]
+        
+        next_button = Button(style=ButtonStyles.GREY, label="Next", emoji="🔽", custom_id="hentai_next")
+        await ctx.channel.send(embeds=embeds, components=[next_button])
+    else:
+        await ctx.send("No more posts.")
  
 
 class NSFW(Scale):
     @slash_command(name="hentai",
-                   description="nice",
+                   description="Retrieves a post from gelbooru.",
                    scopes=[419214713252216848, 709954286376976425])
     @slash_option(name="tags", description="tags to search for",
                   opt_type=OptionTypes.STRING, required=False)
-    @slash_option(name="count", description="Number of posts to return, default 1",
+    @slash_option(name="count", description="Number of posts to return per message, default 1",
                   opt_type=OptionTypes.INTEGER, required=False,
                   min_value=1, max_value=20)
     @slash_option(name="sorting", description="Sorting method, default random",
@@ -102,12 +97,101 @@ class NSFW(Scale):
                   ], required=False)
     async def hentai(self, ctx: InteractionContext, tags: str = None, count: int = 1, sorting: str = "random:0"):
         await ctx.defer()
-        if embeds := await get_post_embeds(ctx, tags, count, sorting):
-            next_button = Button(style=ButtonStyles.GREY, label="Next", emoji="🔽", custom_id="hentai_next")
-            await ctx.send(embeds=embeds, components=[next_button])
+        if tags:
+            # Clean up tags such that they're joined by +
+            tags = "+".join(tags.split())
+        
+        # Save Session
+        gelbooru_sessions[ctx.channel.id] = gelbooru_api.GelbooruSession(
+            tags if tags else "", count, sorting, 0)
+        
+        if data := await gelbooru_api.get_next_post_data(gelbooru_sessions[ctx.channel.id]):
+            attrs = data["@attributes"]
+            embeds = [
+                gelbooru_api.formatted_embed(post, attrs, gelbooru_sessions[ctx.channel.id])
+                for post in data["post"]]
             
-            # Save Session
-            hentai_sessions[ctx.channel.id] = HentaiSession(tags, count, sorting, 0)
+            video_urls = [
+                post["file_url"] for post in data["post"]
+                if ("webm" in post["file_url"] or "mp4" in post["file_url"]) ]
+            
+            next_button = Button(style=ButtonStyles.GREY, label="Next", emoji="🔽", custom_id="hentai_next")
+            await ctx.send(
+                embeds=embeds, components=[next_button],
+                content="\n".join(video_urls) if video_urls else None)
+        else:
+            await ctx.send("No posts were found.")
+            
+            
+    @slash_command(name="genderbend",
+                   description="Retrieves a post from genderbend.me.",
+                   scopes=[419214713252216848, 709954286376976425])
+    @slash_option(name="tags", description="tags to search for",
+                  opt_type=OptionTypes.STRING, required=False)
+    @slash_option(name="count", description="Number of posts to return per message, default 1",
+                  opt_type=OptionTypes.INTEGER, required=False,
+                  min_value=1, max_value=20)
+    @slash_option(name="sorting", description="Sorting method, default random",
+                  opt_type=OptionTypes.STRING, choices=
+                  [
+                      SlashCommandChoice(name="random", value="random"),
+                      SlashCommandChoice(name="highest score", value="score"),
+                      SlashCommandChoice(name="most recent", value="id")
+                  ], required=False)
+    async def genderbend(self, ctx: InteractionContext, tags: str = None, count: int = 1, sorting: str = "random"):
+        await ctx.defer()
+        if tags:
+            # Clean up tags such that they're joined by +
+            tags = "+".join(tags.split())
+        
+        # Save Session
+        genderbend_sessions[ctx.channel.id] = e621_api.GBSession(
+            tags if tags else "", count, sorting, 0)
+        
+        if data := await e621_api.gb_get_next_post_data(genderbend_sessions[ctx.channel.id]):
+            embeds = [
+                e621_api.gb_formatted_embed(post, genderbend_sessions[ctx.channel.id])
+                for post in data["posts"]]
+            
+            next_button = Button(style=ButtonStyles.GREY, label="Next", emoji="🔽", custom_id="gb_next")
+            await ctx.send(embeds=embeds, components=[next_button])
+        else:
+            await ctx.send("No posts were found.")
+            
+    @slash_command(name="e621",
+                   description="Retrieves a post from e621.net.",
+                   scopes=[419214713252216848, 709954286376976425])
+    @slash_option(name="tags", description="tags to search for",
+                  opt_type=OptionTypes.STRING, required=False)
+    @slash_option(name="count", description="Number of posts to return per message, default 1",
+                  opt_type=OptionTypes.INTEGER, required=False,
+                  min_value=1, max_value=20)
+    @slash_option(name="sorting", description="Sorting method, default random",
+                  opt_type=OptionTypes.STRING, choices=
+                  [
+                      SlashCommandChoice(name="random", value="random"),
+                      SlashCommandChoice(name="highest score", value="score"),
+                      SlashCommandChoice(name="most recent", value="id")
+                  ], required=False)
+    async def e621(self, ctx: InteractionContext, tags: str = None, count: int = 1, sorting: str = "random"):
+        await ctx.defer()
+        if tags:
+            # Clean up tags such that they're joined by +
+            tags = "+".join(tags.split())
+        
+        # Save Session
+        genderbend_sessions[ctx.channel.id] = e621_api.GBSession(
+            tags if tags else "", count, sorting, 0)
+        
+        if data := await e621_api.e621_get_next_post_data(genderbend_sessions[ctx.channel.id]):
+            embeds = [
+                e621_api.e621_formatted_embed(post, genderbend_sessions[ctx.channel.id])
+                for post in data["posts"]]
+            
+            next_button = Button(style=ButtonStyles.GREY, label="Next", emoji="🔽", custom_id="e621_next")
+            await ctx.send(embeds=embeds, components=[next_button])
+        else:
+            await ctx.send("No posts were found.")
         
 
 def setup(bot):
@@ -117,6 +201,20 @@ def setup(bot):
             name="ComponentCallback::hentai_next",
             callback = hentai_button_next,
             listeners=["hentai_next"]
+        )
+    )
+    bot.add_component_callback(
+        ComponentCommand(
+            name="ComponentCallback::gb_next",
+            callback = gb_button_next,
+            listeners=["gb_next"]
+        )
+    )
+    bot.add_component_callback(
+        ComponentCommand(
+            name="ComponentCallback::e621_next",
+            callback = e621_button_next,
+            listeners=["e621_next"]
         )
     )
     log.info("Module nsfw.py loaded.")
