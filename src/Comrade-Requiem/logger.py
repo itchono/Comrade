@@ -31,4 +31,3 @@ log.addHandler(f_handler)
 
 logging.getLogger(logger_name).setLevel(logging.INFO)
 logging.getLogger(logger_name).addHandler(f_handler)
- 

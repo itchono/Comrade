@@ -1,2 +1,5 @@
 dis_snek
 orjson
+python-dotenv
+BeautifulSoup4
+Pillow

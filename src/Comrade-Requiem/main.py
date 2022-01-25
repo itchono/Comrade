@@ -7,10 +7,15 @@ from dis_snek.models.enums import Intents
 from dis_snek.models.listener import listen
 from dis_snek.models.context import Context, InteractionContext, MessageContext
 from dis_snek.models.discord_objects.activity import Activity, ActivityType
+from pymongo.database import Database
 
 dotenv.load_dotenv()  # Load .env file, prior to components loading
 
+
 class CustomSnake(Snake):
+    
+    db: Database = None
+    
     async def on_command_error(self, ctx: Context,
                                error: Exception):
         log.exception(msg=error, exc_info=error)
@@ -22,12 +27,13 @@ class CustomSnake(Snake):
                            f"Error: `{error}`", reply_to = ctx.message)
 
 
-activity = Activity.create(name=" the rise of communism", type=ActivityType.WATCHING, url="comrade.itchono.repl.co")
+activity = Activity.create(name=" the rise of communism", type=ActivityType.WATCHING)
 
 bot = CustomSnake(intents=Intents.new(
                         guild_members=True,
                         guild_messages=True,
-                        direct_messages=True
+                        direct_messages=True,
+                        guild_emojis_and_stickers=True
                     ), sync_interactions=True,
                   delete_unused_application_cmds=True, activity=activity)
 # TODO: May need to add "GUILDS" and "GUILD_EMOJIS_AND_STICKERS" to intents
@@ -53,7 +59,5 @@ for module in os.listdir("./feature_modules"):
             bot.grow_scale(f"feature_modules.{module[:-3]}")
         except Exception as e:
             log.exception(f"Failed to load extension {module}")
-
-
 
 bot.start(os.environ.get("DISCORD_BOT_TOKEN"))

@@ -23,9 +23,6 @@ class Vault(Scale):
         # Get the message to be voted on.
         vault_message: Message = await ctx.channel.get_message(ctx.target_id)
 
-        jump_url = "https://discordapp.com/channels/"
-        f"{ctx.guild_id}/{ctx.channel.id}/{vault_message.id}"
-
         special_id = f"vault{ctx.target_id}"
 
         button = Button(ButtonStyles.PRIMARY,
@@ -40,7 +37,7 @@ class Vault(Scale):
             components=components,
             content="Another user must press the button"
             "to vault the post! You have 180 seconds to vote." + " " +
-            jump_url)
+            vault_message.jump_url)
 
         def check(button: Button):
             return button.context.author != ctx.author

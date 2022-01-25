@@ -7,7 +7,7 @@ from dis_snek.models.discord_objects.channel import GuildText
 from dis_snek.models.discord_objects.message import Message
 from dis_snek.models.discord_objects.webhooks import Webhook
 from dis_snek.models.discord_objects.user import Member
-from dis_snek.models.context import InteractionContext
+from dis_snek.models.context import Context
 from dis_snek.utils import find
 
 
@@ -37,7 +37,7 @@ async def mimic(channel: GuildText, content:str=None,
                        avatar_url=avatar_url, **kwargs)
 
 
-async def echo(ctx: InteractionContext, member: Member,
+async def echo(ctx: Context, member: Member,
                content=None, **kwargs):
     '''
     Sends a mimic as a specific person -- entry point from slash command
@@ -45,7 +45,8 @@ async def echo(ctx: InteractionContext, member: Member,
     await mimic(ctx.channel, content=content,
                 username=member.display_name,
                 avatar_url=member.avatar.url, **kwargs)
-    await ctx.send("Echoed!", ephemeral=True)
+    if not ctx.responded:
+        await ctx.send("Echoed!", ephemeral=True)
 
 
 def isWebhook(message: Message) -> bool:
