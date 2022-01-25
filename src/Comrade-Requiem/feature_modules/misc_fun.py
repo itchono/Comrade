@@ -1,13 +1,9 @@
-from dis_snek.models.scale import Scale
-from dis_snek.models.application_commands import (slash_command,
-                                                  OptionTypes, slash_option,
-                                                  context_menu)
-from dis_snek.models.context import InteractionContext
-from dis_snek.models.discord_objects.user import Member
-from dis_snek.models.enums import CommandTypes
-from dis_snek.models.discord_objects.message import Message
-from dis_snek.models.discord_objects.embed import Embed
-from dis_snek.models.color import FlatUIColours
+from dis_snek.models.snek import (Scale, slash_command,
+                                  OptionTypes, slash_option,
+                                  context_menu, InteractionContext,
+                                  CommandTypes)
+from dis_snek.models.discord import Member, Message, Embed
+from dis_snek.models.discord import FlatUIColours
 
 import random
 

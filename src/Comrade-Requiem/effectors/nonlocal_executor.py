@@ -1,6 +1,5 @@
 # Execute commands without needing to go through slash routes
-from dis_snek.models.context import Context, InteractionContext
-from dis_snek.models.application_commands import SlashCommand
+from dis_snek.models.snek import (Context, InteractionContext, SlashCommand)
 from inspect import signature
 from logger import log
 from copy import copy

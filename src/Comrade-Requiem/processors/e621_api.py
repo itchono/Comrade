@@ -3,7 +3,7 @@
 import aiohttp
 from dataclasses import dataclass
 import orjson
-from dis_snek.models.discord_objects.embed import Embed
+from dis_snek.models.discord import Embed
 
 GB_BASE = "https://genderbend.me/posts.json?"
 E621_BASE = "https://e621.net/posts.json?"

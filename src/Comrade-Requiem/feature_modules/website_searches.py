@@ -1,10 +1,7 @@
-from dis_snek.models.scale import Scale
-from dis_snek.models.application_commands import (slash_command, OptionTypes,
-                                                  slash_option)
-from dis_snek.models.context import InteractionContext
-from dis_snek.models.discord_objects.embed import Embed
-from dis_snek.models.paginators import Paginator
-from dis_snek.models.color import FlatUIColours
+from dis_snek.models.snek import (Scale, slash_command, OptionTypes,
+                                  InteractionContext, slash_option)
+from dis_snek.models.discord import Embed, FlatUIColours
+from dis_snek.ext.paginators import Paginator
 
 import aiohttp
 from bs4 import BeautifulSoup

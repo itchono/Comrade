@@ -3,10 +3,10 @@ import os
 from logger import log
 
 from dis_snek.client import Snake
-from dis_snek.models.enums import Intents
-from dis_snek.models.listener import listen
-from dis_snek.models.context import Context, InteractionContext, MessageContext
-from dis_snek.models.discord_objects.activity import Activity, ActivityType
+from dis_snek.client.const import __version__
+from dis_snek.models.discord import Intents, Activity, ActivityType
+from dis_snek.models.snek import (listen, Context,
+                                  InteractionContext, MessageContext)
 from pymongo.database import Database
 
 dotenv.load_dotenv()  # Load .env file, prior to components loading
@@ -42,7 +42,7 @@ bot = CustomSnake(intents=Intents.new(
 
 @listen()
 async def on_ready():
-    log.info(f"{bot.user.username} is online.")
+    log.info(f"{bot.user.username} is online, running dis-snek version {__version__}.")
     
 # Locate and load all modules under "control_modules"
 for module in os.listdir("./control_modules"):

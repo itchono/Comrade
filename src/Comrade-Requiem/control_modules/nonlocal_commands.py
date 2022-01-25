@@ -1,7 +1,5 @@
 # Execute commands without needing to go through slash routes
-from dis_snek.models.context import MessageContext
-from dis_snek.models.scale import Scale
-from dis_snek.models.command import message_command
+from dis_snek.models.snek import MessageContext, Scale, message_command
 from inspect import signature
 from logger import log
 

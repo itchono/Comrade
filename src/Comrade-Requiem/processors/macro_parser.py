@@ -1,10 +1,8 @@
 # Arbitrary execution of bot commands
 
-from dis_snek.models.discord_objects.user import User
-from dis_snek.models.discord_objects.guild import Guild
-from dis_snek.models.discord_objects.message import Message
-from dis_snek.models.context import MessageContext, Context
-from dis_snek.models.events import MessageCreate
+from dis_snek.models.discord import User, Guild, Message
+from dis_snek.models.snek import MessageContext, Context
+from dis_snek.api.events import MessageCreate
 from pymongo.database import Database
 import asyncio
 from datetime import datetime

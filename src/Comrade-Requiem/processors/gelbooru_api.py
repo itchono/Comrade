@@ -3,7 +3,7 @@
 import aiohttp
 from dataclasses import dataclass
 import orjson
-from dis_snek.models.discord_objects.embed import Embed
+from dis_snek.models.discord import Embed
 
 URL_BASE = "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1"
 # Base URL for Gelbooru API

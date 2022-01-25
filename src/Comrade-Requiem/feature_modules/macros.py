@@ -1,10 +1,8 @@
-from dis_snek.models.context import InteractionContext
-from dis_snek.models.scale import Scale
-from dis_snek.models.application_commands import (slash_command,
-                                                  OptionTypes, slash_option)
-from dis_snek.models.listener import Listener
-from dis_snek.models.discord_objects.embed import Embed
-from dis_snek.models.events import MessageCreate
+from dis_snek.models.snek import (InteractionContext, Scale,
+                                  slash_command, OptionTypes, slash_option,
+                                  Listener)
+from dis_snek.models.discord import Embed
+from dis_snek.api.events import MessageCreate
 from logger import log
 
 from processors.macro_parser import Macro, macro_id

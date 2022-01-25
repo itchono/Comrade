@@ -1,8 +1,7 @@
 # Method of requesting files from a user
-from dis_snek.models.context import InteractionContext
-from dis_snek.models.discord_objects.message import Attachment
-from dis_snek.models.events import MessageCreate
-from dis_snek.models.application_commands import slash_option, OptionTypes
+from dis_snek.models.snek import (InteractionContext, slash_option, OptionTypes)
+from dis_snek.models.discord import Attachment
+from dis_snek.api.events import MessageCreate
 import asyncio
 from imghdr import what
 

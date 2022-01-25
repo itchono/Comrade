@@ -1,9 +1,8 @@
-from dis_snek.models.context import InteractionContext
+from dis_snek.models.snek import InteractionContext
+from dis_snek.models.discord import File
 
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
-
-from dis_snek.models.file import File
 
 import textwrap
 

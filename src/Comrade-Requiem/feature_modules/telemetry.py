@@ -1,8 +1,7 @@
-from dis_snek.models.scale import Scale
-from dis_snek.models.application_commands import slash_command
-from dis_snek.models.context import InteractionContext
+from dis_snek.models.snek import Scale, slash_command, InteractionContext
 from dis_snek import Snake
-from dis_snek.models.discord_objects.embed import Embed
+from dis_snek.client.const import __version__
+from dis_snek.models.discord import Embed
 import datetime
 import dis_snek
 
@@ -27,7 +26,7 @@ class Telemetry(Scale):
         embed.add_field(name="Uptime", value=uptime_str)
 
         embed.add_field(name="Latency", value=f"{bot.latency * 1000:.2f}ms")
-        embed.add_field(name="Library Version", value=dis_snek.__version__)
+        embed.add_field(name="Library Version", value=__version__)
       
         await ctx.send(embed=embed)
 

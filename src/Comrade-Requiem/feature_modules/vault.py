@@ -1,10 +1,7 @@
-from dis_snek.models.scale import Scale
-from dis_snek.models.application_commands import context_menu
-from dis_snek.models.context import InteractionContext
-from dis_snek.models.discord_objects.components import (ActionRow,
-                                                        Button, ButtonStyles)
-from dis_snek.models.discord_objects.message import Message
-from dis_snek.models.enums import CommandTypes
+from dis_snek.models.snek import (Scale, InteractionContext,
+                                  context_menu, CommandTypes)
+from dis_snek.models.discord import (ActionRow, Message,
+                                     Button, ButtonStyles)
 
 from logger import log
 import asyncio

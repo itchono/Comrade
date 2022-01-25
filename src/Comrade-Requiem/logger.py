@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from dis_snek.const import logger_name
+from dis_snek.client.const import logger_name
 
 logging.Formatter.converter = \
     lambda *args: datetime.now().timetuple()

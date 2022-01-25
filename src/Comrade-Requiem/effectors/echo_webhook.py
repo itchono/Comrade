@@ -3,12 +3,8 @@ Powerful core feature of Comrade which
 allows messsages to be sent under the guise of another person
 '''
 
-from dis_snek.models.discord_objects.channel import GuildText
-from dis_snek.models.discord_objects.message import Message
-from dis_snek.models.discord_objects.webhooks import Webhook
-from dis_snek.models.discord_objects.user import Member
-from dis_snek.models.context import Context
-from dis_snek.utils import find
+from dis_snek.models.discord import GuildText, Message, Webhook, Member
+from dis_snek.models.snek import Context
 
 
 async def mimic(channel: GuildText, content:str=None,
@@ -20,7 +16,9 @@ async def mimic(channel: GuildText, content:str=None,
     # Set up webhook if it doesn't already exist
     # if there are no webhook permissions, send it directly using the bot
     try:
-        webhook: Webhook = find(lambda w: w.name == "Comrade", await channel.get_webhooks())
+        # Try to find webhook named "Comrade"
+        channel_webhooks = await channel.get_webhooks()
+        webhook: Webhook = next(filter(lambda w: w.name == "Comrade", channel_webhooks), None)
 
         if not webhook:
             webhook: Webhook = await channel.create_webhook(name="Comrade")

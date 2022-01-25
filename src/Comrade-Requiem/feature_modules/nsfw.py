@@ -1,11 +1,9 @@
-from dis_snek.models.scale import Scale
-from dis_snek.models.application_commands import (slash_command,
-                                                  OptionTypes, slash_option,
-                                                  SlashCommandChoice,
-                                                  ComponentCommand)
-from dis_snek.models.context import InteractionContext, ComponentContext
-from dis_snek.models.discord_objects.components import Button
-from dis_snek.models.enums import ButtonStyles
+from dis_snek.models.snek import (Scale, slash_command,
+                                     OptionTypes, slash_option,
+                                     SlashCommandChoice,
+                                     ComponentCommand, InteractionContext,
+                                     ComponentContext)
+from dis_snek.models.discord import Button, ButtonStyles
 from logger import log
 
 from processors import gelbooru_api, e621_api

@@ -1,9 +1,6 @@
-from dis_snek.models.scale import Scale
-from dis_snek.models.application_commands import slash_command
-from dis_snek.models.context import InteractionContext
+from dis_snek.models.snek import Scale, slash_command, InteractionContext
+from dis_snek.models.discord import File
 from logger import log
-
-from dis_snek.models.file import File
 
 from PIL import Image
 from effectors.request_file import request_file_bytes, ImageBytes, image_url
