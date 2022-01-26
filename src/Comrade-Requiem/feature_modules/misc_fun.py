@@ -81,12 +81,6 @@ class MiscFun(Scale):
                      icon_url=ctx.author.avatar.url)
         await ctx.send(embed=e)
 
-    @slash_command(name="fileupload",
-                   description="test file upload",
-                   scopes=[419214713252216848, 709954286376976425])
-    async def file_upload(self, ctx: InteractionContext):
-        await request_file(ctx)
-
 
 def setup(bot):
     MiscFun(bot)

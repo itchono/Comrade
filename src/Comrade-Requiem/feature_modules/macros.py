@@ -1,3 +1,4 @@
+import re
 from dis_snek.models.snek import (InteractionContext, Scale,
                                   slash_command, OptionTypes, slash_option,
                                   Listener)
@@ -6,6 +7,7 @@ from dis_snek.api.events import MessageCreate
 from logger import log
 
 from processors.macro_parser import Macro, macro_id
+from processors.macro_input import request_macro_input
 
 
 class Macros(Scale):
@@ -30,17 +32,18 @@ class Macros(Scale):
             
     @slash_command(name="macro",
                    sub_cmd_name="add",
-                   sub_cmd_description="Add a macro",
+                   sub_cmd_description="Add a macro; input instructions in a following message.",
                    scopes=[419214713252216848, 709954286376976425])
     @slash_option(name="name", description="Macro will run when the message starts with this.",
                   opt_type=OptionTypes.STRING, required=True)
-    @slash_option(name="instructions", description="Instructions to execute when the macro is run.",
-                  opt_type=OptionTypes.STRING, required=True)
-    async def macro_add(self, ctx: InteractionContext, name: str, instructions: str):
-        macro = Macro(name.lower(), ctx.guild_id, True, ctx.author.id, instructions)
+    async def macro_add(self, ctx: InteractionContext, name: str):
+        await ctx.defer()
+        macro_instructions = await request_macro_input(ctx)
+        macro = Macro(name.lower(), ctx.guild_id, True,
+                      ctx.author.id, macro_instructions, [])
         collection = self.bot.db.macros
         result = collection.insert_one(macro.as_dict())
-        await ctx.send(f"Macro {macro.name} added with ID {result.inserted_id}.", ephemeral=True)
+        await ctx.send(f"Macro {macro.name} added with ID {result.inserted_id}.")
         
     @slash_command(name="macro",
                    sub_cmd_name="remove",
@@ -50,7 +53,7 @@ class Macros(Scale):
                   opt_type=OptionTypes.STRING, required=True)
     async def macro_remove(self, ctx: InteractionContext, name: str):
         collection = self.bot.db.macros
-        result = collection.delete_one({"_id": macro_id(ctx.guild_id, name.lower()), "owner": ctx.author.id})
+        result = collection.delete_one({"_id": macro_id(ctx.guild_id, name.lower()), "author_id": ctx.author.id})
         
         if result.deleted_count == 1:
             await ctx.send(f"Macro was deleted.", ephemeral=True)
@@ -63,9 +66,7 @@ class Macros(Scale):
                    scopes=[419214713252216848, 709954286376976425])
     @slash_option(name="name", description="Name of macro to view",
                   opt_type=OptionTypes.STRING, required=True)
-    async def macro_show(self, ctx: InteractionContext, name: str):
-        collection = self.bot.db.macros
-        
+    async def macro_show(self, ctx: InteractionContext, name: str):     
         if macro := Macro.create_from_id(ctx, macro_id(ctx.guild_id, name.lower())):
             pretty_instructions = ';\n'.join(macro.instructions.split(';'))
             e = Embed(title=macro.name,
@@ -76,6 +77,41 @@ class Macros(Scale):
             await ctx.send(embed=e)
         else:
             await ctx.send(f"Macro {name} not found.", ephemeral=True)
+            
+    @slash_command(name="macro",
+                   sub_cmd_name="showall",
+                   sub_cmd_description="Show all macros that can be called.",
+                   scopes=[419214713252216848, 709954286376976425])
+    async def macro_showall(self, ctx: InteractionContext):
+        db = self.bot.db
+        
+        results = db.macros.find({"locale": ctx.guild_id})
+        
+        e = Embed(title="All Macros in this Guild",
+                  description="\n".join([f"{macro['name']} - <@{macro['author_id']}>" for macro in results]))
+        await ctx.send(embed=e)
+            
+    @slash_command(name="macro",
+                   sub_cmd_name="guide",
+                   sub_cmd_description="View the guide for macros",
+                   scopes=[419214713252216848, 709954286376976425])
+    async def macro_guide(self, ctx: InteractionContext):
+        e = Embed(title="How to use macros")
+        with open("static/macro_guide.md", "r") as f:
+            e.description = f.read()
+        e.set_author(name="Comrade Macro System",
+                     icon_url=ctx.bot.user.avatar.url)
+        e.set_footer(text="Make your own macro using /macro add")
+        await ctx.send(embed=e)
+            
+    @slash_command(name="opt",
+                   sub_cmd_name="out",
+                   sub_cmd_description="Opt out of activating a macro",
+                   scopes=[419214713252216848, 709954286376976425])
+    @slash_option(name="name", description="Name of macro to opt out of",
+                  opt_type=OptionTypes.STRING, required=True)
+    async def opt_out(self, ctx: InteractionContext, name: str):
+        pass
 
 async def msg_macro(event: MessageCreate):
     # Try to identify macros

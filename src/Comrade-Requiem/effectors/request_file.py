@@ -26,7 +26,12 @@ async def request_file(ctx: InteractionContext,
 
     def message_check(event: MessageCreate):
         # Check that the message is from the author and has a file
-        return event.message.author == ctx.author and event.message.attachments
+        if event.message._guild_id:
+            return event.message.author == ctx.author \
+                and event.message.attachments \
+                and event.message.channel == ctx.channel
+        else:
+            return event.message.author == ctx.author and event.message.attachments
 
     try:
         event: MessageCreate = await ctx.bot.wait_for(

@@ -32,7 +32,7 @@ def fake_ctx(ctx: Context, args) -> InteractionContext:
     return new_ctx
 
 
-async def execute_slash_command(ctx: Context, cmd_name: str, args):
+async def execute_slash_command(ctx: Context, cmd_name: str, args: list):
     '''
     Executes any slash command registered with the bot.
     '''
@@ -40,6 +40,7 @@ async def execute_slash_command(ctx: Context, cmd_name: str, args):
         command: SlashCommand = ctx.bot.interactions[ctx.guild_id][cmd_name]
         log.info(f"Executing nonlocal command {command.resolved_name}"
                  f" with function signature {signature(command.callback)}")
-        await command.call_callback(command.callback, fake_ctx(ctx, list(args)))
+        await command.call_callback(command.callback, fake_ctx(ctx, args))
     else:
         raise ValueError(f"Command {cmd_name} not found.")
+    

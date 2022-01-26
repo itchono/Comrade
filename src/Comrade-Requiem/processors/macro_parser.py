@@ -1,6 +1,6 @@
 # Arbitrary execution of bot commands
 
-from dis_snek.models.discord import User, Guild, Message
+from dis_snek.models.discord import User, Guild
 from dis_snek.models.snek import MessageContext, Context
 from dis_snek.api.events import MessageCreate
 from pymongo.database import Database
@@ -32,20 +32,21 @@ def macro_id(locale: User | Guild | int, macro_name: str) -> str:
 
 
 class Macro:
-    def __init__(self, name, locale, guild, author_id, instructions):
+    def __init__(self, name, locale, guild, author_id, instructions, exclusions):
         self.name: str = name  # Name of the macro
         self.locale: int = locale  # Locale of the macro
         self.guild: bool = guild  # Whether the macro is guild-specific
         self.author_id: int = author_id  # ID of the author of the macro
+        self.exclusions: list = exclusions  # List of user ids who will not activate the macro
         
         # Clean the instructions
-        split_instructions = instructions.split(";")
-        instructions = ";".join([i.strip() for i in split_instructions if i.strip()])
+        split_instructions = instructions.split("\n")
+        instructions = "\n".join([i.strip() for i in split_instructions if i.strip()])
         self.instructions: str = instructions  # instructions to execute
         
     def __repr__(self):
         return f"<Macro {self.name}>:\n" +\
-            ";\n".join(self.instructions.split(";"))
+            self.instructions
 
     def as_dict(self):
         return {
@@ -54,7 +55,8 @@ class Macro:
             "locale": self.locale,
             "guild": self.guild,
             "author_id": self.author_id,
-            "instructions": self.instructions
+            "instructions": self.instructions,
+            "exclusions": self.exclusions
         }
     
     @classmethod
@@ -64,7 +66,8 @@ class Macro:
             data["locale"],
             data["guild"],
             data["author_id"],
-            data["instructions"])
+            data["instructions"],
+            data["exclusions"])
     
     @classmethod
     def create_from_id(cls, ctx: Context, id: str):
@@ -88,8 +91,12 @@ class Macro:
     async def execute_from_msg(self, event: MessageCreate):
         self_length = len(self.name.split(" "))
         arg = " ".join(event.message.content.split(" ")[self_length:])
-        await self.execute(MessageContext.from_message(
-            event.bot, event.message), arg)
+        
+        try:
+            await self.execute(MessageContext.from_message(
+                event.bot, event.message), arg)
+        except Exception as e:
+            await event.message.channel.send(f"An error occurred while executing the macro.\n`{e}`")
     
     
     async def execute(self, ctx: MessageContext, arg: str):
@@ -102,15 +109,18 @@ class Macro:
             ctx.recursion_depth = 1
         
         if ctx.recursion_depth > MAXIMUM_RECURSION_DEPTH:
-            raise RuntimeError(
+            await ctx.channel.send(
                 f"Recursion depth limit exceeded {MAXIMUM_RECURSION_DEPTH}.")
+            return
         
         # Tokens to replace in the macro with contextual elements
         SUB_TOKENS = {
             "${author}": ctx.author.nick if ctx.guild else ctx.author.name,
             "${ping}": ctx.author.mention,
             "${arg}": arg,
-            "${channel}" : ctx.channel.mention,
+            "${channelping}" : ctx.channel.mention,
+            "${channel}": ctx.channel.name,
+            "${depth}" : str(ctx.recursion_depth),
             # Format current time as unix timestamp
             "${time}": f"<t:{int(datetime.now().timestamp())}>"
         }
@@ -126,8 +136,6 @@ class Macro:
                 instruction = instruction.replace(token, value)
             
             operation = instruction.split(" ")[0]
-            
-            print(instruction)
             
             # Check control flow to see if we need to skip lines
             if control_stack and control_stack[-1] == "skip"\
@@ -150,9 +158,10 @@ class Macro:
                 
                 match operation:
                     case "$run":
-                        command_name = argument.split(" ")[0]
-                        command_args = " ".join(argument.split(" ")[1:]).split(";")
-                        await execute_slash_command(ctx, command_name, command_args)
+                        args = argument.split(":")
+                        command_name = args.pop(0)
+                        args = [s.strip() for s in args]
+                        await execute_slash_command(ctx, command_name, args)
                     case "$wait":
                         await asyncio.sleep(int(argument))
                     case "$if":
@@ -189,13 +198,12 @@ class Macro:
                             return state
                         else:
                             raise RuntimeError("$endrandom cannot be used outside of a random block.")
-            
-            print(control_stack)
             return state
                           
         # Parse macro instructions
-        for instruction in self.instructions.split(";"):
+        for instruction in self.instructions.split("\n"):
             try:
                 state = await asyncio.wait_for(execute_instruction(instruction, state), timeout=5)
             except asyncio.TimeoutError:
-                raise RuntimeError("Macro execution timed out.")
+                await ctx.channel.send("Macro execution timed out.")
+                return

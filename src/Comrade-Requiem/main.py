@@ -2,30 +2,13 @@ import dotenv
 import os
 from logger import log
 
-from dis_snek.client import Snake
-from dis_snek.client.const import __version__
+from dis_snek.client.const import __version__, __py_version__
 from dis_snek.models.discord import Intents, Activity, ActivityType
-from dis_snek.models.snek import (listen, Context,
-                                  InteractionContext, MessageContext)
-from pymongo.database import Database
+from dis_snek.models.snek import listen
+
+from custom_client import CustomSnake
 
 dotenv.load_dotenv()  # Load .env file, prior to components loading
-
-
-class CustomSnake(Snake):
-    
-    db: Database = None
-    
-    async def on_command_error(self, ctx: Context,
-                               error: Exception):
-        log.exception(msg=error, exc_info=error)
-        if type(ctx) == InteractionContext and not ctx.responded:
-            await ctx.send("Something went wrong while executing the command.\n"
-                           f"Error: `{error}`", ephemeral=True)
-        elif type(ctx) == MessageContext:
-            await ctx.send("Something went wrong while executing the command.\n"
-                           f"Error: `{error}`", reply_to = ctx.message)
-
 
 activity = Activity.create(name=" the rise of communism", type=ActivityType.WATCHING)
 
@@ -42,8 +25,11 @@ bot = CustomSnake(intents=Intents.new(
 
 @listen()
 async def on_ready():
-    log.info(f"{bot.user.username} is online, running dis-snek version {__version__}.")
-    
+    log.info(f"{bot.user.username} is online, "
+             f"running dis-snek version {__version__}"
+             f" using Python {__py_version__}")
+
+
 # Locate and load all modules under "control_modules"
 for module in os.listdir("./control_modules"):
     if module.endswith(".py") and not module.startswith("_"):
