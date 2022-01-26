@@ -4,3 +4,5 @@ python-dotenv
 BeautifulSoup4
 Pillow
 GitPython
+pymongo
+dnspython
