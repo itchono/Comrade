@@ -28,18 +28,24 @@ class Updater(Scale):
             os.path.join(
                 os.path.dirname(
                     os.path.dirname(
-                        os.path.abspath(__file__))), ".git"))
+                        os.path.abspath(
+                            os.getcwd()))), ".git"))
         
         current_commit = repo.head.commit
         
         repo.remotes.origin.pull()
         
-        current_commit = repo.head.commit
+        latest_commit = repo.head.commit
         
-        if current_commit.hexsha != repo.head.commit.hexsha:
-            await ctx.send(f"New update found and pulled. Restart for changes to take effect.")
+        if current_commit.hexsha != latest_commit.hexsha:
+            await ctx.send(f"New update found and pulled. Restart for changes to take effect."
+                           f"{current_commit.hexsha} "
+                           f"({current_commit.committed_datetime})"
+                           f" -> {latest_commit.hexsha} ({latest_commit.committed_datetime})")
         else:
-            await ctx.send(f"No new updates found.")
+            await ctx.send(f"No new updates found."
+                           f" Latest commit is from {latest_commit.committed_datetime}"
+                           f" with hash {latest_commit.hexsha}")
         
     @slash_command(name="restart",
                    description="Restarts the bot",
