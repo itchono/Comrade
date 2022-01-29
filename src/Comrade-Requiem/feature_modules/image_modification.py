@@ -97,7 +97,7 @@ class ImageModification(Scale):
             if ratio < 1:
                 user_image = user_image.resize((int(270 * ratio), 270))
             else:
-                user_image = user_image.resize((180, int(180 * ratio)))
+                user_image = user_image.resize((180, int(180 / ratio)))
         
             meme.paste(user_image, (25, 275), mask=user_image)
 
