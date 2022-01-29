@@ -15,13 +15,15 @@ class ImageModification(Scale):
                    description="ZAMN!! Upload an image to ZAMN it.",
                    scopes=[419214713252216848, 709954286376976425])
     @image_url()
-    async def zamn(self, ctx: InteractionContext, file_bytes: ImageBytes = None):
-        if not file_bytes:
+    async def zamn(self, ctx: InteractionContext, image_url: ImageBytes = None):
+        if not image_url:
             file_bytes: BytesIO = await request_file_bytes(
                 ctx,
                 "**FILE UPLOAD REQUEST**\n"
                 f"{ctx.author.mention}, "
                 "please upload an image within the next 30 seconds.")
+        else:
+            file_bytes = image_url
 
         # Load the image from file_bytes
         user_image = Image.open(file_bytes)
@@ -90,14 +92,14 @@ class ImageModification(Scale):
         
         # If the user image exists, resize it and paste it at (25, 275)
         if image_url:
-            user_image = Image.open(image_url)  
+            user_image = Image.open(image_url).convert('RGBA')
             ratio = user_image.size[0]/user_image.size[1]
             if ratio < 1:
                 user_image = user_image.resize((int(270 * ratio), 270))
             else:
                 user_image = user_image.resize((180, int(180 * ratio)))
         
-            meme.paste(user_image, (25, 275))
+            meme.paste(user_image, (25, 275), mask=user_image)
 
         meme.save(file_bytes, "PNG")
         file_bytes.seek(0)
