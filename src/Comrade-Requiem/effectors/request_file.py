@@ -78,7 +78,7 @@ class ImageBytes():
         # Downloads the image at url and returns a BytesIO object
         
         if not ctx.responded:
-            await ctx.defer(ephemeral=True)
+            await ctx.defer()
             # Defer execution because downloading will take time
         
         async with aiohttp.ClientSession() as session:

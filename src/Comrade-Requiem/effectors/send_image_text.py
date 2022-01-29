@@ -10,7 +10,8 @@ async def send_amongus(ctx: InteractionContext, text: str):
     '''
     Sends a message as among us font in image form
     '''
-    await ctx.defer(ephemeral=True)
+    if not ctx.responded:
+        await ctx.defer()
     
     # Import font
     font = ImageFont.truetype("static/AmongUs-Regular.ttf", size=50)
@@ -44,7 +45,4 @@ async def send_amongus(ctx: InteractionContext, text: str):
     
     send_file = File(file_bytes, file_name="amongus.png")
     
-    await ctx.channel.send(file=send_file)
-    # Send the image to the channel
-    if not ctx.responded:
-        await ctx.send("AMOGUS", ephemeral=True)
+    await ctx.send(file=send_file)

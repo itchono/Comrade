@@ -1,10 +1,13 @@
-from dis_snek.models.snek import Scale, slash_command, InteractionContext
+from dis_snek.models.snek import (Scale, slash_command,
+                                  InteractionContext, slash_option,
+                                  OptionTypes)
 from dis_snek.models.discord import File
 from logger import log
 
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 from effectors.request_file import request_file_bytes, ImageBytes, image_url
 from io import BytesIO
+import textwrap
 
 
 class ImageModification(Scale):
@@ -39,11 +42,70 @@ class ImageModification(Scale):
 
         send_file = File(file_bytes, file_name="zamn.png")
 
-        await ctx.channel.send(file=send_file)
+        await ctx.send(file=send_file)
         # Send the image to the channel
         
         if not ctx.responded:
             await ctx.send("ZAMN'd!")
+            
+    @slash_command(name="the",
+                   description="Make a Barnacle Boy \"the\" meme.",
+                   scopes=[419214713252216848, 709954286376976425])
+    @slash_option(name="caption", description="Caption for the meme",
+                  opt_type=OptionTypes.STRING, required=True)
+    @image_url()
+    async def the(self, ctx: InteractionContext, caption: str, image_url: ImageBytes = None):
+        if not ctx.deferred:
+            await ctx.defer()
+
+        # Load the image
+        meme= Image.open("static/barnacleboy.png")
+        
+        file_bytes = BytesIO()
+        font = ImageFont.truetype("static/impact.ttf", size=50)
+        
+        text = "".join(char.upper()
+                    for char in caption if char.isalpha() or char == " ")
+        text = textwrap.wrap(text, 30)
+        text_width, text_height = font.getsize(max(text, key=len))
+        text_height = int(text_height * 1.1)
+        
+        # Multiply by the number of lines
+        text_height *= len(text)
+        text = "\n".join(text)
+        
+        # Create new transparent image with the correct size
+        text_layer = Image.new("RGBA", (text_width, text_height), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(text_layer)
+        draw.multiline_text((0, 0), text, font=font, fill=(255, 255, 255, 255))
+    
+        # Resize the text layer so that width is within a 450 x 110 box
+        if text_height/text_width > 110/450:
+            text_layer = text_layer.resize((int(110*text_width/text_height), 110))
+        else:
+            text_layer = text_layer.resize((450, int(450*text_height/text_width)))
+            
+        # Paste the text layer onto the template at (210, 10)
+        meme.paste(text_layer, (210, 10), mask=text_layer)
+        
+        # If the user image exists, resize it and paste it at (25, 275)
+        if image_url:
+            user_image = Image.open(image_url)  
+            ratio = user_image.size[0]/user_image.size[1]
+            if ratio < 1:
+                user_image = user_image.resize((int(270 * ratio), 270))
+            else:
+                user_image = user_image.resize((180, int(180 * ratio)))
+        
+            meme.paste(user_image, (25, 275))
+
+        meme.save(file_bytes, "PNG")
+        file_bytes.seek(0)
+
+        send_file = File(file_bytes, file_name="the.png")
+
+        await ctx.send(file=send_file)
+        # Send the image to the channel
 
 
 def setup(bot):
