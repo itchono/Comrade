@@ -115,7 +115,7 @@ class Macro:
         
         # Tokens to replace in the macro with contextual elements
         SUB_TOKENS = {
-            "${author}": ctx.author.nick if ctx.guild else ctx.author.name,
+            "${author}": ctx.author.display_name,
             "${ping}": ctx.author.mention,
             "${arg}": arg,
             "${channelping}" : ctx.channel.mention,

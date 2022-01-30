@@ -21,6 +21,8 @@ class WebSearches(Scale):
 
         # Defer the interaction to give processing time
         await ctx.defer()
+        
+        original_term = term
 
         # Process term into URL encoded string
         term = term.replace(" ", "%20")
@@ -56,7 +58,7 @@ class WebSearches(Scale):
                 continue
 
             # Otherwise, send the definition
-            embed = Embed(title=term, url=url, color=FlatUIColours.MIDNIGHTBLUE)
+            embed = Embed(title=original_term, url=url, color=FlatUIColours.MIDNIGHTBLUE)
             embed.add_field(name="Definition", value=meaning.text)
             embed.add_field(name="Example", value=example.text)
             embed.set_footer(text="Powered by Urban Dictionary | "

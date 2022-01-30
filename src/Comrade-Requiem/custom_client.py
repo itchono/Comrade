@@ -1,19 +1,21 @@
 from dataclasses import dataclass
 from dis_snek.client import Snake
 from pymongo.database import Database
-from dis_snek.models.snek import (Context, Scale,
-                                  InteractionContext, MessageContext)
-
+from dis_snek.models.snek import (Context,
+                                  InteractionContext,
+                                  MessageContext)
+from dis_snek.models.discord import Guild, GuildText
 from logger import log
-from collections import defaultdict
+from collections import defaultdict, deque
 from datetime import datetime
 
 
 class CustomSnake(Snake):
-    
     db: Database = None
-    audit_log = defaultdict(list)
-    # TODO: log command execution
+    audit_log = defaultdict(lambda: defaultdict(lambda: deque(maxlen=10)))
+    relay_guild: Guild = None
+    relay_channel: GuildText = None
+    emote_channels: dict = {}
     
     async def on_command_error(self, ctx: Context,
                                error: Exception):
@@ -24,33 +26,31 @@ class CustomSnake(Snake):
         elif type(ctx) == MessageContext:
             await ctx.send("Something went wrong while executing the command.\n"
                            f"Error: `{error}`", reply_to = ctx.message)        
-
-@dataclass
-class CommandExecInfo:
-    command_name: str
-    kwargs: dict
-    author_id: int
-    time: datetime
-# Stores command execution info for audit log
-
-
-class CustomScale(Scale):
-    def __init__(self, client: CustomSnake):
-        self.client = client
-        #self.add_scale_check(self.a_check)
-        self.add_scale_postrun(self.post_run)
+            
+    async def on_error(self, source: str, error: Exception, *args, **kwargs) -> None:
+        log.exception(msg=error, exc_info=error)
         
-    # async def a_check(ctx: InteractionContext) -> bool:
-    #     return bool(ctx.author.name.startswith("a"))
-
-    async def post_run(self, ctx: InteractionContext):
-        if ctx.guild_id:
-            self.client.audit_log[ctx.guild_id].append(
+        
+    async def on_command(self, ctx: Context) -> None:
+        # log command execution
+        if ctx.guild_id and ctx.channel:
+            self.audit_log[ctx.guild_id][ctx.channel.id].append(
                 CommandExecInfo(
-                    "idk",
+                    ctx.invoked_name,
+                    ctx.args,
                     ctx.kwargs,
                     ctx.author.id,
                     datetime.now()
                 )
             )
-        
+        await super().on_command(ctx)
+
+
+@dataclass
+class CommandExecInfo:
+    command_name: str
+    args: list
+    kwargs: dict
+    author_id: int
+    time: datetime
+# Stores command execution info for audit log

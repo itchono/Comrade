@@ -69,8 +69,8 @@ class ImageModification(Scale):
         text = "".join(char.upper()
                     for char in caption if char.isalpha() or char == " ")
         text = textwrap.wrap(text, 30)
-        text_width, text_height = font.getsize(max(text, key=len))
-        text_height = int(text_height * 1.1)
+        text_width, text_height = font.getsize(max(text, key=len), stroke_width=2)
+        text_height = int(text_height * 1.1) if len(text) > 1 else text_height
         
         # Multiply by the number of lines
         text_height *= len(text)
@@ -79,7 +79,8 @@ class ImageModification(Scale):
         # Create new transparent image with the correct size
         text_layer = Image.new("RGBA", (text_width, text_height), (0, 0, 0, 0))
         draw = ImageDraw.Draw(text_layer)
-        draw.multiline_text((0, 0), text, font=font, fill=(255, 255, 255, 255))
+        draw.multiline_text((0, 0), text, font=font, fill=(255, 255, 255, 255),
+                            stroke_fill=(0, 0, 0, 255), stroke_width=2)
     
         # Resize the text layer so that width is within a 450 x 110 box
         if text_height/text_width > 110/450:
@@ -90,16 +91,19 @@ class ImageModification(Scale):
         # Paste the text layer onto the template at (210, 10)
         meme.paste(text_layer, (210, 10), mask=text_layer)
         
-        # If the user image exists, resize it and paste it at (25, 275)
+        # If the user image exists, resize it and paste it
         if image_url:
             user_image = Image.open(image_url).convert('RGBA')
             ratio = user_image.size[0]/user_image.size[1]
             if ratio < 1:
-                user_image = user_image.resize((int(270 * ratio), 270))
+                user_image = user_image.resize((int(330 * ratio), 330))
+                meme.paste(user_image, (20, 200), mask=user_image)
             else:
-                user_image = user_image.resize((180, int(180 / ratio)))
+                user_image = user_image.resize((300, int(300 / ratio)))
+                margin = (330 - user_image.size[1])
+                meme.paste(user_image, (20, 200+margin), mask=user_image)
         
-            meme.paste(user_image, (25, 275), mask=user_image)
+            
 
         meme.save(file_bytes, "PNG")
         file_bytes.seek(0)

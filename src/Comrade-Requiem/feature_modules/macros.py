@@ -1,4 +1,3 @@
-import re
 from dis_snek.models.snek import (InteractionContext, Scale,
                                   slash_command, OptionTypes, slash_option,
                                   Listener)
