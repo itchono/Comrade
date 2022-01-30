@@ -66,9 +66,7 @@ class ImageModification(Scale):
         file_bytes = BytesIO()
         font = ImageFont.truetype("static/impact.ttf", size=50)
         
-        text = "".join(char.upper()
-                    for char in caption if char.isalpha() or char == " ")
-        text = textwrap.wrap(text, 30)
+        text = textwrap.wrap(caption.upper(), 30)
         text_width, text_height = font.getsize(max(text, key=len), stroke_width=2)
         text_height = int(text_height * 1.1) if len(text) > 1 else text_height
         
