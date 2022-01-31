@@ -6,6 +6,7 @@ allows messsages to be sent under the guise of another person
 from dis_snek.models.discord import GuildText, Message, Webhook, Member
 from dis_snek.models.snek import Context
 
+WEBHOOK_NAME = "Comrade Requiem"
 
 async def mimic(channel: GuildText, content:str=None,
                 username: str=None, avatar_url: str=None, **kwargs):
@@ -18,10 +19,10 @@ async def mimic(channel: GuildText, content:str=None,
     try:
         # Try to find webhook named "Comrade"
         channel_webhooks = await channel.get_webhooks()
-        webhook: Webhook = next(filter(lambda w: w.name == "Comrade", channel_webhooks), None)
+        webhook: Webhook = next(filter(lambda w: w.name == WEBHOOK_NAME, channel_webhooks), None)
 
         if not webhook:
-            webhook: Webhook = await channel.create_webhook(name="Comrade")
+            webhook: Webhook = await channel.create_webhook(name=WEBHOOK_NAME)
 
     except BaseException:
         await channel.send(content=content,
