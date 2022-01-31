@@ -4,11 +4,10 @@ from dis_snek.models.discord import Attachment
 from dis_snek.api.events import MessageCreate
 import asyncio
 from imghdr import what
-
 import aiohttp
-
 from io import BytesIO
 from logger import log
+from processors.tenor_converter import get_tenor_gif
 
 
 async def request_file(ctx: InteractionContext,
@@ -80,6 +79,9 @@ class ImageBytes():
         if not ctx.responded:
             await ctx.defer()
             # Defer execution because downloading will take time
+
+        if url.startswith("https://tenor.com/view/"):
+            url = await get_tenor_gif(url)
         
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as resp:
