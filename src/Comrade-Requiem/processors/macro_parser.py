@@ -86,7 +86,10 @@ class Macro:
     @property
     def id(self):
         return macro_id(self.locale, self.name)
-    
+
+    @property
+    def requires_args(self):
+        return "${arg}" in self.instructions
     
     async def execute_from_msg(self, event: MessageCreate):
         self_length = len(self.name.split(" "))

@@ -123,11 +123,12 @@ async def msg_macro(event: MessageCreate):
             macro_id(locale, message.content.lower())):
         await macro.execute_from_msg(event)
     
-    # Try single word macro as well
+    # Try single word macro as well, if it has arguments
     elif macro := Macro.create_from_id_msg(
             event,
             macro_id(locale, message.content.split(" ")[0].lower())):
-        await macro.execute_from_msg(event)
+        if macro.requires_args:
+            await macro.execute_from_msg(event)
         
 def setup(bot):
     Macros(bot)
