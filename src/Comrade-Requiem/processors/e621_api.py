@@ -25,8 +25,6 @@ async def gb_get_next_post_data(session: GBSession) -> dict:
     # Assemble url to query genderbender API
     url_ext = f"&tags={session.tags}+order:{session.sorting}&limit={session.count}&page={session.pid}"
     
-    print(GB_BASE + url_ext)
-    
     # Advance page by 1
     session.pid += 1
     
@@ -43,9 +41,7 @@ async def e621_get_next_post_data(session: GBSession) -> dict:
     
     # Assemble url to query genderbender API
     url_ext = f"&tags={session.tags}+order:{session.sorting}&limit={session.count}&page={session.pid}"
-    
-    print(E621_BASE + url_ext)
-    
+
     # Advance page by 1
     session.pid += 1
     

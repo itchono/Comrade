@@ -5,10 +5,12 @@ from dis_snek.models.snek import (Context,
                                   InteractionContext,
                                   MessageContext)
 from dis_snek.models.discord import Guild, GuildText
-from logger import log
+import logging
 from collections import defaultdict, deque
 from datetime import datetime
 
+
+log = logging.getLogger("ComradeLog")
 
 class CustomSnake(Snake):
     db: Database = None
@@ -29,6 +31,7 @@ class CustomSnake(Snake):
             
     async def on_error(self, source: str, error: Exception, *args, **kwargs) -> None:
         log.exception(msg=error, exc_info=error)
+        await super().on_error(source, error, *args, **kwargs)
         
         
     async def on_command(self, ctx: Context) -> None:

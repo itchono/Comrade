@@ -1,6 +1,6 @@
 from dis_snek.models.snek import (InteractionContext, Scale,
                                   slash_command, OptionTypes, slash_option,
-                                  Listener)
+                                  Listener, MessageContext)
 from dis_snek.models.discord import Embed
 from dis_snek.api.events import MessageCreate
 from logger import log
@@ -23,9 +23,16 @@ class Macros(Scale):
         Executes any slash command registered with the bot.
         '''
         if macro := Macro.create_from_id(ctx, macro_id(ctx.guild_id, macro)):
-            await macro.execute(ctx, arg)
             if not ctx.responded:
-                await ctx.send(f"{macro.name} executed.")
+                msg = await ctx.send(f"Executing {macro.name}...")
+                try:
+                    await macro.execute(
+                        MessageContext.from_message(ctx.bot, msg),arg)
+                except Exception as e:
+                    await ctx.send(
+                        f"An error occurred while executing the macro.\n`{e}`")
+                    raise e
+            await macro.execute(ctx, arg)
         else:
             await ctx.send(f"Macro {macro} not found.", ephemeral=True)
             
@@ -43,6 +50,7 @@ class Macros(Scale):
         collection = self.bot.db.macros
         result = collection.insert_one(macro.as_dict())
         await ctx.send(f"Macro {macro.name} added with ID {result.inserted_id}.")
+        await ctx.send("Macro Added Successfully.")
         
     @slash_command(name="macro",
                    sub_cmd_name="remove",

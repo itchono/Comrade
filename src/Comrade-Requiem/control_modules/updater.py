@@ -59,6 +59,7 @@ class Updater(Scale):
                         value=f"Date: {current_commit.committed_datetime}")
             e.add_field(name=f"Latest Commit ({latest_commit.hexsha[:8]})",
                         value=f"Date: {latest_commit.committed_datetime}")
+            e.set_footer(f"Message: {latest_commit.message}")
         else:
             e = Embed(title="No updates found.",
                       color=MaterialColors.GREY)

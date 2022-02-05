@@ -6,11 +6,14 @@ from dis_snek.api.events import MessageCreate
 from pymongo.database import Database
 import asyncio
 from datetime import datetime
+from collections import defaultdict
 from effectors.nonlocal_executor import execute_slash_command
 from random import choice
 
 
-MAXIMUM_RECURSION_DEPTH = 5
+MAXIMUM_RECURSION_DEPTH = 4
+
+macro_recursion_depth = defaultdict(lambda: 0)
 
 
 def macro_id(locale: User | Guild | int, macro_name: str) -> str:
@@ -100,21 +103,18 @@ class Macro:
                 event.bot, event.message), arg)
         except Exception as e:
             await event.message.channel.send(f"An error occurred while executing the macro.\n`{e}`")
+            raise e
     
     
     async def execute(self, ctx: MessageContext, arg: str):
         """
         Executes the macro.
         """
-        if hasattr(ctx, "recusion_depth"):
-            ctx.recursion_depth += 1
-        else:
-            ctx.recursion_depth = 1
+        macro_recursion_depth[ctx.message.id] += 1
         
-        if ctx.recursion_depth > MAXIMUM_RECURSION_DEPTH:
-            await ctx.channel.send(
-                f"Recursion depth limit exceeded {MAXIMUM_RECURSION_DEPTH}.")
-            return
+        if macro_recursion_depth[ctx.message.id] > MAXIMUM_RECURSION_DEPTH:
+            del macro_recursion_depth[ctx.message.id]
+            raise RecursionError(f"Maximum recursion depth reached ({MAXIMUM_RECURSION_DEPTH})")
         
         # Tokens to replace in the macro with contextual elements
         SUB_TOKENS = {
@@ -123,7 +123,7 @@ class Macro:
             "${arg}": arg,
             "${channelping}" : ctx.channel.mention,
             "${channel}": ctx.channel.name,
-            "${depth}" : str(ctx.recursion_depth),
+            "${depth}" : str(macro_recursion_depth[ctx.message.id]),
             # Format current time as unix timestamp
             "${time}": f"<t:{int(datetime.now().timestamp())}>"
         }
@@ -133,7 +133,7 @@ class Macro:
         state = "send"
         random_buffer = []  # Buffer for random operations
          
-        async def execute_instruction(instruction: str, state: str) -> str:         
+        async def execute_instruction(instruction: str, state: str) -> str:
             # Replace tokens with contextual elements
             for token, value in SUB_TOKENS.items():
                 instruction = instruction.replace(token, value)
@@ -150,7 +150,6 @@ class Macro:
                 match state:
                     case "send":
                         # Simply send the message if the operation is not valid
-                        print(f"Sending {instruction}")
                         await ctx.channel.send(instruction)
                     case "random":
                         # Add instruction to random buffer
@@ -210,3 +209,8 @@ class Macro:
             except asyncio.TimeoutError:
                 await ctx.channel.send("Macro execution timed out.")
                 return
+
+        # Clean up
+        macro_recursion_depth[ctx.message.id] -= 1
+        if macro_recursion_depth[ctx.message.id] == 0:
+            del macro_recursion_depth[ctx.message.id]

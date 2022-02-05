@@ -24,9 +24,7 @@ async def send_amongus(ctx: InteractionContext, text: str):
     text = textwrap.wrap(text, 30)
     
     # Determine dimensions of the text
-    text_width, text_height = font.getsize(max(text, key=len))
-    
-    text_height = int(text_height * 1.1) if len(text) > 1 else text_height
+    text_width, text_height = font.getsize_multiline(text)
     
     # Multiply by the number of lines
     text_height *= len(text)

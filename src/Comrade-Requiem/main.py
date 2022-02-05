@@ -25,7 +25,6 @@ bot = CustomSnake(intents=Intents.new(
                         direct_messages=True,
                         guild_emojis_and_stickers=True
                     ), sync_interactions=True,
-                  delete_unused_application_cmds=True,
                   activity=activity,
                   enable_emoji_cache=True)
 
