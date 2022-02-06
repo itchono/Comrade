@@ -22,13 +22,10 @@ async def send_amongus(ctx: InteractionContext, text: str):
     
     # Wrap text so that each line is no longer than 30 characters
     text = textwrap.wrap(text, 30)
+    text = "\n".join(text)
     
     # Determine dimensions of the text
     text_width, text_height = font.getsize_multiline(text)
-    
-    # Multiply by the number of lines
-    text_height *= len(text)
-    text = "\n".join(text)
     
     # Create new transparent image with the correct size
     image = Image.new("RGBA", (text_width, text_height), (0, 0, 0, 0))

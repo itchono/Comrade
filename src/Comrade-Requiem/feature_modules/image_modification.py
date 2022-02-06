@@ -164,7 +164,62 @@ class ImageModification(Scale):
         meme.save(file_bytes, "PNG")
         file_bytes.seek(0)
 
-        send_file = File(file_bytes, file_name="the.png")
+        send_file = File(file_bytes, file_name="finally.png")
+
+        await ctx.send(file=send_file)
+        # Send the image to the channel
+
+    @slash_command(name="supremacy",
+                   description="Make an \"I believe in <??> supremacy\" meme.",
+                   scopes=[419214713252216848, 709954286376976425])
+    @slash_option(name="caption", description="Caption for the meme",
+                  opt_type=OptionTypes.STRING, required=True)
+    @image_url()
+    async def supremacy(self, ctx: InteractionContext, caption: str, image_url: ImageBytes = None):
+        if not ctx.deferred:
+            await ctx.defer()
+
+        # Load the image
+        meme= Image.open("static/supremacy.png").convert('RGBA')
+        
+        file_bytes = BytesIO()
+        font = ImageFont.truetype("static/unicode_impact.ttf", size=50)
+        
+        text = textwrap.wrap(caption.upper(), 30)
+        text = "\n".join(text)
+        text_width, text_height = font.getsize_multiline(text, stroke_width=2)
+        
+        # Create new transparent image with the correct size
+        text_layer = Image.new("RGBA", (text_width, text_height), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(text_layer)
+        draw.multiline_text((1, 0), text, font=font, fill=(0, 0, 0, 255))
+    
+        # Resize the text layer so that width is within a 400 x 100 box
+        if text_height/text_width > 100/400:
+            text_layer = text_layer.resize((int(100*text_width/text_height), 100))
+        else:
+            text_layer = text_layer.resize((400, int(400*text_height/text_width)))
+        # Paste the text layer onto the template at (325, 120)
+        meme.paste(text_layer, (325, 120), mask=text_layer)
+        
+        # If the user image exists, resize it and paste it
+        if image_url:
+            user_image = Image.open(image_url).convert('RGBA')
+            ratio = user_image.size[0]/user_image.size[1]
+            if ratio < 1:
+                # image has a width greater than height
+                user_image = user_image.resize((int(340 * ratio), 340))
+                meme.paste(user_image, (0, 140), mask=user_image)
+            else:
+                user_image = user_image.resize((320, int(320 / ratio)))
+                margin = (340 - user_image.size[1])
+                meme.paste(user_image, (0, 140+margin), mask=user_image)
+                
+
+        meme.save(file_bytes, "PNG")
+        file_bytes.seek(0)
+
+        send_file = File(file_bytes, file_name="supremacy.png")
 
         await ctx.send(file=send_file)
         # Send the image to the channel
@@ -173,4 +228,3 @@ class ImageModification(Scale):
 def setup(bot):
     ImageModification(bot)
     log.info("Module image_modification.py loaded.")
-    
