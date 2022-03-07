@@ -157,7 +157,7 @@ async def inject(ctx: commands.Context, name) -> discord.Emoji:
             content = await resp.read()
 
             # March 7: Fix by Sean to handle webp images
-            if session.get(document["URL"]).endswith("webp"):
+            if document["URL"].endswith("webp"):
                 im = Image.open(io.BytesIO(content))
                 content = io.BytesIO()
                 im.save(content, format='png')
