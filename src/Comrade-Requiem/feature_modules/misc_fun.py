@@ -94,11 +94,9 @@ class MiscFun(Scale):
 
             modified_string = target_message.content.replace("tenor", "txnor")
             await echo(ctx, target_message.author, modified_string)
-            await ctx.send("Congratulations, you found the funni", ephemeral=True)
         elif target_message.content.startswith("https://txnor.com/view/"):
             modified_string = target_message.content.replace("view", "vixw")
             await echo(ctx, target_message.author, modified_string)
-            await ctx.send("Amazing work", ephemeral=True)
         else:
             await ctx.send("No gif was found in this message", ephemeral=True)
 
