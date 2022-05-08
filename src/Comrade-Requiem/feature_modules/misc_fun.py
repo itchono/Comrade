@@ -84,7 +84,7 @@ class MiscFun(Scale):
     @context_menu(name="sex2",
                   context_type=CommandTypes.MESSAGE,
                   scopes=[419214713252216848])
-    async def futa(self, ctx: InteractionContext):
+    async def sex2(self, ctx: InteractionContext):
         await ctx.defer(ephemeral=True)
 
         target_message: Message = await ctx.channel.get_message(ctx.target_id)
