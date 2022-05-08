@@ -81,6 +81,24 @@ class MiscFun(Scale):
                      icon_url=ctx.author.avatar.url)
         await ctx.send(embed=e)
 
+    @context_menu(name="sex2",
+                  context_type=CommandTypes.MESSAGE,
+                  scopes=[419214713252216848])
+    async def futa(self, ctx: InteractionContext):
+        await ctx.defer(ephemeral=True)
+
+        target_message: Message = await ctx.channel.get_message(ctx.target_id)
+
+        # Check if message is a link to a tenor gif
+        if target_message.content.startswith("https://tenor.com/view/"):
+
+            modified_string = target_message.content.replace("tenor", "txnor")
+
+            await echo(ctx, target_message.author, modified_string)
+
+            await ctx.send("Congratulations, you found the funni", ephemeral=True)
+        else:
+            await ctx.send("No gif was found in this message", ephemeral=True)
 
 def setup(bot):
     MiscFun(bot)
