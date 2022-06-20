@@ -337,13 +337,13 @@ class NSFW(Scale):
                    description="Searches NHentai for a given query.",
                    scopes=[419214713252216848, 709954286376976425])
     @slash_option(name="query", description="tags to search for",
-                  opt_type=OptionTypes.STRING, required=False)
+                  opt_type=OptionTypes.STRING)
     @slash_option(name="sorting", description="Sorting method, default popular",
                   opt_type=OptionTypes.STRING, choices=[
                       SlashCommandChoice(name="recent", value="recent"),
                       SlashCommandChoice(name="popular", value="popular")
                   ], required=False)
-    async def nsearch(self, ctx: InteractionContext, query: str = None, sorting: str = "popular"):
+    async def nsearch(self, ctx: InteractionContext, query: str, sorting: str = "popular"):
         await ctx.defer()
 
         # Save Session
