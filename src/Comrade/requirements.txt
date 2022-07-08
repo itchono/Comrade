@@ -107,7 +107,7 @@ pillow==9.0.0
     #   matplotlib
 pydictionary==2.0.1
     # via -r requirements.in
-pyjwt==2.1.0
+pyjwt==2.4.0
     # via flask-discord
 pymongo==3.11.4
     # via -r requirements.in
