@@ -7,8 +7,8 @@
 aiohttp==3.7.4.post0
     # via
     #   discord-components
+    #   discord-py
     #   discord-py-slash-command
-    #   discord.py
 async-lru==1.0.2
     # via -r requirements.in
 async-timeout==3.0.1
@@ -41,14 +41,14 @@ discord==1.7.3
     # via -r requirements.in
 discord-components==1.1.2
     # via -r requirements.in
-discord-py-slash-command==2.3.0
-    # via -r requirements.in
-discord.py==1.7.3
+discord-py==1.7.3
     # via
     #   discord
     #   discord-components
     #   discord-py-slash-command
     #   flask-discord
+discord-py-slash-command==2.3.0
+    # via -r requirements.in
 dnspython==2.1.0
     # via -r requirements.in
 flask==2.0.1
@@ -93,7 +93,7 @@ multidict==5.1.0
     #   yarl
 mypy-extensions==0.4.3
     # via typing-inspect
-numpy==1.21.0
+numpy==1.22.0
     # via
     #   -r requirements.in
     #   matplotlib
@@ -101,13 +101,13 @@ oauthlib==3.1.1
     # via
     #   flask-discord
     #   requests-oauthlib
-pillow==9.0.0
+pillow==9.0.1
     # via
     #   -r requirements.in
     #   matplotlib
 pydictionary==2.0.1
     # via -r requirements.in
-pyjwt==2.1.0
+pyjwt==2.4.0
     # via flask-discord
 pymongo==3.11.4
     # via -r requirements.in
