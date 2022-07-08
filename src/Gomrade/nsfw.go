@@ -510,15 +510,17 @@ func NSFWCommand(s *discordgo.Session, m *discordgo.MessageCreate) int {
 
 	case "nhentai":
 		if len(fields) == 2 {
-			return NHentaiStart(s, m, fields[1])
+			//return NHentaiStart(s, m, fields[1])
 		}
-		s.ChannelMessageSend(m.ChannelID, "Please Provide gallery number.")
+		s.ChannelMessageSend(m.ChannelID, "Apologies, this command is broken right now.")
+		//s.ChannelMessageSend(m.ChannelID, "Please Provide gallery number.")
 
 	case "nsearch":
 		if len(fields) == 1 {
-			return NSearch(s, m, make([]string, 0))
+			//return NSearch(s, m, make([]string, 0))
 		}
-		return NSearch(s, m, fields[1:])
+		s.ChannelMessageSend(m.ChannelID, "Apologies, this command is broken right now.")
+		//return NSearch(s, m, fields[1:])
 
 	case "help":
 		s.ChannelMessageSend(m.ChannelID, "`hentai [tags]` -- searches for hentai posts via Gelbooru\n"+
