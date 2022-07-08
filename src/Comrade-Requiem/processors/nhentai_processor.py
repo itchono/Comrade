@@ -103,7 +103,8 @@ def nhentai_search(query: str, mode: str = "recent") -> NHentaiSearchResult:
     try:
         result = scraper.get(query_url)
     except Exception as e:
-        return NHentaiSearchResult(query=query, num_results=0, error=e)
+        return NHentaiSearchResult(query=query, num_results=0, error=e,
+                                   sort_suffix="", num_pages=0, cached_pages={})
 
     soup = BeautifulSoup(result.text, "html.parser")
     title_block = soup.find_all("h1")[0].text
