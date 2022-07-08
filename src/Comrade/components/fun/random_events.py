@@ -85,29 +85,29 @@ class RandomEvents(commands.Cog):
                 elif choice == "rickroll":
                     await self.rickroll(ctx)
 
-    @commands.Cog.listener()
-    async def on_member_update(self,
-                               before: discord.Member, after: discord.Member):
-        if before.nick != after.nick:
+    # @commands.Cog.listener()
+    # async def on_member_update(self,
+    #                            before: discord.Member, after: discord.Member):
+    #     if before.nick != after.nick:
 
-            userdoc = collection("users").find_one(ufil(after))
+    #         userdoc = collection("users").find_one(ufil(after))
 
-            if "persistent-name" not in userdoc:
-                return
-            await after.edit(nick=userdoc["persistent-name"], reason="Comrade name change")
+    #         if "persistent-name" not in userdoc:
+    #             return
+    #         await after.edit(nick=userdoc["persistent-name"], reason="Comrade name change")
 
-    @commands.command()
-    @commands.check(isOP())
-    async def clearnamelock(self, ctx: commands.Context, member: discord.Member):
-        '''
-        Clears name lock on a user who got nameswapped
-        '''
-        collection("users").update_one(
-                    ufil(member),
-                    {"$unset": {
-                        "persistent-name": ""}})
+    # @commands.command()
+    # @commands.check(isOP())
+    # async def clearnamelock(self, ctx: commands.Context, member: discord.Member):
+    #     '''
+    #     Clears name lock on a user who got nameswapped
+    #     '''
+    #     collection("users").update_one(
+    #                 ufil(member),
+    #                 {"$unset": {
+    #                     "persistent-name": ""}})
 
-        await ctx.send(f"Name Lock for {member.display_name} has been removed.")
+    #     await ctx.send(f"Name Lock for {member.display_name} has been removed.")
 
     @commands.command()
     @commands.check(isOP())

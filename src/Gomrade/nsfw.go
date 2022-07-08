@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -21,9 +22,14 @@ type nHentaiSession struct {
 	Ext     []string
 }
 
+type GelbooruSession struct {
+	Query []string
+	Page  int
+}
+
 // Variables (global)
 var (
-	prevQuery map[string]([]string)
+	prevQuery map[string](*GelbooruSession)
 	// previous hentai query in each channel
 
 	prevImg map[string]([]string)
@@ -34,7 +40,7 @@ var (
 )
 
 func init() {
-	prevQuery = make(map[string]([]string))
+	prevQuery = make(map[string](*GelbooruSession))
 	prevImg = make(map[string]([]string))
 	prevNH = make(map[string](*nHentaiSession))
 }
@@ -214,7 +220,25 @@ func Hentai(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int
 		return 0
 	}
 
-	tempQuery := args // temporarily store previous copy of query, for use later
+	_, ok := prevQuery[m.ChannelID]
+
+	if !ok {
+		// First query, need to set up
+		prevQuery[m.ChannelID] = &GelbooruSession{args, 0}
+	} else {
+		// Check if previous query is equal to current query
+		// compare string slices to see if they're equal
+		if reflect.DeepEqual(prevQuery[m.ChannelID].Query, args) {
+			// Same query, increment page
+			prevQuery[m.ChannelID].Page++
+		} else {
+			// New query, reset page
+			prevQuery[m.ChannelID].Page = 0
+			prevQuery[m.ChannelID].Query = args
+		}
+	}
+
+	pid := prevQuery[m.ChannelID].Page
 
 	tagList := []string{}
 	// list of tags passed to API
@@ -228,7 +252,6 @@ func Hentai(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int
 		if isInt(args[len(args)-1]) {
 			limit64, _ := strconv.ParseInt(args[len(args)-1], 10, 64)
 			limit = int(limit64)
-
 			args = args[:len(args)-1]
 		}
 		tagList = args // overwrite tags
@@ -242,13 +265,13 @@ func Hentai(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int
 	var responseData interface{} // decoded response data
 
 	// CONSTRUCT the query to gelbooru
-	urlBase := "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1"
+	urlBase := "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1" + fmt.Sprintf("&pid=%d", pid)
 
 	// sort randomly if no sort is specified
 	if strings.Contains(strings.Join(tagList, " "), "sort") {
 		urlBase += fmt.Sprintf("&limit=%d", limit) + "&tags=" + strings.Join(tagList, "+")
 	} else {
-		urlBase += fmt.Sprintf("&limit=%d", limit) + "&tags=sort%3arandom+" + strings.Join(tagList, "+")
+		urlBase += fmt.Sprintf("&limit=%d", limit) + "&tags=sort%3arandom%3a0+" + strings.Join(tagList, "+")
 	}
 
 	// QUERY
@@ -262,8 +285,16 @@ func Hentai(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int
 	err = json.NewDecoder(resp.Body).Decode(&responseData) // Decode JSON to struct
 
 	if err != nil {
-		// No JSON i.e. no results
-		s.ChannelMessageSend(m.ChannelID, "No results found (search failed).")
+
+		if pid > 0 {
+			s.ChannelMessageSend(m.ChannelID, "No results found; you may have reached the end of the list for these tags.")
+		} else {
+			// No JSON i.e. no results
+			s.ChannelMessageSend(m.ChannelID, "No results found (search failed).")
+		}
+		// clear previous query
+		delete(prevQuery, m.ChannelID)
+
 		return 0
 	}
 
@@ -273,9 +304,6 @@ func Hentai(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int
 		s.ChannelMessageSend(m.ChannelID, "JSON Decode Error. Ping Mingde.")
 		return 0
 	}
-	// Query was successful
-	prevQuery[m.ChannelID] = tempQuery
-	// set previous query
 
 	// responseDict["post"] is a list of posts, which we need to extract
 	// responseDict["@attr"] is a dictionary with attribute count
@@ -308,11 +336,36 @@ func Hentai(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int
 
 		emb.URL = post_url
 		emb.Color = 0xfecbed
-		emb.Description = "ID: " + fmt.Sprintf("%.f", postData["id"].(float64)) +
-			"\nScore: " + fmt.Sprintf("%.f", postData["score"].(float64)) +
-			"\nHit Count: " + fmt.Sprintf("%.f", attributes["count"])
 		emb.Footer = &discordgo.MessageEmbedFooter{Text: tagString}
 		emb.Image = &discordgo.MessageEmbedImage{URL: file_url}
+		emb.Fields = []*discordgo.MessageEmbedField{
+			{
+				Name:   "ID",
+				Value:  fmt.Sprintf("%.f", postData["id"].(float64)),
+				Inline: true},
+			{
+				Name:   "Score",
+				Value:  fmt.Sprintf("%.f", postData["score"].(float64)),
+				Inline: true},
+			{
+				Name:   "Hit Count",
+				Value:  fmt.Sprintf("%.f", attributes["count"]),
+				Inline: true},
+		}
+
+		var jumpURL string
+		if m.GuildID != "" {
+			jumpURL = fmt.Sprintf("https://discordapp.com/channels/%s/%s/%s", m.GuildID, m.ChannelID, m.ID)
+		} else {
+			jumpURL = fmt.Sprintf("https://discordapp.com/channels/@me/%s/%s", m.ChannelID, m.ID)
+		}
+
+		emb.Author = &discordgo.MessageEmbedAuthor{
+			Name: "Hentai " + fmt.Sprintf("(%d)", pid+1),
+			// URL is the a link to the message, m
+			URL:     jumpURL,
+			IconURL: m.Author.AvatarURL(""),
+		}
 
 		s.ChannelMessageSendEmbed(m.ChannelID, &emb)
 
@@ -419,7 +472,7 @@ func NSFWHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	prevR, ok3 := prevImg[m.ChannelID]
 
 	if strings.ToLower(m.Content) == "next" && ok {
-		Hentai(s, m, prevQ)
+		Hentai(s, m, prevQ.Query)
 	} else if strings.ToLower(m.Content) == "np" && ok2 {
 		NHentaiNext(s, m)
 	} else if strings.ToLower(m.Content) == "nextr" && ok3 {
@@ -457,15 +510,17 @@ func NSFWCommand(s *discordgo.Session, m *discordgo.MessageCreate) int {
 
 	case "nhentai":
 		if len(fields) == 2 {
-			return NHentaiStart(s, m, fields[1])
+			//return NHentaiStart(s, m, fields[1])
 		}
-		s.ChannelMessageSend(m.ChannelID, "Please Provide gallery number.")
+		s.ChannelMessageSend(m.ChannelID, "Apologies, this command is broken right now.")
+		//s.ChannelMessageSend(m.ChannelID, "Please Provide gallery number.")
 
 	case "nsearch":
 		if len(fields) == 1 {
-			return NSearch(s, m, make([]string, 0))
+			//return NSearch(s, m, make([]string, 0))
 		}
-		return NSearch(s, m, fields[1:])
+		s.ChannelMessageSend(m.ChannelID, "Apologies, this command is broken right now.")
+		//return NSearch(s, m, fields[1:])
 
 	case "help":
 		s.ChannelMessageSend(m.ChannelID, "`hentai [tags]` -- searches for hentai posts via Gelbooru\n"+

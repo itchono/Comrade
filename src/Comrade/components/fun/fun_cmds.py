@@ -21,6 +21,8 @@ from utils.emoji_converter import emojiToText, textToEmoji
 from utils.echo import echo, mimic
 from utils.utilities import webscrape_header
 
+from components.servertools.emote_system import ComradeEmojiConverter
+
 from utils.logger import logger
 
 # Static dependencies
@@ -407,6 +409,38 @@ class Fun(commands.Cog):
         await m.add_reaction("♂️")
         await m.add_reaction("🍆")
         await m.add_reaction("💦")
+
+    @commands.command()
+    async def ratio(self, ctx: commands.Context, m: discord.Message = None):
+        '''
+        When ur tired of getting ratio'd by kids on Twitter
+        '''
+        if not m:
+            m = (await ctx.channel.history(limit=2).flatten())[1]
+                       
+        #spell ratio
+        await m.add_reaction(u"\U0001F1F7")
+        await m.add_reaction(u"\U0001F1E6")
+        await m.add_reaction(u"\U0001F1F9")
+        await m.add_reaction(u"\U0001F1EE")
+        await m.add_reaction(u"\U0001F1F4")
+
+        #load emote 02whoasked
+        emote = await ComradeEmojiConverter().convert(ctx, "02whoasked")
+        if emote is not None:
+            await m.add_reaction(emote)
+        else:
+            return     
+
+        #L
+        await m.add_reaction(u"\U0001F1F1")
+
+        # + cope
+        await m.add_reaction(u"\U00002795")
+        await m.add_reaction(u"\U0001F1E8")
+        await m.add_reaction("0️⃣")
+        await m.add_reaction(u"\U0001F1F5")
+        await m.add_reaction(u"\U0001F1EA")
 
     @commands.command()
     async def ascii(self, ctx: commands.Context, character: str, *, text):

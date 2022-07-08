@@ -156,6 +156,13 @@ async def inject(ctx: commands.Context, name) -> discord.Emoji:
         async with session.get(document["URL"]) as resp:
             content = await resp.read()
 
+            # March 7: Fix by Sean to handle webp images
+            if document["URL"].endswith("webp"):
+                im = Image.open(io.BytesIO(content))
+                content = io.BytesIO()
+                im.save(content, format='png')
+                content = content.getvalue()
+
         return await ctx.guild.create_custom_emoji(name=document["name"], image=content, reason=f"Requested by user {ctx.author.display_name}")
 
     else:
