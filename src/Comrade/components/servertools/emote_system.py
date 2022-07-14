@@ -176,6 +176,7 @@ class Emotes(commands.Cog):
     `:emotename:` call
     `\emotename\` swap type
     '''
+
     def __init__(self, bot):
         self.bot: commands.Bot = bot
 
@@ -238,10 +239,10 @@ class Emotes(commands.Cog):
             if type == "inline":
                 emote = await inject(ctx, name)
                 await ctx.send(f'Emote `{name}` was added.'
-                            f'You can call {emote} using `:{name}:`')
+                               f'You can call {emote} using `:{name}:`')
             else:
                 await ctx.send(f'Emote `{name}` was added. '
-                            f'You can call it using `:{name}:`')
+                               f'You can call it using `:{name}:`')
 
         else:
             await reactX(ctx)
@@ -353,12 +354,12 @@ class Emotes(commands.Cog):
             await ctx.send(f"Emote `{name_old}` was renamed.")
 
             if e := collection("emotes").find_one(
-                {"name": name_old, "server": ctx.guild.id}):
+                    {"name": name_old, "server": ctx.guild.id}):
 
                 if e["type"] == "inline":
                     emote = discord.utils.get(ctx.guild.emojis, name=name_old)
                     try:
-                        await emote.edit(name = name_new)
+                        await emote.edit(name=name_new)
                     except BaseException:
                         pass
         else:
@@ -421,7 +422,8 @@ class Emotes(commands.Cog):
         pages = paginator.pages
 
         def em_embed(pagenum):
-            e = discord.Embed(color=0xd7342a, title=f"__**Big Emotes in {ctx.guild.name}**__")
+            e = discord.Embed(
+                color=0xd7342a, title=f"__**Big Emotes in {ctx.guild.name}**__")
             e.set_footer(text=f"({pagenum + 1}/{len(pages)})")
             e.description = pages[pagenum]
             return e
@@ -454,7 +456,8 @@ class Emotes(commands.Cog):
         pages = paginator.pages
 
         def em_embed(pagenum):
-            e = discord.Embed(color=0xd7342a, title=f"__**Inline Emotes in {ctx.guild.name}**__")
+            e = discord.Embed(
+                color=0xd7342a, title=f"__**Inline Emotes in {ctx.guild.name}**__")
             e.set_footer(text=f"({pagenum + 1}/{len(pages)})")
             e.description = pages[pagenum]
             return e
@@ -527,10 +530,14 @@ class Emotes(commands.Cog):
                     message.clean_content):
                 s = message.content
                 send = False
+
+                already_substituted = []  # prevent double substitution
+
                 for i in match:
-                    if emote := await pullemote(i):
+                    if emote := await pullemote(i) and emote.id not in already_substituted:
                         send = True
                         s = s.replace(i, str(emote))
+                        already_substituted.append(emote.id)
                     # else:
                     # Handled by Go Module
 
