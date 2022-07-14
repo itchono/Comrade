@@ -534,7 +534,8 @@ class Emotes(commands.Cog):
                 already_substituted = []  # prevent double substitution
 
                 for i in match:
-                    if emote := await pullemote(i) and emote.id not in already_substituted:
+                    emote = await pullemote(i)
+                    if emote and emote.id not in already_substituted:
                         send = True
                         s = s.replace(i, str(emote))
                         already_substituted.append(emote.id)
