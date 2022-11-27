@@ -21,9 +21,9 @@ f_handler1.setLevel(logging.DEBUG)
 f_handler2.setLevel(logging.DEBUG)
 
 c_format = logging.Formatter('%(asctime)s: %(message)s',
-                             datefmt="%H:%M:%S")
+                             datefmt="%Y-%m-%d %H:%M:%S")
 f_format = logging.Formatter('%(asctime)s [%(filename)s@%(lineno)d (%(funcName)s)]: %(levelname)s - %(message)s',
-                             datefmt="%I:%M:%S %p")
+                             datefmt="%Y-%m-%d %I:%M:%S %p")
 
 c_handler.setFormatter(c_format)
 f_handler1.setFormatter(f_format)

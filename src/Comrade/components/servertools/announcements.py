@@ -84,9 +84,13 @@ class Announcements(commands.Cog):
             general_cog = self.bot.get_cog("General")
             await general_cog.avatar(ctx, member=luckyperson)
 
-            if not sum_of_weights(channel.guild):
-                # rebuild if necessary
-                await rebuild_weight_table(channel.guild)
+        remaining_entries = sum_of_weights(ctx.guild)
+
+        logger.info(f"Guild has {remaining_entries} entries left in MoD list.")
+
+        if remaining_entries == 0:
+            # rebuild if necessary
+            await rebuild_weight_table(ctx.guild)
 
     @tasks.loop(minutes=1.0)
     async def timedannounce(self):

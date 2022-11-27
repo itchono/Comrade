@@ -293,6 +293,9 @@ class Users(commands.Cog):
                 for mem_id in col["notify-status"]:
                     mem = after.guild.get_member(mem_id)
 
+                    if mem not in guild.members:
+                        return
+
                     embed = discord.Embed(color=0xd7342a,
                         description=
                         f"{str(before.status)} -> {str(after.status)} @ {local_time().strftime('%I:%M:%S %p %Z')}")
