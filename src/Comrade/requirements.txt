@@ -101,7 +101,7 @@ oauthlib==3.1.1
     # via
     #   flask-discord
     #   requests-oauthlib
-pillow==9.0.1
+pillow==9.2.0
     # via
     #   -r requirements.in
     #   matplotlib
