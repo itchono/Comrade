@@ -55,7 +55,7 @@ func NHentaiStart(s *discordgo.Session, m *discordgo.MessageCreate, tag string) 
 	}
 
 	// CONSTRUCT the query to nhentai
-	urlBase := fmt.Sprintf("https://nhentai.net/g/%s/", tag)
+	urlBase := fmt.Sprintf("https://nhentai.to/g/%s/", tag)
 
 	// QUERY
 	resp, err := soup.Get(urlBase)
@@ -71,10 +71,10 @@ func NHentaiStart(s *discordgo.Session, m *discordgo.MessageCreate, tag string) 
 		return -1
 	}
 
-	// A: Metadata
-	title := doc.FindAll("meta")[2].Attrs()["content"]             // title of the hentai
-	galleryCoverProxy := doc.FindAll("meta")[3].Attrs()["content"] // used to extra the gallery number
-	// format is https://t.nhentai.net/galleries/######/cover.<EXT>
+	// A: Metadata 
+	title := doc.Find("h1").Text()  // title of the hentai
+	galleryCoverProxy := doc.Find("noscript").Text() // used to extra the gallery number
+	// // format is ... https://cdn.dogehls.xyz/galleries/######/cover.<EXT> ...
 
 	re := regexp.MustCompile(`galleries/(\d+)/cover`)
 	// extract gallery number and file extension
@@ -85,10 +85,15 @@ func NHentaiStart(s *discordgo.Session, m *discordgo.MessageCreate, tag string) 
 
 	// file extensions are not guaranteed to be the same for all images, therefore we must adapt using an array.
 	for _, nstag := range doc.FindAll("noscript") {
-		raw := nstag.Text()                                  // raw image url for each element.
+		raw := nstag.Text()                      			 // raw image url for each element.
 		re = regexp.MustCompile(`galleries/\d+/.*?\.(.*?)"`) // matching file extensions
+		matches := re.FindStringSubmatch(raw)
 
-		fileExts = append(fileExts, re.FindStringSubmatch(raw)[1])
+		if len(matches) == 0 {
+			continue
+		}
+
+		fileExts = append(fileExts, matches[1])
 	}
 
 	coverURL := "https://t.nhentai.net/galleries/" + galleryNumber + "/cover." + fileExts[0]
@@ -111,6 +116,11 @@ func NHentaiNext(s *discordgo.Session, m *discordgo.MessageCreate) int {
 
 	if _, ok := prevNH[m.ChannelID]; !ok {
 		return -1
+	}
+
+	if prevNH[m.ChannelID].Page > len(prevNH[m.ChannelID].Ext) {
+		prevNH[m.ChannelID] = nil // unset previous session
+		s.ChannelMessageSend(m.ChannelID, "You have reached the end of this work.")
 	}
 
 	// next hentai page
@@ -141,7 +151,7 @@ func NHentaiNext(s *discordgo.Session, m *discordgo.MessageCreate) int {
 
 // NSearch searches for a hentai on nhentai.net
 func NSearch(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int {
-	urlBase := "https://nhentai.net/search/?q=" + strings.Join(args, "+")
+	urlBase := "https://nhentai.to/search/?q=" + strings.Join(args, "+")
 
 	// QUERY
 	resp, err := soup.Get(urlBase)
@@ -510,17 +520,17 @@ func NSFWCommand(s *discordgo.Session, m *discordgo.MessageCreate) int {
 
 	case "nhentai":
 		if len(fields) == 2 {
-			//return NHentaiStart(s, m, fields[1])
+			return NHentaiStart(s, m, fields[1])
 		}
-		s.ChannelMessageSend(m.ChannelID, "Apologies, this command is broken right now.")
-		//s.ChannelMessageSend(m.ChannelID, "Please Provide gallery number.")
+		// s.ChannelMessageSend(m.ChannelID, "Apologies, this command is broken right now.")
+		s.ChannelMessageSend(m.ChannelID, "Please Provide gallery number.")
 
 	case "nsearch":
-		if len(fields) == 1 {
-			//return NSearch(s, m, make([]string, 0))
-		}
+		// if len(fields) == 1 {
+		// 	return NSearch(s, m, make([]string, 0))
+		// }
 		s.ChannelMessageSend(m.ChannelID, "Apologies, this command is broken right now.")
-		//return NSearch(s, m, fields[1:])
+		// return NSearch(s, m, fields[1:])
 
 	case "help":
 		s.ChannelMessageSend(m.ChannelID, "`hentai [tags]` -- searches for hentai posts via Gelbooru\n"+
