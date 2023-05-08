@@ -55,21 +55,36 @@ func NHentaiStart(s *discordgo.Session, m *discordgo.MessageCreate, tag string) 
 	}
 
 	// CONSTRUCT the query to nhentai
-	urlBase := fmt.Sprintf("https://nhentai.to/g/%s/", tag)
+	patterns := [2]string{"https://nhentai.to/g/%s/",
+	"http://translate.google.com/translate?sl=ja&tl=en&u=https://nhentai.net/g/%s"} // primary and backup
 
-	// QUERY
-	resp, err := soup.Get(urlBase)
-	if err != nil {
-		// if HTTP request fails
-		return -1
+	var doc soup.Root
+
+	for i, pattern := range(patterns) {
+		urlBase := fmt.Sprintf(pattern, tag)
+
+		// QUERY
+		resp, err := soup.Get(urlBase)
+		if err != nil {
+			// if HTTP request fails
+			return -1
+		}
+
+		// SCRAPE Nhentai
+		doc = soup.HTMLParse(resp)
+
+		if len(doc.FindAll("meta")) <= 3 {
+			s.ChannelMessageSend(m.ChannelID,
+				fmt.Sprintf(
+					"Source %d does not have this work available or is inaccessible, falling back to backups...", i+1))
+			continue
+		} else {
+			break
+		}
+
 	}
 
-	// SCRAPE Nhentai
-	doc := soup.HTMLParse(resp)
-
-	if len(doc.FindAll("meta")) <= 3 {
-		return -1
-	}
+	
 
 	// A: Metadata 
 	title := doc.Find("h1").Text()  // title of the hentai
