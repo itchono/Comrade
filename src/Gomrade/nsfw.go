@@ -58,6 +58,8 @@ func NHentaiStart(s *discordgo.Session, m *discordgo.MessageCreate, tag string) 
 	patterns := [2]string{"https://nhentai.to/g/%s/",
 	"http://translate.google.com/translate?sl=ja&tl=en&u=https://nhentai.net/g/%s"} // primary and backup
 
+	source_names := [2]string{"nhentai.to", "Google Translate Proxy"}
+
 	var doc soup.Root
 
 	for i, pattern := range(patterns) {
@@ -76,9 +78,10 @@ func NHentaiStart(s *discordgo.Session, m *discordgo.MessageCreate, tag string) 
 		if len(doc.FindAll("meta")) <= 3 {
 			s.ChannelMessageSend(m.ChannelID,
 				fmt.Sprintf(
-					"Source %d does not have this work available or is inaccessible, falling back to backups...", i+1))
+					"%s does not have this work available or is inaccessible, falling back to backups...", source_names[i]))
 			continue
 		} else {
+			s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Successfully located this work using %s", source_names[i]))
 			break
 		}
 
@@ -87,7 +90,7 @@ func NHentaiStart(s *discordgo.Session, m *discordgo.MessageCreate, tag string) 
 	
 
 	// A: Metadata 
-	title := doc.Find("h1").Text()  // title of the hentai
+	title := doc.Find("h1").FullText()  // title of the hentai
 	galleryCoverProxy := doc.Find("noscript").Text() // used to extra the gallery number
 	// // format is ... https://cdn.dogehls.xyz/galleries/######/cover.<EXT> ...
 
@@ -166,7 +169,8 @@ func NHentaiNext(s *discordgo.Session, m *discordgo.MessageCreate) int {
 
 // NSearch searches for a hentai on nhentai.net
 func NSearch(s *discordgo.Session, m *discordgo.MessageCreate, args []string) int {
-	urlBase := "https://nhentai.to/search/?q=" + strings.Join(args, "+")
+	urlBase := "http://translate.google.com/translate?sl=ja&tl=en&u=https://nhentai.net/search/?q=" + strings.Join(args, "%2B")
+	// (previously, the "%2B" above was "+", but URL encoding needs to be done properly for google translate to work)
 
 	// QUERY
 	resp, err := soup.Get(urlBase)
@@ -196,7 +200,7 @@ func NSearch(s *discordgo.Session, m *discordgo.MessageCreate, args []string) in
 	// so now, let's convert this into a number
 	numResults, err := strconv.ParseInt(strings.Split(results, " ")[0], 10, 64)
 	if err != nil {
-		s.ChannelMessageSend(m.ChannelID, "No results found. Please try another tag.")
+		s.ChannelMessageSend(m.ChannelID, "No results found (search returned nothing). Please try another tag.")
 		return -1
 	}
 
@@ -226,9 +230,10 @@ func NSearch(s *discordgo.Session, m *discordgo.MessageCreate, args []string) in
 	hentais := re.FindAllStringSubmatch(string(pageText), -1)
 
 	if len(hentais) == 0 {
-		s.ChannelMessageSend(m.ChannelID, "No results found. Please try another tag.")
+		s.ChannelMessageSend(m.ChannelID, "No results found (scrape failed). Please try another tag.")
 		return -1
 	}
+
 
 	NHentaiStart(s, m, hentais[rand.Intn(len(hentais))][1])
 
@@ -537,15 +542,13 @@ func NSFWCommand(s *discordgo.Session, m *discordgo.MessageCreate) int {
 		if len(fields) == 2 {
 			return NHentaiStart(s, m, fields[1])
 		}
-		// s.ChannelMessageSend(m.ChannelID, "Apologies, this command is broken right now.")
 		s.ChannelMessageSend(m.ChannelID, "Please Provide gallery number.")
 
 	case "nsearch":
-		// if len(fields) == 1 {
-		// 	return NSearch(s, m, make([]string, 0))
-		// }
-		s.ChannelMessageSend(m.ChannelID, "Apologies, this command is broken right now.")
-		// return NSearch(s, m, fields[1:])
+		if len(fields) == 1 {
+			return NSearch(s, m, make([]string, 0))
+		}
+		return NSearch(s, m, fields[1:])
 
 	case "help":
 		s.ChannelMessageSend(m.ChannelID, "`hentai [tags]` -- searches for hentai posts via Gelbooru\n"+
